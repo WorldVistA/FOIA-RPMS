@@ -1,5 +1,5 @@
 AMHLEGP1 ; IHS/CMI/LAB - GROUP FORM DATA ENTRY CREATE RECORD ;
- ;;4.0;IHS BEHAVIORAL HEALTH;;MAY 14, 2010
+ ;;4.0;IHS BEHAVIORAL HEALTH;**8**;JUN 02, 2010;Build 7
  ;
  ;
  ;loop and get patients until AMHNUM
@@ -27,6 +27,7 @@ CREATE ;create mhss record
  I Y=-1 W !!,$C(7),$C(7),"Behavioral Health Record is NOT complete!!  Deleting Record.",! D PAUSE,^XBFMK Q
  S (DA,AMHR)=+Y,AMHAWIXX="A",DIE="^AMHREC(",DR="[AMH ADD RECORD NO INTERACT]" D CALLDIE^AMHLEIN K AMHAWIXX
  I $D(Y) W !!,"ERROR -- Incomplete record!! Deleting record!!" D DEL Q
+ S DA=AMHR,DIE="^AMHREC(",DR="1117////"_$$HL^AMHUTIL2($$VALI^XBDIQ1(9002011,AMHR,.02)) D ^DIE K DIE,DA,DR
  S AMHVTYPE=$P(^AMHREC(AMHR,0),U,33)
 PROV ;create provider entries
  S AMHX=0 F  S AMHX=$O(AMHPROV(AMHX)) Q:AMHX'=+AMHX  D

@@ -1,5 +1,5 @@
  ;BEDDAPPL.EDMenu.1
- ;(C)InterSystems, generated for class BEDDAPPL.EDMenu.  Do NOT edit. 04/14/2017 08:47:49AM
+ ;(C)InterSystems, generated for class BEDDAPPL.EDMenu.  Do NOT edit. 06/12/2017 07:15:26PM
  ;;42695964;BEDDAPPL.EDMenu
  ;
 %CreateComposite() public {

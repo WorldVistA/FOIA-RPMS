@@ -1,5 +1,5 @@
 BIDX ;IHS/CMI/MWR - RISK FOR FLU & PNEUMO, CHECK FOR DIAGNOSES.; MAY 10, 2010
- ;;8.5;IMMUNIZATION;**13**;AUG 01,2016
+ ;;8.5;IMMUNIZATION;**14**;AUG 01,2017
  ;;* MICHAEL REMILLARD, DDS * CIMARRON MEDICAL INFORMATICS, FOR IHS *
  ;;  CHECK FOR DIAGNOSES IN A TAXONOMY RANGE, WITHIN A GIVE DATE RANGE.
  ;;  FROM LORI BUTCHER, 9-18-05
@@ -8,78 +8,77 @@ BIDX ;IHS/CMI/MWR - RISK FOR FLU & PNEUMO, CHECK FOR DIAGNOSES.; MAY 10, 2010
  ;;  PATCH 13: Changes to check for Flu High Risk.   RISK+25, HASDX+38
  ;
  ;
+ ;********** PATCH 14, v8.5, AUG 01,2017, IHS/CMI/MWR
  ;----------
-RISK(BIDFN,BIFDT,BIRSK,BIRISKI,BIRISKP,BIRISKH) ;EP Return High Risk Influenza & Pneumo.
+RISKP(BIDFN,BIFDT,BIAGE,BISMKR,BIRISKF) ;EP Return Pneumo High Risk.
  ;---> Determine if this patient is in the Pneumo Risk Taxonomy.
  ;---> Parameters:
  ;     1 - BIDFN   (req) Patient IEN.
  ;     2 - BIFDT   (opt) Forecast Date (date used for forecast).
- ;     3 - BIRSK   (opt) Risk Parameter: 0=none, 1=Hep B only, 2=Pneumo only,
- ;                       12=Hep B & Pneumo, 23=Pneumo only + Smoking, 123=all.
- ;                       4=Flu only.
- ;     4 - BIRISKI (ret) 1=Patient has Risk of Influenza; otherwise 0.
- ;     5 - BIRISKP (ret) 1=Patient has Risk of Pneumo; otherwise 0.
- ;     6 - BIRISKH (ret) 1=Patient has Risk of HEP B; otherwise 0.
+ ;     3 - BIAGE   (req) Patient Age in years for this Forecast Date.
+ ;     4 - BISMKR  (opt) 1=Include Smoking Factors.
+ ;     5 - BIRISKF (ret) 1=Patient has Risk of Pneumo; otherwise 0.
  ;
- ;
- ;********** PATCH 9, v8.5, OCT 01,2014, IHS/CMI/MWR
- ;---> Seed new BIRISKH variable for Hep B risk.
- S BIRISKI=0,BIRISKP=0,BIRISKH=0
- S:'$G(BIDUZ2) BIDUZ2=$G(DUZ(2))
- S BIRSK=+$G(BIRSK)
- ;
+ S BIRISKF=0
  Q:'$G(BIDFN)
+ ;---> Quit if this Pt Age <5 yrs or >65 yrs, regardless of risk.
+ Q:((BIAGE<5)!(BIAGE>64))
  S:'$G(BIFDT) BIFDT=$G(DT)
- ;---> Patient age in years.
- N BIAGEY S BIAGEY=$$AGE^BIUTL1(BIDFN,1,BIFDT)
- ;
- ;
- ;********** PATCH 13, v8.5, AUG 01,2016, IHS/CMI/MWR
- ;---> Code to look for High Risk Flu
- I BIRSK=4 D  Q
- .Q:(BIAGEY<18)  Q:(BIAGEY>50)
- .S Y=+$$HASDX(BIDFN,"BI HIGH RISK FLU",2,BIBEGDT,BIFDT)
- .S:(Y>0) BIRISKI=1
- ;**********
- ;
- ;---> No High Risk computation under 19 years.
- Q:(BIAGEY<19)
- N Y
- ;
- ;********** PATCH 9, v8.5, OCT 01,2014, IHS/CMI/MWR
- ;---> Comment out Flu code since all ages are forecast for Flu.
- ;---> Check Influenza Risk (2 Flu Dx's over 3-year range).
- ;---> Flu now forecast for all.
- ;D:('BIRSK!(BIRSK=1))
- ;.Q:(BIAGEY>50)
- ;.S Y=+$$HASDX(BIDFN,"BI HIGH RISK FLU",2,BIBEGDT,BIFDT)
- ;.S:(Y>0) BIRISKI=1
- ;
- ;
- ;********** PATCH 9, v8.5, OCT 01,2014, IHS/CMI/MWR
- ;---> Check Hep B Risk (2 Diabetes Dx's from DOB to Forecast Date).
- D:(BIRSK[1)
- .Q:(BIAGEY>59)
- .S Y=+$$V2DM(BIDFN,,BIFDT)
- .S:Y BIRISKH=1
- ;**********
- ;
- N BIBEGDT S BIBEGDT=$$FMADD^XLFDT(BIFDT,-(3*365))
+ N BIBEGDT,Y S BIBEGDT=$$FMADD^XLFDT(BIFDT,-(3*365))
  ;
  ;---> Check Pneumo Risk (2 Pneumo Dx's over 3-year range).
- D:(BIRSK[2)
- .Q:(BIAGEY>64)
- .S Y=+$$HASDX(BIDFN,"BI HIGH RISK PNEUMO",2,BIBEGDT,BIFDT)
- .I Y S BIRISKP=1 Q
- .;
- .;---> Quit if site parameter says don't include Smoking.
- .Q:(BIRSK'[3)
- .S Y=+$$HASDX(BIDFN,"BI HIGH RISK PNEUMO W/SMOKING",2,BIBEGDT,BIFDT)
- .I Y S BIRISKP=1 Q
- .;
- .;---> Check for Smoking Health Factor in the last 2 years.
- .S BIRISKP=$$HFSMKR(BIDFN,BIFDT)
+ S Y=+$$HASDX(BIDFN,"BI HIGH RISK PNEUMO",2,BIBEGDT,BIFDT)
+ ;S BIRISKF=1 Q  ;Uncomment to test. MWRZZZ
+ I Y S BIRISKF=1 Q
  ;
+ ;---> Quit if site parameter says don't include Smoking.
+ Q:'$G(BISMKR)
+ S Y=+$$HASDX(BIDFN,"BI HIGH RISK PNEUMO W/SMOKING",2,BIBEGDT,BIFDT)
+ I Y S BIRISKF=1 Q
+ ;
+ ;---> Check for Smoking Health Factor in the last 2 years.
+ S BIRISKF=$$HFSMKR(BIDFN,BIFDT)
+ I Y=1 S BIRISKF=1
+ Q
+ ;
+ ;
+ ;----------
+RISKB(BIDFN,BIFDT,BIAGE,BIRISKF) ;EP Return Hep B High Risk.
+ ;---> Determine if this patient is in the Hep B due to Diabetes Risk Taxonomy.
+ ;---> Parameters:
+ ;     1 - BIDFN   (req) Patient IEN.
+ ;     2 - BIFDT   (opt) Forecast Date (date used for forecast).
+ ;     3 - BIAGE   (req) Patient Age in years for this Forecast Date.
+ ;     4 - BIRISKF (ret) 1=Patient has Risk of Hep B due to Diabetes; otherwise 0.
+ ;
+ S BIRISKF=0
+ Q:'$G(BIDFN)
+ S:'$G(BIFDT) BIFDT=$G(DT)
+ N Y
+ ;
+ ;---> Check Hep B Risk (2 Diabetes Dx's from DOB to Forecast Date).
+ Q:(BIAGE>59)
+ N Y S Y=+$$V2DM(BIDFN,,BIFDT)
+ ;S BIRISKF=1 Q  ;Uncomment to test. MWRZZZ
+ I Y=1 S BIRISKF=1
+ Q
+ ;----------
+RISKAB(BIDFN,BIFDT,BIRISKF) ;EP Return Hep A & Hep B High Risk.
+ ;---> Determine if this patient is in the CLD/HepC Risk Taxonomy.
+ ;---> Parameters:
+ ;     1 - BIDFN   (req) Patient IEN.
+ ;     2 - BIFDT   (opt) Forecast Date (date used for forecast).
+ ;     3 - BIRISKF (ret) 1=Patient has Risk of HepA&B; otherwise 0.
+ ;
+ S BIRISKF=0
+ Q:'$G(BIDFN)
+ S:'$G(BIFDT) BIFDT=$G(DT)
+ N BIBEGDT,Y S BIBEGDT=$$FMADD^XLFDT(BIFDT,-(3*365))
+ ;
+ ;---> Check CLD/HepC Risk (1 CLD/HepC Dx's over 3-year range).
+ S Y=+$$HASDX(BIDFN,"BI HIGH RISK HEPA/B, CLD/HEPC",1,BIBEGDT,BIFDT)
+ ;S BIRISKF=1 Q  ;Uncomment to test. MWRZZZ
+ I Y=1 S BIRISKF=1
  Q
  ;
  ;
@@ -200,7 +199,7 @@ V2DM(P,BDATE,EDATE) ;EP - are there 2 visits with DM?
  ;IHS/CMI/LAB - added lines below for icd10
  ;MWRZZZ  COMMENT OUT NEXT LINE, ADD ONE AFTER.
  ;I $D(^ICDS(0)) D
- I $D(^ICDS(0)),$T(^ATXAPI)]""
+ I $D(^ICDS(0)),$T(^ATXAPI)]"" D
  .K ^TMP($J,"BITAX")  ;IHS/CMI/LAB - clean out old nodes just in case
  .S BIREF=$NA(^TMP($J,"BITAX"))  ;IHS/CMI/LAB
  .D BLDTAX^ATXAPI("SURVEILLANCE DIABETES",BIREF,T)

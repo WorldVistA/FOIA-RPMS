@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:35">
+<Class name="BSTS.ns1.TNamespace">
+<Description>
+Created from: http://VDENMIHSDEVD01:8082/soap/DtsQueryDaoWS?wsdl</Description>
+<CompileAfter>BSTS.ns1.TNamespaceType</CompileAfter>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>BSTS.ns1.TVersionedContent</Super>
+<TimeChanged>63616,48124.072686</TimeChanged>
+<TimeCreated>63616,48124.042739</TimeCreated>
+
+<Parameter name="ELEMENTQUALIFIED">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="NAMESPACE">
+<Default>http://apelon.com/dtsserver/types</Default>
+</Parameter>
+
+<Parameter name="XMLNAME">
+<Default>TNamespace</Default>
+</Parameter>
+
+<Parameter name="XMLSEQUENCE">
+<Default>1</Default>
+</Parameter>
+
+<Property name="code">
+<Type>%String</Type>
+<Parameter name="MAXLEN"/>
+<Parameter name="XMLNAME" value="code"/>
+</Property>
+
+<Property name="local">
+<Type>%Boolean</Type>
+<Required>1</Required>
+<SqlFieldName>_local</SqlFieldName>
+<Parameter name="XMLNAME" value="local"/>
+</Property>
+
+<Property name="namespaceType">
+<Type>BSTS.ns1.TNamespaceType</Type>
+<Parameter name="XMLNAME" value="namespaceType"/>
+</Property>
+
+<Property name="linkedNamespaceId">
+<Type>%xsd.int</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="linkedNamespaceId"/>
+</Property>
+</Class>
+</Export>

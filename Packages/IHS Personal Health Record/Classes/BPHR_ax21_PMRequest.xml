@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:34">
+<Class name="BPHR.ax21.PMRequest">
+<Description>
+Created from: https://phr1rpms.d1.na.ihs.gov:5081/axis2/services/PMQueryService?wsdl</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject,%XML.Adaptor</Super>
+<TimeChanged>64097,55803.327523</TimeChanged>
+<TimeCreated>64097,55803.326043</TimeCreated>
+
+<Parameter name="ATTRIBUTEQUALIFIED">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="ELEMENTQUALIFIED">
+<Default>0</Default>
+</Parameter>
+
+<Parameter name="NAMESPACE">
+<Default>http://util.pm.phr/xsd</Default>
+</Parameter>
+
+<Parameter name="XMLNAME">
+<Default>PMRequest</Default>
+</Parameter>
+
+<Parameter name="XMLSEQUENCE">
+<Default>1</Default>
+</Parameter>
+
+<Property name="loginId">
+<Type>%String</Type>
+<Parameter name="MAXLEN"/>
+<Parameter name="XMLNAME" value="loginId"/>
+</Property>
+
+<Property name="password">
+<Type>%String</Type>
+<Parameter name="MAXLEN"/>
+<Parameter name="XMLNAME" value="password"/>
+</Property>
+
+<Property name="query">
+<Type>BPHR.ax21.Query</Type>
+<Parameter name="XMLNAME" value="query"/>
+</Property>
+</Class>
+</Export>

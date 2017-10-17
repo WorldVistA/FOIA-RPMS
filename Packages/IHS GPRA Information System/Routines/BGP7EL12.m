@@ -1,5 +1,5 @@
 BGP7EL12 ; IHS/CMI/LAB - print ind ;
- ;;17.0;IHS CLINICAL REPORTING;;AUG 30, 2016;Build 16
+ ;;17.1;IHS CLINICAL REPORTING;;MAY 10, 2017;Build 29
  ;
 I1AGE ;EP
  S BGPHD1="ACTIVE DIABETIC PATIENTS 55+",BGPHD2="Active Diabetic Pts"
@@ -111,21 +111,21 @@ I1AGEP ;
  S T=28 F X=1:1:4 S V=$P(BGPDAC(X),U,2) W ?T,$$C(V,0,6) S T=T+12
  W !,"% w/ A1c done w/",!," or w/o result"
  S T=27 F X=1:1:4 S V=$P(BGPDAC(X),U,3) W ?T,$J(V,6,1) S T=T+12
- W !!,"# w/ A1c > 9.5"
+ W !!,"# w/ A1c > 9"
  S T=28 F X=1:1:4 S V=$P(BGPDAC(X),U,4) W ?T,$$C(V,0,6) S T=T+12
- W !,"% w/ A1c > 9.5"
+ W !,"% w/ A1c > 9"
  S T=27 F X=1:1:4 S V=$P(BGPDAC(X),U,5) W ?T,$J(V,6,1) S T=T+12
  W !!,"# w/ A1c >=12"
  S T=28 F X=1:1:4 S V=$P(BGPDAC(X),U,6) W ?T,$$C(V,0,6) S T=T+12
  W !,"% w/ A1c >=12"
  S T=27 F X=1:1:4 S V=$P(BGPDAC(X),U,7) W ?T,$J(V,6,1) S T=T+12
- W !!,"# w/ A1c >9.5 and <12"
+ W !!,"# w/ A1c >9 and <12"
  S T=28 F X=1:1:4 S V=$P(BGPDAC(X),U,8) W ?T,$$C(V,0,6) S T=T+12
- W !,"% w/ A1c >9.5 and <12"
+ W !,"% w/ A1c >9 and <12"
  S T=27 F X=1:1:4 S V=$P(BGPDAC(X),U,9) W ?T,$J(V,6,1) S T=T+12
- W !!,"# w/ A1c =>8 and <=9.5"
+ W !!,"# w/ A1c =>8 and <=9"
  S T=28 F X=1:1:4 S V=$P(BGPDAC(X),U,10) W ?T,$$C(V,0,6) S T=T+12
- W !,"% w/ A1c =>8 and <=9.5"
+ W !,"% w/ A1c =>8 and <=9"
  S T=27 F X=1:1:4 S V=$P(BGPDAC(X),U,11) W ?T,$J(V,6,1) S T=T+12
  W !!,"# w/ A1c =>7 and <8"
  S T=28 F X=1:1:4 S V=$P(BGPDAC(X),U,12) W ?T,$$C(V,0,6) S T=T+12
@@ -152,21 +152,21 @@ PR ;
  S T=28 F X=1:1:4 S V=$P(BGPDAP(X),U,2) W ?T,$$C(V,0,6) S T=T+12
  W !,"% w/ A1c done w/",!," or w/o result"
  S T=27 F X=1:1:4 S V=$P(BGPDAP(X),U,3) W ?T,$J(V,6,1) S T=T+12
- W !!,"# w/ A1c > 9.5"
+ W !!,"# w/ A1c > 9"
  S T=28 F X=1:1:4 S V=$P(BGPDAP(X),U,4) W ?T,$$C(V,0,6) S T=T+12
- W !,"% w/ A1c > 9.5"
+ W !,"% w/ A1c > 9"
  S T=27 F X=1:1:4 S V=$P(BGPDAP(X),U,5) W ?T,$J(V,6,1) S T=T+12
  W !!,"# w/ A1c >=12"
  S T=28 F X=1:1:4 S V=$P(BGPDAP(X),U,6) W ?T,$$C(V,0,6) S T=T+12
  W !,"% w/ A1c >=12"
  S T=27 F X=1:1:4 S V=$P(BGPDAP(X),U,7) W ?T,$J(V,6,1) S T=T+12
- W !!,"# w/ A1c >9.5 and <12"
+ W !!,"# w/ A1c >9 and <12"
  S T=28 F X=1:1:4 S V=$P(BGPDAP(X),U,8) W ?T,$$C(V,0,6) S T=T+12
- W !,"% w/ A1c >9.5 and <12"
+ W !,"% w/ A1c >9 and <12"
  S T=27 F X=1:1:4 S V=$P(BGPDAP(X),U,9) W ?T,$J(V,6,1) S T=T+12
- W !!,"# w/ A1c =>8 and <=9.5"
+ W !!,"# w/ A1c =>8 and <=9"
  S T=28 F X=1:1:4 S V=$P(BGPDAP(X),U,10) W ?T,$$C(V,0,6) S T=T+12
- W !,"% w/ A1c =>8 and <=9.5"
+ W !,"% w/ A1c =>8 and <=9"
  S T=27 F X=1:1:4 S V=$P(BGPDAP(X),U,11) W ?T,$J(V,6,1) S T=T+12
  W !!,"# w/ A1c =>7 and <8"
  S T=28 F X=1:1:4 S V=$P(BGPDAP(X),U,12) W ?T,$$C(V,0,6) S T=T+12
@@ -188,13 +188,13 @@ PR ;
  W !!,"CHANGE FROM PREV YR %"
  W !,"w/ A1c done w/",!," or w/o result"
  S T=27 F X=1:1:4 S N=$P(BGPDAC(X),U,3),O=$P(BGPDAP(X),U,3) W ?T,$J($FN((N-O),"+,",1),6) S T=T+12
- W !,"w/ A1c > 9.5"
+ W !,"w/ A1c > 9"
  S T=27 F X=1:1:4 S N=$P(BGPDAC(X),U,5),O=$P(BGPDAP(X),U,5) W ?T,$J($FN((N-O),"+,",1),6) S T=T+12
  W !,"w/ A1c => 12"
  S T=27 F X=1:1:4 S N=$P(BGPDAC(X),U,7),O=$P(BGPDAP(X),U,7) W ?T,$J($FN((N-O),"+,",1),6) S T=T+12
- W !,"w/ A1c >9.5 and <12"
+ W !,"w/ A1c >9 and <12"
  S T=27 F X=1:1:4 S N=$P(BGPDAC(X),U,9),O=$P(BGPDAP(X),U,9) W ?T,$J($FN((N-O),"+,",1),6) S T=T+12
- W !,"w/ A1c =>8 and <=9.5"
+ W !,"w/ A1c =>8 and <=9"
  S T=27 F X=1:1:4 S N=$P(BGPDAC(X),U,11),O=$P(BGPDAP(X),U,11) W ?T,$J($FN((N-O),"+,",1),6) S T=T+12
  W !,"w/ A1c =>7and <8"
  S T=27 F X=1:1:4 S N=$P(BGPDAC(X),U,13),O=$P(BGPDAP(X),U,13) W ?T,$J($FN((N-O),"+,",1),6) S T=T+12
@@ -213,21 +213,21 @@ BL ;
  S T=28 F X=1:1:4 S V=$P(BGPDAB(X),U,2) W ?T,$$C(V,0,6) S T=T+12
  W !,"% w/ A1c done w/",!," or w/o result"
  S T=27 F X=1:1:4 S V=$P(BGPDAB(X),U,3) W ?T,$J(V,6,1) S T=T+12
- W !!,"# w/ A1c > 9.5"
+ W !!,"# w/ A1c > 9"
  S T=28 F X=1:1:4 S V=$P(BGPDAB(X),U,4) W ?T,$$C(V,0,6) S T=T+12
- W !,"% w/ A1c > 9.5"
+ W !,"% w/ A1c > 9"
  S T=27 F X=1:1:4 S V=$P(BGPDAB(X),U,5) W ?T,$J(V,6,1) S T=T+12
  W !!,"# w/ A1c >=12"
  S T=28 F X=1:1:4 S V=$P(BGPDAB(X),U,6) W ?T,$$C(V,0,6) S T=T+12
  W !,"% w/ A1c >=12"
  S T=27 F X=1:1:4 S V=$P(BGPDAB(X),U,7) W ?T,$J(V,6,1) S T=T+12
- W !!,"# w/ A1c >9.5 and <12"
+ W !!,"# w/ A1c >9 and <12"
  S T=28 F X=1:1:4 S V=$P(BGPDAB(X),U,8) W ?T,$$C(V,0,6) S T=T+12
- W !,"% w/ A1c >9.5 and <12"
+ W !,"% w/ A1c >9 and <12"
  S T=27 F X=1:1:4 S V=$P(BGPDAB(X),U,9) W ?T,$J(V,6,1) S T=T+12
- W !!,"# w/ A1c =>8 and <=9.5"
+ W !!,"# w/ A1c =>8 and <=9"
  S T=28 F X=1:1:4 S V=$P(BGPDAB(X),U,10) W ?T,$$C(V,0,6) S T=T+12
- W !,"% w/ A1c =>8 and <=9.5"
+ W !,"% w/ A1c =>8 and <=9"
  S T=27 F X=1:1:4 S V=$P(BGPDAB(X),U,11) W ?T,$J(V,6,1) S T=T+12
  W !!,"# w/ A1c =>7 and <8"
  S T=28 F X=1:1:4 S V=$P(BGPDAB(X),U,12) W ?T,$$C(V,0,6) S T=T+12
@@ -249,13 +249,13 @@ BL ;
  W !!,"CHANGE FROM BASE YR %"
  W !,"w/ A1c done w/",!," or w/o result"
  S T=27 F X=1:1:4 S N=$P(BGPDAC(X),U,3),O=$P(BGPDAB(X),U,3) W ?T,$J($FN((N-O),"+,",1),6) S T=T+12
- W !,"w/ A1c > 9.5"
+ W !,"w/ A1c > 9"
  S T=27 F X=1:1:4 S N=$P(BGPDAC(X),U,5),O=$P(BGPDAB(X),U,5) W ?T,$J($FN((N-O),"+,",1),6) S T=T+12
  W !,"w/ A1c => 12"
  S T=27 F X=1:1:4 S N=$P(BGPDAC(X),U,7),O=$P(BGPDAB(X),U,7) W ?T,$J($FN((N-O),"+,",1),6) S T=T+12
- W !,"w/ A1c >9.5 and <12"
+ W !,"w/ A1c >9 and <12"
  S T=27 F X=1:1:4 S N=$P(BGPDAC(X),U,9),O=$P(BGPDAB(X),U,9) W ?T,$J($FN((N-O),"+,",1),6) S T=T+12
- W !,"w/ A1c =>8 and <=9.5"
+ W !,"w/ A1c =>8 and <=9"
  S T=27 F X=1:1:4 S N=$P(BGPDAC(X),U,11),O=$P(BGPDAB(X),U,11) W ?T,$J($FN((N-O),"+,",1),6) S T=T+12
  W !,"w/ A1c =>7and <8"
  S T=27 F X=1:1:4 S N=$P(BGPDAC(X),U,13),O=$P(BGPDAB(X),U,13) W ?T,$J($FN((N-O),"+,",1),6) S T=T+12

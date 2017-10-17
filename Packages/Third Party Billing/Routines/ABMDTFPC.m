@@ -1,7 +1,9 @@
-ABMDTFPC ; IHS/ASDST/DMJ - Apply per cent change to fee sched ;
- ;;2.6;IHS Third Party Billing System;**2**;NOV 12, 2009
+ABMDTFPC ; IHS/SD/SDR - Apply per cent change to fee sched ;
+ ;;2.6;IHS Third Party Billing System;**2,14,21**;NOV 12, 2009;Build 379
  ; IHS/SD/SDR - abm*2.6*2 - 3PMS10003A - modified to track changes
  ;   in effective date multiples and who updated
+ ;IHS/SD/SDR - 2.6*21 - HEAT112857 - Fixed increase fee even when old data structure is incomplete.
+ ;
 START ;START
  W !!,"This routine will apply a percentage increase or decrease to"
  W !,"a selected segment or the entire fee schedule."
@@ -50,11 +52,20 @@ CAT1 ;CHANGE FEES ONE CATEGORY
  S ABMI=0
  F  S ABMI=$O(^ABMDFEE(ABMFEE,ABMCAT,ABMI)) Q:'ABMI  D
  .S ABMCTR=+$G(ABMCTR)+1 W:'(ABMCTR#10) "."
- .S ABMOFE=$P(^ABMDFEE(ABMFEE,ABMCAT,ABMI,0),U,2)
- .S ABMNFE=ABMOFE*ABMMULT
- .S ABMNFE=ABMNFE+.5
- .S ABMNFE=ABMNFE\1
- .S $P(^ABMDFEE(ABMFEE,ABMCAT,ABMI,0),U,2)=ABMNFE
+ .;start old abm*2.6*21 HEAT112857
+ .;S ABMOFE=$P(^ABMDFEE(ABMFEE,ABMCAT,ABMI,0),U,2)
+ .;S ABMNFE=ABMOFE*ABMMULT
+ .;S ABMNFE=ABMNFE+.5
+ .;S ABMNFE=ABMNFE\1
+ .;S $P(^ABMDFEE(ABMFEE,ABMCAT,ABMI,0),U,2)=ABMNFE
+ .;end old start new abm*2.6*21 IHS/SD/SDR HEAT112857
+ .S ABMOFE=+$P($G(^ABMDFEE(ABMFEE,ABMCAT,ABMI,0)),U,2)
+ .I ABMOFE'=0 D
+ ..S ABMNFE=ABMOFE*ABMMULT
+ ..S ABMNFE=ABMNFE+.5
+ ..S ABMNFE=ABMNFE\1
+ ..S $P(^ABMDFEE(ABMFEE,ABMCAT,ABMI,0),U,2)=ABMNFE
+ .;end new abm*2.6*21 IHS/SD/SDR HEAT112857
  .D EFFDT
  Q
  ;start new code abm*2.6*2 3PMS10003A
@@ -94,6 +105,14 @@ GETFEES ;
  F  S ABMDT=$O(^ABMDFEE(ABMFEE,ABMCAT,ABMI,1,"B",ABMDT)) Q:(+$G(ABMDT)=0)  D
  .S ABMDIEN=0
  .F  S ABMDIEN=$O(^ABMDFEE(ABMFEE,ABMCAT,ABMI,1,"B",ABMDT,ABMDIEN))  Q:(+$G(ABMDIEN)=0)  D
+ ..;start new abm*2.6*21 IHS/SD/SDR HEAT112857
+ ..I ABMOFE=0 D
+ ...S ABMOFE=+$P($G(^ABMDFEE(ABMFEE,ABMCAT,ABMI,1,ABMDIEN,0)),U,2)
+ ...S ABMNFE=ABMOFE*ABMMULT
+ ...S ABMNFE=ABMNFE+.5
+ ...S ABMNFE=ABMNFE\1
+ ...S ^ABMDFEE(ABMFEE,ABMCAT,ABMI,0)=ABMI_U_ABMNFE_U_ABMEDT
+ ..;end new abm*2.6*21 IHS/SD/SDR HEAT112857
  ..S ABMTFE=+$P($G(^ABMDFEE(ABMFEE,ABMCAT,ABMI,1,ABMDIEN,0)),U,3)  ;technical charge
  ..S ABMPFE=+$P($G(^ABMDFEE(ABMFEE,ABMCAT,ABMI,1,ABMDIEN,0)),U,4)  ;professional charge
  Q

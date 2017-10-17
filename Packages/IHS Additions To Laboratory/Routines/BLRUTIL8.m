@@ -1,0 +1,453 @@
+BLRUTIL8 ;IHS/MSC/MKK - MISC IHS LAB UTILITIES (Cont) ; 01-Jun-2016 06:49 ; MKK
+ ;;5.2;IHS LABORATORY;**1037,1039**;NOV 01, 1997;Build 38
+ ;
+DUPDNAME ; EP - Find Instances of Duplicate DataNames
+ NEW (DILOCKTM,DISYS,DT,DTIME,DUZ,IO,IOBS,IOF,IOM,ION,IOS,IOSL,IOST,IOT,IOXY,U,XPARSYS,XQXFLG)
+ ;
+ Q:$$DUPNAMEI()="Q"
+ ;
+ F  S DATADESC=$O(^DD(63.04,"B",DATADESC))  Q:DATADESC=""!(QFLG="Q")  D DUPNAMEL
+ ;
+ ; W !!,?4,"Number of Duplicate Datanames = ",CNT
+ ;
+ ; ----- BEGIN IHS/MSC/MKK - LR*5.2*1034
+ W !!,?4,DATANCNT," DataNames Analyzed."
+ W !!,?9,$S(CNT:CNT,1:"No")," Duplicate DataName",$S(CNT=1:"",1:"s"),"."
+ ; ----- END IHS/MSC/MKK - LR*5.2*1034
+ ;
+ D ^%ZISC
+ ;
+ D PRESSKEY^BLRGMENU(9)
+ Q
+ ;
+DUPNAMEI() ; EP - Initialization
+ D SETBLRVS("DUPDNAME")
+ ;
+ S HEADER(1)="Duplicate DataNames"
+ S HEADER(2)="File 63.04"
+ ;
+ D HEADERDT^BLRGMENU
+ D HEADONE^BLRGMENU(.HDRONE)
+ ;
+ S HEADER(3)=" "
+ S $E(HEADER(4),10)="#"
+ S $E(HEADER(4),20)="Description"
+ S $E(HEADER(4),50)="Last Edit"
+ S $E(HEADER(4),65)="F 60"
+ ;
+ D ^%ZIS
+ I POP D  Q "Q"
+ . W !,?4,"Invalid DEVICE call.  Routine Ends."
+ . D PRESSKEY^BLRGMENU(9)
+ ;
+ U IO
+ ;
+ S (CNT,PG)=0
+ S MAXLINES=(IOSL-4),LINES=MAXLINES+10
+ S QFLG="NO"
+ S DATADESC=""
+ S DATANCNT=0 ; IHS/MSC/MKK - LR*5.2*1034
+ Q "OK"
+ ;
+DUPNAMEL ; EP - Line of Data
+ Q:$$DUPNAMEC(.DUPNAMEA)=0
+ ;
+ I LINES>MAXLINES D HEADERPG^BLRGMENU(.PG,.QFLG,HDRONE)  Q:QFLG="Q"
+ ;
+ S (CNTDN,DATANAME)=0
+ F  S DATANAME=$O(DUPNAMEA(DATANAME))  Q:DATANAME<1!(QFLG="Q")  D
+ . I LINES>MAXLINES D HEADERPG^BLRGMENU(.PG,.QFLG,HDRONE)  Q:QFLG="Q"
+ . ;
+ . S CNTDN=CNTDN+1
+ . W $J(CNTDN,3)
+ . W ?9,DATANAME
+ . W ?19,$E(DATADESC,1,28)
+ . S CREATEDT=$G(DUPNAMEA(DATANAME,"DT"))
+ . W:$L(CREATEDT) ?49,$$FMTE^XLFDT(CREATEDT,"5DZ")
+ . W ?65,$O(^LAB(60,"C","CH;"_DATANAME_";1",0))
+ . W !
+ . S LINES=LINES+1
+ ;
+ W !
+ S LINES=LINES+1
+ S CNT=CNT+1
+ Q
+ ;
+DUPNAMEC(ARRAY) ; EP - Check on the DataName
+ S DATANCNT=DATANCNT+1  ; IHS/MSC/MKK - LR*5.2*1034
+ ;
+ NEW DN,NUMDUPS
+ ;
+ K ARRAY
+ ;
+ S (DN,NUMDUPS)=0
+ F  S DN=$O(^DD(63.04,"B",DATADESC,DN))  Q:DN<1  D
+ . S NUMDUPS=NUMDUPS+1
+ . S ARRAY(DN)=""
+ . S ARRAY(DN,"DT")=$G(^DD(63.04,DN,"DT"))
+ ;
+ Q $S(NUMDUPS<2:1,1:0)
+ ;
+SETBLRVS(TWO) ; EP - Use the STACK to find the Routine and set the BLRVRN variable(S)
+ ; S CONTXT=$STACK(-1)-1
+ ; S:CONTXT<1 CONTXT=1
+ ; S PLACE=$STACK(CONTXT,"PLACE")
+ ; S BLRVERN=$P($P(PLACE,"^",2)," ")
+ ; ----- BEGIN IHS/MSC/MKK - LR*5.2*1039 - Don't use $STACK
+ K BLRVERN,BLRVERN2
+ ;
+ S BLRVERN=$P($P($T(+1),";")," ")
+ ; ----- END IHS/MSC/MKK - LR*5.2*1039
+ S:$L($G(TWO)) BLRVERN2=TWO
+ Q
+ ;
+ ; ----- BEGIN IHS/MSC/MKK - LR*5.2*1039
+ARRIVETM(LRDFN,LRSS,LRIDT) ; EP - Print Arrival Time on Interim Report -- called from LRRP1
+ NEW (DILOCKTM,DISYS,DT,DTIME,DUZ,IO,IOBS,IOF,IOM,ION,IOS,IOSL,IOST,IOT,IOXY,LRDFN,LRSS,LRIDT,U,XPARSYS,XQXFLG)
+ ;
+ Q:LRSS="MI"  ; Micro Interim Reports already has RECEIVED date.
+ ;
+ S UID=$G(^LR(LRDFN,LRSS,LRIDT,"ORU"))
+ Q:$L(UID)<1
+ ;
+ S LRC=$Q(^LRO(68,"C",UID))
+ Q:$QS(LRC,3)'=UID
+ S LRAA=$QS(LRC,4),LRAD=$QS(LRC,5),LRAN=$QS(LRC,6)
+ S ARRIVTI=$$GET1^DIQ(68.02,LRAN_","_LRAD_","_LRAA,12,"I") ; Arrival Time Internal (FileMan)
+ Q:ARRIVTI<1
+ ;
+ I LRSS'="MI" D
+ . S ARRIVTE="Lab Arrival Date/Time:"_$$FMTE^XLFDT(ARRIVTI,"2MZ") ; Arrival Time External
+ . W ?(IOM-$L(ARRIVTE)-1),ARRIVTE
+ Q
+ ;
+ ;
+ ; Send MAILMAN/ALERT to a specified MAIL GROUP
+MAILALMI(MESSAGE,MSGARRAY,FROMWHOM,NOUSER,MAILGROUP) ; EP - Generic MAILER/ALERTER - allows any MailGroup
+ NEW MAILARRY
+ ;
+ S MAILGROUP="G."_$G(MAILGROUP,"LMI")
+ ;
+ ; Send MESSAGE string as ALERT
+ D SNDALERT(MESSAGE,$G(NOUSER),MAILGROUP)
+ ;
+ ; Setup variables for sending MailMan e-mail
+ I $L($G(MSGARRAY(1))) M MAILARRY=MSGARRAY
+ ;
+ I $L($G(MSGARRAY(1)))<1 D     ; If MSGARRAY null, create generic array
+ . S MAILARRY(1)="The Subject of this email is the message:"
+ . S MAILARRY(2)="     "_MESSAGE
+ ;
+ I $G(FROMWHOM)="" S FROMWHOM="RPMS Lab Package"
+ ;
+ D SENDMAIL(MESSAGE,.MAILARRY,FROMWHOM,$G(NOUSER),MAILGROUP)
+ ;
+ Q
+ ;
+ ;
+SNDALERT(ALERTMSG,NOUSER,MAILGROUP) ; EP - Send Alert
+ S XQAMSG=ALERTMSG
+ S XQA(MAILGROUP)=""
+ ;
+ ; If User NOT a member of the Mail Group, send them alert also, but
+ ; If-And-Only-If the NOUSER variable is null.
+ S:$G(NOUSER)=""&($$NINMGRP(MAILGROUP,DUZ)) XQA(DUZ)=""
+ ;
+ S X=$$SETUP1^XQALERT
+ K XQA,XQAMSG
+ Q:X
+ ;
+ ; If ALERT call failed, store information
+ NEW SUBSCRPT
+ S SUBSCRPT="BLR Alert^"_+$H_"^"_$J
+ S ^XTMP(SUBSCRPT,0)=$$FMADD^XLFDT($$DT^XLFDT,90)_"^"_$$DT^XLFDT_"^"_"Lab Package Alert."
+ S ^XTMP(SUBSCRPT,1)="Alert was not sent."
+ S ^XTMP(SUBSCRPT,2)="  Message that should have been sent follows:"
+ S ^XTMP(SUBSCRPT,3)="     "_ALERTMSG
+ S ^XTMP(SUBSCRPT,4)="  ALERT Error Message Follows:"
+ S ^XTMP(SUBSCRPT,5)="     "_XQALERR
+ Q
+ ;
+ ;
+ ; Send MailMan E-mail to MailGroup
+SENDMAIL(MAILMSG,MAILARRY,FROMWHOM,NOUSER,MAILGROUP) ; EP 
+ NEW DIFROM
+ ;
+ K XMY
+ S XMY(MAILGROUP)=""
+ ;
+ ; If User not part of MailGroup, send them e-mail also, but
+ ; If-And-Only-If the NOUSER variable is null.
+ S:$G(NOUSER)=""&($$NINMGRP(MAILGROUP,DUZ)) XMY(DUZ)=""
+ ;
+ S LRBLNOW=$E($$NOW^XLFDT,1,12)
+ ;
+ S XMSUB=MAILMSG
+ S XMTEXT="MAILARRY("
+ S XMDUZ=FROMWHOM
+ S XMZ="NOT OKAY"
+ D ^XMD
+ ;
+ I $G(XMMG)'=""!(XMZ="NOT OKAY") D
+ . NEW SUBSCRPT,ARRAY
+ . S SUBSCRPT="MailMan Message Failure for Group "_MAILGROUP_"^"_$$HTFM^XLFDT($H)_"^"_$J
+ . S ^XTMP(SUBSCRPT,0)=$$FMADD^XLFDT($$DT^XLFDT,90)_"^"_$$DT^XLFDT_"^"_"Lab Package MailMan Message."
+ . S ^XTMP(SUBSCRPT,1)="MailMan Message was not sent."
+ . S ^XTMP(SUBSCRPT,2)="  Message that should have been sent follows:"
+ . S ARRAY=0
+ . F  S ARRAY=$O(MAILARRY(ARRAY))  Q:ARRAY<1  D
+ .. S ^XTMP(SUBSCRPT,(ARRAY+2))="     "_$G(MAILARRY(ARRAY))
+ ;
+ K X,XMDUZ,XMSUB,XMTEXT,XMY,XMZ,Y   ; Cleanup
+ Q
+ ;
+NINMGRP(MAILGROUP,USERDUZ) ; EP - Is User NOT a member of the MailGroup?
+ NEW MGIEN,XMDUZ,Y
+ S MGIEN=+$$FIND1^DIC(3.8,,,$P(MAILGROUP,".",2))
+ Q:MGIEN<1 0
+ ;
+ S XMDUZ=USERDUZ,Y=MGIEN
+ D CHK^XMA21
+ Q '$T
+ ;
+RJZF(NUM,LEN) ; EP - Right Justify, Zero Fill function
+ Q $S((NUM'?.N):"",1:$TR($J(NUM,LEN)," ","0"))   ; If NUM variable not a number, return NULL
+ ;
+ ; The following is called from LR7OF1
+ ; If Urgency is ASAP or STAT or Hospital Location["EMER", send
+ ; Alert & E-Mail to LAB HIGH URGENCY NOTIFICATION Mail Group
+IHSURGNT ; EP 
+ Q:+$$GET^XPAR("PKG","BLR EMERGENCY ALERT",1,"Q")<1   ; Skip if XPAR is 'OFF'
+ Q:+$G(ORIFN)<1    ; Skip if file 100 IEN < 1
+ ;
+ NEW HOSPDIV,LABORD,MESSAGE,MSGARRAY,URGSTR
+ ;
+ S HOSPDIV=$$UP^XLFSTR($$GET1^DIQ(100,ORIFN,"PATIENT LOCATION"))
+ S URGSTR=$$UP^XLFSTR($$GET1^DIQ(62.05,+$$VALUE^ORCSAVE2(ORIFN,"URGENCY"),.01))
+ ;
+ ; Skip if not URGENT and not ASAP and not from Emergency room
+ Q:URGSTR'["STAT"&(URGSTR'["ASAP")&(HOSPDIV'["EMER")
+ ;
+ S LABORD=+$$GET1^DIQ(69.01,+$G(LRSN)_","_+$G(LRODT),9.5)
+ S:LABORD<1 LABORD=+$$GET1^DIQ(100,ORIFN,"PACKAGE REFERENCE")
+ ;
+ S MESSAGE="**URGENT** Lab Order:"_LABORD_"  Location:"_HOSPDIV_"  HRCN:"_$G(HRCN)
+ ;
+ S MSGARRAY(1)="Lab Order #:"_LABORD_"  OERR #:"_ORIFN_" detail:"
+ S MSGARRAY(2)=" "
+ S MSGARRAY(3)=$J("",5)_"Patient Name:"_$G(LRPNM)_"  HRCN:"_$G(HRCN)
+ S MSGARRAY(4)=" "
+ S MSGARRAY(5)=$J("",10)_"TEST:"_$P($G(MSG(5)),U,5)
+ ;
+ D MAILALMI^BLRUTIL8(MESSAGE,.MSGARRAY,,1,"LAB HIGH URGENCY NOTIFICATION")
+ Q
+ ;
+ ;
+LABGLOBR ; EP - Given Accession number/UID, list Data from Files 68, 69 & 63.
+ NEW (DILOCKTM,DISYS,DT,DTIME,DUZ,IO,IOBS,IOF,IOM,ION,IOS,IOSL,IOST,IOT,IOXY,U,XPARSYS,XQXFLG)
+ ;
+ Q:$$DETAILIN("DETAIL")="Q"
+ ;
+ D LRASDATA(LRAA,LRAD,LRAN,9)
+ ;
+ D ORDRDATA
+ ;
+ D LABDATA
+ ;
+ D PRESSKEY^BLRGMENU(4)
+ Q
+ ;
+DETAILIN(SUBRTN) ; EP - Initialize variables
+ NEW COL,COL2
+ ;
+ D ^XBCLS
+ D ^LRWU4
+ W !!
+ ;
+ I $D(^LRO(68,LRAA,1,LRAD,1,LRAN,0))<1 Q $$BADSTUFF^BLRUTIL7("Accession does not Exist.")
+ ;
+ S LRSS=$$GET1^DIQ(68,LRAA,.02,"I")
+ S LRAAIEN=LRAN_","_LRAD_","_LRAA
+ S ORDERNUM=$$GET1^DIQ(68.02,LRAAIEN,14,"I")
+ S LRAS=$$GET1^DIQ(68.02,LRAAIEN,15)
+ S UID=$$GET1^DIQ(68.02,LRAAIEN,16)
+ ;
+ Q "OK"
+ ;
+ ;
+LRASDATA(LRAA,LRAD,LRAN,LM,RM) ; EP - Display File 68 Data
+ NEW (DILOCKTM,DISYS,DT,DTIME,DUZ,IO,IOBS,IOF,IOM,ION,IOS,IOSL,IOST,IOT,IOXY,LRAA,LRAD,LRAN,NOPRESS,LM,RM,U,XPARSYS,XQXFLG)
+ ;
+ D ^XBCLS
+ ;
+ W !
+ D LINEMSG("Accession (#68) file data","=",5)
+ ;
+ S NOMORE="^LRO(68,"_LRAA_",1,"_LRAD_",1,"_LRAN
+ S NOMOREL=$L(NOMORE)
+ S LETSGO=NOMORE_")"
+ ;
+ S LM=$G(LM,4)            ; Left Margin
+ S RM=$G(RM,(IOM-5))          ; Right Margin
+ ;
+ S STR1=$Q(@LETSGO@(""))
+ W ?LM,STR1,"="  S TAB=$X  D LINEWRAP^BLRGMENU(TAB,@STR1,(RM-TAB)) W !
+ F  S STR1=$Q(@STR1)  Q:STR1=""!($E(STR1,1,NOMOREL)'=NOMORE)  D
+ . W ?(LM+5),STR1,"=" S TAB=$X
+ . D LINEWRAP^BLRGMENU(TAB,@STR1,(RM-TAB)) W !
+ ;
+ Q
+ ;
+ ;
+ORDRDATA ; EP - Display data from the ORDER file
+ NEW ORDERDT,LRSN
+ ;
+ W !
+ D LINEMSG("Lab Order Entry (#69) file Data","=",5)
+ ;
+ I +ORDERNUM<1 W ?7,"No Order File Data",!  Q	
+ ;
+ S LRODT=0
+ F  S LRODT=$O(^LRO(69,"C",ORDERNUM,LRODT))  Q:LRODT<1  D
+ . S LRSP=0
+ . F  S LRSP=$O(^LRO(69,"C",ORDERNUM,LRODT,LRSP))  Q:LRSP<1  D
+ .. D LRORDATA(LRODT,LRSP,9)
+ Q
+ ;
+ ;
+LRORDATA(LRODT,LRSP,LM,RM) ; EP - Display File 69 Data
+ NEW (DILOCKTM,DISYS,DT,DTIME,DUZ,IO,IOBS,IOF,IOM,ION,IOS,IOSL,IOST,IOT,IOXY,LRODT,LRSP,LM,NOPRESS,RM,U,XPARSYS,XQXFLG)
+ ;
+ S NOMORE="^LRO(69,"_LRODT_",1,"_LRSP
+ S NOMOREL=$L(NOMORE)
+ S LETSGO=NOMORE_")"
+ ;
+ S LM=$G(LM,4)            ; Left Margin
+ S RM=$G(RM,(IOM-5))          ; Right Margin
+ ;
+ S STR1=$Q(@LETSGO@(""))
+ W ?LM,STR1,"="  S TAB=$X  D LINEWRAP^BLRGMENU(TAB,@STR1,(RM-TAB)) W !
+ F  S STR1=$Q(@STR1)  Q:STR1=""!($E(STR1,1,NOMOREL)'=NOMORE)  D
+ . W ?(LM+5),STR1,"=" S TAB=$X
+ . D LINEWRAP^BLRGMENU(TAB,@STR1,(RM-TAB)) W !
+ ;
+ Q
+ ;
+ ;
+LABDATA ; EP - Display Data from Lab Data file, if it exists -- LRAA,LRAD,LRAN must exist
+ NEW CNT,LRDFN,LRIDT,LRSUB,STR
+ ;
+ S LRDFN=$$GET1^DIQ(68.02,LRAAIEN,.01,"I")
+ S LRIDT=$$GET1^DIQ(68.02,LRAAIEN,13.5,"I")
+ S STR=$G(^LR(LRDFN,LRSS,LRIDT,0))
+ ;
+ I $D(^LR(LRDFN,LRSS,LRIDT))<1 D  Q
+ . W !
+ . D LINEONE("LRDFN:"_LRDFN_", LRIDT:"_LRIDT_", File #63 Data DOES NOT exist.","=")
+ . W !
+ ;
+ W !
+ D LINEMSG("Lab Data (#63) file data","=",5)
+ ;
+ D LABDATAD(LRDFN,LRSS,LRIDT,1,9)
+ Q
+ ;
+ ;
+LABDATAD(LRDFN,LRSS,LRIDT,NOPRESS,LM,RM) ; EP - Display File 63 Data
+ NEW (DILOCKTM,DISYS,DT,DTIME,DUZ,IO,IOBS,IOF,IOM,ION,IOS,IOSL,IOST,IOT,IOXY,LRDFN,LRSS,LRIDT,NOPRESS,LM,RM,U,XPARSYS,XQXFLG)
+ ;
+ S NOMORE="^LR("_LRDFN_","_$C(34)_LRSS_$C(34)_","_LRIDT
+ S NOMOREL=$L(NOMORE)
+ S LETSGO=NOMORE_")"
+ ;
+ S LM=$G(LM,4)            ; Left Margin
+ S RM=$G(RM,(IOM-5))      ; Right Margin
+ S NOPRESS=$G(NOPRESS,0)  ; Flag for PRESSKEY call below
+ ;
+ S STR1=$Q(@LETSGO@(""))
+ W ?LM,STR1,"="  S TAB=$X  D LINEWRAP^BLRGMENU(TAB,@STR1,(RM-TAB)) W !
+ F  S STR1=$Q(@STR1)  Q:STR1=""!($E(STR1,1,NOMOREL)'=NOMORE)  D
+ . W ?(LM+5),STR1,"=" S TAB=$X
+ . I $P(STR1,",",4)>1 D
+ .. S DN=$P($P(STR1,",",4),")")
+ .. S F60IEN=$O(^LAB(60,"C","CH;"_DN_";1",0))
+ .. W $S(LRSS="CH":$$GET1^DIQ(60,F60IEN,.01),1:""),!
+ . D LINEWRAP^BLRGMENU(TAB,@STR1,(RM-TAB)) W !
+ ;
+ Q:$G(NOPRESS)  ; Skip if the PRESSKEY call is not wanted
+ ;
+ D PRESSKEY^BLRGMENU(LM)
+ Q
+ ;
+LINEONE(MSG,FILLER) ; EP - Demarcation line
+ S MSG="@"_$TR(MSG," ","@")_"@"
+ S MSG=$TR($$CJ^XLFSTR(MSG,70)," @",FILLER_" ")
+ W ?4,MSG,!
+ Q
+ ;
+LINEMSG(MSG,FILLER,TAB) ; EP - Demarcation line, Version 2
+ S MSG="@"_$TR(MSG," ","@")_"@"
+ S MSG=$TR($$CJ^XLFSTR(MSG,(IOM-$S(+$G(TAB):TAB*2,1:0)))," @",FILLER_" ")
+ W ?($S(+$G(TAB):TAB-1,1:0)),MSG,!!
+ Q
+ ;
+ ;
+LAHREPT ; EP - ^LAH Update Date Report
+ NEW (DILOCKTM,DISYS,DT,DTIME,DUZ,IO,IOBS,IOF,IOM,ION,IOS,IOSL,IOST,IOT,IOXY,U,XPARSYS,XQXFLG)
+ ;
+ S HEADER(1)="^LAH Global Report"
+ D HEADERDT^BLRGMENU
+ D ^XBFMK
+ S DIR(0)="PO^68.2:EMZ"
+ D ^DIR
+ I +$G(DIRUT) D BADSTUFF^BLRUTIL7("No/Quit/Invalid Input.")  Q
+ ;
+ S LWL=+Y,LWLDESC=$P(Y,U,2)
+ ;
+ S HEADER(2)="LOAD/WORK LIST "_LWLDESC_" ["_LWL_"]"
+ D HEADERDT^BLRGMENU
+ D HEADONE^BLRGMENU(.HDRONE)
+ D HEADERDT^BLRGMENU
+ ;
+ S HEADER(3)=" "
+ S $E(HEADER(4),5)="UID"
+ S $E(HEADER(4),20)="Create Date/Time"
+ S $E(HEADER(4),40)="Update Date/Time"
+ S $E(HEADER(4),60)="Time Difference"
+ ;
+ S MAXLINES=IOSL-4,LINES=MAXLINES+10
+ S (CNT,PG)=0,QFLG="NO"
+ ;
+ S (ISQN,ISQNCNT)=0
+ F  S ISQN=$O(^LAH(LWL,1,ISQN))  Q:ISQN<1!(QFLG="Q")  D
+ . S ISQNCNT=ISQNCNT+1
+ . S LRUID=$G(^LAH(LWL,1,ISQN,.3))
+ . Q:LRUID=""
+ . ;
+ . S STRZERO=$G(^LAH(LWL,1,ISQN,0))
+ . S CREATDTT=$P(STRZERO,U,10)
+ . S UPDTDTT=$P(STRZERO,U,11)
+ . ;
+ . I LINES>MAXLINES D HEADERPG^BLRGMENU(.PG,.QFLG,HDRONE)  Q:QFLG="Q"
+ . ;
+ . W ?4,LRUID
+ . W:CREATDTT ?19,$$FMTE^XLFDT(CREATDTT,"5MZ")
+ . W:UPDTDTT ?39,$$FMTE^XLFDT(UPDTDTT,"5MZ")
+ . I CREATDTT,UPDTDTT D
+ .. W:$E(CREATDTT,1,12)'=$E(UPDTDTT,1,12) ?60,$J($$FMDIFF^XLFDT(UPDTDTT,CREATDTT,3),13)
+ . W !
+ . S LINES=LINES+1
+ . S CNT=CNT+1
+ ;
+ W !!,?4,ISQNCNT," entries analyzed."
+ W !!,?9,$S(CNT:CNT,1:"No")," entr",$$PLURALI^BLRUTIL7(CNT)," with UIDs."
+ D PRESSKEY^BLRGMENU(4)
+ Q
+ ;
+ ; ============================= UTILITIES =============================
+ ;
+JUSTNEW ; EP - Generic RPMS EXCLUSIVE NEW
+ NEW (DILOCKTM,DISYS,DT,DTIME,DUZ,IO,IOBS,IOF,IOM,ION,IOS,IOSL,IOST,IOT,IOXY,U,XPARSYS,XQXFLG)
+ ;
+ Q
+ ; ----- END IHS/MSC/MKK - LR*5.2*1039

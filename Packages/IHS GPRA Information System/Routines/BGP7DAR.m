@@ -1,5 +1,5 @@
 BGP7DAR ; IHS/CMI/LAB - ihs area GPRA 02 Sep 2004 1:11 PM 09 Apr 2017 10:03 AM 17 Nov 2014 10:36 AM 11 Aug 2016 2:48 PM ; 
- ;;17.0;IHS CLINICAL REPORTING;;AUG 30, 2016;Build 16
+ ;;17.1;IHS CLINICAL REPORTING;;MAY 10, 2017;Build 29
  ;
  ;
  W:$D(IOF) @IOF
@@ -28,7 +28,10 @@ TP ;
  I BGPQTR=2 S BGPBD=($E(BGPPER,1,3)-1)_"0401",BGPED=$E(BGPPER,1,3)_"0331"
  I BGPQTR=3 S BGPBD=($E(BGPPER,1,3)-1)_"0701",BGPED=$E(BGPPER,1,3)_"0630"
  I BGPQTR=4 S BGPBD=($E(BGPPER,1,3)-1)_"1001",BGPED=$E(BGPPER,1,3)_"0930"
- I BGPQTR=5 S BGPBD=$$FMADD^XLFDT(BGPPER,-364),BGPED=BGPPER,BGPPER=$E(BGPED,1,3)_"0000"
+ I BGPQTR=5 D
+ .S D=$$FMADD^XLFDT(BGPPER,1)
+ .I $E(BGPPER,4,7)'=1231 S BGPBD=($E(BGPPER,1,3)-1)_$E(D,4,7),BGPED=BGPPER,BGPPER=$E(BGPED,1,3)_"0000"
+ .I $E(BGPPER,4,7)=1231 S BGPBD=$E(BGPPER,1,3)_$E(D,4,7),BGPED=BGPPER,BGPPER=$E(BGPED,1,3)_"0000"
  I BGPED>DT D  G:BGPDO=1 TP
  .W !!,"You have selected Current Report period ",$$FMTE^XLFDT(BGPBD)," through ",$$FMTE^XLFDT(BGPED),"."
  .W !,"The end date of this report is in the future; your data will not be",!,"complete.",!
@@ -89,6 +92,7 @@ EISSEX ;
  .S BGPFDEV4="CRSGPRADEVNT4"_$P(^AUTTLOC(DUZ(2),0),U,10)_2017063000000000_$$D^BGP7UTL(BGPNOW)_"_"_$$LZERO^BGP7UTL(BGPC,6)_".TXT"
  .S BGPFGNT3="CRSGPRANT3"_$P(^AUTTLOC(DUZ(2),0),U,10)_2017063000000000_$$D^BGP7UTL(BGPNOW)_"_"_$$LZERO^BGP7UTL(BGPC,6)_".TXT"
  .S BGPFGNT4="CRSGPRANT4"_$P(^AUTTLOC(DUZ(2),0),U,10)_2017063000000000_$$D^BGP7UTL(BGPNOW)_"_"_$$LZERO^BGP7UTL(BGPC,6)_".TXT"
+ .S BGPFGNT5="CRSGPRANT5"_$P(^AUTTLOC(DUZ(2),0),U,10)_2017063000000000_$$D^BGP7UTL(BGPNOW)_"_"_$$LZERO^BGP7UTL(BGPC,6)_".TXT"
  .Q
  S BGPASUF=$P(^AUTTLOC(DUZ(2),0),U,10)
  I BGPEXCEL D
@@ -96,6 +100,7 @@ EISSEX ;
  .W !!,"A file will be created called ",BGPFGNT2,!,"and will reside in the ",BGPUF," directory. This file can be used in Excel.",!
  .W !!,"A file will be created called ",BGPFGNT3,!,"and will reside in the ",BGPUF," directory. This file can be used in Excel.",!
  .W !!,"A file will be created called ",BGPFGNT4,!,"and will reside in the ",BGPUF," directory. This file can be used in Excel.",!
+ .W !!,"A file will be created called ",BGPFGNT5,!,"and will reside in the ",BGPUF," directory. This file can be used in Excel.",!
  .W !!,"A file will be created called ",BGPFDEV1,!,"and will reside in the ",BGPUF," directory. This file can be used in Excel.",!
  .W !!,"A file will be created called ",BGPFDEV2,!,"and will reside in the ",BGPUF," directory. This file can be used in Excel.",!
  .W !!,"A file will be created called ",BGPFDEV3,!,"and will reside in the ",BGPUF," directory. This file can be used in Excel.",!

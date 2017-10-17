@@ -1,5 +1,5 @@
 ABMDEVAR ; IHS/SD/SDR - SET UP CLAIM VARIABLES ;      
- ;;2.6;IHS Third Party Billing;**1,4,6,7,10,11,13,14,18**;NOV 12, 2009;Build 289
+ ;;2.6;IHS Third Party Billing;**1,4,6,7,10,11,13,14,18,21**;NOV 12, 2009;Build 379
  ;
  ;IHS/ASDS/DMJ - v2.4 p7 - 9/7/01 NOIS HQW-0701-100066
  ;     Modifications done related to Medicare Part B.
@@ -17,6 +17,7 @@ ABMDEVAR ; IHS/SD/SDR - SET UP CLAIM VARIABLES ;
  ;IHS/SD/SDR - 2.6*14 - ICD10 Updated go-live date to 10/1/2015; also added code to check ICD Indicator that acts as override for go-live date
  ;IHS/SD/SDR - 2.6*14 - HEAT165301 - took out page 9A
  ;IHS/SD/SDR - 2.6*18 - HEAT244054 - DOS same as ICD10 Effective Date was causing errors, page 5A to not work correctly.
+ ;IHS/SD/SDR - 2.6*21 - HEAT139641 - Changed 3P Insurer references from DUZ(2) to ABMP("LDFN")
  ;
  S ABMP("C0")=^ABMDCLM(DUZ(2),ABMP("CDFN"),0)
  S ABMP("PDFN")=$P(ABMP("C0"),U)
@@ -71,8 +72,10 @@ BTYP ;EP - SET BILL TYPE
  ;I ABMP("BTYP")=121,$P($G(^AUTNINS(ABMP("INS"),2)),U)'="R" S ABMP("BTYP")=""  ;abm*2.6*10 HEAT73780
  I ABMP("BTYP")=121,$$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,ABMP("INS"),".211","I"),1,"I")'="R" S ABMP("BTYP")=""  ;abm*2.6*10 HEAT73780
  I ABMP("BTYP")="" D
- .I $P($G(^ABMNINS(DUZ(2),+ABMP("INS"),1,ABMP("VTYP"),0)),U,11) D
- ..S ABMP("BTYP")=$P(^ABMNINS(DUZ(2),+ABMP("INS"),1,ABMP("VTYP"),0),U,11)
+ .;I $P($G(^ABMNINS(DUZ(2),+ABMP("INS"),1,ABMP("VTYP"),0)),U,11) D  ;abm*2.6*21 IHS/SD/AML HEAT139641
+ .I $P($G(^ABMNINS(ABMP("LDFN"),+ABMP("INS"),1,ABMP("VTYP"),0)),U,11) D  ;abm*2.6*21 IHS/SD/AML HEAT139641
+ ..;S ABMP("BTYP")=$P(^ABMNINS(DUZ(2),+ABMP("INS"),1,ABMP("VTYP"),0),U,11)  ;abm*2.6*21 IHS/SD/AML HEAT139641
+ ..S ABMP("BTYP")=$P(^ABMNINS(ABMP("LDFN"),+ABMP("INS"),1,ABMP("VTYP"),0),U,11)  ;abm*2.6*21 IHS/SD/AML HEAT139641
  ..S ABMP("BTYP")=$P($G(^ABMDCODE(ABMP("BTYP"),0)),U)
  .S:ABMP("BTYP")<110!(ABMP("BTYP")>999) ABMP("BTYP")=""
  .S:ABMP("BTYP")="" ABMP("BTYP")=$S(ABMP("VTYP")=111:111,ABMP("VTYP")=121:121,ABMP("VTYP")=831:831,1:131)
@@ -150,9 +153,15 @@ EXP ;EP for setting up Export Array
  S ABMP("EXP",ABMP("EXP"))=""
  S ABMP("VTYP",ABMP("VTYP"))=ABMP("EXP")
  Q:'$G(ABMP("CDFN"))
- I $P($G(^ABMNINS(DUZ(2),+ABMP("INS"),1,ABMP("VTYP"),0)),U,6)="Y" D
- .Q:$P($G(^ABMNINS(DUZ(2),ABMP("INS"),1,999,0)),"^",7)="N"
- .S ABMP("VTYP",999)=$S($P($G(^ABMNINS(DUZ(2),ABMP("INS"),1,999,0)),"^",4):$P(^(0),U,4),1:14)
+ ;start old abm*2.6*21 IHS/SD/AML HEAT139641
+ ;I $P($G(^ABMNINS(DUZ(2),+ABMP("INS"),1,ABMP("VTYP"),0)),U,6)="Y" D
+ ;.Q:$P($G(^ABMNINS(DUZ(2),ABMP("INS"),1,999,0)),"^",7)="N"
+ ;.S ABMP("VTYP",999)=$S($P($G(^ABMNINS(DUZ(2),ABMP("INS"),1,999,0)),"^",4):$P(^(0),U,4),1:14)
+ ;end old start new abm*2.6*21 IHS/SD/AML HEAT139641
+ I $P($G(^ABMNINS(ABMP("LDFN"),+ABMP("INS"),1,ABMP("VTYP"),0)),U,6)="Y" D
+ .Q:$P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),1,999,0)),"^",7)="N"
+ .S ABMP("VTYP",999)=$S($P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),1,999,0)),"^",4):$P(^(0),U,4),1:14)
+ .;end new abm*2.6*21 IHS/SD/AML HEAT139641
  .F ABMPC=1,2 D
  ..Q:$P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),70)),U,ABMPC)
  ..S $P(^ABMDCLM(DUZ(2),ABMP("CDFN"),70),U,ABMPC)=ABMP("VTYP",999)

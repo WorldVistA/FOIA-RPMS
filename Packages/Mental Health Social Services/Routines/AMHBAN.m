@@ -1,10 +1,10 @@
 AMHBAN ; IHS/CMI/LAB - Banner for BH ; 05 Sep 2014  11:26 AM
- ;;4.0;IHS BEHAVIORAL HEALTH;**1,2,3,4,5,6,7**;JUN 02, 2010;Build 15
+ ;;4.0;IHS BEHAVIORAL HEALTH;**1,2,3,4,5,6,7,8**;JUN 02, 2010;Build 7
  ;
 EP ;
 V ; GET VERSION
  ;S AMH("VERSION")="",AMH("VERSION")=$O(^DIC(9.4,"C","AMH",AMH("VERSION"))),AMH("VERSION")=^DIC(9.4,AMH("VERSION"),"VERSION")
- S AMH("VERSION")="4.0 (patch 7)"
+ S AMH("VERSION")="4.0 (patch 8)"
  I $G(AMHTEXT)="" S AMHTEXT="TEXT",AMHLINE=3 G PRINT
  S AMHTEXT="TEXT"_AMHTEXT
  F AMHJ=1:1 S AMHX=$T(@AMHTEXT+AMHJ),AMHX=$P(AMHX,";;",2) Q:AMHX="QUIT"!(AMHX="")  S AMHLINE=AMHJ
@@ -126,6 +126,12 @@ TEXTL ;data entry menu
  ;;**********************************************
  ;;**       IHS Behavioral Health System       **
  ;;**              Suicide Reports             **
+ ;;**********************************************
+ ;;QUIT
+TEXTS ;data entry menu
+ ;;**********************************************
+ ;;**       IHS Behavioral Health System       **
+ ;;**      Suicide Risk Assessment Reports     **
  ;;**********************************************
  ;;QUIT
 COPYINFO ;EP called from option

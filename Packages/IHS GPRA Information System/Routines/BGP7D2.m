@@ -1,5 +1,5 @@
 BGP7D2 ; IHS/CMI/LAB - measure 1,2,3,4 ;
- ;;17.0;IHS CLINICAL REPORTING;;AUG 30, 2016;Build 16
+ ;;17.1;IHS CLINICAL REPORTING;;MAY 10, 2017;Build 29
  ;
 I1 ;EP
  S BGPN1=0
@@ -21,19 +21,21 @@ DMGC ;EP - called from elder care
  ;Active clinical
  ;2 visits during report period
  ;2 dm visits ever OR dm on problem list
+ S (BGPN1,BGPN2,BGPN3,BGPN4,BGPN5,BGPN6,BGPN7,BGPN8,BGPN9,BGPN10)=0
  I BGPACTCL,$$V2^BGP7D1(DFN,BGPBDATE,BGPEDATE),$$DMPVPL^BGP7D211(DFN,$$DOB^AUPNPAT(DFN),BGPEDATE),$$DMFB^BGP7D211(DFN,$$FMADD^XLFDT(BGPBDATE,-1)) S BGPDMDEV=1
  I 'BGPDM1,'BGPDMDEV S BGPSTOP=1 Q
  S BGPLHGB=$$HGBA1C(DFN,BGPBDATE,BGPEDATE)
  S BGPN1=$P(BGPLHGB,U)
+ I $P(BGPLHGB,U,4)["3046F" S BGPN8=1 G I31
  S BGPN2=$S($P(BGPLHGB,U,2)=2:1,1:0)
  S BGPN3=$S($P(BGPLHGB,U,2)=3:1,1:0)
  S BGPN4=$S($P(BGPLHGB,U,2)=4:1,1:0)
  S BGPN5=$S($P(BGPLHGB,U,2)=5:1,1:0)
  S BGPN6=$S($P(BGPLHGB,U,2)=6:1,1:0)
  S BGPN7=$S($P(BGPLHGB,U,2)=7:1,1:0)
- S BGPN8=0 I BGPN2!(BGPN3) S BGPN8=1
+ S BGPN8=0 I BGPN2!(BGPN3) S BGPN8=1  ;>9
  S BGPN9=0 I BGPN5!(BGPN6) S BGPN9=1
- S BGPXPHV=$P(BGPLHGB,U,4)
+I31 S BGPXPHV=$P(BGPLHGB,U,4)
  S BGPVALUE=$S(BGPDMD1:"UP",1:"")_$S(BGPDMD2:",AD",1:"")_$S(BGPDMD3:",AAD",1:"")_"||| " I $P(BGPLHGB,U,3)]"" S BGPVALUE=BGPVALUE_$$DATE^BGP7UTL($P(BGPLHGB,U,3))_$S($P(BGPLHGB,U,4)]"":" A1c: "_$P(BGPLHGB,U,4),1:" A1c: No Result")
  I BGPDMDEV S BGPVALUD=$S(BGPDMDEV:"AD(DEV)",1:"")_"||| " I $P(BGPLHGB,U,3)]"" S BGPVALUD=BGPVALUD_$$DATE^BGP7UTL($P(BGPLHGB,U,3))_$S($P(BGPLHGB,U,4)]"":" A1c: "_$P(BGPLHGB,U,4),1:" A1c: No Result")
  K X,Y,Z,%,A,B,C,D,E,H,BDATE,EDATE,P,V,S,F,J,K,G,I,L,T,BGPLHGB
@@ -72,7 +74,7 @@ I5 ;EP
  K BGPN1,BGPN2,BGPN3,BGPN4,BGPN5,BGPVALUE,BGPLD,BGPLDL,BGPTRI,BGPHDL
  S (BGPN1,BGPN2,BGPN3,BGPN4,BGPN5)=0
  I 'BGPDM1 S BGPSTOP=1 Q
-DMLDL ;EP - called from elder care
+DMLDL ;EP - called from elder
  S BGPLDL=$$LDL(DFN,BGP365,BGPEDATE)
  ;
  S BGPN2=$P(BGPLDL,U)
@@ -124,30 +126,36 @@ HGBA1C(P,BDATE,EDATE) ;EP
  I %]"" S BGPC=BGPC+1,BGPT(9999999-$P(%,U,2),BGPC)="CPT 3044F"
  S %="",E=+$$CODEN^ICPTCOD("3044F"),%=$$TRANI^BGP7DU(P,BDATE,EDATE,E)
  I %]"" S BGPC=BGPC+1,BGPT(9999999-$P(%,U,2),BGPC)="CPT/TRAN 3044F"
+ S %="",E=+$$CODEN^ICPTCOD("3046F"),%=$$CPTI^BGP7DU(P,BDATE,EDATE,E)
+ I %]"" S BGPC=BGPC+1,BGPT(9999999-$P(%,U,2),BGPC)="CPT 3046F"
+ S %="",E=+$$CODEN^ICPTCOD("3046F"),%=$$TRANI^BGP7DU(P,BDATE,EDATE,E)
+ I %]"" S BGPC=BGPC+1,BGPT(9999999-$P(%,U,2),BGPC)="CPT/TRAN 3046F"
  ; now got though and set return value of done 1 or 0^numerator 2-7^date^value
- I '$D(BGPT) D HCPT Q %  ;no tests
+ I '$D(BGPT) D HCPT Q %
  S D=0,G="" F  S D=$O(BGPT(D)) Q:D=""!(G]"")  D
  .S C=0 F  S C=$O(BGPT(D,C)) Q:C=""  D
  ..S X=BGPT(D,C)
  ..I $$UP^XLFSTR(X)="COMMENT" Q
  ..I X="" Q
  ..I X["3044F" S G=D_U_X Q
+ ..I X["3046F" S G=D_U_X Q
  ..I $E(X)[">" S G=D_U_X Q
  ..I $E(X)["<" S G=D_U_X Q
  ..I $E(X)'=+$E(X) Q
  ..S G=$P(D,".")_U_X
  ;1=DONE W/OR W/O RESULT
  ;2  =>12
- ;3  =>9.5
+ ;3  >9 & <12
  ;4  =>8
  ;5  =>7, <8
  ;6  <7
  I G="" S D=$O(BGPT(0)) S D=$P(D,".") Q 1_"^"_7_"^"_(9999999-D)
  I $P(G,U,2)["3044F" Q 1_"^"_6_"^"_(9999999-$P(G,U))_"^"_$P(G,U,2)
+ I $P(G,U,2)["3046F" Q 1_"^"_3_"^"_(9999999-$P(G,U))_"^"_$P(G,U,2) ;V17.1
  I $E($P(G,U,2))=">" Q 1_"^"_2_"^"_(9999999-$P(G,U))_"^"_$P(G,U,2)
  I $E($P(G,U,2))="<" Q 1_"^"_6_"^"_(9999999-$P(G,U))_"^"_$P(G,U,2)
  I +($P(G,U,2))'<12 Q 1_"^"_2_"^"_(9999999-$P(G,U))_"^"_$P(G,U,2)
- I +($P(G,U,2))>9.5 Q 1_"^"_3_"^"_(9999999-$P(G,U))_"^"_$P(G,U,2)
+ I +($P(G,U,2))>9 Q 1_"^"_3_"^"_(9999999-$P(G,U))_"^"_$P(G,U,2) ;V17.1 >9&<12
  I +($P(G,U,2))'<8 Q 1_"^"_4_"^"_(9999999-$P(G,U))_"^"_$P(G,U,2)
  I +($P(G,U,2))'<7 Q 1_"^"_5_"^"_(9999999-$P(G,U))_"^"_$P(G,U,2)
  I +($P(G,U,2))=0 Q 1_"^"_7_"^"_(9999999-$P(G,U))_"^"_$P(G,U,2)
@@ -187,7 +195,6 @@ MEANBPD(P,BDATE,EDATE,GDEV,BGPAGEB) ;EP
  S X=$$BPS(P,BDATE,EDATE,"I",GDEV)
  S S=$$SYSMEAN(X) I S="" Q ""
  S DS=$$DIAMEAN(X) I DS="" Q ""
- ;I S<130&(DS<80) Q S_"/"_DS_" CON"_U_2
  S A=""
  I BGPAGEB<60 D  Q A
  .I S<140&(DS<90) S A=S_"/"_DS_" CON"_U_4 Q
@@ -233,6 +240,7 @@ GDEV(V) ;EP
  I C=44 Q 1
  I C="C1" Q 1
  I C="D4" Q 1
+ I C=79 Q 1  ;V17.1
  Q 0
 BPS(P,BDATE,EDATE,F,GDEV) ;EP ;
  I $G(F)="" S F="E"
@@ -247,15 +255,15 @@ BPS(P,BDATE,EDATE,F,GDEV) ;EP ;
  .Q:$$CLINIC^APCLV(V,"C")=30
  .Q:$$GDEV(V)
  .Q:'$D(^AUPNVMSR("AD",V))
- .;NOW GET ALL BPS ON THIS VISIT
+ .;NOW GET ALL BPS
  .S BGPBP=""
  .S X=0 F  S X=$O(^AUPNVMSR("AD",V,X)) Q:X'=+X  D
- ..Q:'$D(^AUPNVMSR(X,0))  ;BAD AD XREF
+ ..Q:'$D(^AUPNVMSR(X,0))
  ..S T=$P($G(^AUPNVMSR(X,0)),U)
- ..Q:T=""  ;BAD AD XREF
+ ..Q:T=""
  ..Q:$P($G(^AUTTMSR(T,0)),U)'="BP"
  ..Q:$P($G(^AUPNVMSR(X,2)),U,1)
- ..S Z=$P(^AUPNVMSR(X,0),U,4)  ;blood pressure value
+ ..S Z=$P(^AUPNVMSR(X,0),U,4)
  ..I BGPBP="" S BGPBP=Z Q
  ..I $P(Z,"/")'>$P(BGPBP,"/") S BGPBP=Z
  .Q:BGPBP=""
@@ -264,27 +272,6 @@ BPS(P,BDATE,EDATE,F,GDEV) ;EP ;
  .I F="I" S $P(BGPGV,";",BGPGLL)=$P(BGPBP," ")
  K ^TMP($J,"BPV")
  Q BGPGV
-LIPID(P,BDATE,EDATE) ;EP
- K BGPC
- S BGPC=0
- S %="",E=+$$CODEN^ICPTCOD(80061),%=$$CPTI^BGP7DU(P,BDATE,EDATE,E)
- I %]"" Q 1_U_$P(%,U,2)_U_"80061"
- S %="",E=+$$CODEN^ICPTCOD(80061),%=$$TRANI^BGP7DU(P,BDATE,EDATE,E)
- I %]"" Q 1_U_$P(%,U,2)_U_"80061"
- ;now get all loinc/taxonomy tests
- S T=$O(^ATXAX("B","BGP LIPID PROFILE LOINC CODES",0))
- S BGPLT=$O(^ATXLAB("B","DM AUDIT LIPID PROFILE TAX",0))
- S B=9999999-BDATE,E=9999999-EDATE S D=E-1 F  S D=$O(^AUPNVLAB("AE",P,D)) Q:D'=+D!(D>B)!($P(BGPC,U))  D
- .S L=0 F  S L=$O(^AUPNVLAB("AE",P,D,L)) Q:L'=+L!($P(BGPC,U))  D
- ..S X=0 F  S X=$O(^AUPNVLAB("AE",P,D,L,X)) Q:X'=+X!($P(BGPC,U))  D
- ...Q:'$D(^AUPNVLAB(X,0))
- ...I BGPLT,$P(^AUPNVLAB(X,0),U),$D(^ATXLAB(BGPLT,21,"B",$P(^AUPNVLAB(X,0),U))) S BGPC=1_U_(9999999-D)_U_"LAB" Q
- ...Q:'T
- ...S J=$P($G(^AUPNVLAB(X,11)),U,13) Q:J=""
- ...Q:'$$LOINC(J,T)
- ...S BGPC=1_U_(9999999-D)_U_"LOINC"
- ...Q
- Q BGPC
  ;
 TRIG(P,BDATE,EDATE) ;EP
  K BGPC

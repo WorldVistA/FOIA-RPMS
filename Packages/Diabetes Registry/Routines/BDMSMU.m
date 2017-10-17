@@ -1,5 +1,5 @@
 BDMSMU ; IHS/CMI/LAB - utilities for hmr ;
- ;;2.0;DIABETES MANAGEMENT SYSTEM;**3,4,8,9**;JUN 14, 2007;Build 78
+ ;;2.0;DIABETES MANAGEMENT SYSTEM;**3,4,8,9,10**;JUN 14, 2007;Build 12
  ;
 D1(D) ;EP - DATE WITH 4 YR
  I $G(D)="" Q ""
@@ -131,17 +131,21 @@ TYPEREF(N) ;EP
  I %="F" Q "No Response to F/U "
  I %="U" Q "Unable to Screen "
  Q $$VAL^XBDIQ1(9000022,N,.07)
-LASTHF(P,C,F) ;EP - get last factor in category C for patient P
+LASTHF(P,C,F,BD,ED) ;EP - get last factor in category C for patient P
  I '$G(P) Q ""
  I $G(C)="" Q ""
  I $G(F)="" S F=""
  S C=$O(^AUTTHF("B",C,0))
  I '$G(C) Q ""
+ I $G(BD)="" S BD=$$DOB^AUPNPAT(P)
+ I $G(ED)="" S ED=DT
  NEW H,D,O S H=0 K O
  F  S H=$O(^AUTTHF("AC",C,H))  Q:'+H  D
  .  Q:'$D(^AUPNVHF("AA",P,H))
  .  S D=$O(^AUPNVHF("AA",P,H,""))
  .  Q:'D
+ .  I (9999999-D)<BD Q
+ .  I (9999999-D)>ED Q
  .  S O(D)=$O(^AUPNVHF("AA",P,H,D,""))
  .  Q
  S D=$O(O(0))

@@ -1,5 +1,5 @@
 ABMDEMRG ; IHS/ASDST/DMJ - MERGE CLAIMS ; 
- ;;2.6;IHS 3P BILLING SYSTEM;**9,11,19**;NOV 12, 2009;Build 300
+ ;;2.6;IHS 3P BILLING SYSTEM;**9,11,19,21**;NOV 12, 2009;Build 379
  ;
  ;IHS/DSD/DMJ - 9/14/1999 - NOIS NDA-1198-180003 Patch 3 #14
  ;       By-passed $$NXNM and allowed duplicate claim numbers
@@ -14,6 +14,7 @@ ABMDEMRG ; IHS/ASDST/DMJ - MERGE CLAIMS ;
  ;
  ;IHS/SD/SDR - 2.6*19 - HEAT155799 - If user cancels claim it will now move into the 3P Cancelled Claim file with
  ;   cancellation reason Cancelled due to Merged Claim automatically populated on claim.
+ ;IHS/SD/SDR - 2.6*21 - HEAT242626 - Made it so claims that are already billed can't be merged.
  ;
 START ;START HERE
  ;start new code abm*2.6*9 NOHEAT - ensure UFMS is setup
@@ -33,6 +34,12 @@ START ;START HERE
  .W !
  .D ^DIC
  .I +Y<0 S ABM("F1")=1 Q
+ .;start new abm*2.6*21 IHS/SD/SDR HEAT242626
+ .I ("^F^E^P^"'[("^"_$P($G(^ABMDCLM(DUZ(2),+Y,0)),U,4)_"^")!($D(^ABMDCLM(DUZ(2),+Y,65,0)))) D  Q
+ ..W !,"Claim has already been billed or has active bills associated with it"
+ ..W !,"and is therefore unselectable for merging."
+ ..S ABMI=ABMI-1
+ .;end new abm*2.6*21 IHS/SD/SDR HEAT242626
  .I ABMI=1 S ABM("PDFN")=$P(^ABMDCLM(DUZ(2),+Y,0),U),ABM("VTYP")=$P(^(0),"^",7)
  .I ABMI=1 S DIC("S")="I $P(^(0),""^"",1)=ABM(""PDFN"")"
  .Q:$D(ABM("CLM1",+Y))

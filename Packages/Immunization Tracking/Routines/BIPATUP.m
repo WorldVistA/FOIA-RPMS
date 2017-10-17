@@ -1,11 +1,12 @@
 BIPATUP ;IHS/CMI/MWR - UPDATE PATIENT FORECAST; MAY 10, 2010
- ;;8.5;IMMUNIZATION;**9**;OCT 01,2014
+ ;;8.5;IMMUNIZATION;**14**;AUG 01,2017
  ;;* MICHAEL REMILLARD, DDS * CIMARRON MEDICAL INFORMATICS, FOR IHS *
  ;;  UPDATE PATIENT FORECAST DATA, IMM PROFILE IN ^BIP(DFN,
  ;;  AND IMM FORECAST IN ^BIPDUE(.
  ;;  PATCH 8: Changes to accommodate new TCH Forecaster  UPDATE+81,+99, LDPROF+18, BIDE+6
  ;;  PATCH 9: Insert patient name and DOB at top of Report Text (for EHR).  LDPROF+28
  ;;           Add DUZ2 so that BIXTCH can retrieve IP address for TCH.
+ ;;  PATCH 14: Add IHS Addendum to TCH Report.  UPDATE+118
  ;
  ;
  ;----------
@@ -126,7 +127,20 @@ UPDATE(BIDFN,BIFDT,BIERR,BINOP,BIDUZ2,BIPDSS) ;EP
  ;---> Load Forecast into BI PATIENT IMMUNIZATIONS DUE File (^BIPDUE).
  ;---> Pass BIHX (history) and BIFDT to check for >65yrs need for Pneumo.
  ;---> need for Influenza and Pneumo.
- D LDFORC^BIPATUP1(BIDFN,BIFORC,BIHX,BIFDT,BIDUZ2,.BINF,.BIPDSS)
+ ;
+ ;********** PATCH 14, v8.5, AUG 01,2017, IHS/CMI/MWR
+ ;---> Add IHS Addendum to TCH Report.
+ N BIADDND
+ D LDFORC^BIPATUP1(BIDFN,BIFORC,BIHX,BIFDT,BIDUZ2,.BINF,.BIPDSS,.BIADDND)
+ ;W !,BIPROF R ZZZ
+ D
+ .;---> Below preserves some ending character on TCH Report String.
+ .N X,Y S X=$L(BIPROF) S Y=$E(BIPROF,X) S BIPROF=$E(BIPROF,1,(X-1))
+ .I $G(BIADDND)="" D  Q
+ ..S BIPROF=BIPROF_"|||---------------------------|||No IHS Addendum|||"_Y
+ .S BIPROF=BIPROF_"|||---------------------------|||IHS Addendum: "_BIADDND_"|||"_Y
+ ;
+ ;**********
  ;
  ;---> Load Report Text into patient WP global (^BIP(DFN,1,).
  D:'BINOP LDPROF(BIDFN,BIPROF)

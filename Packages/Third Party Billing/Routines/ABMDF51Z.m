@@ -1,18 +1,13 @@
 ABMDF51Z ;IHS/DSD/DMJ/LSL - PRINT UB92     
- ;;2.6;IHS 3P BILLING SYSTEM;;NOV 12, 2009
+ ;;2.6;IHS 3P BILLING SYSTEM;**14,21**;NOV 12, 2009;Build 379
  ;Original;DMJ;
  ;
- ; IHS/SD/SDR - v2.5 p9 - IM15936
- ;   Added check for Medi-Cal
+ ;IHS/SD/SDR - v2.5 p9 - IM15936 - Added check for Medi-Cal
+ ;IHS/SD/SDR - v2.5 p9 - IM17233 - Removed "." from Dxs
+ ;IHS/SD/SDR - v2.5 p10 - IM20981 - Correction to error <UNDEF>58+14^ABMDF51Z
+ ;IHS/SD/SDR - v2.5 p11 - IM24315 - Made FL 64/65/66 not print for Medi-Cal
  ;
- ; IHS/SD/SDR - v2.5 p9 - IM17233
- ;    Removed "." from Dxs
- ;
- ; IHS/SD/SDR - v2.5 p10 - IM20981
- ;   Correction to error <UNDEF>58+14^ABMDF51Z
- ;
- ; IHS/SD/SDR - v2.5 p11 - IM24315
- ;   Made FL 64/65/66 not print for Medi-Cal
+ ;IHS/SD/SDR - 2.6*21 - HEAT123457 - Updated 61044 checks from 'equals' to 'contains'
  ;
 45 ;
  ; ABMPAID = Primary + Secondary + Tertiary + Prepaid
@@ -35,7 +30,8 @@ ABMDF51Z ;IHS/DSD/DMJ/LSL - PRINT UB92
  N I
  F I=1:1:3 D
  .Q:'$D(ABMREC(30,I))
- .Q:$E(ABMREC(30,I),26,30)'=61044
+ .;Q:$E(ABMREC(30,I),26,30)'=61044  ;abm*2.6*21 IHS/SD/SDR HEAT123457
+ .Q:$E(ABMREC(30,I),26,30)'["61044"  ;abm*2.6*21 IHS/SD/SDR HEAT123457
  .Q:I'=$G(ABMFLAG)
  .W !
  .S ABMDE=$E(ABMREC(30,I),111,130)  ; Insured's last name
@@ -59,23 +55,24 @@ ABMDF51Z ;IHS/DSD/DMJ/LSL - PRINT UB92
  .D @(I_"^ABMER40A")
  N I
  F I=1:1:3 D
- . W !
- . Q:'$D(ABMREC(30,I))
- . S ABMDE=ABMR(40,(10*I)+40)_"^^18"         ; Pro Authorization #
- . D WRT^ABMDF11W                                ; form locator #63
- . I $$RCID^ABMERUTL(ABMP("INS"))=61044 Q
- . S ABMDE=$E(ABMREC(30,I),146)_"^19^1R"     ; Employmnt Status code
- . D WRT^ABMDF11W                                ; form locator #64
- . S ABMDE=$E(ABMREC(31,I),87,110)_"^21^24"  ; Employer name
- . D WRT^ABMDF11W                                ; form locator #65
- . S ABMTMPDE=$E(ABMREC(31,I),129,143)       ; Employer city, state
- . S ABMDE=$P(ABMTMPDE," ",1)
- . N J
- . F J=2:1:$L(ABMTMPDE," ") D
- . . I $P(ABMTMPDE," ",J)]"" S ABMDE=ABMDE_" "_$P(ABMTMPDE," ",J)
- . I $E(ABMREC(31,I),144,145)'="  " S ABMDE=ABMDE_", "_$E(ABMREC(31,I),144,145)
- . S ABMDE=ABMDE_"^46^35"                ; Employer location
- . D WRT^ABMDF11W                                ; form locator #66
+ .W !
+ .Q:'$D(ABMREC(30,I))
+ .S ABMDE=ABMR(40,(10*I)+40)_"^^18"         ; Pro Authorization #
+ .D WRT^ABMDF11W                                ; form locator #63
+ .;I $$RCID^ABMERUTL(ABMP("INS"))=61044 Q  ;abm*2.6*21 IHS/SD/SDR HEAT123457
+ .I $$RCID^ABMERUTL(ABMP("INS"))["61044" Q  ;abm*2.6*21 IHS/SD/SDR HEAT123457
+ .S ABMDE=$E(ABMREC(30,I),146)_"^19^1R"     ; Employmnt Status code
+ .D WRT^ABMDF11W                                ; form locator #64
+ .S ABMDE=$E(ABMREC(31,I),87,110)_"^21^24"  ; Employer name
+ .D WRT^ABMDF11W                                ; form locator #65
+ .S ABMTMPDE=$E(ABMREC(31,I),129,143)       ; Employer city, state
+ .S ABMDE=$P(ABMTMPDE," ",1)
+ .N J
+ .F J=2:1:$L(ABMTMPDE," ") D
+ ..I $P(ABMTMPDE," ",J)]"" S ABMDE=ABMDE_" "_$P(ABMTMPDE," ",J)
+ .I $E(ABMREC(31,I),144,145)'="  " S ABMDE=ABMDE_", "_$E(ABMREC(31,I),144,145)
+ .S ABMDE=ABMDE_"^46^35"                ; Employer location
+ .D WRT^ABMDF11W                                ; form locator #66
  ;
 55 ;
  W !!
@@ -140,7 +137,8 @@ ABMDF51Z ;IHS/DSD/DMJ/LSL - PRINT UB92
  ; Secondary Provider License #
  W !
  S ABMDE=$P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),1,ABMP("VTYP"),0)),"^",8)_"^59^23"
- I $$RCID^ABMERUTL(ABMP("INS"))=61044 D     ;as long as we are talking MEDI-CAL
+ ;I $$RCID^ABMERUTL(ABMP("INS"))=61044 D     ;as long as we are talking MEDI-CAL  ;abm*2.6*21 IHS/SD/SDR HEAT123457
+ I $$RCID^ABMERUTL(ABMP("INS"))["61044" D     ;as long as we are talking MEDI-CAL  ;abm*2.6*21 IHS/SD/SDR HEAT123457
  .N ABMDFX,ABMDFP,ABMDFO
  .;Get Attending provider dfn from Bill file-
  .S ABMDFX=$O(^ABMDBILL(DUZ(2),ABMP("BDFN"),41,"C","A",""))

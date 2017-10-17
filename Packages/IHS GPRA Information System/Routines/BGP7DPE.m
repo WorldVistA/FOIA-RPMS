@@ -1,5 +1,5 @@
 BGP7DPE ; IHS/CMI/LAB - IHS GPRA 16 REPORT DRIVER 01 Feb 2017 12:11 PM ; 
- ;;17.0;IHS CLINICAL REPORTING;;AUG 30, 2016;Build 16
+ ;;17.1;IHS CLINICAL REPORTING;;MAY 10, 2017;Build 29
  ;
  ;
  W:$D(IOF) @IOF
@@ -136,7 +136,7 @@ ZIS ;call to XBDBQUE
  I $G(BGPQUIT) D XIT Q
  I BGPRPT="" D XIT Q
  I BGPPEEXP D
- .W !!,"A file will be created called BG170",$P(^AUTTLOC(DUZ(2),0),U,10)_".PED"_BGPRPT," and will reside",!,"in the ",BGPUF," directory.",!
+ .W !!,"A file will be created called BG171",$P(^AUTTLOC(DUZ(2),0),U,10)_".PED"_BGPRPT," and will reside",!,"in the ",BGPUF," directory.",!
  .W !,"Depending on your site configuration, this file may need to be manually",!,"sent to your Area Office.",!
  K IOP,%ZIS I BGPROT="D",BGPDELT="F" D NODEV,XIT Q
  K IOP,%ZIS W !! S %ZIS=$S(BGPDELT'="S":"PQM",1:"PM") D ^%ZIS

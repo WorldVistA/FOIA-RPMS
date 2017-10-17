@@ -1,0 +1,112 @@
+BQIPDSC2 ;GDHD/HCS/ALA-Panel descriptions continued ; 04 Nov 2016  8:53 AM
+ ;;2.6;ICARE MANAGEMENT SYSTEM;;Jul 07, 2017;Build 72
+ ;;
+ ;
+POV ;EP - POVs
+ S PORD=$$PORD^BQIDCDF(FSOURCE,"POV")
+ I PORD="" S PORD=$$PORD^BQIDCDF(FSOURCE,"POVS")
+ ;S PORD=$$PORD^BQIDCDF(FSOURCE,"PVNOT") Q:PORD=""
+ ;
+ I FNAME="POV" D
+ . S VALUE=$G(FPARMS("VAL","POV"))
+ . Q:VALUE=""
+ . S DSC=$S($G(FPARMS(PORD,"PVNOT"))="Y":"without",1:"with")_" POV ICD "_VALUE
+ I FNAME="POVTX" D
+ . S VALUE=$G(FPARMS("VAL","POVTX"))
+ . S DSC=$S($G(FPARMS(PORD,"PVNOT"))="Y":"without",1:"with")_" POV ICDs found in taxonomy "_VALUE
+ I FNAME="POVS" D
+ . S VALUE=$G(FPARMS("VAL","POVS"))
+ . Q:VALUE=""
+ . NEW TXT,BSIEN
+ . S BSIEN=$O(^BSTS(9002318.4,"C",36,VALUE,""))
+ . S TXT=$S(BSIEN'="":$G(^BSTS(9002318.4,BSIEN,1)),1:"")
+ . S DSC=$S($G(FPARMS(PORD,"PVNOT"))="Y":"without",1:"with")_" POV SNOMED Concept ID "_VALUE_" "_TXT
+ I FNAME="POVSB" D
+ . S VALUE=$G(FPARMS("VAL","POVSB"))
+ . S DSC=$S($G(FPARMS(PORD,"PVNOT"))="Y":"without",1:"with")_" POV SNOMED Concept IDs found in subset "_VALUE
+ S PORD=$$PORD^BQIDCDF(FSOURCE,"POV")
+ I PORD="" S PORD=$$PORD^BQIDCDF(FSOURCE,"POVS")
+ Q
+ ;
+PDAT ;EP - POV Dates
+ S PORD=$$PORD^BQIDCDF(FSOURCE,"POV")
+ I PORD="" S PORD=$$PORD^BQIDCDF(FSOURCE,"POVS")
+ I PORD="" Q
+ I FNAME="PVFROM" D
+ . NEW PVFROM,PVTHRU
+ . S PVFROM=$$GETVAL(OWNR,PLIEN,"PVFROM")
+ . I PVFROM]"" S VALUE="(Range from date "_$$FMTE^BQIUL1(PVFROM)
+ . S PVTHRU=$$GETVAL(OWNR,PLIEN,"PVTHRU")
+ . I PVTHRU]"" S VALUE=VALUE_$S(VALUE["Range":" thru date ",1:" (Range thru date ")_$$FMTE^BQIUL1(PVTHRU)
+ . I VALUE["(" S VALUE=VALUE_")"
+ . S DSC="for "_VALUE
+ I FNAME="PVRANGE" D
+ . NEW PVRANGE,RFROM,RTHRU
+ . S PVRANGE=$$GETVAL(OWNR,PLIEN,"PVRANGE")
+ . I $G(PPIEN)'="" D RANGE^BQIDCAH1(PVRANGE,PPIEN,"PVRANGE")
+ . I PVRANGE'["Ever" S VALUE=PVRANGE_" ("_$$FMTE^BQIUL1(RFROM)_"-"_$$FMTE^BQIUL1(RTHRU)_")"
+ . I PVRANGE["Ever" S VALUE=PVRANGE
+ . S DSC="for timeframe "_VALUE
+ Q
+ ;
+GETVAL(OWNR,PLIEN,FLD) ;EP - Retrieve Single field value
+ N DECIEN,DA,IEN,IENS
+ S IEN=$O(^BQICARE(OWNR,1,PLIEN,15,"B",FLD,"")) Q:IEN="" ""
+ S DA(2)=OWNR,DA(1)=PLIEN,DA=IEN,IENS=$$IENS^DILF(.DA)
+ Q $$GET1^DIQ(90505.115,IENS,.02,"I")
+ ;
+MEAS ; EP - Measurements
+ S PORD=$$PORD^BQIDCDF(FSOURCE,"MSNOT") Q:PORD=""
+ ;
+ I FNAME="MEAS" D
+ . S VALUE=$G(FPARMS("VAL","MEAS"))
+ . Q:VALUE=""
+ . S DSC=$S($G(FPARMS(PORD,"MSNOT"))="Y":"without",1:"with")_" Measurement "_VALUE
+ S PORD=$$PORD^BQIDCDF(FSOURCE,"MEAS")
+ Q
+ ;
+MDAT ;EP - Measurement Dates
+ S PORD=$$PORD^BQIDCDF(FSOURCE,"MEAS") Q:PORD=""
+ I FNAME="MSFROM" D
+ . NEW MSFROM,MSTHRU
+ . S MSFROM=$$GETVAL(OWNR,PLIEN,"MSFROM")
+ . I MSFROM]"" S VALUE=VALUE_" (Range from date "_$$FMTE^BQIUL1(MSFROM)
+ . S MSTHRU=$$GETVAL(OWNR,PLIEN,"MSTHRU")
+ . I MSTHRU]"" S VALUE=VALUE_$S(VALUE["Range":" thru date ",1:" (Range thru date ")_$$FMTE^BQIUL1(MSTHRU)
+ . I VALUE["(" S VALUE=VALUE_")"
+ . S DSC="for "_VALUE
+ I FNAME="MSRANGE" D
+ . NEW MSRANGE,RFROM,RTHRU
+ . S MSRANGE=$$GETVAL(OWNR,PLIEN,"MSRANGE")
+ . I $G(PPIEN)'="" D RANGE^BQIDCAH1(MSRANGE,PPIEN,"MSRANGE")
+ . I MSRANGE'["Ever" S VALUE=MSRANGE_" ("_$$FMTE^BQIUL1(RFROM)_"-"_$$FMTE^BQIUL1(RTHRU)_")"
+ . I MSRANGE["Ever" S VALUE=MSRANGE
+ . S DSC="for timeframe "_VALUE
+ Q
+ ;
+MSRS(MSVAL) ;EP - Measurement result
+ NEW STR,N1,FND,N2,V,STR
+ S STR=""
+ S MSVAL=$P(MSVAL,"NUMMEAS",2)
+ S MSVAL1=MSVAL,MSVAL2=""
+ I MSVAL["~" S MSVAL1=$P(MSVAL,"~",1)
+ S (N1,FND)="" F I=1:1:$L(MSVAL1) Q:FND=1  D
+ . I $E(MSVAL1,I)?1N S N1=N1_$E(MSVAL1,I,$L(MSVAL1)),FND=1
+ . ;I $E(MSVAL,I)?1N,$E(MSVAL,I-1)'="." S N1=N1_$E(MSVAL,I),FND=1
+ . ;I $E(MSVAL,I)?1N,$E(MSVAL,I-1)="." S N1=N1_$E(MSVAL,I-1,I),FND=1
+ Q:N1=""
+ I MSVAL["~" S MSVAL2=$P(MSVAL,"~",2)
+ S (N2,FND)="" F I=1:1:$L(MSVAL2) Q:FND=1  D
+ . I $E(MSVAL2,I)?1N S N2=N2_$E(MSVAL2,I,$L(MSVAL2)),FND=1
+ . ;I $E(MSVAL,I)?1N,$E(MSVAL,I-1)'="." S N2=N2_$E(MSVAL,I),FND=1 Q
+ . ;I $E(MSVAL,I)?1N,$E(MSVAL,I-1)="." S N2=N2_$E(MSVAL,I-1,I),FND=1
+ S V=MSVAL
+ I V["~",V["'" S STR=STR_" in range (inclusive) "_N1_" thru "_N2
+ E  I V["~" S STR=STR_" out of range (exclusive) less than "_N1_" or greater than "_N2
+ E  I V["'<" S STR=STR_" greater than or equal to "_N1
+ E  I V["'>" S STR=STR_" less than or equal to "_N1
+ E  I V["<" S STR=STR_" less than "_N1
+ E  I V[">" S STR=STR_" greater than "_N1
+ E  S STR=STR_" equal to "_N1
+ S MSVAL=STR
+ Q MSVAL

@@ -1,9 +1,10 @@
 BILETPR1 ;IHS/CMI/MWR - PRINT PATIENT LETTERS.; DEC 15, 2011
- ;;8.5;IMMUNIZATION;**10**;MAY 30,2015
+ ;;8.5;IMMUNIZATION;**14**;AUG 01,2017
  ;;* MICHAEL REMILLARD, DDS * CIMARRON MEDICAL INFORMATICS, FOR IHS *
  ;;  BUILD ^TMP WP ARRAY FOR PRINTING LETTERS.
  ;;  PATCH 10: If no skin tests on record, display explicitly. HISTORY1+190
  ;;            Display only the most recent three dates of Skin Tests. HISTORY1+209
+ ;;  PATCH 14: Remove "NOS" from forecasted vaccines in letters.  FORECAST+41
  ;
  ;
  ;----------
@@ -112,7 +113,7 @@ HISTORY1(BILINE,BIDFN,BIFORM,BINVAL,BIGBL,BIPDSS,BIHDRS,BINOSK,BILOC,BIMMRF,BIMM
  S:$G(BIGBL)="" BIGBL="BILET"
  S:$G(BIFORM)="" BIFORM=1 S:$G(BINVAL)="" BINVAL=0
  ;
- ;---> RPC to gather Immunization History.
+ ;---> RPC to gather Imm Hx.
  ;     BIRETVAL - Return value of valid data from RPC.
  ;     BIRETERR - Return value (text string) of error from RPC.
  ;
@@ -127,12 +128,12 @@ HISTORY1(BILINE,BIDFN,BIFORM,BINVAL,BIGBL,BIPDSS,BIHDRS,BINOSK,BILOC,BIMMRF,BIMM
  ;--->  8  3 = Vaccine Components.  ;v8.0
  ;---> 24  4 = IEN, V File Visit.
  ;---> 26  5 = Location (or Outside Location) where Imm was given.
- ;---> 27  6 = Vaccine Group (Series Type) for grouping of vaccines.
+ ;---> 27  6 = Vaccine Group.
  ;---> 33  7 = Vaccine Lot#, Text.
  ;---> 38  8 = Skin Test Result.
  ;---> 39  9 = Skin Test Reading.
  ;---> 41 10 = Skin Test Name.
- ;---> 44 11 = Reaction to Immunization, text.
+ ;---> 44 11 = Reaction to Imm, text.
  ;---> 56 12 = Date of Visit Fileman format (YYYMMDD).
  ;---> 65 13 = Dose Override.
  ;---> 69 14 = Vaccine Component CVX Code.
@@ -148,7 +149,7 @@ HISTORY1(BILINE,BIDFN,BIFORM,BINVAL,BIGBL,BIPDSS,BIHDRS,BINOSK,BILOC,BIMMRF,BIMM
  .D WRITE(.BILINE,"     "_BIRETERR,BIGBL)
  .D WRITE(.BILINE,,BIGBL)
  ;
- ;---> Set BIHX=to a valid Immunization History for this patient.
+ ;---> Set BIHX=to a valid Imm Hx for this patient.
  N BIHX S BIHX=$P(BIRETVAL,BI31,1)
  ;
  ;---> Build Listmanager array from BIHX string.
@@ -160,7 +161,7 @@ HISTORY1(BILINE,BIDFN,BIFORM,BINVAL,BIGBL,BIPDSS,BIHDRS,BINOSK,BILOC,BIMMRF,BIMM
  ;
  N BIAR,I,V,Y S V="|"
  ;
- ;---> List Immunization History by Date (if call is not for Skin Test ONLY).
+ ;---> List Imm Hx by Date (if call is not for Skin Test ONLY).
  ;---> Loop through "^"-pieces of Imm History, getting data.
  I $G(BINOSK)'=2 F I=1:1 S Y=$P(BIHX,U,I) Q:Y=""  D
  .;---> Quit if this is not an Immunization.
@@ -228,8 +229,6 @@ HISTORY1(BILINE,BIDFN,BIFORM,BINVAL,BIGBL,BIPDSS,BIHDRS,BINOSK,BILOC,BIMMRF,BIMM
  .S BIHXLN=$$SLDT2^BIUTL5(N,1)_": "
  .N I,M S M=0
  .;---> Note: I and J below are counters for inserting ", ".
- .;---> In v8.1 come back here and allow for extremely long immunizations
- .;---> that have Combo name + Lot# + Invalid text + reaction text.
  .F I=1:1 S M=$O(BIAR(N,M)) Q:M=""  D
  ..N J,P S P=0
  ..F J=1:1 S P=$O(BIAR(N,M,P)) Q:'P  D
@@ -412,6 +411,11 @@ FORECAST(BILET,BILINE,BIFORCST,BIFDT) ;EP
  F I=1:1 S Y=$P(BIFORC,U,I) Q:Y=""  D
  .;
  .S Y=$P(Y,V) I +Y&($E(Y,2)="-") S Y=$E(Y,3,99)
+ .;
+ .;********** PATCH 14, v8.5, AUG 01,2017, IHS/CMI/MWR
+ .;---> Remove "NOS" from forecasted vaccines.
+ .I Y[",NOS" S Y=$P(Y,",NOS")_$P(Y,",NOS",2)
+ .;**********
  .;
  .D WRITE(.BILINE,"        "_$$STRIP^BIUTL5(.Y))
  D WRITE(.BILINE)

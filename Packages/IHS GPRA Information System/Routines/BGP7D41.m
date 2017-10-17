@@ -1,5 +1,5 @@
 BGP7D41 ; IHS/CMI/LAB - measure 3 ;
- ;;17.0;IHS CLINICAL REPORTING;;AUG 30, 2016;Build 16
+ ;;17.1;IHS CLINICAL REPORTING;;MAY 10, 2017;Build 29
  ;
  ;IHS/CMI/LAB - patch 1 7-7-03 added HDL and Triglyceride check to 30-1
  ;  - fixed IMM Refusal check for null reason

@@ -1,6 +1,9 @@
 ABMDF34X ; IHS/SD/SDR - ADA-2012 FORM ;   
- ;;2.6;IHS 3P BILLING SYSTEM;**11,13**;NOV 12, 2009;Build 213
+ ;;2.6;IHS 3P BILLING SYSTEM;**11,13,21**;NOV 12, 2009;Build 379
  ;IHS/SD/SDR - 2.6*13 - VMBP - RQMT_95 - Added code to populated remarks box 35 (line 41)
+ ;IHS/SD/SDR - 2.6*21 - HEAT166874 - fix for programming error so test claim will print correctly
+ ;IHS/SD/SDR - 2.6*21 - HEAT205579 - Made T1015 print first for ARBOR HEALTH PLAN
+ ;IHS/SD/SDR - 2.6*21 - HEAT284071 - Added check for FL override for ADA-2012
  ;************************************************************************************
  ;
 MARG ;Set left and top margins
@@ -8,6 +11,7 @@ MARG ;Set left and top margins
  I $D(^ABMDEXP(34,0)) S ABM("TM")=$P(^(0),U,3),ABM("LM")=$P(^(0),U,2)
  W $$EN^ABMVDF("IOF")
  I +ABM("TM") F ABM("I")=1:1:ABM("TM") W !
+ D:$G(ABMP("INS")) OVER  ;abm*2.6*21 IHS/SD/SDR HEAT284071
  ;
 LOOP ;
  ;Loop thru line number array
@@ -23,7 +27,8 @@ LOOP ;
  S ABM("FMAT")=$P($T(@ABM("FL")),";;",3)
  ;
  ;added NE Medicaid code for W0047 to print first
- I ABMP("ITYP")="D" D
+ ;I ABMP("ITYP")="D" D  ;abm*2.6*21 IHS/SD/SDR HEAT166874
+ I ($G(ABMP("ITYP"))="D")!((+$G(ABMP("INS"))'=0)&(($P($G(^AUTNINS(+$G(ABMP("INS")),0)),U)="ARBOR HEALTH PLAN"))) D  ;abm*2.6*21 IHS/SD/SDR HEAT166874 and HEAT205579
  .F ABMLOOP=26:1:36 D
  ..Q:'$D(ABMF(ABMLOOP))
  ..S ABMCHK=$P(ABMF(ABMLOOP),U,6)
@@ -100,6 +105,21 @@ TEST ;
  S ABMF("TEST")=1
  F ABM=0:ABMF("TEST"):63 S ABMF(ABM)=""
  G MARG
+ ;start new abm*2.6*21 IHS/SD/SDR HEAT284071
+OVER ;GET OVRRIDE VALUES FROM 3P INSURER FILE
+ S ABMOLN=0
+ F  S ABMOLN=$O(^ABMNINS(ABMP("LDFN"),ABMP("INS"),2,"AOVR",34,ABMOLN)) Q:'ABMOLN  D
+ .S ABMOPC=0
+ .F  S ABMOPC=$O(^ABMNINS(ABMP("LDFN"),ABMP("INS"),2,"AOVR",34,ABMOLN,ABMOPC)) Q:'ABMOPC  D
+ ..K ABMOVTYP
+ ..I $D(^ABMNINS(ABMP("LDFN"),ABMP("INS"),2,"AOVR",34,ABMOLN,ABMOPC,0)) S ABMOVTYP=0
+ ..I $D(^ABMNINS(ABMP("LDFN"),ABMP("INS"),2,"AOVR",34,ABMOLN,ABMOPC,ABMP("VTYP"))) S ABMOVTYP=ABMP("VTYP")
+ ..Q:'$D(ABMOVTYP)
+ ..S ABMVALUE=^ABMNINS(ABMP("LDFN"),ABMP("INS"),2,"AOVR",34,ABMOLN,ABMOPC,ABMOVTYP)
+ ..S $P(ABMF(ABMOLN),"^",ABMOPC)=ABMVALUE
+ K ABMOLN,ABMOPC,ABMVALUE,ABMOVTYP
+ Q
+ ;end new abm*2.6*21 IHS/SD/SDR HEAT284071
  ;
 XIT ;
  I '$D(ABM("MORE")) K ABMF,ABM

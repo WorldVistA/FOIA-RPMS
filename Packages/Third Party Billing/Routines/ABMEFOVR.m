@@ -1,5 +1,6 @@
 ABMEFOVR ; IHS/SD/SDR - Setup 837 Form Override ;   
- ;;2.6;IHS 3P BILLING SYSTEM;**6,8,9,10**;NOV 12, 2009;Build 300
+ ;;2.6;IHS 3P BILLING SYSTEM;**6,8,9,10,21**;NOV 12, 2009;Build 379
+ ;IHS/SD/SDR - 2.6*21 - HEAT70826 - Made changes to allow for removal of loop 2310B.
  ;
 START ;start
  K DIC,ABMNM
@@ -9,6 +10,7 @@ START ;start
 STARTA D VTYP Q:'$G(ABMVTYP)
  D LOOP Q:($G(ABMLOOP)="")
  D SEND Q:$G(ABMSEND)=""
+ I ABMLOOP="2310B" D 2310B Q  ;abm*2.6*21 IHS/SD/SDR HEAT70826
  D SEGMENT Q:($G(ABMSEG)="")
  I ABMSEND="N",(ABMSEG="REF") D NOSEND Q
  D ELEMENT Q:($G(ABMELE)="")
@@ -56,6 +58,59 @@ SEND ;select send/don't send
  D ^DIR K DIR
  S ABMSEND=Y
  Q
+ ;start new abm*2.6*21 IHS/SD/SDR HEAT70826
+2310B ;EP
+ I ABMSEND="N" D ASKLOOP Q
+ Q:'$D(^ABMNINS(DUZ(2),ABMINS,2.5,"ASEND",ABMFORM,"2310B","N"))
+ ;if it gets here that means that they had said Don't send but are changing it to send
+ ;existing entry should just be removed
+ S DA(1)=ABMINS
+ S DA=$O(^ABMNINS(DUZ(2),ABMINS,2.5,"ASEND",ABMFORM,"2310B","00",0,"N",0))
+ S DIK="^ABMNINS(DUZ(2),"_DA(1)_",2.5,"
+ D ^DIK
+ Q
+ASKLOOP ;
+ S DIR(0)="Y"
+ S DIR("A")="Remove WHOLE loop"
+ S DIR("B")="N"
+ D ^DIR K DIR
+ S ABMSKIPL=Y
+ I ABMSKIPL="N" Q
+ S ABMQFLG=1
+ I '$D(^ABMNINS(DUZ(2),ABMINS)) D  Q:+Y<0
+ .D ^XBFMK
+ .S X="`"_ABMINS
+ .S DIC="^ABMNINS(DUZ(2),"
+ .S DIC(0)="LX"
+ .D ^DIC
+ D ^XBFMK
+ S ABMNM="FM"_ABMFORM_" "_ABMLOOP_" DON'T SEND"
+ S:ABMVTYP=9999 ABMVTYP=""
+ S DA(1)=ABMINS
+ S DIC="^ABMNINS(DUZ(2),"_DA(1)_",2.5,"
+ S DIC("P")=$P(^DD(9002274.09,2.5,0),U,2)
+ S X=ABMNM
+ S DIC(0)="LXE" D ^DIC
+ Q:+Y<0
+ S DA=+Y
+ S ABMDA=DA
+ S DIE=DIC
+ S ABMANS=1
+ I $P(Y,U,3)'=1 D
+ .S DIR(0)="S^1:ADD/EDIT;2:DELETE"
+ .S DIR("A")="Add/Edit or Delete Entry?"
+ .S DIR("B")="ADD/EDIT"
+ .D ^DIR K DIR
+ .Q:'Y  S ABMANS=Y
+ I ABMANS=1 D
+ .S DR=".02///"_ABMFORM_";.03///"_ABMLOOP_";.04////00;.05////0;.06///"_ABMVTYP_";.08///"_ABMSEND
+ S:ABMANS=2 DR=".01///@"
+ D ^DIE
+ I ABMANS=2 D
+ .W !,"Entry Deleted.",!
+ .D EOP^ABMDUTL(1)
+ Q
+ ;end new abm*2.6*21 IHS/SD/SDR HEAT70826
 SEGMENT ;select segment
  S DIR(0)="S^"_$P($T(@ABMLOOP),";;",2)
  S DIR("A")="Select Segment"
@@ -134,7 +189,8 @@ NOSEND ;
  D ^DIE
  Q
  ;
-LOOPS ;;1:HEADER;2:1000A;3:1000B;4:2010AA;5:2010BB;6:2000B
+LOOPS ;;1:HEADER;2:1000A;3:1000B;4:2010AA;5:2010BB;6:2000B;7:2310B
+ ;abm*2.6*21 IHS/SD/SDR HEAT70826 added loop 2310B
  ;
 HEADER ;;1:ISA;2:GS
 1000A ;;1:NM1

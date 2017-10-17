@@ -1,5 +1,5 @@
-BLRSHPM1 ;cmi/anch/maw - BLR Reference Lab Shipping Manifest (con't) 2/7/91 14:29 ;JUL 06, 2010 3:14 PM
- ;;5.2;IHS LABORATORY;**1027,1030,1031**;NOV 01, 1997
+BLRSHPM1 ;cmi/anch/maw - BLR Reference Lab Shipping Manifest (con't) ; 11-Apr-2016 10:30 ; MAW
+ ;;5.2;IHS LABORATORY;**1027,1030,1031,1039**;NOV 01, 1997;Build 38
  ;
  ;;5.2;LAB SERVICE;**121,153**;Sep 27, 1994
 LST1 ;from LRWRKLST

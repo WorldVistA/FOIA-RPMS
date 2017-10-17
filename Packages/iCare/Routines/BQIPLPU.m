@@ -1,5 +1,5 @@
 BQIPLPU ;GDIT/HCSD/ALA-Panel Autopopulate Utility ; 29 Sep 2015  1:06 PM
- ;;2.5;ICARE MANAGEMENT SYSTEM;;May 24, 2016;Build 27
+ ;;2.6;ICARE MANAGEMENT SYSTEM;;Jul 07, 2017;Build 72
  ;
 SXRF ;EP - Set cross-reference
  I $G(D0)="" S ^BQICARE("AF",X,DA(1),DA)="" Q
@@ -8,6 +8,7 @@ SXRF ;EP - Set cross-reference
  ;
 KXRF ; EP - Kill cross-reference
  I $G(D0)="" K ^BQICARE("AF",X,DA(1),DA) Q
+ I $G(D1)="" K ^BQICARE("AF",X,DA(1),DA) Q
  K ^BQICARE("AF",X,D0,D1)
  Q
  ;

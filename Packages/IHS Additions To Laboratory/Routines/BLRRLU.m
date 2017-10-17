@@ -1,5 +1,5 @@
 BLRRLU ;cmi/anch/maw - BLR Reference Lab Utilities ; 02-Nov-2015 13:43 ; MAW
- ;;5.2;IHS LABORATORY;**1027,1035,1037**;NOV 01, 1997;Build 4
+ ;;5.2;IHS LABORATORY;**1027,1035,1037,1040**;NOV 01, 1997;Build 5
  ;;5.2;LR;**1021**;Jul 27, 2006
  ;
  ;
@@ -32,7 +32,7 @@ SITE ;EP - setup the site parameters in BLR MASTER CONTROL
  S DIC("A")="Add this Reference Lab to which Site: "
  D ^DIC
  Q:Y<0
- S DIE=DIC,DA=+Y,DR="3001////"_BLRRL_";3002:3023;3100;3200"  ;cmi/maw 4/3/2008 setup parameters in BLR MASTER CONTROL file
+ S DIE=DIC,DA=+Y,DR="3001////"_BLRRL_";3002:3023;3032;3044;3100;3200"  ;cmi/maw 4/3/2008 setup parameters in BLR MASTER CONTROL file
  D ^DIE
  K DIC,DIE,DR,DA
  W !!,"Now setting up Lab HL7 Message Parameter File.."
@@ -129,6 +129,7 @@ PURGESM ;-- purge the shipping manifest over time
  S X1=DT,X2=-BLRDAYS
  D C^%DTC
  S BLRSTART=X
+ I $P($G(^BLRSITE(DUZ(2),"RL")),U,22) D PURGELSM(BLRSTART) Q
  N BLRRLDA
  S BLRRLDA=0 F  S BLRRLDA=$O(^BLRSHPM(BLRRLDA)) Q:'BLRRLDA  D
  . Q:$P($G(^BLRSHPM(BLRRLDA,0)),U,3)>BLRSTART
@@ -138,6 +139,19 @@ PURGESM ;-- purge the shipping manifest over time
  ;. N BLRRLIEN
  ;. S BLRRLIEN=0 F  S BLRRLIEN=$O(^BLRSHPM("ADT",BLRRLDA,BLRRLIEN)) Q:'BLRRLIEN  D
  ;.. S DIK="^BLRSHPM(",DA=BLRRLIEN D ^DIK
+ Q
+ ;
+PURGELSM(START) ;-- purge the ledi shipping manifest over time
+ N BLRDA,BLRIDT,BLRIEN,BLRST,BLRPRG
+ S BLRDA=0 F  S BLRDA=$O(^LAHM(62.8,"B",BLRDA)) Q:BLRDA=""  D
+ . S BLRIDT=$P(BLRDA,"-",2)
+ . S BLRIDT=$$HL7TFM^XLFDT(BLRIDT)
+ . Q:BLRIDT>START
+ . S BLRIEN=0 F  S BLRIEN=$O(^LAHM(62.8,"B",BLRDA,BLRIEN)) Q:'BLRIEN  D
+ .. S BLRPRG=0
+ .. I $P($G(^LAHM(62.8,BLRIEN,0)),U,3)=0 S BLRPRG=1
+ .. I $P($G(^LAHM(62.8,BLRIEN,0)),U,3)=4 S BLRPRG=1
+ .. I $G(BLRPRG)=1 S DIK="^LAHM(62.8,",DA=BLRIEN D ^DIK
  Q
  ;
 LOG(FNM,TYP,USER)  ;EP - log the entry
@@ -226,7 +240,7 @@ BEFORE(PD,PS) ;-- is the accession before the purge date
  ;
 QPASK ;-- queueable pask
  N PASK
- S PASK=$$BLST(DT,180)
+ S PASK=$$BLST(DT,90)
  D PRG(PASK)
  K DIK,DA
  Q

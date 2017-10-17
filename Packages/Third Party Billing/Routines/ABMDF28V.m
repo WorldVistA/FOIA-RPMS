@@ -1,19 +1,10 @@
 ABMDF28V ; IHS/SD/SDR - PRINT UB-04 ;    
- ;;2.6;IHS Third Party Billing;**11,14,19**;NOV 12, 2009;Build 300
+ ;;2.6;IHS Third Party Billing;**11,14,19,21**;NOV 12, 2009;Build 379
  ;IHS/SD/SDR - 2.6*19 - HEAT116949 - updated check for Medi-Cal to contain (not equal) 61044
+ ;IHS/SD/SDR - 2.6*21 - HEAT97615 - Remove box 57 if billing Medicare and primary insurer was TSI.
+ ;IHS/SD/SDR - 2.6*21 - VMBP - Updated p11 changes to include Serena ref#s
  ;
-13 ;
- W !
- K ABMR
- S ABM("9SP")="         "
- N I
- F I=160:10:200 D
- .D @(I_"^ABMER41A")
- N I
- F I=210:10:390 D
- .D @(I_"^ABMER41")
- ; Policy holder street addr
- ;start new abm*2.6*2 FIXPMS10028
+38 ;
  I ABM38FLG="P" D
  .I "^P^H^F^M^"[("^"_ABMP("ITYPE")_"^") D
  ..S ABMDE=$G(ABM(9000003.1,+$G(ABME("PH")),.09,"E"))_"^^40"
@@ -37,67 +28,123 @@ ABMDF28V ; IHS/SD/SDR - PRINT UB-04 ;
  .;end new HEAT7998
  .S ABMDE=ABMISTR_"^^40"
  .D WRT^ABMDF28W
- ;
+ Q
+VALCDS1 ;
  I ABMR(41,160)'="" D
- .S ABMDE=ABMR(41,160)_"^43^2"  ;Value code 1
+ .S ABMDE=ABMR(41,160)_"^43^2"  ;Val cd 1
  .D WRT^ABMDF28W  ;FL #39a
  I ($TR(ABMR(41,170)," ",""))'="" D
  .I ABMR(41,160)="A0"!(ABMR(41,160)=80) S ABMDE=+ABMR(41,170)_"^46^7R"
- .E  S ABMDE=$FN(+ABMR(41,170),"",2)_"^46^9R"  ;Value Amt 1
+ .E  S ABMDE=$FN(+ABMR(41,170),"",2)_"^46^9R"  ;Val Amt 1
  .D WRT^ABMDF28W  ;FL #39a
- ;
  I ABMR(41,180)'="" D
- .S ABMDE=ABMR(41,180)_"^56^2"  ;Value code 2
+ .S ABMDE=ABMR(41,180)_"^56^2"  ;Val cd 2
  .D WRT^ABMDF28W  ;FL #40a
  I ($TR(ABMR(41,190)," ",""))'="" D
  .I ABMR(41,180)="A0"!(ABMR(41,180)=80) S ABMDE=+ABMR(41,190)_"^59^7R"
  .E  S ABMDE=$FN(+ABMR(41,190),"",2)_"^59^9R"
  .D WRT^ABMDF28W  ;FL #40a
- ;
  I ABMR(41,200)'="" D
- .S ABMDE=ABMR(41,200)_"^69^2"  ;Value code 3
+ .S ABMDE=ABMR(41,200)_"^69^2"  ;Val cd 3
  .D WRT^ABMDF28W  ;FL #41a
  I ($TR(ABMR(41,210)," ",""))'="" D
  .I ABMR(41,200)="A0"!(ABMR(41,200)=80) S ABMDE=+ABMR(41,210)_"^72^7R"
  .E  S ABMDE=+ABMR(41,210)_"^72^9R"
  .D WRT^ABMDF28W  ;FL #41a
  Q
-42 ;
- ;Lines 42 - 44
- K ABMP("SET")
- D ^ABMER30  ;get ins and pymt data
- N I
- F I=1:1:3 D  ;check for blank entries; if any, move others up
- .I '$D(ABMREC(30,I)) D
- ..S ABMREC(30,I)=$G(ABMREC(30,(I+1)))
- ..S ABMREC(31,I)=$G(ABMREC(31,(I+1)))
- F I=1:1:3 D
- .W !
- .;Q:'$D(ABMREC(30,I))  ;HEAT144755
- .Q:$TR(ABMREC(30,I),"")=""  ;HEAT144755
- .;Ins name_" "_Payor Sub ID
- .S ABMDE=$S($E(ABMREC(30,I),54,78)["RAILROAD":"RAILROAD MEDICARE",1:$E(ABMREC(30,I),54,78))_" "_$E(ABMREC(30,I),31,34)_"^^22"
- .;I $$RCID^ABMERUTL(+$G(ABMP("INS",I)))=61044 S ABMDE="O/P MEDI-CAL^^22"  ;abm*2.6*19 IHS/SD/SDR HEAT116949
- .I $$RCID^ABMERUTL(+$G(ABMP("INS",I)))["61044" S ABMDE="O/P MEDI-CAL^^22"  ;abm*2.6*19 IHS/SD/SDR HEAT116949
- .D WRT^ABMDF28W  ;FL #50
- .S ABMDE=$E(ABMREC(30,I),160,172)_"^23^15"  ; Provider ID (blank)
- .I $P($G(^AUTNINS(ABMP("INS"),0)),U)="IOWA MEDICAID" S ABMDE="^23^15"
- .D WRT^ABMDF28W   ;FL #51
- .S ABMDE=$E(ABMREC(30,I),142)_"^38^1"  ;Release code
- .D WRT^ABMDF28W   ;FL #52
- .S ABMDE=$E(ABMREC(30,I),143)_"^41^1"  ;Ben Assgn Indicator
- .D WRT^ABMDF28W   ;FL #53
- .S ABMDE=+$E(ABMREC(30,I),173,182)_" ^43^10R"  ;3PB pymt receive
- .I +ABMDE D WRT^ABMDF28W  ;FL #54
- .S ABMDE=+$E(ABMREC(30,I),183,192)_" ^55^10R"  ;Est 3PB amt due
- .I +ABMDE D WRT^ABMDF28W  ;FL #55
- .I I=1 D  ;other provider ID - FL #57
- ..S Y=$P($G(^ABMNINS(ABMP("LDFN"),+ABMP("INS",I),1,ABMP("VTYP"),0)),U,8)
- ..S:Y="" Y=$P($G(^AUTNINS(+ABMP("INS",I),15,ABMP("LDFN"),0)),U,2)
- ..S:Y="" Y=$TR($P($G(^AUTTLOC(DUZ(2),0)),U,18),"-")
- ..Q:$P($G(^AUTNINS(ABMP("INS"),0)),U)["VMBP"  ;abm*2.6*11 IHS/SD/AML 7/30/2013
- ..S ABMDE=Y_"^67^15"
- ..I $P($G(^AUTNINS(ABMP("INS"),0)),U)="IOWA MEDICAID" S ABMDE="^67^15"
+38P2 ;
+ I ABM38FLG="P" D
+ .I "^P^H^F^M^"[("^"_ABMP("ITYPE")_"^") D
+ ..S ABMDE=$G(ABM(9000003.1,+$G(ABME("PH")),.11,"E"))_", "_$G(ABM(9000003.1,+$G(ABME("PH")),.12,"E"))_" "_$G(ABM(9000003.1,+$G(ABME("PH")),.13,"E"))_"^^40"
+ ..D WRT^ABMDF28W  ;FL 38
+ .;MCR or MCD - pt addr
+ .I "^R^MD^MH^D^K^"[("^"_ABMP("ITYPE")_"^") D
+ ..S ABMDE=$G(ABME("AD4"))_", "_$G(ABME("AD5"))_"  "_$G(ABME("AD6"))_"^^40"
+ ..D WRT^ABMDF28W  ;FL 38
+ .I ABMP("ITYPE")="N" D  Q
+ ..S ABMDE=$G(ABME("AD4"))_", "_$G(ABME("AD5"))_"  "_$G(ABME("AD6"))_"^^40"
  ..D WRT^ABMDF28W
- K ABMR
+ I ABM38FLG["I" D
+ .I ABMP("ITYPE")="N" D  Q
+ ..S ABMDE=$G(ABME("AD4"))_", "_$G(ABME("AD5"))_"  "_$G(ABME("AD6"))_"^^40"
+ ..D WRT^ABMDF28W
+ .S ABMDE=ABMICTY_", "_$P($G(^DIC(5,ABMIST,0)),U,2)_"  "_ABMIZIP_"^^40"
+ D WRT^ABMDF28W  ;FL #38
  Q
+VALCDS2 ;
+ I ABMR(41,220)'="" D
+ .S ABMDE=ABMR(41,220)_"^43^2"  ;Val cd 4
+ .D WRT^ABMDF28W  ;FL #39b
+ I ABMR(41,230) D
+ .I ABMR(41,220)="A0" S ABMDE=+ABMR(41,230)_"^46^9"
+ .E  S ABMDE=+ABMR(41,230)_"^46^9R"  ;Val amt 4
+ .D WRT^ABMDF28W  ;FL #39b
+ I ABMR(41,240)'="" D
+ .S ABMDE=ABMR(41,240)_"^56^2"  ;Val cd 5
+ .D WRT^ABMDF28W  ;FL #40b
+ I ABMR(41,250) D
+ .I ABMR(41,240)="A0" S ABMDE=+ABMR(41,250)_"^59^9"
+ .E  S ABMDE=+ABMR(41,250)_"^59^9R"  ;Val amt 5
+ .D WRT^ABMDF28W  ;FL #40b
+ I ABMR(41,260)'="" D
+ .S ABMDE=ABMR(41,260)_"^69^2"  ;Val cd 6
+ .D WRT^ABMDF28W  ;FL #41b
+ I ABMR(41,270) D
+ .I ABMR(41,260)="A0" S ABMDE=+ABMR(41,270)_"^72^9"
+ .E  S ABMDE=+ABMR(41,270)_"^72^9R"  ;Val amt 6
+ .D WRT^ABMDF28W  ;FL #41b
+ Q
+VALCDS3 ;
+ I ABMR(41,280)'="" D
+ .S ABMDE=ABMR(41,280)_"^43^2"  ;Val cd 7
+ .D WRT^ABMDF28W  ;FL #39c
+ I ABMR(41,290) D
+ .I ABMR(41,280)="A0" S ABMDE=+ABMR(41,290)_"^46^9"
+ .E  S ABMDE=+ABMR(41,290)_"^46^9R"  ;Val amt 7
+ .D WRT^ABMDF28W  ;FL #39c
+ I ABMR(41,300)'="" D
+ .S ABMDE=ABMR(41,300)_"^56^2"  ;Val cd 8
+ .D WRT^ABMDF28W  ;FL #40c
+ I ABMR(41,310) D
+ .I ABMR(41,300)="A0" S ABMDE=+ABMR(41,310)_"^59^9"
+ .E  S ABMDE=+ABMR(41,310)_"^59^9R"  ;Val amt 8
+ .D WRT^ABMDF28W  ;FL #40c
+ I ABMR(41,320)'="" D
+ .S ABMDE=ABMR(41,320)_"^69^2"  ;Val cd 9
+ .D WRT^ABMDF28W  ;FL #41c
+ I ABMR(41,330) D
+ .I ABMR(41,320)="A0" S ABMDE=+ABMR(41,330)_"^72^9"
+ .E  S ABMDE=+ABMR(41,330)_"^72^9R"  ;Val amt 9
+ .D WRT^ABMDF28W  ;FL #41c
+ Q
+VALCDS4 ;
+ I ABMR(41,340)'="" D
+ .S ABMDE=ABMR(41,340)_"^43^2"  ;Val cd 10
+ .D WRT^ABMDF28W  ;FL #39d
+ I ABMR(41,350) D
+ .I ABMR(41,340)="A0" S ABMDE=+ABMR(41,350)_"^46^9"
+ .E  S ABMDE=+ABMR(41,350)_"^46^9R"  ;Val amt 10
+ .D WRT^ABMDF28W  ;FL #39d
+ I ABMR(41,360)'="" D
+ .S ABMDE=ABMR(41,360)_"^56^2"  ;Val cd 11
+ .D WRT^ABMDF28W  ;FL #40d
+ I ABMR(41,370) D
+ .I ABMR(41,360)="A0" S ABMDE=+ABMR(41,370)_"^59^9"
+ .E  S ABMDE=+ABMR(41,370)_"^59^9R"  ;Val amt 11
+ .D WRT^ABMDF28W  ;FL #40d
+ I ABMR(41,380)'="" D
+ .S ABMDE=ABMR(41,380)_"^69^2"  ;Val cd 12
+ .D WRT^ABMDF28W  ;FL #41d
+ I ABMR(41,390) D
+ .I ABMR(41,380)="A0" S ABMDE=+ABMR(41,390)_"^72^9"
+ .E  S ABMDE=+ABMR(41,390)_"^72^9R"  ;Val amt 12
+ .D WRT^ABMDF28W  ;FL #41d
+ Q
+ ;start new abm*2.6*21 IHS/SD/SDR HEAT97615
+PRIMECK ;
+ ;if billing Medicare, see if primary insurer was tribal self insured; if so, remove box 57
+ S ABMT=0,ABMTSIFG=0
+ F  S ABMT=$O(^ABMDBILL(DUZ(2),ABMP("BDFN"),13,ABMT)) Q:'ABMT  D
+ .I $P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),13,ABMT,0)),U,3)'="C" Q  ;only check complete
+ .I $P($G(^ABMNINS(ABMP("LDFN"),$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),13,ABMT,0)),U),0)),U,11)="Y" S ABMTSIFG=1
+ ;end new abm*2.6*21 IHS/SD/SDR HEAT97615

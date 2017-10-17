@@ -1,5 +1,5 @@
 BGP7UTL3 ; IHS/CMI/LAB - UTILITIES ;
- ;;17.0;IHS CLINICAL REPORTING;;AUG 30, 2016;Build 16
+ ;;17.1;IHS CLINICAL REPORTING;;MAY 10, 2017;Build 29
  ;
 ONN4 ;EP
  Q  ;V17
@@ -128,3 +128,64 @@ PASTMTH(BIDTI,BIMTHS,BIDTO,BIYR) ;EP
  S BIDTO=YYY_MM_DD
  Q
  ;
+TESTDR ;
+TP ;
+ W !!,"for testing purposes only, please enter DATE RANGE AND YEAR",!
+ S (BGPBD,BGPED,BGPTP)=""
+ S DIR(0)="S^1:January 1 - December 31;2:April 1 - March 31;3:July 1 - June 30;4:October 1 - September 30;5:User-Defined Report Period",DIR("A")="Enter the date range for your report" KILL DA D ^DIR KILL DIR
+ I $D(DIRUT) Q
+ S BGPQTR=Y
+ I BGPQTR=5 D ENDDATE^BGP7DGPU
+ I BGPQTR'=5 D F
+ I BGPPER="" W !,"Year not entered.",! G TP
+ I BGPQTR=1 S BGPBD=$E(BGPPER,1,3)_"0101",BGPED=$E(BGPPER,1,3)_"1231"
+ I BGPQTR=2 S BGPBD=($E(BGPPER,1,3)-1)_"0401",BGPED=$E(BGPPER,1,3)_"0331"
+ I BGPQTR=3 S BGPBD=($E(BGPPER,1,3)-1)_"0701",BGPED=$E(BGPPER,1,3)_"0630"
+ I BGPQTR=4 S BGPBD=($E(BGPPER,1,3)-1)_"1001",BGPED=$E(BGPPER,1,3)_"0930"
+ ;I BGPQTR=5 S D=$$FMADD^XLFDT(BGPPER,1) S BGPBD=($E(BGPPER,1,3)-1)_$E(D,4,7),BGPED=BGPPER,BGPPER=$E(BGPED,1,3)_"0000"
+ I BGPQTR=5 D
+ .S D=$$FMADD^XLFDT(BGPPER,1)
+ .I $E(BGPPER,4,7)'=1231 S BGPBD=($E(BGPPER,1,3)-1)_$E(D,4,7),BGPED=BGPPER,BGPPER=$E(BGPED,1,3)_"0000"
+ .I $E(BGPPER,4,7)=1231 S BGPBD=$E(BGPPER,1,3)_$E(D,4,7),BGPED=BGPPER,BGPPER=$E(BGPED,1,3)_"0000"
+ I BGPED>DT D  G:BGPDO=1 TP
+ .W !!,"You have selected Current Report period ",$$FMTE^XLFDT(BGPBD)," through ",$$FMTE^XLFDT(BGPED),"."
+ .W !,"The end date of this report is in the future; your data will not be",!,"complete.",!
+ .K DIR S BGPDO=0 S DIR(0)="Y",DIR("A")="Do you want to change your Current Report Dates",DIR("B")="N" KILL DA D ^DIR KILL DIR
+ .I $D(DIRUT) S BGPDO=1 Q
+ .I Y S BGPDO=1 Q
+ .Q
+BY ;get baseline year
+ S BGPVDT=""
+ W !!,"Enter the Baseline Year to compare data to.",!,"Use a 4 digit year, e.g. 2010"
+ S DIR(0)="D^::EP"
+ S DIR("A")="Enter Year (e.g. 2010)"
+ D ^DIR KILL DIR
+ I $D(DIRUT) G TP
+ I $D(DUOUT) S DIRUT=1 G TP
+ S BGPVDT=Y
+ I $E(Y,4,7)'="0000" W !!,"Please enter a year only!",! G BY
+ S X=$E(BGPPER,1,3)-$E(BGPVDT,1,3)
+ S X=X_"0000"
+ S BGPBBD=BGPBD-X,BGPBBD=$E(BGPBBD,1,3)_$E(BGPBD,4,7)
+ S BGPBED=BGPED-X,BGPBED=$E(BGPBED,1,3)_$E(BGPED,4,7)
+ S BGPPBD=($E(BGPBD,1,3)-1)_$E(BGPBD,4,7)
+ S BGPPED=($E(BGPED,1,3)-1)_$E(BGPED,4,7)
+ ;W !!,"The date ranges for this report are:"
+ ;W !?5,"Report Period: ",?31,$$FMTE^XLFDT(BGPBD)," to ",?31,$$FMTE^XLFDT(BGPED)
+ ;W !?5,"Previous Year Period: ",?31,$$FMTE^XLFDT(BGPPBD)," to ",?31,$$FMTE^XLFDT(BGPPED)
+ ;W !?5,"Baseline Period: ",?31,$$FMTE^XLFDT(BGPBBD)," to ",?31,$$FMTE^XLFDT(BGPBED)
+ I BGPPBD=BGPBBD,BGPPED=BGPBED K Y D CHKY^BGP7DL I Y K BGPBBD,BGPBED,BGPPBD,BGPPED G BY
+ Q
+F ;calendar year
+ S (BGPPER,BGPVDT)=""
+ W !!,"Enter the Calendar Year for the report END date.  Use a 4 digit",!,"year, e.g. 2017"
+ S DIR(0)="D^::EP"
+ S DIR("A")="Enter Year"
+ S DIR("?")="This report is compiled for a period.  Enter a valid date."
+ D ^DIR KILL DIR
+ I $D(DIRUT) Q
+ I $D(DUOUT) S DIRUT=1 Q
+ S BGPVDT=Y
+ I $E(Y,4,7)'="0000" W !!,"Please enter a year only!",! G F
+ S BGPPER=BGPVDT
+ Q

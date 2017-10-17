@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:35">
+<Class name="csp.hl7.hl7schemarawstructure">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>CSPX.AutoPageCSP</Super>
+<TimeChanged>61501,53312.646966</TimeChanged>
+<TimeCreated>61501,53312.642598</TimeCreated>
+<GeneratedBy>/csp/goldb/HL7/HL7SchemaRawStructure.csp</GeneratedBy>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body>"
+	Write !,"<table border=""0"" class=""LayoutMain"" width=""100%"" cellpadding=""0"" cellspacing=""0"">"
+	Do ..WriteTitlePane("@Ensemble:HL7ManagerRawMessageStructure@Ensemble HL7 Raw Message Structure")
+	Write !,"</table>"
+	Write !,!,"<div class=""Text1"">"
+	Write "HL7 <b>Raw Message Structure</b> definition is displayed below:"
+	Write "</div>"
+	Write !,"<br>",!
+	Write !
+	set ms=%request.Get("MS")
+	set category=$p(ms,":",2)
+	set secondary=$p(ms,":",3)
+	If ((category'="")&&(secondary'="")) {
+	set description=..EscapeHTML(##class(EnsLib.HL7.Schema).GetDescription(ms))
+	if $data(^EnsHL7.Schema(category,"MS",secondary))=0 {
+	write "<b><font size=6>"_ms_" </font> Definition does not exist!</b>",!
+	quit
+	}
+	}
+	Write !,!,"<b><font size=6>"_(category_":"_secondary)_" </font> "_($G(description))_"</b>",!
+	Write "<br><br>",!
+	Write !
+	If ((category'="")&&(secondary'="")) {
+	Set struct=^EnsHL7.Schema(category,"MS",secondary)
+	write "<b>Raw Definition:</b>"
+	write "<table border=1 cellpadding=2 cellspacing=0 style=""font-size: 0.8em;""><tbody align=center><tr>",!
+	write "<tr><td>"_struct_"</td></tr>"
+	write "</table>"
+	write "<br>"
+	}
+	Write !,!,"<p>",!
+	Write "<a href="""_(..Link("HL7SchemaMain.csp"))_""">"
+	Write "(Show All Categories)"
+	Write "</a>"
+	Write "<br>",!
+	Write "<a href="""_(..Link("HL7SchemaList.csp?ELEMENT=MS&CATEGORY="_category))_""">"
+	Write "(Show All Message Structures in category '"_(category)_"')"
+	Write "</a>"
+	Write "<br>",!
+	Write "<a href="""_(..Link("HL7SchemaMessageStructure.csp?MS="_ms))_""">"
+	Write "(Show Definition diagram)"
+	Write "</a>"
+	Write !,!,"</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<title>Ensemble HL7 Raw Message Structure</title>",!
+	Write "<link rel=""stylesheet"" type=""text/css"" href=""/csp/sys/csputils.css"" title=""Standard Style""/>"
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>C:\InterSystems\Ensemble\CSP\goldb\HL7\HL7SchemaRawStructure.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/goldb/HL7/HL7SchemaRawStructure.csp</Default>
+</Parameter>
+
+<Parameter name="DOMAIN">
+<Default>Ensemble</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>61286,9120</Default>
+</Parameter>
+
+<Parameter name="PAGENAME">
+<Default>HL7 Raw Message Structure</Default>
+</Parameter>
+
+<Parameter name="PARENTPAGE">
+<Default>HL7SchemaMain.csp</Default>
+</Parameter>
+</Class>
+</Export>

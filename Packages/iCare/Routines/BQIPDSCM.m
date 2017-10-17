@@ -1,5 +1,5 @@
 BQIPDSCM ;VNGT/HS/BEE-Panel Description Utility ; 7 Apr 2008  4:28 PM
- ;;2.4;ICARE MANAGEMENT SYSTEM;;Apr 01, 2015;Build 41
+ ;;2.6;ICARE MANAGEMENT SYSTEM;;Jul 07, 2017;Build 72
  ;
  Q
  ;
@@ -130,7 +130,9 @@ DESC(OWNR,PLIEN,DESC) ;EP - Format Panel Generated Description
  D FILTER^BQIPDSCF(OWNR,PLIEN,.FPARMS)
  ;
  ;Assemble filter description
- I $D(FPARMS) D FDESC(.DESC,.FPARMS)
+ I $D(FPARMS) D
+ . I SOURCE["AD HOC",FSOURCE="FILTER" K X,DESC
+ . D FDESC(.DESC,.FPARMS)
  ;
  ;Pull category and IPC Flag
  D CATIPC(OWNR,PLIEN,.DESC)

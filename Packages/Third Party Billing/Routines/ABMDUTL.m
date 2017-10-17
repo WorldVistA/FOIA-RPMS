@@ -1,5 +1,5 @@
 ABMDUTL ; IHS/SD/SDR - UTILITY FOR 3P BILLING PACKAGE ;     
- ;;2.6;IHS 3P BILLING SYSTEM;**6,15**;NOV 12, 2009;Build 251
+ ;;2.6;IHS 3P BILLING SYSTEM;**6,15,21**;NOV 12, 2009;Build 379
  ; IHS/SD/SDR - v2.5 p9 - IM12408 - Added code for inactive CPTs to check visit date
  ; IHS/SD/SDR - v2.5 p9 - IM16660 - Coded for 4-digit revenue codes
  ; IHS/SD/SDR - v2.5 p10 - IM20454 - Fix xref on .03 field
@@ -8,6 +8,8 @@ ABMDUTL ; IHS/SD/SDR - UTILITY FOR 3P BILLING PACKAGE ;
  ; IHS/SD/SDR - v2.6 CSV
  ; IHS/SD/SDR - abm*2.6*6 - 5010 - added new call BDT for complete date, includ. seconds
  ;IHS/SD/SDR - 2.6*15 - HEAT188548 - added code to make length of time 6 characters
+ ;IHS/SD/SDR - 2.6*21 - HEAT122118 - added code to look in bill file for new claim number as well.
+ ;IHS/SD/SDR - 2.6*21 - HEAT139641 - Changed 3P Insurer references from DUZ(2) to ABMP("LDFN")
  ;
 SDT(X) ;EP - Y is set to the printable date ##/##/#### from X (fileman date)
  N Y
@@ -127,10 +129,16 @@ PAT(X) ;EP - DISPLAY PATIENT HEADER WITH IDENTIFIERS - X=DFN
 FLAT(X,Y,Z)          ;EP - DETERMINE FLAT RATE
  ;X=INSURER, Y=VISIT TYPE, Z=DATE
  S N=Z+.5
- S ABMDT=$O(^ABMNINS(DUZ(2),X,1,Y,11,"B",N),-1)
+ ;S ABMDT=$O(^ABMNINS(DUZ(2),X,1,Y,11,"B",N),-1)  ;abm*2.6*21 IHS/SD/AML HEAT139641
+ S ABMDT=$O(^ABMNINS(ABMP("LDFN"),X,1,Y,11,"B",N),-1)  ;abm*2.6*21 IHS/SD/AML HEAT139641
  I 'ABMDT S X=0 K ABMDT Q X
- S ABMDA=$O(^ABMNINS(DUZ(2),X,1,Y,11,"B",ABMDT,0))
- S ABMZERO=$G(^ABMNINS(DUZ(2),X,1,Y,11,ABMDA,0))
+ ;start old abm*2.6*21 IHS/SD/AML HEAT139641
+ ;S ABMDA=$O(^ABMNINS(DUZ(2),X,1,Y,11,"B",ABMDT,0))
+ ;S ABMZERO=$G(^ABMNINS(DUZ(2),X,1,Y,11,ABMDA,0))
+ ;end old start new abm*2.6*21 IHS/SD/AML HEAT139641
+ S ABMDA=$O(^ABMNINS(ABMP("LDFN"),X,1,Y,11,"B",ABMDT,0))
+ S ABMZERO=$G(^ABMNINS(ABMP("LDFN"),X,1,Y,11,ABMDA,0))
+ ;end new abm*2.6*21 IHS/SD/AML HEAT139641
  S X=$P(ABMZERO,"^",2)
  I $P(ABMZERO,"^",3),$P(ABMZERO,"^",3)<Z S X=0
  K ABMZERO,ABMDT,ABMDA
@@ -142,9 +150,15 @@ NXNM(X) ;EP - GET NEXT CLAIM NUMBER
  ..Q:$P(^ABMDCLM(I,0),"^",3)'>^ABMDCLM(0)
  ..S ^ABMDCLM(0)=$P(^ABMDCLM(I,0),"^",3)
  L +^ABMDCLM(0):30 I '$T S X="" Q X
- F  D  Q:'$D(^ABMDCLM(DUZ(2),X))
+ ;start old abm*2.6*21 IHS/SD/SDR HEAT122118
+ ;F  D  Q:'$D(^ABMDCLM(DUZ(2),X))
+ ;.S X=^ABMDCLM(0)+1
+ ;.S ^ABMDCLM(0)=X
+ ;end old start new abm*2.6*21 IHS/SD/SDR HEAT122118
+ F  D  Q:'$D(^ABMDCLM(DUZ(2),X))&(+$O(^ABMDBILL(DUZ(2),"B",X_"@"))'[X)
  .S X=^ABMDCLM(0)+1
  .S ^ABMDCLM(0)=X
+ ;end new abm*2.6*21 IHS/SD/SDR HEAT122118
  L -^ABMDCLM(0)
  Q X
 EOP(X) ;EP - end of page

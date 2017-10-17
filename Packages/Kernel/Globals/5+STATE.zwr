@@ -1,6 +1,6 @@
 OSEHRA ZGO Export: STATE
-12-JUN-2017 17:09:58 ZWR
-^DIC(5,0)="STATE^5I^73^73"
+17-OCT-2017 09:15:39 ZWR
+^DIC(5,0)="STATE^5I^74^74"
 ^DIC(5,0,"AUDIT")="@"
 ^DIC(5,0,"DD")="@"
 ^DIC(5,0,"DEL")="@"
@@ -9790,6 +9790,8 @@ OSEHRA ZGO Export: STATE
 ^DIC(5,72,0)="PHILIPPINES^PH"
 ^DIC(5,73,0)="AMERICAN SAMOA^AS^60"
 ^DIC(5,73,9999999.01)="^"
+^DIC(5,74,0)="NETHERLANDS^NL^95"
+^DIC(5,74,9999999.01)="^"
 ^DIC(5,"%",0)="^1.005^1^1"
 ^DIC(5,"%",1,0)="VA"
 ^DIC(5,"%","B","VA",1)=""
@@ -9830,6 +9832,7 @@ OSEHRA ZGO Export: STATE
 ^DIC(5,"B","MISSOURI",26)=""
 ^DIC(5,"B","MONTANA",27)=""
 ^DIC(5,"B","NEBRASKA",28)=""
+^DIC(5,"B","NETHERLANDS",74)=""
 ^DIC(5,"B","NEVADA",29)=""
 ^DIC(5,"B","NEW BRUNSWICK",61)=""
 ^DIC(5,"B","NEW HAMPSHIRE",30)=""
@@ -9930,6 +9933,7 @@ OSEHRA ZGO Export: STATE
 ^DIC(5,"C",92,68)=""
 ^DIC(5,"C",93,69)=""
 ^DIC(5,"C",94,70)=""
+^DIC(5,"C",95,74)=""
 ^DIC(5,"C",96,54)=""
 ^DIC(5,"C",97,55)=""
 ^DIC(5,"C",99,56)=""
@@ -9981,6 +9985,7 @@ OSEHRA ZGO Export: STATE
 ^DIC(5,"C","NH",30)=""
 ^DIC(5,"C","NJ",31)=""
 ^DIC(5,"C","NL",62)=""
+^DIC(5,"C","NL",74)=""
 ^DIC(5,"C","NM",32)=""
 ^DIC(5,"C","NS",64)=""
 ^DIC(5,"C","NT",63)=""

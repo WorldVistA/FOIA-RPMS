@@ -1,11 +1,13 @@
 ABMDSPLT ; IHS/ASDST/DMJ - SPLIT CLAIM IN TWO ;     
- ;;2.6;IHS Third Party Billing;**1,3,9**;NOV 12, 2009
+ ;;2.6;IHS Third Party Billing;**1,3,9,10,21**;NOV 12, 2009;Build 379
  ;
  ; IHS/SD/SDR - v2.5 p12 - UFMS
  ;   Added check to see if user is logged in before splitting
  ;   claims allowed
  ; IHS/SD/SDR - abm*2.6*1 - HEAT4480 - Added ARE YOU SURE prior to split
  ; IHS/SD/SDR - abm*2.6*3 - HEAT11948 - fix for <UNDEF>START+3^AUPNPAT
+ ;IHS/SD/SDR - 2.6*21 - HEAT190661 - If user types '^' at section prompt they will be exited out of option without split.
+ ;  Also rearranged code so claim wouldn't get created until sections to be copied/moved were selected.
  ;
  ; *********************************************************************
  ;
@@ -31,8 +33,40 @@ START ;START
  S DIR("B")="NO"
  D ^DIR K DIR
  G:Y=0 START
- S X=$P(^ABMDCLM(DUZ(2),ABMP("CDFN"),0),U)  ;abm*2.6*3 HEAT11948
+ ;S X=$P(^ABMDCLM(DUZ(2),ABMP("CDFN"),0),U)  ;abm*2.6*3 HEAT11948  ;abm*2.6*21 IHS/SD/SDR 190661
  ;end new code HEAT4480
+ ;start old abm*2.6*21 IHS/SD/SDR HEAT190661
+ ;S DINUM=$$NXNM^ABMDUTL
+ ;I DINUM="" D  Q
+ ;.W !!,"ERROR: Claim not created - check global ^ABMDCLM(0)"
+ ;.S DIR(0)="E" D ^DIR K DIR
+ ;K DD,DO D FILE^DICN Q:+Y<0  S ABMC2=+Y
+ ;M ^ABMDCLM(DUZ(2),ABMC2)=^ABMDCLM(DUZ(2),ABMP("CDFN"))
+ ;S DIE="^ABMDCLM(DUZ(2),"
+ ;S DA=ABMC2
+ ;S DR=".1////"_DT_";.04///E"
+ ;S DR=DR_";.17////"_DT
+ ;S DR=DR_";.022////S"  ;abm*2.6*10 ICD10 008
+ ;D ^DIE
+ ;;start new code ;abm*2.6*10 ICD10 008
+ ;S DIE="^ABMDCLM(DUZ(2),"
+ ;S DA=ABMP("CDFN")
+ ;S DR=".022////O"  ;abm*2.6*10 ICD10 008
+ ;D ^DIE
+ ;end new code 008
+ ;end old abm*2.6*21 IHS/SD/SDR HEAT190661
+MLI ;MOVE LINE ITEMS
+ S ABMSTRG=""
+ S DIR(0)="SO^8A:MEDICAL;8B:SURGICAL;8C:REVENUE CODE;8D:RX;8E:LAB;8F:RADIOLOGY;8G:ANESTHESIA;8H:HCPCS;8I:INPATIENT DENTAL;8J:CHARGE MASTER;8Z:ALL"
+ S DIR("A")="Move Which Section(s)? "
+ F  D  Q:'Y
+ .D ^DIR
+ .Q:'Y
+ .S:ABMSTRG'[Y ABMSTRG=ABMSTRG_Y_"^"
+ .W !!,"Selected: ",$TR(ABMSTRG,"^"," ")
+ ;start new abm*2.6*21 IHS/SD/SDR HEAT190661
+ I $D(DTOUT)!$D(DUOUT)!$D(DIROUT) W !!,"Split will not occur..." H 1 Q
+ S X=$P(^ABMDCLM(DUZ(2),ABMP("CDFN"),0),U)
  S DINUM=$$NXNM^ABMDUTL
  I DINUM="" D  Q
  .W !!,"ERROR: Claim not created - check global ^ABMDCLM(0)"
@@ -43,16 +77,13 @@ START ;START
  S DA=ABMC2
  S DR=".1////"_DT_";.04///E"
  S DR=DR_";.17////"_DT
+ S DR=DR_";.022////S"
  D ^DIE
-MLI ;MOVE LINE ITEMS
- S ABMSTRG=""
- S DIR(0)="SO^8A:MEDICAL;8B:SURGICAL;8C:REVENUE CODE;8D:RX;8E:LAB;8F:RADIOLOGY;8G:ANESTHESIA;8H:HCPCS;8I:INPATIENT DENTAL;8J:CHARGE MASTER;8Z:ALL"
- S DIR("A")="Move Which Section(s)? "
- F  D  Q:'Y
- .D ^DIR
- .Q:'Y
- .S:ABMSTRG'[Y ABMSTRG=ABMSTRG_Y_"^"
- .W !!,"Selected: ",$TR(ABMSTRG,"^"," ")
+ S DIE="^ABMDCLM(DUZ(2),"
+ S DA=ABMP("CDFN")
+ S DR=".022////O"
+ D ^DIE
+ ;end new abm*2.6*21 IHS/SD/SDR HEAT190661
  K DIR
  W !
  I ABMSTRG'["8Z" D

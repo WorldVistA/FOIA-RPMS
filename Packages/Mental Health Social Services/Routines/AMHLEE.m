@@ -1,7 +1,7 @@
-AMHLEE ; IHS/CMI/LAB - MENTAL HLTH ROUTINE 23 Jun 2009 3:26 PM ;
- ;;4.0;IHS BEHAVIORAL HEALTH;**1,2,4**;JUN 18, 2010;Build 28
+AMHLEE ; IHS/CMI/LAB - MENTAL HLTH ROUTINE  ;
+ ;;4.0;IHS BEHAVIORAL HEALTH;**1,2,4,8**;JUN 02, 2010;Build 7
  ;
-EDITR ;EP - called from protocol
+EDITR ;EP -protocol
  I AMHRCNT=0 W !,"There are no visits in the list to edit." D PAUSE^AMHLEA D XIT Q
  K DIR S DIR(0)="N^1:"_AMHRCNT_":0",DIR("A")="Edit Which Record" D ^DIR K DIR S:$D(DUOUT) DIRUT=1
  I $D(DIRUT) W !,"No record selected." G XIT
@@ -43,6 +43,7 @@ EDIT1 ;
  ..I $P(^AMHREC(AMHR,0),U,22)'="A" S DA=AMHR,DIE="^AMHREC(",DR=".22///M" D ^DIE K DA,DIE,DR
  ..I $D(^AMHRCDST("B",AMHR)) D CDST^AMHLEA
  ..I $D(^AMHREC(AMHR,0)),$P(^AMHREC(AMHR,0),U,33)="S"!($P(^AMHREC(AMHR,0),U,33)="U") S AMHPAT=$P(^AMHREC(AMHR,0),U,8) I AMHPAT D EP1^AMHLESAN(AMHPAT,AMHR)
+ S DIE="^AMHREC(",DA=AMHR,DR="1117////"_$$HL^AMHUTIL2($$VALI^XBDIQ1(9002011,AMHR,.02)) D ^DIE K DIE,DA,DR ;IHS/CMI/LAB PATCH 8 HOSP LOC
  D CHECK^AMHLEA
  I $P(^AMHREC(AMHR,0),U,8)]"" D REGULAR^AMHLEP2
  I $P(^AMHREC(AMHR,0),U,8)]"" D SUIC^AMHLEA,OTHER^AMHLEA
@@ -50,7 +51,7 @@ EDIT1 ;
  D PCCLINK^AMHLEA
  D:'$G(AMHPATCE) XIT
  Q
-EDITSP ;EP called from protocol entry
+EDITSP ;EP 
  I AMHRCNT=0 W !,"There are no visits in the list to edit." D PAUSE^AMHLEA D XIT Q
  K DIR S DIR(0)="N^1:"_AMHRCNT_":0",DIR("A")="Edit Which Record" D ^DIR K DIR S:$D(DUOUT) DIRUT=1
  I $D(DIRUT) W !,"No record selected." G XIT
@@ -236,7 +237,7 @@ HS ;EP - Display PP
  D PAUSE^AMHLEA
  D XIT
  Q
-ID ;EP - INTAKE
+ID ;EP
  D FULL^VALM1
  D GETPAT^AMHLEA
  I 'AMHPAT W !,"NO Patient selected!",! D PAUSE^AMHLEA D XIT Q
@@ -270,7 +271,7 @@ LAB ;
  D PAUSE^AMHLEA
  D XIT
  Q
-TIUN ;EP-TIU
+TIUN ;EP
  I AMHRCNT=0 W !,"There are no visits in the list to display." D PAUSE^AMHLEA D XIT Q
  K DIR S DIR(0)="N^1:"_AMHRCNT_":0",DIR("A")="Display Note for Which Record" D ^DIR K DIR S:$D(DUOUT) DIRUT=1
  I $D(DIRUT) W !,"No record selected." G XIT

@@ -1,5 +1,5 @@
 BGP7PDLH ; IHS/CMI/LAB - cover page ;
- ;;17.0;IHS CLINICAL REPORTING;;AUG 30, 2016;Build 16
+ ;;17.1;IHS CLINICAL REPORTING;;MAY 10, 2017;Build 29
  ;
  S X="" D SET(X,1,1)
  S X="Cover Page" D SET(X,1,1)
@@ -45,16 +45,16 @@ N ;
  I BGPRTYPE=7 D ONMHDR
  I BGPRTYPE=6 D PEHDR
  I $G(BGPEXPT),BGPRTYPE=1 D
- .S X="A file will be created called BG170"_$P(^AUTTLOC(DUZ(2),0),U,10)_"."_BGPRPT_"." D SET(X,1,1)
+ .S X="A file will be created called BG171"_$P(^AUTTLOC(DUZ(2),0),U,10)_"."_BGPRPT_"." D SET(X,1,1)
  .S X="It will reside in the public/export directory." D SET(X,1,1)
  .S X="This file should be sent to your Area Office." D SET(X,1,1)
  S X=" " D SET(X,1,1)
  I $G(BGPEXPT),BGPRTYPE=7 D
- .S X="A file will be created called BG170"_$P(^AUTTLOC(DUZ(2),0),U,10)_".ONM"_BGPRPT_"." D SET(X,1,1)
+ .S X="A file will be created called BG171"_$P(^AUTTLOC(DUZ(2),0),U,10)_".ONM"_BGPRPT_"." D SET(X,1,1)
  .S X="It will reside in the public/export directory." D SET(X,1,1)
  .S X="This file should be sent to your Area Office." D SET(X,1,1)
  I BGPRTYPE=6,$G(BGPPEEXP) D
- .S X="A file will be created called BG170"_$P(^AUTTLOC(DUZ(2),0),U,10)_".PED"_BGPRPT_"." D SET(X,1,1)
+ .S X="A file will be created called BG171"_$P(^AUTTLOC(DUZ(2),0),U,10)_".PED"_BGPRPT_"." D SET(X,1,1)
  .S X="This file will reside in the public/export directory." D SET(X,1,1)
  .S X="This file should be sent to your Area Office." D SET(X,1,1)
  .S X=" " D SET(X,1,1)
@@ -65,7 +65,9 @@ N ;
  S X=" " D SET(X,1,1)
  I BGPYRPTH="P" K BGPX,BGPQUIT Q
  I $G(BGPALLPT) S X="All Communities Included." D SET(X,1,1)
- I '$G(BGPALLPT),'$G(BGPSEAT) S X="Community Taxonomy Name: "_$P(^ATXAX(BGPTAXI,0),U) D SET(X,1,1)
+ I '$G(BGPALLPT),'$G(BGPSEAT) D
+ .I BGPTAXI S X="Community Taxonomy Name: "_$P(^ATXAX(BGPTAXI,0),U) D SET(X,1,1)
+ .I $G(BGPCOMMI) S X="Community Name: "_$P(^AUTTCOM(BGPCOMMI,0),U,1) D SET(X,1,1)
  I '$G(BGPALLPT),'$G(BGPSEAT) S X="The following communities are included in this report:" D SET(X,1,1) D
  .S BGPZZ="",N=0,Y="" F  S BGPZZ=$O(BGPTAX(BGPZZ)) Q:BGPZZ=""  S N=N+1,Y=Y_$S(N=1:"",1:";")_BGPZZ
  .S BGPZZ=0,C=0 F BGPZZ=1:3:N D
@@ -193,7 +195,7 @@ NA S X="AREA AGGREGATE" D SET(X,1,1)
  .S X="has been placed in the "_$$GETDEDIR^BGP7UTL2()_" directory for your use in Excel or some" D SET(X,1,1) S X="other software package.  See your site manager to access this file." D SET(X,1,1)
  S X=" " D SET(X,1,1)
  I $G(BGPEXCEL),'$G(BGPYGPU),BGPRTYPE=1 D
- .S X="National GPRA Filenames:  " D SET(X,1,1) S X=BGPFGNT1 D SET(X,1,1) S X=BGPFGNT2 D SET(X,1,1) S X=BGPFGNT3 D SET(X,1,1) S X=BGPFGNT4 D SET(X,1,1)  ;S X=BGPFN2 D SET(X,1,1) S X=" " D SET(X,1,1)
+ .S X="National GPRA Filenames:  " D SET(X,1,1) S X=BGPFGNT1 D SET(X,1,1) S X=BGPFGNT2 D SET(X,1,1) S X=BGPFGNT3 D SET(X,1,1) S X=BGPFGNT4 D SET(X,1,1) S X=BGPFGNT5 D SET(X,1,1) ;S X=" " D SET(X,1,1)
  I BGPRTYPE=7 D
  .S X="Other National Reporting Filenames:  "_$G(BGPFONN1) D SET(X,1,1) S X="^"_BGPFONN2 D SET(X,1,1) S X="^"_BGPFONN3 D SET(X,1,1) S X=" " D SET(X,1,1)
  S X="Report includes data from the following facilities:" D SET(X,1,1)

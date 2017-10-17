@@ -1,5 +1,5 @@
  ;BEDDAPPL.EDSystem.1
- ;(C)InterSystems, generated for class BEDDAPPL.EDSystem.  Do NOT edit. 04/14/2017 08:47:50AM
+ ;(C)InterSystems, generated for class BEDDAPPL.EDSystem.  Do NOT edit. 06/12/2017 07:15:27PM
  ;;62704B34;BEDDAPPL.EDSystem
  ;
 %ApplyURLParms() public {

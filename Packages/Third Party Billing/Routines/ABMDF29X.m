@@ -1,10 +1,13 @@
 ABMDF29X ; IHS/ASDST/DMJ - ADA-2006 FORM ;   
- ;;2.6;IHS 3P BILLING SYSTEM;**3,8,9,11,13**;NOV 12, 2009;Build 213
+ ;;2.6;IHS 3P BILLING SYSTEM;**3,8,9,11,13,21**;NOV 12, 2009;Build 379
  ;
  ; IHS/SD/SDR - v2.5 p12 - IM25568 - Corrected alignment issues
  ; IHS/SD/PMT - abm*2.6*3 - HEAT8604 - Corrected report to start at line 1, not line 2
  ; IHS/SD/SDR - abm*2.6*3 - HEAT12620 - Moved last lin of box 48 one space left
  ;IHS/SD/SDR - 2.6*13 - VMBP - RQMT_95 - Added code to populated remarks box 35 (line 41)
+ ;IHS/SD/SDR - 2.6*21 - HEAT133954 - Made change for <UNDEF>LOOP+19^ABMDF29X.  Test print erred because it
+ ;  expected ABMP("ITYPE") to be defined.
+ ;IHS/SD/SDR - 2.6*21 - HEAT205579 - Made T1015 print first for ARBOR HEALTH PLAN
  ;************************************************************************************
  ;
 MARG ;Set left and top margins
@@ -32,14 +35,26 @@ LOOP ;
  ;start new code abm*2.6*8 HEAT41791
  ;added NE Medicaid code for W0047 to print first
  ;I $P(ABMF(7),U)["NEBRASKA MEDICAID" D  ;abm*2.6*11 HEAT117086
- I ABMP("ITYP")="D" D  ;abm*2.6*11 HEAT117086
- .F ABMLOOP=26:1:36 D
- ..Q:'$D(ABMF(ABMLOOP))
- ..S ABMCHK=$TR($P(ABMF(ABMLOOP),U,6)," ","")
- ..I ABMCHK["T1015",ABMLOOP'=26 D
- ...S ABMF("TMP")=$G(ABMF(26))
- ...S ABMF(26)=$G(ABMF(ABMLOOP))
- ...S ABMF(ABMLOOP)=$G(ABMF("TMP"))
+ ;start old abm*2.6*21 IHS/SD/SDR HEAT133954
+ ;I ABMP("ITYP")="D" D  ;abm*2.6*11 HEAT117086
+ ;.F ABMLOOP=26:1:36 D
+ ;..Q:'$D(ABMF(ABMLOOP))
+ ;..S ABMCHK=$TR($P(ABMF(ABMLOOP),U,6)," ","")
+ ;..I ABMCHK["T1015",ABMLOOP'=26 D
+ ;...S ABMF("TMP")=$G(ABMF(26))
+ ;...S ABMF(26)=$G(ABMF(ABMLOOP))
+ ;...S ABMF(ABMLOOP)=$G(ABMF("TMP"))
+ ;end old start new abm*2.6*21 IHS/SD/SDR HEAT133954
+ I '$D(ABMF("TEST")) D
+ .I $G(ABMP("ITYP"))="D"!(+$G(ABMP("INS"))'=0&(($P($G(^AUTNINS(ABMP("INS"),0)),U)="ARBOR HEALTH PLAN"))) D  ;abm*2.6*21 IHS/SD/SDR HEAT205579
+ ..F ABMLOOP=26:1:36 D
+ ...Q:'$D(ABMF(ABMLOOP))
+ ...S ABMCHK=$TR($P(ABMF(ABMLOOP),U,6)," ","")
+ ...I ABMCHK["T1015",ABMLOOP'=26 D
+ ....S ABMF("TMP")=$G(ABMF(26))
+ ....S ABMF(26)=$G(ABMF(ABMLOOP))
+ ....S ABMF(ABMLOOP)=$G(ABMF("TMP"))
+ ;end new abm*2.6*21 IHS/SD/SDR HEAT133954
  K ABMLOOP,ABMCHK,ABMF("TMP")
  ;end new code abm*2.6*8 HEAT41791
  ;

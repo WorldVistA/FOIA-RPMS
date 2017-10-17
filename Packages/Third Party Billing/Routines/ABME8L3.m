@@ -1,15 +1,12 @@
-ABME8L3 ; IHS/ASDST/DMJ - Header 
- ;;2.6;IHS 3P BILLING SYSTEM;;NOV 12, 2009
+ABME8L3 ; IHS/SD/SDR - Header 
+ ;;2.6;IHS 3P BILLING SYSTEM;**14,21**;NOV 12, 2009;Build 379
  ;Header Segments
  ;
- ; IHS/SD/SDR - v2.5 p8 - IM15585
- ;    Check for new patient, not just new subscriber
+ ; IHS/SD/SDR - v2.5 p8 - IM15585 - Check for new patient, not just new subscriber
+ ; IHS/SD/SDR - v2.5 p8 - IM13177/IM13285 - Change so DOB comes from page 4 of Reg
+ ; IHS/SD/SDR - v2.5 p10 - IM19923 - Don't write address if RCID=610442
  ;
- ; IHS/SD/SDR - v2.5 p8 - IM13177/IM13285
- ;    Change so DOB comes from page 4 of Reg
- ;
- ; IHS/SD/SDR - v2.5 p10 - IM19923
- ;   Don't write address if RCID=610442
+ ;IHS/SD/SDR - 2.6*21 - HEAT123457 - Updated 61044 check from 'equals' to 'contains'
  ;
 START ;START HERE
  S ABMI=1
@@ -28,7 +25,8 @@ START ;START HERE
  S ABMLOOP="2010BB"
  D EP^ABME8NM1("PR",ABMP("INS"))
  D WR^ABMUTL8("NM1")
- I $$RCID^ABMUTLP(ABMP("INS"))'=610442 D
+ ;I $$RCID^ABMUTLP(ABMP("INS"))'=610442 D  ;abm*2.6*21 IHS/SD/SDR HEAT123457
+ I $$RCID^ABMUTLP(ABMP("INS"))'["61044" D  ;abm*2.6*21 IHS/SD/SDR HEAT123457
  .D EP^ABME8N3(9999999.18,ABMP("INS"))
  .D WR^ABMUTL8("N3")
  .D EP^ABME8N4(9999999.18,ABMP("INS"))

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:34">
+<Class name="BEDDAPPL.EDWarningModel">
+<Description>
+BEDDAPPL.EDWarningModel</Description>
+<Super>%ZEN.DataModel.ObjectDataModel</Super>
+<TimeChanged>62465,71739.892945</TimeChanged>
+<TimeCreated>61957,74238.810241</TimeCreated>
+
+<Property name="EDStatus">
+<Type>%String</Type>
+</Property>
+
+<Property name="WaitTime">
+<Type>%String</Type>
+</Property>
+
+<Property name="Color">
+<Type>%String</Type>
+</Property>
+
+<Property name="NotifyMgr">
+<Type>%String</Type>
+</Property>
+
+<Property name="NotifyByEmail">
+<Type>%String</Type>
+</Property>
+
+<Property name="NotifyByPager">
+<Type>%String</Type>
+</Property>
+
+<Property name="StartTm">
+<Type>%Time</Type>
+</Property>
+
+<Property name="EndTm">
+<Type>%Time</Type>
+</Property>
+
+<Method name="%OnOpenSource">
+<FormalSpec>pID:%String</FormalSpec>
+<ReturnType>%RegisteredObject</ReturnType>
+<Implementation><![CDATA[  Quit ##class(BEDD.EDWarning).%OpenId(pID)
+]]></Implementation>
+</Method>
+
+<Method name="%OnSaveSource">
+<FormalSpec>pSource:BEDD.EDWarning</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+   Set tSC = pSource.%Save()
+   Set ..%id = pSource.%Id()
+   Quit tSC
+]]></Implementation>
+</Method>
+
+<Method name="%OnNewSource">
+<FormalSpec>*pSC:%Status=$$$OK</FormalSpec>
+<ReturnType>%RegisteredObject</ReturnType>
+<Implementation><![CDATA[  Quit ##class(BEDD.EDWarning).%New()
+]]></Implementation>
+</Method>
+
+<Method name="%OnDeleteSource">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pID:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[  Quit ##class(BEDD.EDWarning).%DeleteId(pID)
+]]></Implementation>
+</Method>
+
+<Method name="%OnLoadModel">
+<FormalSpec>pSource:BEDD.EDWarning</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    Set ..EDStatus = pSource.EDStatus
+    Set ..WaitTime = pSource.WaitTime
+    Set ..Color = pSource.Color
+    Set ..NotifyMgr = pSource.NotifyMgr
+    Set ..NotifyByEmail = pSource.NotifyByEmail
+    Set ..NotifyByPager = pSource.NotifyByPager
+    Set ..StartTm = pSource.StartTm
+    Set ..EndTm = pSource.EndTm
+    Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="%OnStoreModel">
+<FormalSpec>pSource:BEDD.EDWarning</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    Set pSource.EDStatus = ..EDStatus
+    Set pSource.WaitTime = ..WaitTime
+    Set pSource.Color = ..Color
+    Set pSource.NotifyMgr = ..NotifyMgr
+    Set pSource.NotifyByEmail = ..NotifyByEmail
+    Set pSource.NotifyByPager = ..NotifyByPager
+    Set pSource.StartTm = ..StartTm
+    Set pSource.EndTm = ..EndTm
+    Quit pSource.%Save()
+]]></Implementation>
+</Method>
+</Class>
+</Export>

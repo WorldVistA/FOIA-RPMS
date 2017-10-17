@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:35">
+<Class name="csp.astm.astmschemasegmentstructure">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>CSPX.AutoPageCSP</Super>
+<TimeChanged>61501,53312.212631</TimeChanged>
+<TimeCreated>61501,53312.206828</TimeCreated>
+<GeneratedBy>/csp/goldb/ASTM/ASTMSchemaSegmentStructure.csp</GeneratedBy>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body>"
+	Write !,"<table border=""0"" class=""LayoutMain"" width=""100%"" cellpadding=""0"" cellspacing=""0"">"
+	Do ..WriteTitlePane("@Ensemble:ASTMManagerSegmentStructure@Ensemble ASTM Segment Structure")
+	Write !,"</table>"
+	Write !,!,"<div class=""Text1"">"
+	Write "ASTM <b>Segment Structure</b> definition is displayed below:"
+	Write "</div>"
+	Write !,!
+	#include EnsEDIASTM
+	set ss=%request.Get("SS")
+	set category=$p(ss,":",2)
+	set secondary=$p(ss,":",3)
+	If ((category'="")&&(secondary'="")) {
+	set description=..EscapeHTML($get($$$vaSchemaDescGbl(category,"SS",secondary)))
+	if '$data($$$vaSchemaGbl(category,"SS",secondary)) {
+	write "<b><font size=6>"_ss_" </font> Definition does not exist!</b>",!
+	quit
+	}
+	}
+	set ds=%request.Get("DS")
+	set tPath=%request.Get("PATH")
+	Write !
+	If '($L(tPath)) Goto %csp00001 ;{
+	Write !,"<div class=""Text1"">"
+	Write "<i>Path you followed to get to this segment:</i>&nbsp;<b>"_(tPath)_"</b><br>",!
+	Write "	<i>In Document Structure </i>&nbsp;<b>'"_($P(ds,":",2,3))_"'</b>"
+	Write "</div>"
+	Write !
+%csp00001	;}
+	Write !,"<div style=""margin-left: 20px; margin-right: 20px;"">"
+	Write !,!,"<table border=1 cellpadding=4 cellspacing=0  style=""font-size: 0.8em; margin-left: 20px;"">",!
+	Write !,"<tr><td colspan=11><b><font size=6>"_(category_":"_secondary)_" </font> "_($G(description))_"</b></td></tr>",!
+	Write !,"<tr><td colspan=11 align=center><b></b></font></td></tr>",!
+	Write !,"<tr align='left'><th>Field</th><th>Description</th><th>Property&nbsp;Name</th><th>Data&nbsp;Structure</th><th>Symbol</th><th>Repeat&nbsp;Count</th><th>Length</th><th>Required</th><th>Repeating</th><th>Code&nbsp;Table</th><th><center><i>Alternate<br>Description</i></center></th></tr>",!
+	Write !
+	#include EnsEDIASTM
+	If ((category'="")&&(secondary'="")) {
+	set struct=$$$vaSchemaGbl(category,"SS",secondary)
+	kill names set name="" for { set name=$o($$$vaSchemaGbl(category,"SS",secondary,"names",name)) quit:name=""
+	set names($$$vaSchemaGbl(category,"SS",secondary,"names",name))=name
+	}
+	for i=1:1:$LL(struct)  {
+	set one=$li(struct,i)
+	write "<tr>"
+	write "<td>"_i_"</td>"
+	; description
+	set description=..EscapeHTML($get($$$vaSchemaDescGbl(category,"SS",secondary,i)))
+	write "<td>",$s(description="":"&nbsp;",1:description),"</td>"
+	; property name
+	set tPropPath=$S(""=$get(names(i)):"",1:tPath_":"_$get(names(i)))_$S($li(one,6):"()",1:"")
+	write "<td><a"_$S(""=tPath:"",1:" title='"_tPropPath_"' href='"_..Link("ASTMSchemaPath.csp?PATH="_tPropPath_"&FIELD="_i_"&DS="_ds_"&SS="_ss)_"'")_">"_$get(names(i),"&nbsp")_"</a></td>"
+	; component structure
+	set value=$li(one,1) write "<td>",$s(value="":"&nbsp;",1:"<a href='"_..Link("ASTMSchemaComponentStructure.csp?CS=CS:"_value_"&PATH="_tPropPath_"&FIELD="_i_"&DS="_ds_"&SS="_ss)_"'>"_value_"</a>"),"</td>"
+	; symbol
+	set value=$li(one,2),annotate=$case(value,"*":"zero or more", "+":"one or more", "!":"exactly one&nbsp;required", "?":"conditional", "&":"conditional", :"")
+	write "<td>",$s(value="":"&nbsp;",1:value_$s(annotate="":"",1:" ("_annotate_")")),"</td>"
+	; repeat count
+	set value=$li(one,3) write "<td>",$s(value="":"&nbsp;",1:value),"</td>"
+	; length
+	set value=$li(one,4) write "<td>",$s(value="":"&nbsp;",1:value),"</td>"
+	; required
+	set value=$li(one,5) write "<td>",$s(value="":"&nbsp;",1:value),"</td>"
+	; if repeating
+	set value=$li(one,6) write "<td>",$s(value="":"&nbsp;",1:value),"</td>"
+	; code table
+	set value=$g($$$vaSchemaGbl(category,"SS",secondary,"tables",i))
+	write "<td>",$s(value="":"&nbsp;",1:"<a href='"_..Link("ASTMSchemaCodeTable.csp?CT=CT:"_value)_"'>"_value_"</a>"),"</td>"
+	; alternate description
+	set altdesc=..EscapeHTML($get($$$vaSchemaDescGbl(category,"SS",secondary,i,"alt")))
+	write "<td>",$s(altdesc="":"&nbsp;",1:altdesc),"</td>"
+	}
+	}
+	Write !,"</table>",!
+	Write !,"<p>",!
+	Write "<a href="""_(..Link("ASTMSchemaMain.csp"))_""">"
+	Write "(Show All Categories)"
+	Write "</a>"
+	Write "<br>",!
+	Write "<a href="""_(..Link("ASTMSchemaList.csp?ELEMENT=SS&CATEGORY="_category))_""">"
+	Write "(Show All Segment Structures in Category '"_(category)_"')"
+	Write "</a>"
+	Write !,"</div>"
+	Write !,"</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<title>Ensemble ASTM Segment Structure</title>",!
+	Write "<link rel=""stylesheet"" type=""text/css"" href=""/csp/sys/csputils.css"" title=""Standard Style""/>"
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>C:\InterSystems\Ensemble\CSP\goldb\ASTM\ASTMSchemaSegmentStructure.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/goldb/ASTM/ASTMSchemaSegmentStructure.csp</Default>
+</Parameter>
+
+<Parameter name="DOMAIN">
+<Default>Ensemble</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>61286,9120</Default>
+</Parameter>
+
+<Parameter name="PAGENAME">
+<Default>ASTM Segment Structure</Default>
+</Parameter>
+
+<Parameter name="PARENTPAGE">
+<Default>ASTMSchemaMain.csp</Default>
+</Parameter>
+</Class>
+</Export>

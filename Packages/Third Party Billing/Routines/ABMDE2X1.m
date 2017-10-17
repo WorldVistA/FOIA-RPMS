@@ -1,9 +1,10 @@
-ABMDE2X1 ; IHS/ASDST/DMJ - PAGE 2 - Primary Insurer Check ;   
- ;;2.6;IHS 3P BILLING SYSTEM;;NOV 12, 2009
+ABMDE2X1 ; IHS/SD/SDR - PAGE 2 - Primary Insurer Check ;   
+ ;;2.6;IHS 3P BILLING SYSTEM;**10,21**;NOV 12, 2009;Build 379
  ;
  ; IHS/ASDS/LSL - 01/09/02 - V2.4 Patch 10 
- ;     Modified to allow pick option to function properly.  Thanks to
- ;     Jim Gray for the research.
+ ;     Modified to allow pick option to function properly.  Thanks to Jim Gray for the research.
+ ;
+ ;IHS/SD/SDR - 2.6*21 - HEAT139641 - Changed 3P Insurer reference to use ABMP("LDFN"), not DUZ(2)
  ;
  ; *********************************************************************
  ;
@@ -55,7 +56,8 @@ PRIM ;
 FRATE ;EP - Entry Point for setting up Flat Rate array if applicable
  S ABMV("X6")=""
  I '$D(ABMP("GL")) S ABMP("GL")="^ABMDCLM(DUZ(2),"_ABMP("CDFN")_","
- I $P($G(^ABMNINS(DUZ(2),ABMP("INS"),1,ABMP("VTYP"),0)),U,11),$P(^(0),U,11)=111!($P(^(0),U,11)=131) D
+ ;I $P($G(^ABMNINS(DUZ(2),ABMP("INS"),1,ABMP("VTYP"),0)),U,11),$P(^(0),U,11)=111!($P(^(0),U,11)=131) D  ;ABM*2.6*21 IHS/SD/AML HEAT139641
+ I $P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),1,ABMP("VTYP"),0)),U,11),$P(^(0),U,11)=111!($P(^(0),U,11)=131) D  ;ABM*2.6*21 IHS/SD/AML HEAT139641
  .S DA(1)=ABMP("INS")
  .S DA=ABMP("VTYP")
  .S DIE="^ABMNINS("_DA(1)_",1,"
@@ -65,20 +67,35 @@ FRATE ;EP - Entry Point for setting up Flat Rate array if applicable
  S $P(ABMV("X6"),"^",3)=ABMP("BTYP")
  S:ABMP("BTYP")=121 ABMP("VTYP")=121
  S ABMX("VDT")=$P($G(@(ABMP("GL")_"7)")),U)
- I '$D(^ABMNINS(DUZ(2),ABMX("INS"),1,ABMP("VTYP"),0)) G RT
- S $P(ABMV("X6"),U,2)=$P(^ABMNINS(DUZ(2),ABMX("INS"),1,ABMP("VTYP"),0),U,2)
- S $P(ABMV("X6"),U,4)=$P(^ABMNINS(DUZ(2),ABMX("INS"),1,ABMP("VTYP"),0),U,3)
+ ;start old abm*2.6*21 IHS/SD/AML HEAT139641
+ ;I '$D(^ABMNINS(DUZ(2),ABMX("INS"),1,ABMP("VTYP"),0)) G RT
+ ;S $P(ABMV("X6"),U,2)=$P(^ABMNINS(DUZ(2),ABMX("INS"),1,ABMP("VTYP"),0),U,2)
+ ;S $P(ABMV("X6"),U,4)=$P(^ABMNINS(DUZ(2),ABMX("INS"),1,ABMP("VTYP"),0),U,3)
+ ;end old start new abm*2.6*21 IHS/SD/AML HEAT139641
+ I '$D(^ABMNINS(ABMP("LDFN"),ABMX("INS"),1,ABMP("VTYP"),0)) G RT
+ S $P(ABMV("X6"),U,2)=$P(^ABMNINS(ABMP("LDFN"),ABMX("INS"),1,ABMP("VTYP"),0),U,2)
+ S $P(ABMV("X6"),U,4)=$P(^ABMNINS(ABMP("LDFN"),ABMX("INS"),1,ABMP("VTYP"),0),U,3)
+ ;end new abm*2.6*21 IHS/SD/AML HEAT139641
  I $P(ABMV("X6"),"^",4)="" D
  .I ABMP("VTYP")=111 S $P(ABMV("X6"),"^",4)=100 Q
  .I ABMP("VTYP")=121 S $P(ABMV("X6"),"^",4)=240 Q
  .S $P(ABMV("X6"),"^",4)=510
  I '$D(ABMP("EXP")) D EXP^ABMDEVAR
- I $D(^ABMNINS(DUZ(2),ABMX("INS"),1,ABMP("VTYP"),0)) D
- .I $P(^ABMNINS(DUZ(2),ABMX("INS"),1,ABMP("VTYP"),0),U,4) D
- ..S $P(ABMV("X6"),U)=$P(^ABMNINS(DUZ(2),ABMX("INS"),1,ABMP("VTYP"),0),U,4)
- .I $P(^ABMNINS(DUZ(2),ABMX("INS"),1,ABMP("VTYP"),0),U,5) D
- ..S ABMP("FEE")=$P(^ABMNINS(DUZ(2),ABMX("INS"),1,ABMP("VTYP"),0),U,5)
- I $D(ABMP("VTYP",999)),$P($G(^AUTNINS(ABMX("INS"),2)),U)="R" D
+ ;start old abm*2.6*21 IHS/SD/AML HEAT139641
+ ;I $D(^ABMNINS(DUZ(2),ABMX("INS"),1,ABMP("VTYP"),0)) D
+ ;.I $P(^ABMNINS(DUZ(2),ABMX("INS"),1,ABMP("VTYP"),0),U,4) D
+ ;..S $P(ABMV("X6"),U)=$P(^ABMNINS(DUZ(2),ABMX("INS"),1,ABMP("VTYP"),0),U,4)
+ ;.I $P(^ABMNINS(DUZ(2),ABMX("INS"),1,ABMP("VTYP"),0),U,5) D
+ ;..S ABMP("FEE")=$P(^ABMNINS(DUZ(2),ABMX("INS"),1,ABMP("VTYP"),0),U,5)
+ ;end old start new abm*2.6*21 IHS/SD/AML HEAT139641
+ I $D(^ABMNINS(ABMP("LDFN"),ABMX("INS"),1,ABMP("VTYP"),0)) D
+ .I $P(^ABMNINS(ABMP("LDFN"),ABMX("INS"),1,ABMP("VTYP"),0),U,4) D
+ ..S $P(ABMV("X6"),U)=$P(^ABMNINS(ABMP("LDFN"),ABMX("INS"),1,ABMP("VTYP"),0),U,4)
+ .I $P(^ABMNINS(ABMP("LDFN"),ABMX("INS"),1,ABMP("VTYP"),0),U,5) D
+ ..S ABMP("FEE")=$P(^ABMNINS(ABMP("LDFN"),ABMX("INS"),1,ABMP("VTYP"),0),U,5)
+ ;end new abm*2.6*21 IHS/SD/AML HEAT139641
+ ;I $D(ABMP("VTYP",999)),$P($G(^AUTNINS(ABMX("INS"),2)),U)="R" D  ;abm*2.6*10 HEAT73780
+ I $D(ABMP("VTYP",999)),($$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,ABMX("INS"),".211","I"),1,"I")="R") D  ;abm*2.6*10 HEAT73780
  .S ABMX=0 F  S ABMX=$O(@(ABMP("GL")_"13,"_ABMX("INS")_",11,"_ABMX_")")) Q:'ABMX  I $P($G(^AUTTPIC(ABMX,0)),U,3)="B" S ABMX="OK" Q
  .I ABMX'="OK" K ABMP("VTYP",999)
  S ABMX=0
@@ -89,13 +106,15 @@ RT ; ABMP("FLAT")=Flat Rate^Revn^Units^Pro Fee^Pro Coding Method^Revn Desc^Desc 
  I +$P(ABMV("X6"),U,5) D
  .S ABMP("FLAT")=$P(ABMV("X6"),U,5)_U_$P(ABMV("X6"),U,4)
  .S ABMP("FLAT")=ABMP("FLAT")_U_$S((ABMP("BTYP")=111!(ABMP("BTYP")=121))&($P($G(@(ABMP("GL")_"7)")),U,3)>0):$P($G(^(7)),U,3),ABMP("BTYP")=111:1,$P($G(^(6)),U,9)]"":$P(^(6),U,9),1:1)
- I  S $P(ABMP("FLAT"),U,6)=$P($P(^ABMNINS(DUZ(2),ABMX("INS"),1,ABMP("VTYP"),0),U,9),"|"),$P(ABMP("FLAT"),U,7)=$P($P(^(0),U,9),"|",2)
+ ;I  S $P(ABMP("FLAT"),U,6)=$P($P(^ABMNINS(DUZ(2),ABMX("INS"),1,ABMP("VTYP"),0),U,9),"|"),$P(ABMP("FLAT"),U,7)=$P($P(^(0),U,9),"|",2)  ;abm*2.6*21 IHS/SD/AML HEAT139641
+ I  S $P(ABMP("FLAT"),U,6)=$P($P(^ABMNINS(ABMP("LDFN"),ABMX("INS"),1,ABMP("VTYP"),0),U,9),"|"),$P(ABMP("FLAT"),U,7)=$P($P(^(0),U,9),"|",2)  ;abm*2.6*21 IHS/SD/AML HEAT139641
  Q:'$D(ABMP("FLAT"))
  I $P($G(@(ABMP("GL")_"5)")),U,10)>0 S ABMP("FLAT",170)=$P(^(5),U,10)
  I $D(ABMP("VTYP",999)) D
  .S $P(ABMP("FLAT"),U,8)=$P($G(@(ABMP("GL")_"5)")),U,7)
  .S:'$P(ABMP("FLAT"),U,8) $P(ABMP("FLAT"),U,8)=$P(ABMP("FLAT"),U,3)+3
- .S $P(ABMP("FLAT"),U,5)=$P($G(^ABMNINS(DUZ(2),ABMX("INS"),1,999,0)),U,2)
+ .;S $P(ABMP("FLAT"),U,5)=$P($G(^ABMNINS(DUZ(2),ABMX("INS"),1,999,0)),U,2)  ;abm*2.6*21 IHS/SD/AML HEAT139641
+ .S $P(ABMP("FLAT"),U,5)=$P($G(^ABMNINS(ABMP("LDFN"),ABMX("INS"),1,999,0)),U,2)  ;abm*2.6*21 IHS/SD/AML HEAT139641
  .S $P(ABMP("FLAT"),U,4)=$$FLAT^ABMDUTL(ABMX("INS"),999,ABMX("VDT"))
  Q
  ;

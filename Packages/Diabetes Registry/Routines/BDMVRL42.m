@@ -1,5 +1,5 @@
 BDMVRL42 ; IHS/CMI/LAB - VIEW PT RECORD CON'T ; 11 Jan 2011  12:34 PM
- ;;2.0;DIABETES MANAGEMENT SYSTEM;**2,3,4,5,6,7,8,9**;JUN 14, 2007;Build 78
+ ;;2.0;DIABETES MANAGEMENT SYSTEM;**2,3,4,5,6,7,8,9,10**;JUN 14, 2007;Build 12
  ;MOVED VARIOUS SUBROUTINES INTO BDMVRL42
  ;
  ;
@@ -121,13 +121,13 @@ P11 S X="Foot Exam       Annually"
  D Z(X)
  S X="Nutrition       Possible Hypertension, No Ace Inhibitors or ARB"
  D Z(X)
- S X="Exercise        Annually"
+ S X="Physical Activity     Annually"
  D Z(X)
  S X="General Info    Annually"
  D Z(X)
  S X="Flu Shot        Annually"
  D Z(X)
- S X="Pneumovax       Every 6 years"
+ S X="Pneumococcal       Every 6 years"
  D Z(X)
  S X="Td              Every 10 years"
  D Z(X)
@@ -242,7 +242,7 @@ FURESULT ;EP;FIND LAST VISIT AND RESULT OF FU
  .S BDMVDATE=9999999-BDMVDATE
  .I BDMVDATE S BDM("VISIT",BDMVDATE)="",BDMQUIT=""
  Q:$G(BDMVDATE)=9999999
- S BDMDOA=$$DODX^BDMDD16(DFN,BDMRDA,"I")
+ S BDMDOA=$$DODX^BDMDE16(DFN,BDMRDA,"I")
  S Z=$O(BDM("VISIT",0)) I Z S Z=9999999-Z I Z>BDMDOA S BDMQUIT="" Q
  K BDMQUIT
  S Z=$O(BDM("VISIT",0))
@@ -258,14 +258,14 @@ S1 ;;
 S2 ;;
  ;2;ALL Patient Education;ALL EDUCATION
  ;21;Nutrition;NTED
- ;22;Exercise;EXER
+ ;22;Physical Activity;EXER
  ;23;General Info;GENI
  ;;
  ;
 S3 ;;
  ;3;ALL Immunizations/Vaccines;ALL VACCINES
  ;31;Seasonal Flu Shot;FLU
- ;32;Pneumovax;PNEU
+ ;32;Pneumococcal;PNEU
  ;33;Td/Tdap;TD
  ;34;TB Test;PPD
  ;35;Hepatitis B;HEPB

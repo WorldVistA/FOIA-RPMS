@@ -1,5 +1,5 @@
 ABMDEMLE ; IHS/ASDST/DMJ - Edit Utility - FOR MULTIPLES ;
- ;;2.6;IHS 3P BILLING SYSTEM;**3,6,8,9,10,11,13,14,15,18**;NOV 12, 2009;Build 289
+ ;;2.6;IHS 3P BILLING SYSTEM;**3,6,8,9,10,11,13,14,15,18,21**;NOV 12, 2009;Build 379
  ;
  ; IHS/SD/SDR - v2.5 p5 - 5/18/04 - Modified to put POS and TOS by line item
  ; IHS/SD/SDR - v2.5 p6 - 7/9/04 - IM14079 and IM14121 - Edited code for TOS
@@ -20,6 +20,9 @@ ABMDEMLE ; IHS/ASDST/DMJ - Edit Utility - FOR MULTIPLES ;
  ;IHS/SD/SDR - 2.6*14 - HEAT165301 - Removed link between page 9a and 3 introduced in patch 13
  ;IHS/SD/SDR - 2.6*15 - Added change so they can edit the POA even if there is a SNOMED on the claim
  ;IHS/SD/SDR - 2.6*18 - HEAT240919 - put code back from p14 so user can edit provider narrative
+ ;IHS/SD/AML - 2.6*21 - HEAT197195 - Removed dot so POA would be editable on page 5A.
+ ;IHS/SD/SDR - 2.6*21 - HEAT233742 - Updated check for CPT Narrative prompt.  Wasnt' including Surgical (21) or Ambulance (47) because the range
+ ;   wasn't inclusive.  Changed >21 to >20 and <47 to <48.
  ;
 E1 ; Edit Multiple
  I ABMZ("NUM")=0 W *7,!!,"There are no entries to edit, you must first ADD an entry.",! K DIR S DIR(0)="E" D ^DIR K DIR Q
@@ -37,7 +40,8 @@ E2 W !!!,"[",+Y,"]  ",$P(ABMZ(+Y),U) S ABMX("Y")=+Y
  .I $D(ABMZ("MOD")),$P($G(^ABMDPARM(DUZ(2),1,2)),"^",5) D MOD2^ABMDEMLC S ABMZ("DR")=ABMZ("DR")_ABMZ("CHRG")_"////"_ABMZ("MODFEE")
  ;start new code abm*2.6*9 NARR
  ;I ABMZ("SUB")>21,ABMZ("SUB")<47,ABMZ("SUB")'=41,$D(^ABMNINS(ABMP("LDFN"),ABMP("INS"),5,"B",ABMZIEN)) D  ;abm*2.6*10 HEAT74291
- I ABMZ("SUB")>21,ABMZ("SUB")<47,ABMZ("SUB")'=41,$G(ABMZIEN)'="",$D(^ABMNINS(ABMP("LDFN"),ABMP("INS"),5,"B",ABMZIEN)) D  ;abm*2.6*10 HEAT74291
+ ;I ABMZ("SUB")>21,ABMZ("SUB")<47,ABMZ("SUB")'=41,$G(ABMZIEN)'="",$D(^ABMNINS(ABMP("LDFN"),ABMP("INS"),5,"B",ABMZIEN)) D  ;abm*2.6*10 HEAT74291  ;abm*2.6*21 IHS/SD/SDR HEAT233742
+ I ABMZ("SUB")>20,ABMZ("SUB")<48,ABMZ("SUB")'=41,$G(ABMZIEN)'="",$D(^ABMNINS(ABMP("LDFN"),ABMP("INS"),5,"B",ABMZIEN)) D  ;abm*2.6*10 HEAT74291  ;abm*2.6*21 IHS/SD/SDR HEAT233742
  .Q:$P($G(^ABMDEXP(ABMP("EXP"),0)),U)'["5010"  ;only 5010 formats
  .S ABMCNCK=$O(^ABMNINS(ABMP("LDFN"),ABMP("INS"),5,"B",ABMZIEN,0))
  .I ABMCNCK,$P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),5,ABMCNCK,0)),U,2)="Y" S ABMZ("DR")=ABMZ("DR")_";22"
@@ -52,7 +56,7 @@ E2 W !!!,"[",+Y,"]  ",$P(ABMZ(+Y),U) S ABMX("Y")=+Y
  .D NARR^ABMDEMLC S ABMZ("DR")=ABMZ("DR")_$P(ABMZ("NARR"),U)_+Y
  .;I $G(ABMZ("SUB"))=17&($P($G(^ABMDPARM(ABMP("LDFN"),1,2)),U,13)="Y")&(($E(ABMP("BTYP"),1,2)=11)!($E(ABMP("BTYP"),1,2)="12")) S ABMZ("DR")=ABMZ("DR")_";.05//"  ;abm*2.6*15
  ;end old abm*2.6*18 IHS/SD/SDR HEAT240919
- I $G(ABMZ("SUB"))=17&($P($G(^ABMDPARM(ABMP("LDFN"),1,2)),U,13)="Y")&(($E(ABMP("BTYP"),1,2)=11)!($E(ABMP("BTYP"),1,2)="12")) S ABMZ("DR")=ABMZ("DR")_";.05//"  ;abm*2.6*15
+ I $G(ABMZ("SUB"))=17&($P($G(^ABMDPARM(ABMP("LDFN"),1,2)),U,13)="Y")&(($E(ABMP("BTYP"),1,2)=11)!($E(ABMP("BTYP"),1,2)="12")) S ABMZ("DR")=ABMZ("DR")_";.05//"  ;abm*2.6*21 IHS/SD/SDR HEAT197195 edit POA
  ; don't do POS if page 5 (Dxs)
  I $G(ABMZ("SUB"))'=17 D
  .D POSA^ABMDEMLC  ;abm*2.6*9 NOHEAT  ;abm*2.6*10 IHS/SD/AML HEAT76189 - <<REACTIVATED LINE>> REMOVE DUPLICATE POS FIELD FROM 8G, ASKS FOR POS NOW

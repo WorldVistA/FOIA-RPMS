@@ -1,9 +1,9 @@
-BLRRLEVN ;cmi/anch/maw - BLR Reference Lab Non LEDI Manifest Build ; 03-Dec-2014 11:21 ; MAW
- ;;5.2;IHS LABORATORY;**1034,1036,1037**;NOV 01, 1997;Build 4
+BLRRLEVN ;cmi/anch/maw - BLR Reference Lab Non LEDI Manifest Build ; 12-Apr-2016 14:25 ; MAW
+ ;;5.2;IHS LABORATORY;**1034,1036,1037,1039**;NOV 01, 1997;Build 38
  ;
  Q
  ;
-SHIPMAN(ORD,RE) ;-- get data needed for HL7 message and manifest
+SHIPMAN(ORD,RE,SHP) ;-- get data needed for HL7 message and manifest
  N LA7RT,AA,AD,AN,TEST,LDFN,IDT,SPEC,SAMP,ORDN,OA,ON,BLROI,ADA,ACC,AREA,URG,ODT,CDT,ORDP,AC
  N LOC,OPI,FLG,PRT,RL
  S PRT=0
@@ -40,15 +40,33 @@ SHIPMAN(ORD,RE) ;-- get data needed for HL7 message and manifest
  . S RL=$P($G(^BLRSITE($S($G(BLRALTDZ):BLRALTDZ,1:DUZ(2)),"RL")),U)
  . Q:'$$NOMAP^BLRRLEVT(RL,TEST,LOC)  ;p1036 dont ship or print a non mapped test
  . D BLRVARS(BLROI,ORD,AC,ACC,CDT,TEST,SAMP,SPEC,ORDP,AREA,URG,ODT,LOC,OPI)
- . S X="BLR REFLAB ACCESSION A TEST",DIC=101 D EN^XQOR
+ . I '$G(RE) S X="BLR REFLAB ACCESSION A TEST",DIC=101 D EN^XQOR
+ . I $G(RE),$G(SHP) S X="BLR REFLAB ACCESSION A TEST",DIC=101 D EN^XQOR
  . S PRT=1
  . Q
+ ;ihs/cmi/maw 04/10/2016 ask for # of copies
+ S COPI=$$GETCOP(DUZ(2))
+ I $G(COPI) S COP=$$ASKCOP(COPI)
  I $G(PRT) D
  . W !,"Printing Shipping Manifests for Reference Lab..."
  . W !,"Printing manifest for order # "_ORD
- . D PRT^BLRSHPM(RE)
+ . D PRT^BLRSHPM(RE,$S($G(COP):COP,1:1))
  D KVAR
  Q
+ ;
+GETCOP(DZ2) ;-- get number of copies
+ N COPI
+ S COPI=$P($G(^BLRSITE(DZ2,"RLA")),U,5)
+ Q COPI
+ ;
+ASKCOP(CP) ;-- ask the number of copies
+ S DIR(0)="N^1:9",DIR("A")="How many of copies of the shipping manifest: "
+ S DIR("B")=CP
+ D ^DIR
+ K DIR
+ I $D(DIRUT) Q 1
+ I $G(Y)>1 Q Y
+ Q 1
  ;
 BLRVARS(OI,OR,UID,ACC,CD,TS,SM,SP,OP,AR,UG,OD,LC,PI)   ; Setup the variables for manifest and message
  ;set all BLR VARS call TMPSET before manifest
@@ -91,7 +109,7 @@ BLRVARS(OI,OR,UID,ACC,CD,TS,SM,SP,OP,AR,UG,OD,LC,PI)   ; Setup the variables for
  . S LRUID=UID
  . D INS^BLRRLHL(BLRRL("PAT"),1)
  . K PAT  ;,LRORD,LRUID
- I $E($G(BLRRL("BILL TYPE")),1,1)="P" D  ;p1037
+ I $E($G(BLRRL("BILL TYPE")),1,1)="P" D  ;cmi/maw p1039
  . D PATBILL^BLRRLHL(TS)
  N BDA,BLRCM,RSC,QS,RS,AOD
  S BDA=0 F  S BDA=$O(BLRRL(BDA)) Q:BDA=""  D
@@ -195,17 +213,28 @@ SETFLG(OI,AD) ;-- set the flag as accessioned
  Q
  ;
 RESHIP ;-- reship a non ledi order
- N RORD
+ N RORD,RESHIP
  S RORD=$$WORD
  Q:'$G(RORD)
  I '$O(^BLRRLO("B",RORD,0)) W !,"Order Number does not exist" Q
- W !,"Reshipping order: "_RORD
- D SHIPMAN(RORD,1)
+ S RESHIP=$$RSHPYN()
+ W !,$S($G(RESHIP):"Reshipping order: "_RORD,1:"Reprinting Order: "_RORD)
+ D SHIPMAN(RORD,1,RESHIP)
  Q
+ ;
+RSHPYN() ;-- ask whether to reship
+ W !
+ S DIR(0)="Y",DIR("A")="Would you like to reship this order as well"
+ D ^DIR
+ Q:$D(DIRUT) 0
+ K DIR
+ I Y<0 Q 0
+ Q +$G(Y)
  ;
 WORD() ;-- reship which order
  S DIR(0)="N",DIR("A")="Enter Order Number"
  D ^DIR
+ K DIR
  Q:$D(DIRUT) 0
  I Y<0 Q 0
  Q +$G(Y)

@@ -1,5 +1,5 @@
-BLR7OGMP ; IHS/OIT/MKK - Lab Interim Report for EHR ; 22-Oct-2013 09:22 ; MKK
- ;;5.2;IHS LABORATORY;**1028,1030,1031,1033**;NOV 01, 1997
+BLR7OGMP ; IHS/OIT/MKK - Lab Interim Report for EHR ; 27-May-2016 06:40 ; MKK
+ ;;5.2;IHS LABORATORY;**1028,1030,1031,1033,1039**;NOV 01, 1997;Build 38
  ;
  ; Cloned from LR7OGMP. This is a 127 column "report"
  ;
@@ -31,6 +31,9 @@ PRINT(OUTCNT) ; from LR7OGMC
  . S LINE="     Specimen: "_$E($P($G(^LAB(61,SPEC,0),"<no specimen on file>"),U),1,25)_"."
  . S $E(LINE,42)="Spec Collect Date/Time: "_$$UP^XLFSTR($$FMTE^XLFDT(CDT,"5MPZ"))     ; IHS/OIT/MKK - LR*5.2*1030
  . D SETLINE(LINE,.OUTCNT)
+ . ;
+ . D LABARRT  ; Lab Arrival Time - IHS/MSC/MKK - LR*5.2*1039
+ . ;
  . ; ----- BEGIN IHS/MSC/MKK - LR*5.2*1033
  . S SPECCOND=$$CONDSPEC()
  . I $L(SPECCOND) D
@@ -358,3 +361,19 @@ GETCOMPD() ; EP - Get Completion Date
  Q DATEHERE
  ;
  ; ----- END IHS/MSC/MKK - LR*5.2*1033
+ ;
+ ; ----- BEGIN IHS/MSC/MKK - LR*5.2*1039
+LABARRT ; EP - Lab Arrival Time
+ NEW LABARRT,LRAS,LRAA,LRAD,LRAN
+ S LRAS=$P(ZERO,U,6)
+ Q:$$GETACCCP^BLRUTIL3(LRAS,.LRAA,.LRAD,.LRAN)<1
+ ;
+ S LABARRT=$$GET1^DIQ(68.02,LRAN_","_LRAD_","_LRAA,12,"I")
+ Q:+LABARRT<1
+ ;
+ K LINE
+ S $E(LINE,43)="Lab Arrival Date/Time: "_$$UP^XLFSTR($$FMTE^XLFDT(LABARRT,"5MPZ"))
+ D SETLINE(LINE,.OUTCNT)
+ K LINE
+ Q
+ ; ----- END IHS/MSC/MKK - LR*5.2*1039

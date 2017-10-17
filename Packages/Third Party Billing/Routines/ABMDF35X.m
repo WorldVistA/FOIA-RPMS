@@ -1,10 +1,12 @@
 ABMDF35X ; IHS/SD/SDR - New HCFA-1500 (02/12) Format ;   
- ;;2.6;IHS Third Party Billing;**13,14,17**;NOV 12, 2009;Build 272
+ ;;2.6;IHS Third Party Billing;**13,14,17,21**;NOV 12, 2009;Build 379
  ;
  ; Objective: Print designated form using data contained in the
  ;            ABMF array.
  ;IHS/SD/SDR - 2.6*14 - HEAT164158 - fixed format of lines 31, 32, and 33; had extra '^' that was throwing things off
  ;IHS/SD/SDR - 2.6*17 - HEAT238640 - Expanded DX fields from 7 to 8 characters
+ ;IHS/SD/SDR - 2.6*21 - HEAT172278 - Removed 'c' from box 23 formatting and removed extra '^' at beginning of field length
+ ;IHS/SD/SDR - 2.6*21 - HEAT205579 - Made T1015 print first if ARBOR HEALTH PLAN
  ;
 MARG ;Set left and top margins
  S (ABM("LM"),ABM("TM"),ABM("LN"))=0
@@ -41,8 +43,8 @@ LOOP ;Loop thru line number array
  ...S ABMF(ABMLOOP)=$G(ABMF("TMP"))
  K ABMLOOP,ABMCHK,ABMF("TMP")
  ;
- ;I $P(ABMF(17),U,4)["IOWA MEDICAID" D  ;abm*2.6*13 remove box 9C
- I $G(ABMP("ITYPE"))="D" D  ;abm*2.6*13
+ ;I $P(ABMF(17),U,4)["IOWA MEDICAID" D  ;abm*2.6*13 remove box 9C  ;abm*2.6*21 IHS/SD/SDR HEAT205579
+ I $G(ABMP("ITYPE"))="D"!($P($G(^AUTNINS(ABMP("INS"),0)),U)="ARBOR HEALTH PLAN") D  ;abm*2.6*13  ;abm*2.6*21 IHS/SD/SDR HEAT205579 
  .F ABMLOOP=37:2:47 D
  ..Q:'$D(ABMF(ABMLOOP))
  ..S ABMCHK=$TR($P(ABMF(ABMLOOP),U,5)," ","")
@@ -157,7 +159,8 @@ TEXT ;;TABS;;FIELD LENGTH
 32 ;;3^16^29^42;;8^8^8^8
  ;;3^16^29^42;;7^7^7^7  ;abm*2.6*17 IHS/
  ;;3^16^29^42;;^7^7^7^7  ;abm*2.6*14 IHS/SD/AML 5/6/14 HEAT164158 original line
-33 ;;3^16^29^42^50;;8^8^8^8^29C
+33 ;;3^16^29^42^50;;8^8^8^10^29
+ ;;3^16^29^42^50;;8^8^8^8^29C  ;abm*2.6*21 IHS/SD/SDR HEAT172278 and HEAT207013 original line
  ;;3^16^29^42^50;;7^7^7^7^29C  ;abm*2.6*17 IHS/SD/SDR HEAT238640
  ;;3^16^29^42^50;;^7^7^7^7^29C  ;abm*2.6*14 IHS/SD/AML 5/6/14 HEAT164158 original line
 36 ;;1^65^68;;61^2^12

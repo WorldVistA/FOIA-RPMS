@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:35">
+<Class name="BSTS.ns1.TClassifyStatus">
+<Description>
+Created from: http://VDENMIHSDEVD01:8082/soap/DtsQueryDaoWS?wsdl</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%String</Super>
+<TimeChanged>63616,48123.235094</TimeChanged>
+<TimeCreated>63616,48123.232938</TimeCreated>
+
+<Parameter name="ELEMENTQUALIFIED">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="MAXLEN">
+</Parameter>
+
+<Parameter name="NAMESPACE">
+<Default>http://apelon.com/dtsserver/types</Default>
+</Parameter>
+
+<Parameter name="VALUELIST">
+<Default>,SUCCESS,CLASSIFY_NOT_REQUIRED,MISSING_KIND_ERROR,MISSING_DEFINING_CONCEPT_ERROR,CYCLE_ERROR,EQ_ERROR</Default>
+</Parameter>
+</Class>
+</Export>

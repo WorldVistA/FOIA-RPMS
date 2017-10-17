@@ -1,7 +1,6 @@
 LRDPA ;SLC/RWF/WTY/KLL - FILE OF FILES LOOKUP ON ENTITIES ; 2/28/03 4:10pm
- ;;5.2;LAB SERVICE;**1002,1003,1004,1031**;NOV 1, 1997
- ;
- ;;VA LR Patche(s): 137,121,153,202,211,248,305,360
+ ;;5.2;LAB SERVICE;**137,1002,121,153,202,211,248,1018,305,1022,360,1031,435,1039**;NOV 1, 1997;Build 31
+ ;;5.2;LAB SERVICE;**137,121,153,202,211,248,305,360,435**;Sep 27, 1994;Build 1
  ;
  ;Reference to ^DIC( supported by IA #916
  ;Reference to ^DIC("AC" supported by IA #511
@@ -31,13 +30,14 @@ DPA ;from LRUPS
  D:'$D(LRLABKY) LABKEY^LRPARAM
  K VADM,VAIN,VA
  ;----- BEGIN IHS MODIFICATIONS LR*5.2*1018
- K VADM,VAIN,VA,AGE,DOB,HRCN,SEX,SSN  ;IHS/ANMC/CLS 08/18/96
+ K AGE,DOB,HRCN,SEX,SSN  ;IHS/ANMC/CLS 08/18/96
  ;----- END IHS MODIFICATIONS
  S LRDPF="" G ANY:'($D(DIC)[0)
  R !,"Select Patient Name: ",X:DTIME
 DPA1 ;Entry point from PNAME^LRAPDA
- I X'?1"%"9N.E,X=""!(X["^") S DFN=-1 K DLAYGO G END
+ I X'?1"%"9N.E,$L($P(X,"^",2))'=18,X=""!(X["^") S DFN=-1 K DLAYGO G END
  ;The X'?1"%"9N.E was added since the VIC data stream contains a carat.
+ ;The $L($P(X,"^",2))'=18 was added for VHIC 4.0
  I X="??" W !,"You may enter patient identification or enter a file name followed by "":"".",!,"You may enter ""?:?"" for more extended help." G DPA
 EN1 ;from LRUG, LRUPS
  I X[":" S LRX=$P(X,":",2),X=$P(X,":",1),DIC=0 K:LRX="" LRX G ANY:X=""!(X["?") W !," File: ",X G FL
@@ -50,10 +50,12 @@ EN ;
  ;card data has guard codes before and after the patient data. The SSN
  ;is extracted if these guard codes exist. DIC("S") was added in several
  ;places and in all instances it is being killed immediately after use.
+ ;
  ;----- BEGIN IHS MODIFICATIONS LR*5.2*1018
  ;IHS DOES NOT WANT SSN TO BE AN IDENTIFIER
  S DIC("W")=""
  ;----- END IHS MODIFICATIONS
+ ;
  D ^DIC K DIC("S"),DLAYGO K:Y>0 DUOUT
  ;Since VIC card data contains carats, DUOUT will be returned whenever
  ;the VIC card is used.  If the user ^'s out, Y will be equal to -1.

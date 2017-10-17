@@ -1,5 +1,5 @@
 ABMDFUTL ; IHS/SD/DMJ - Export Forms Utility ;     
- ;;2.6;IHS Third Party Billing System;**2,6,8,9,10,13,14**;NOV 12, 2009;Build 238
+ ;;2.6;IHS Third Party Billing System;**2,6,8,9,10,13,14,21**;NOV 12, 2009;Build 379
  ;Original;TMD;
  ;
  ; IHS/ASDS/DMJ - 05/15/00 - V2.4 Patch 1 - NOIS HQW-0500-100032 - Modified to allow population of the PIN number for KIDSCARE
@@ -22,6 +22,8 @@ ABMDFUTL ; IHS/SD/DMJ - Export Forms Utility ;
  ;IHS/SD/SDR - 2.6*14 - HEAT163697 - changed message in provider lookup if provider is not in New Person file; Also updated lookup so it wouldn't allow special characters if name
  ;  is not in New Person file.
  ;IHS/SD/SDR - 2.6*14 - HEAT165324 - Fixed NPI for PRVLKUP so it will force NPI to be numeric; displays message and prompts again if not
+ ;IHS/SD/SDR - 2.6*21 - HEAT196358 - For page 3 question Ord/Ref/Sup Phys (FL17), made change so no NPI can be entered but if none is
+ ;   entered, the name that was entered won't be saved either. 
  ;
  ; *********************************************************************
  ;
@@ -181,7 +183,9 @@ PRVLKUP(ABMX,ABMY) ;EP
  I Y>0  D  Q ABM("PROVIDER")
  .S $P(ABM("PROVIDER"),U)=$P(Y,U,2)
  .S $P(ABM("PROVIDER"),U,2)=$S($P($$NPI^XUSNPI("Individual_ID",+Y),U)>0:$P($$NPI^XUSNPI("Individual_ID",+Y),U),1:"")
+ S ABMNFLG=1  ;abm*2.6*21 IHS/SD/SDR HEAT196358
 NPI ;
+ I +$G(ABMNFLG)=0  K ABM("PROVIDER") Q 0  ;if no NPI when it gets here from below quit  ;abm*2.6*21 IHS/SD/SDR HEAT196358
  ;I Y<0 D  ;abm*2.6*14 HEAT165324
  I +$G(Y)<1 D  ;abm*2.6*14 HEAT165324
  .;W " Name not in New Person file"  ;abm*2.6*14 HEAT163697
@@ -195,6 +199,7 @@ NPI ;
  .;S DIR("S")="I $$CHKDGT^XUSNPI(X))"  ;abm*2.6*14 HEAT165324
  .D ^DIR
  .;start new abm*2.6*14 HEAT165324
+ .I Y="" W !,"No NPI entered - nothing saved" S ABMNFLG=0 S ABM("PROVIDER")="" H 1 Q  ;abm*2.6*21 IHS/SD/SDR HEAT196358
  .I +$$CHKDGT^XUSNPI(Y)'=1 D  G NPI
  ..W !,"NPI must be 10 numeric characters"
  ..K Y

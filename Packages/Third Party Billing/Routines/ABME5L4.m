@@ -1,7 +1,8 @@
 ABME5L4 ; IHS/ASDST/DMJ - Header 
- ;;2.6;IHS Third Party Billing;**6,8,10,11,13**;NOV 12, 2009;Build 213
+ ;;2.6;IHS Third Party Billing;**6,8,10,11,13,21**;NOV 12, 2009;Build 379
  ;Header Segments
  ;IHS/SD/SDR - 2.6*13 - Added DTP segments for Initial Treatment Date and Acute Manifestation Date
+ ;IHS/SD/SDR - 2.6*21 - HEAT136508 - Made change so CLIA segment would print if lab code started with 'G'
  ;
 START ;START HERE
  K ABMOUTLB
@@ -108,7 +109,8 @@ START ;START HERE
  .S ABMJ=$O(ABMRV(ABMI,ABMJ)) Q:ABMJ=""  D
  ..S ABMK=0
  ..F  S ABMK=$O(ABMRV(ABMI,ABMJ,ABMK)) Q:ABMK=""  D
- ...I $P(ABMRV(ABMI,ABMJ,ABMK),U,2)>79999,($P(ABMRV(ABMI,ABMJ,ABMK),U,2)<90000) S ABMCHK=1
+ ...;I $P(ABMRV(ABMI,ABMJ,ABMK),U,2)>79999,($P(ABMRV(ABMI,ABMJ,ABMK),U,2)<90000) S ABMCHK=1  ;abm*2.6*21 IHS/SD/SDR HEAT136508
+ ...I ($P(ABMRV(ABMI,ABMJ,ABMK),U,2)>79999&($P(ABMRV(ABMI,ABMJ,ABMK),U,2)<90000))!($E($P(ABMRV(ABMI,ABMJ,ABMK),U,2))="G") S ABMCHK=1  ;abm*2.6*21 IHS/SD/SDR HEAT136508
  I ABMCHK=1 D
  .S ABMCLIA="CLM"
  .D EP^ABME5REF("X4","1CLM","1CLM")

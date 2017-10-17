@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:34">
+<Class name="BEDDAPPL.EDMenu">
+<Description>
+BEDDAPPL.EDMenu</Description>
+<Super>%ZEN.Component.composite</Super>
+<TimeChanged>62487,41554</TimeChanged>
+<TimeCreated>61957,73401.639612</TimeCreated>
+
+<Parameter name="NAMESPACE">
+<Description>
+This is the XML namespace for this component.</Description>
+</Parameter>
+
+<XData name="Style">
+<Description>
+This Style block contains component-specific CSS style definitions.</Description>
+<Data><![CDATA[
+<style type="text/css">
+/*Styles for components in this composite component*/
+  .title {
+          background: #C5D6D6;
+          color: black;
+          font-size: 1.5em;
+          font-weight: bold;
+          padding: 5px;
+          border-bottom: 1px solid black;
+          text-align: center;
+    }
+/* Default style overrides*/
+/* Override default menu item style */
+  a.menuItem {
+         font-size: 0.9em;
+         color: black;
+   }
+  a.menuItemDisabled {
+        font-size: 0.9em;
+        color: black;
+  }
+
+</style>
+]]></Data>
+</XData>
+
+<XData name="Contents">
+<Description>
+Contents of this composite component.</Description>
+<XMLNamespace>http://www.intersystems.com</XMLNamespace>
+<Data><![CDATA[
+<composite>
+
+<hmenu width="100%">
+	<menuItem id="m1" caption="Reports" link="BEDDRPTMNU.csp" help="To Be Added" />
+	<menuItem id="m2" caption="Rooms" link="BEDDAPPL.EDRoom.cls" help="Go to Application Home Page" />
+    <menuItem id="m3" caption="Warnings" link="BEDDAPPL.EDWarning.cls" help="View the warnings" />
+    <menuItem id="m4" caption=""  help="" />
+    <menuItem id="m5" caption="DashBoard" link="BEDD.csp" help="return to dashboard" />
+    <menuItem id="m6" caption=""  help="" />
+    <menuItem id="m7" caption="Record Lock" link="BEDDLCKREL.csp" help="return to dashboard" />
+    <menuItem id="m8" caption=""  help="" />
+    <menuItem id="m9" caption="Setup" link="BEDDAPPL.EDSystem.cls" help="To Be Added" />
+    <menuItem id="m10" caption=""  help="" />
+   <!-- <menuItem id="m11" caption="Data Fix" link="BEDDFIXA.csp" help="To Be Added" />-->
+  </hmenu>
+
+</composite>
+]]></Data>
+</XData>
+</Class>
+</Export>

@@ -1,5 +1,5 @@
 BGP7ULF ; IHS/CMI/LAB - UPLOAD AREA FILES ; 
- ;;17.0;IHS CLINICAL REPORTING;;AUG 30, 2016;Build 16
+ ;;17.1;IHS CLINICAL REPORTING;;MAY 10, 2017;Build 29
  ;
  ;
  W:$D(IOF) @IOF
@@ -16,10 +16,10 @@ DIR ;
 FILENAME ;
  W !!
  S BGPFILE=""
- S DIR(0)="FO^2:30",DIR("A")="Enter filename w /ext (i.e. BG170101201.5)" K DA D ^DIR K DIR
+ S DIR(0)="FO^2:30",DIR("A")="Enter filename w /ext (i.e. BG171101201.5)" K DA D ^DIR K DIR
  G:$D(DIRUT) DIR
  I Y="" G DIR
- I $E($$UP^XLFSTR(Y),1,5)'="BG170" W !!,"Filename must begin with BG170" G FILENAME
+ I $E($$UP^XLFSTR(Y),1,5)'="BG171" W !!,"Filename must begin with BG171" G FILENAME
  S BGPFILE=Y
  W !,"Directory=",BGPDIR,"  ","File=",BGPFILE
  D READF
@@ -42,8 +42,8 @@ PROC ;
  F X=1:1:9 I $P(BGP0,U,X)="" S Q=1
  I Q W !!,"File is corrupt, the site will need to re-run the report." K ^TMP("BGPUPL",$J) G EOJ
  S BGPG=$P($G(^TMP("BGPUPL",$J,1,0)),"|")
- F X=1:1:14,21 S Y="BGP"_X,@Y=$P(BGP0,U,X)
- I BGP21="" S BGP21="16"
+ F X=1:1:14,21,22 S Y="BGP"_X,@Y=$P(BGP0,U,X)
+ I BGP21="" S BGP21="17.1"
  ;find existing entry and if exists, delete it
  S (X,BGPOIEN)=0 F  S X=$O(^BGPGPDCG(X)) Q:X'=+X  D
  .I '$D(^BGPGPDCG(X,0)) K ^BGPGPDCG(X) Q
@@ -61,6 +61,7 @@ PROC ;
  .Q:$P(Y,U,12)'=BGP12
  .Q:$P(Y,U,14)'=BGP14
  .Q:$P(Y,U,21)'=BGP21
+ .Q:$P(Y,U,22)'=BGP22
  .S BGPOIEN=X
  D ^XBFMK
  I BGPOIEN S DA=BGPOIEN,DIK="^BGPGPDCG(" D ^DIK S DA=BGPOIEN,DIK="^BGPGPDPG(" D ^DIK S DA=BGPOIEN,DIK="^BGPGPDBG(" D ^DIK

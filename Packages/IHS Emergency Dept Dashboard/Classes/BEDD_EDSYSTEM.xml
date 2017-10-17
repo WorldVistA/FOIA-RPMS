@@ -1,0 +1,433 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:34">
+<Class name="BEDD.EDSYSTEM">
+<Description>
+BEDD.EDSYSTEM CLASS - MAIN STORAGE FOR ED System DATA</Description>
+<Super>%Persistent</Super>
+<TimeChanged>64168,72730.012386</TimeChanged>
+<TimeCreated>61957,70107.611838</TimeCreated>
+
+<Property name="Verify">
+<Description>
+BEDD*2.0*1 Added Whiteboard fields</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="WhiteboardShowProvider">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="WhiteboardShowNurse">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="WhiteboardShowOrders">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="WhiteboardShowNotes">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="WhiteboardShowAge">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="WhiteboardShowComplaint">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="WhiteboardShowChartNumber">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="WhiteboardShowRoom">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="WhiteboardShowName">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="WhiteboardShowAcuity">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="SMTPSERVER">
+<Description>
+enter your facility email server name</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="TimeOut">
+<Type>%String</Type>
+</Property>
+
+<Property name="ChiefofStaff">
+<Type>%String</Type>
+</Property>
+
+<Property name="NrseMgr">
+<Type>%String</Type>
+</Property>
+
+<Property name="ChargeNrseA">
+<Type>%String</Type>
+</Property>
+
+<Property name="ChargeNrseP">
+<Type>%String</Type>
+</Property>
+
+<Property name="Phone">
+<Type>%String</Type>
+</Property>
+
+<Property name="Pager">
+<Type>%String</Type>
+</Property>
+
+<Property name="Status">
+<Type>%String</Type>
+</Property>
+
+<Property name="Site">
+<Type>%String</Type>
+</Property>
+
+<Property name="SiteName">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {SiteName}=##class(BEDD.EDSYSTEM).GetName({Site})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="TwoClinics">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="MedRec">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="RtSheet">
+<Description>
+HIM routing slip</Description>
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="PtRtSheet">
+<Description>
+Patient routing slip</Description>
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="PtLabels">
+<Description>
+Patient Labels at CI</Description>
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="PtArmBand">
+<Description>
+Patient ArmBand at CI</Description>
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="TriageRpt">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="StandAlone">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="ShoUsedRm">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="ShoNrse">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="SwitchEHRPat">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="ShoPrv">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="ShoCons">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="CommBoard">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="AMERMnu">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="AutoNote">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="ShoDlySum">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="PCPFlag">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="FlagInjury">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="Prnt1">
+<Type>%String</Type>
+</Property>
+
+<Property name="LabelPrnt1">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {LabelPrnt1}=##class(CNDHED.EDSYSTEM).GetPName({Prnt1})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="Prnt2">
+<Type>%String</Type>
+</Property>
+
+<Property name="LabelPrnt2">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {LabelPrnt2}=##class(CNDHED.EDSYSTEM).GetPName({Prnt2})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="PendingStsLookBack">
+<Description>
+BEDD*2.0*1;Added PendingStsLookBack property and SiteIdx Index</Description>
+<Type>%String</Type>
+</Property>
+
+<Index name="SiteIdx">
+<Properties>Site</Properties>
+</Index>
+
+<Method name="GetName">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>site:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	If (site="") {
+		Set sitename="" 
+		Quit sitename
+	}
+	
+	If (site="999999") {
+		Quit "Whiteboard Display"
+	}
+	
+	Set sitename=$$SNAME^BEDDUTIL(site)
+	
+	If (sitename="") {
+		Set sitename=$$GETF^BEDDUTIL(4,site,.01,"I")
+	}
+	
+	If (sitename="") {
+		Set sitename="NO ENTRY IN INSTITUTION FILE"
+	}
+	Quit sitename
+]]></Implementation>
+</Method>
+
+<Method name="GetPName">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>labelprnt:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	If (labelprnt="") {
+		Set labelname=""
+		Quit labelname
+	}
+	Set labelname=""
+	Set labelname=$$GETF^BEDDUTIL(4,site,.01,"I") 
+	If (labelname="") {
+		Set labelname="NO Label Printer"
+	}
+	Quit labelname
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^BEDD.EDSYSTEMD</DataLocation>
+<DefaultData>EDSYSTEMDefaultData</DefaultData>
+<IdLocation>^BEDD.EDSYSTEMD</IdLocation>
+<IndexLocation>^BEDD.EDSYSTEMI</IndexLocation>
+<StreamLocation>^BEDD.EDSYSTEMS</StreamLocation>
+<ExtentSize>100000</ExtentSize>
+<Data name="EDSYSTEMDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>SMTPSERVER</Value>
+</Value>
+<Value name="3">
+<Value>ChiefofStaff</Value>
+</Value>
+<Value name="4">
+<Value>NrseMgr</Value>
+</Value>
+<Value name="5">
+<Value>Phone</Value>
+</Value>
+<Value name="6">
+<Value>Pager</Value>
+</Value>
+<Value name="7">
+<Value>Status</Value>
+</Value>
+<Value name="8">
+<Value>Site</Value>
+</Value>
+<Value name="9">
+<Value>TwoClinics</Value>
+</Value>
+<Value name="10">
+<Value>MedRec</Value>
+</Value>
+<Value name="11">
+<Value>RtSheet</Value>
+</Value>
+<Value name="12">
+<Value>PtRtSheet</Value>
+</Value>
+<Value name="13">
+<Value>PtLabels</Value>
+</Value>
+<Value name="14">
+<Value>PtArmBand</Value>
+</Value>
+<Value name="15">
+<Value>TriageRpt</Value>
+</Value>
+<Value name="16">
+<Value>StandAlone</Value>
+</Value>
+<Value name="17">
+<Value>ShoUsedRm</Value>
+</Value>
+<Value name="18">
+<Value>ShoNrse</Value>
+</Value>
+<Value name="19">
+<Value>ShoPrv</Value>
+</Value>
+<Value name="20">
+<Value>CommBoard</Value>
+</Value>
+<Value name="21">
+<Value>AMERMnu</Value>
+</Value>
+<Value name="22">
+<Value>AutoNote</Value>
+</Value>
+<Value name="23">
+<Value>PCPFlag</Value>
+</Value>
+<Value name="24">
+<Value>FlagInjury</Value>
+</Value>
+<Value name="25">
+<Value>Prnt1</Value>
+</Value>
+<Value name="26">
+<Value>Prnt2</Value>
+</Value>
+<Value name="27">
+<Value>ChargeNrseA</Value>
+</Value>
+<Value name="28">
+<Value>ChargeNrseP</Value>
+</Value>
+<Value name="29">
+<Value>ShoCons</Value>
+</Value>
+<Value name="30">
+<Value>ShoDlySum</Value>
+</Value>
+<Value name="31">
+<Value>TimeOut</Value>
+</Value>
+<Value name="32">
+<Value>SwitchEHRPatient</Value>
+</Value>
+<Value name="33">
+<Value>SwitchEHRPat</Value>
+</Value>
+<Value name="34">
+<Value>PendingStsLookBack</Value>
+</Value>
+<Value name="35">
+<Value>Verify</Value>
+</Value>
+<Value name="36">
+<Value>PublicShowProvider</Value>
+</Value>
+<Value name="37">
+<Value>PublicShowNurse</Value>
+</Value>
+<Value name="38">
+<Value>PublicOrders</Value>
+</Value>
+<Value name="39">
+<Value>PublicShowOrders</Value>
+</Value>
+<Value name="40">
+<Value>PublicShowNotes</Value>
+</Value>
+<Value name="41">
+<Value>PublicShowAge</Value>
+</Value>
+<Value name="42">
+<Value>WhiteboardShowProvider</Value>
+</Value>
+<Value name="43">
+<Value>WhiteboardShowNurse</Value>
+</Value>
+<Value name="44">
+<Value>WhiteboardShowOrders</Value>
+</Value>
+<Value name="45">
+<Value>WhiteboardShowNotes</Value>
+</Value>
+<Value name="46">
+<Value>WhiteboardShowAge</Value>
+</Value>
+<Value name="47">
+<Value>WhiteboardShowComplaint</Value>
+</Value>
+<Value name="48">
+<Value>WhiteboardShowChartNumber</Value>
+</Value>
+<Value name="49">
+<Value>WhiteboardShowRoom</Value>
+</Value>
+<Value name="50">
+<Value>WhiteboardShowName</Value>
+</Value>
+<Value name="51">
+<Value>WhiteboardShowAcuity</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

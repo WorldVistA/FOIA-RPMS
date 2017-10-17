@@ -1,12 +1,14 @@
 ABMDREEX ; IHS/SD/SDR - Re-Create batch of Selected Bills ;    
- ;;2.6;IHS Third Party Billing System;**2,3,4,6,10,14**;NOV 12, 2009;Build 238
- ;IHS/SD/SDR-abm*2.6*2-FIXPMS10005 -New routine
- ;IHS/SD/SDR-abm*2.6*3-RPMS10005#2 -mods to make Submission date of 3P Tx status file work correctly
- ;IHS/SD/SDR-abm*2.6*3-FIXPMS10005 -mods to create 1 file for each 1000 bills
- ;IHS/SD/SDR-abm*2.6*4-NOHEAT -if create and re-export are done on same day it will have duplicates
- ;IHS/SD/SDR-abm*2.6*6-HEAT28632 -<SUBSCR>CHECKBAL+17^ABMDREEX error when parent/satellite present
- ;IHS/SD/SDR-2.6*14-HEAT136160 re-wrote to sort by ins/vloc/vtyp/expmode.  Wasn't creating enough files.  Didn't label all
+ ;;2.6;IHS Third Party Billing System;**2,3,4,6,10,14,21**;NOV 12, 2009;Build 379
+ ;IHS/SD/SDR 2.6*2-FIXPMS10005 New routine
+ ;IHS/SD/SDR 2.6*3-RPMS10005#2 mods to make Submission date of 3P Tx status file work correctly
+ ;IHS/SD/SDR 2.6*3-FIXPMS10005 mods to create 1 file for each 1000 bills
+ ;IHS/SD/SDR 2.6*4-NOHEAT if create and re-export are done on same day it will have duplicates
+ ;IHS/SD/SDR 2.6*6-HEAT28632 <SUBSCR>CHECKBAL+17^ABMDREEX error when parent/satellite present
+ ;IHS/SD/SDR 2.6*14-HEAT136160 re-wrote to sort by ins/vloc/vtyp/expmode.  Wasn't creating enough files.  Didn't label all
  ;   changes because there were so many.
+ ;IHS/SD/SDR 2.6*21 - Split routine to ABMDREX1.
+ ;IHS/SD/SDR 2.6*21 HEAT207484 Made change to stop error <UNDEF>EXPMODE+66^ABMDREEX when no bills meet selected criteria
  ;
 EN K ABMT,ABMREX,ABMP,ABMY
  K ^TMP($J,"ABM-D"),^TMP($J,"ABM-D-DUP"),^TMP($J,"D")  ;abm*2.6*4 NOHEAT
@@ -88,6 +90,7 @@ EXPMODE D ^XBFMK
  ;
  S ABMBDT=(ABMREX("BEGDT")-.5)
  S ABMEDT=(ABMREX("ENDDT")+.999999)
+ S (ABMBCNT,ABMTAMT)=0  ;abm*2.6*21 IHS/SD/SDR HEAT207484
  ;start old HEAT136160
  ;S ABMBCNT=0,ABMTAMT=0
  ;S ABMFCNT=1  ;file cnt  ;abm*2.6*3 FIXPMS10005
@@ -140,6 +143,7 @@ EXPMODE D ^XBFMK
  ...S $P(ABMREX("CNTS",ABMEXP,ABMIEN),U,2)=+$P(ABMREX("CNTS",ABMEXP,ABMIEN),U,2)+$P($G(^ABMDBILL(DUZ(2),ABMBIEN,2)),U)
  ...S ^TMP($J,"ABM-D-DUP",ABMBIEN)=+$G(^TMP($J,"ABM-D-DUP",ABMBIEN))+1
  ;end new HEAT136160
+ I ABMBCNT=0 W !!,"No Bills were found that meet the selected criteria" H 3 Q  ;abm*2.6*21 IHS/SD/SDR HEAT207484
  W !!,"A total of "_ABMBCNT_" "_$S(ABMBCNT=1:"bill ",1:"bills ")_"for $"_$J(ABMTAMT,1,2)_" have been located."
  I ABMBCNT>0 D
  .W !?8,"Export mode",?25,"Export Dt/Tm",?50,"#Bills",?60,"Total Amt"
@@ -150,87 +154,7 @@ EXPMODE D ^XBFMK
  ...S ABMECNT=+$G(ABMECNT)+1
  ...W !,?1,ABMECNT,?8,$P(^ABMDEXP(ABMREX("EXP"),0),U),?25,$$CDT^ABMDUTL($P($G(^ABMDTXST(DUZ(2),ABMIEN,0)),U)),?50,+$G(ABMREX("CNTS",ABMREX("EXP"),ABMIEN)),?60,$J(+$P($G(ABMREX("CNTS",ABMREX("EXP"),ABMIEN)),U,2),1,2)
 ZIS ;EP
- ;start new abm*2.6*3
- S ABMBIEN=0,ABMDFLG=0
- F  S ABMBIEN=$O(^TMP($J,"ABM-D-DUP",ABMBIEN)) Q:(+$G(ABMBIEN)=0)  D
- .I $G(^TMP($J,"ABM-D-DUP",ABMBIEN))>1 S ABMDFLG=1
- I ABMDFLG=1 W !!?2,"Duplicate bills exist in this selection.  If re-exported the bill will only",!?2,"be included once."
- ;end new abm*2.6*3
- S DIR(0)="Y"
- S DIR("A",1)=""
- S DIR("A",2)=""
- I $G(ABMREX("SELINS"))'="" D
- .S DIR("A",3)="One file will be created for each visit location/visit type/export mode"
- .S DIR("A",4)="combination with a maximum of 1000 bills in each file"
- .S DIR("A",5)=""
- I $G(ABMREX("SELINS"))="" S DIR("A",3)="A file will be created for the bills selected",DIR("A",4)=""
- S DIR("A")="Proceed"
- S DIR("B")="YES"
- D ^DIR
- K DIR
- ;I Y'=1 K ABME Q  ;abm*2.6*3
- I Y'=1 D  Q:Y=1
- .W !!
- .K X,Y,DIR,DIE,DIC,DA
- .S DIR(0)="Y"
- .S DIR("A",1)="Your selection of bills will be lost."
- .S DIR("A")="Are you sure you wish to exit"
- .S DIR("B")="NO"
- .D ^DIR
- .K DIR
- ;
- ;selected bills-one filename
- I $G(ABMREX("SELINS"))="" D
- .S ABMEXP=ABMT("EXP")
- .S ABMREX("BILLSELECT")=1
- .;start new abm*2.6*3  ;abm*2.6*3 FIXPMS10005
- .S ABMY("TOT")=0
- .S ABMREX("BDFN")=0
- .F  S ABMREX("BDFN")=$O(ABMY(ABMREX("BDFN"))) Q:(+$G(ABMREX("BDFN"))=0)  D
- ..S ABMY("INS")=$P($G(^ABMDBILL(DUZ(2),ABMREX("BDFN"),0)),U,8)
- ..S ABMY("VTYP")=$P($G(^ABMDBILL(DUZ(2),ABMREX("BDFN"),0)),U,7)
- ..S ABMY("EXP")=$P($G(^ABMDBILL(DUZ(2),ABMREX("BDFN"),0)),U,6)
- ..S ABMY("LOC")=$P($G(^AUTTLOC(DUZ(2),0)),U,2)
- ..S ABMY("TOT")=+$G(ABMY("TOT"))+$P($G(^ABMDBILL(DUZ(2),ABMREX("BDFN"),2)),U)
- ..S ^TMP($J,"D",ABMY("INS"),ABMY("LOC"),ABMY("VTYP"),ABMY("EXP"),ABMREX("BDFN"))=""
- .;end new abm*2.6*3  ;abm*2.6*3 FIXPMS10005
- .D CREATEN
- .;
- ;exports selected - one filename for each export
- I $G(ABMREX("SELINS"))'="" D
- .S ABMREX("BATCHSELECT")=1
- .;start new abm*2.6*3 FIXPMS10005
- .S ABMFCNT=1
- .S ABMY("INS")=0
- .F  S ABMY("INS")=$O(^TMP($J,"ABM-REEX",ABMY("INS"))) Q:'ABMY("INS")  D
- ..S ABMINS("IEN")=ABMY("INS")
- ..S ABMY("LOC")=0
- ..F  S ABMY("LOC")=$O(^TMP($J,"ABM-REEX",ABMY("INS"),ABMY("LOC"))) Q:'ABMY("LOC")  D
- ...S ABMY("LOC1")=$P($G(^AUTTLOC(ABMY("LOC"),0)),U,2)_"@"_ABMY("LOC")
- ...S ABMY("VTYP")=0
- ...F  S ABMY("VTYP")=$O(^TMP($J,"ABM-REEX",ABMY("INS"),ABMY("LOC"),ABMY("VTYP"))) Q:'ABMY("VTYP")  D
- ....S ABMY("EXP")=0
- ....F  S ABMY("EXP")=$O(^TMP($J,"ABM-REEX",ABMY("INS"),ABMY("LOC"),ABMY("VTYP"),ABMY("EXP"))) Q:'ABMY("EXP")  D
- .....S ABMEXP=ABMY("EXP")
- .....S ABMBDFN=0
- .....S ABMCNT=0
- .....S ABMY("TOT")=0
- .....F  S ABMBDFN=$O(^TMP($J,"ABM-REEX",ABMY("INS"),ABMY("LOC"),ABMY("VTYP"),ABMY("EXP"),ABMBDFN)) Q:'ABMBDFN  D
- ......S ABMCNT=+$G(ABMCNT)+1
- ......S ABMY("TOT")=+$G(ABMY("TOT"))+$P($G(^ABMDBILL(DUZ(2),ABMBDFN,2)),U)
- .....S ABMREX("CNTS",ABMY("EXP"),ABMCNT)=""
- .....W !!,"Creating file # ",ABMFCNT
- .....S ABMFCNT=+$G(ABMFCNT)+1
- .....M ^TMP($J,"D",ABMY("INS"),ABMY("LOC1"),ABMY("VTYP"),ABMY("EXP"))=^TMP($J,"ABM-REEX",ABMY("INS"),ABMY("LOC"),ABMY("VTYP"),ABMY("EXP"))
- .....W !,?15,$P(^ABMDEXP(ABMY("EXP"),0),U),?35,"VISIT TYPE: "_ABMY("VTYP"),?55,ABMCNT_" "_$S(ABMCNT=1:"Bill",1:"Bills"),?68,$J($FN(ABMY("TOT"),",",2),10)
- .....K ABMXMTDT  ;abm*2.6*3 5PMS10005#2
- .....D CREATEN
- .....K ^TMP($J,"D")
- .;end new abm*2.6*3 FIXPMS10005
- S DIR(0)="E"
- D ^DIR
- K DIR
- W !!
+ D ZIS^ABMDREX1  ;abm*2.6*20 IHS/SD/SDR split routine due to size
 OUT ;
  D ^%ZISC
  ;
@@ -255,7 +179,7 @@ CHECKBAL(ABMBIEN) ;
  .;Q if sat became NOT active before DOS
  .I $P($G(^BAR(90052.05,DA,BARSAT,0)),U,7),(ABMP("DOS")>$P($G(^BAR(90052.05,DA,BARSAT,0)),U,7)) Q
  .S BARPAR=$S(BARSAT:$P($G(^BAR(90052.05,DA,BARSAT,0)),U,3),1:"")
- I 'BARPAR Q ABMBALCK       ;No parent defined for satellite
+ I 'BARPAR Q ABMBALCK  ;No parent defined for satellite
  S DUZ(2)=BARPAR
  S ABMARBIL=$O(^BARBL(DUZ(2),"B",$P($G(^ABMDBILL(ABMHOLD,ABMBIEN,0)),U)))
  S ABMARIEN=$O(^BARBL(DUZ(2),"B",ABMARBIL,0))

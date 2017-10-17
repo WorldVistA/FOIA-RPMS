@@ -1,5 +1,5 @@
 BQIPDSC1 ;GDIT/HS/ALA-Panel descriptions continued ; 10 Apr 2013  4:54 PM
- ;;2.5;ICARE MANAGEMENT SYSTEM;;May 24, 2016;Build 27
+ ;;2.6;ICARE MANAGEMENT SYSTEM;;Jul 07, 2017;Build 72
  ;
 CPT ;EP - CPTs
  S PORD=$$PORD^BQIDCDF(FSOURCE,"CNOT") Q:PORD=""
@@ -10,7 +10,7 @@ CPT ;EP - CPTs
  . S DSC=$S($G(FPARMS(PORD,"CNOT"))="Y":"without",1:"with")_" CPT "_VALUE
  I FNAME="CPTTX" D
  . S VALUE=$G(FPARMS("VAL","CPTTX"))
- . S DSC=$S($G(FPARMS(PORD,"CNOT"))="Y":"without",1:"with")_" CPTs found in "_VALUE
+ . S DSC=$S($G(FPARMS(PORD,"CNOT"))="Y":"without",1:"with")_" CPTs found in taxonomy "_VALUE
  S PORD=$$PORD^BQIDCDF(FSOURCE,"CPT")
  Q
  ;
@@ -19,7 +19,7 @@ CDAT ;EP - CPT Dates
  I FNAME="CFROM" D
  . NEW CFROM,CTHRU
  . S CFROM=$$GETVAL(OWNR,PLIEN,"CFROM")
- . I CFROM]"" S VALUE=VALUE_" (Range from date "_$$FMTE^BQIUL1(CFROM)
+ . I CFROM]"" S VALUE="(Range from date "_$$FMTE^BQIUL1(CFROM)
  . S CTHRU=$$GETVAL(OWNR,PLIEN,"CTHRU")
  . I CTHRU]"" S VALUE=VALUE_$S(VALUE["Range":" thru date ",1:" (Range thru date ")_$$FMTE^BQIUL1(CTHRU)
  . I VALUE["(" S VALUE=VALUE_")"
@@ -30,7 +30,7 @@ CDAT ;EP - CPT Dates
  . I $G(PPIEN)'="" D RANGE^BQIDCAH1(CRANGE,PPIEN,"CRANGE")
  . I CRANGE'["Ever" S VALUE=CRANGE_" ("_$$FMTE^BQIUL1(RFROM)_"-"_$$FMTE^BQIUL1(RTHRU)_")"
  . I CRANGE["Ever" S VALUE=CRANGE
- . S DSC="for timeframe"_VALUE
+ . S DSC="for timeframe "_VALUE
  Q
  ;
 GETVAL(OWNR,PLIEN,FLD) ;EP - Retrieve Single field value

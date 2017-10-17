@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:34">
+<Class name="BEDDAPPL.EDManager">
+<Description>
+BEDDAPPL.EDManager - BEDD Manager</Description>
+<CompileAfter>%ZEN.Generator,BEDDAPPL.EDMenu</CompileAfter>
+<Super>%ZEN.application</Super>
+<TimeChanged>62465,71144.767511</TimeChanged>
+<TimeCreated>61957,70510.87779</TimeCreated>
+<DependsOn>%ZEN.Generator,BEDDAPPL.EDMenu</DependsOn>
+
+<Parameter name="APPLICATIONNAME">
+<Description>
+This is the name of this application.</Description>
+<Default>EDManager</Default>
+</Parameter>
+
+<Parameter name="HOMEPAGE">
+<Description>
+This is the URL of the main starting page of this application.</Description>
+<Default>BEDDAPPL.EDRoom.cls</Default>
+</Parameter>
+
+<XData name="Style">
+<Description>
+This Style block contains application-wide CSS style definitions.</Description>
+<Data><![CDATA[
+<style type="text/css">
+
+/* style for table pane */
+#table table {
+	width: 900px;
+}
+
+/* style for title bar */
+    #title {
+      background: #C5D6D6;
+      color: black;
+      font-family: Verdana;
+      font-size: 1.5em;
+      font-weight: bold;
+      padding: 5px;
+      border-bottom: 1px solid black;
+      text-align: center;
+    }
+
+</style>
+]]></Data>
+</XData>
+</Class>
+</Export>

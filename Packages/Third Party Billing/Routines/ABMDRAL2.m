@@ -1,9 +1,10 @@
 ABMDRAL2 ; IHS/ASDST/DMJ - Bills Listing-132 width ; 
- ;;2.6;IHS 3P BILLING SYSTEM;**9**;NOV 12, 2009
+ ;;2.6;IHS 3P BILLING SYSTEM;**9,14,21**;NOV 12, 2009;Build 379
  ;Original;TMD;
  ;
  ; IHS/SD/SDR - 10/16/02 - V2.5 P2 - UXX-0801-170114 - Modified to fix <SBSCR> error on report
  ; IHS/SD/SDR - 2.6*9 - HEAT35406 - Correction to itemized report
+ ;IHS/SD/SDR - 2.6*21 - HEAT112271 - Changed PAID to POSTED.
  ;
 PRINT ;EP for printing data
  S ABM("PRIVACY")=1
@@ -51,7 +52,8 @@ TOT Q:ABM("CNT")=0
 HD D PAZ^ABMDRUTL Q:$D(DTOUT)!$D(DUOUT)!$D(DIROUT)
 HDB S ABM("PG")=ABM("PG")+1,ABM("I")="" D WHD^ABMDRHD
  W !,?30,"Claim",?67,"Visit",?89,"Export",?101,"Billed",?112,"Date",?125,"Paid"
- W !?10,"Insurer",?30,"Number",?43,"Patient",?59,"HRN",?67,"Date",?77,$S(ABMY("SORT")="V":"Clinic",1:"Visit Type"),?90,"Date",?101,"Amount",?112,"Paid",?124,"Amount"
+ ;W !?10,"Insurer",?30,"Number",?43,"Patient",?59,"HRN",?67,"Date",?77,$S(ABMY("SORT")="V":"Clinic",1:"Visit Type"),?90,"Date",?101,"Amount",?112,"Paid",?124,"Amount"  ;abm*2.6*21 IHS/SD/SDR HEAT112271
+ W !?10,"Insurer",?30,"Number",?43,"Patient",?59,"HRN",?67,"Date",?77,$S(ABMY("SORT")="V":"Clinic",1:"Visit Type"),?90,"Date",?101,"Amount",?112,"Posted",?124,"Amount"  ;abm*2.6*21 IHS/SD/SDR HEAT112271
  S $P(ABM("LINE"),"-",132)="" W !,ABM("LINE") K ABM("LINE")
  Q
  ;

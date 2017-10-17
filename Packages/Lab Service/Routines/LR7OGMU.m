@@ -1,5 +1,5 @@
 LR7OGMU ;VA/SLC/STAFF- Interim report rpc memo utility ; 17-Oct-2014 09:22 ; MKK
- ;;5.2;LR;**187,312,1022,395,1031,1034**;NOV 01, 1997;Build 88
+ ;;5.2;LR;**187,312,1022,395,1031,1034**;NOV 01, 1997;Build 146
  ;
  ; IHS/MSC/MKK - LR*5.2*1034 - Naked References removed
  ;

@@ -1,5 +1,5 @@
-BLRPCCVC ;IHS/OIT/MKK - IHS LAB LINK TO PCC ; 22-Oct-2013 09:22 ; MKK
- ;;5.2;IHS LABORATORY;**1022,1024,1025,1027,1033**;NOV 01, 1997
+BLRPCCVC ;IHS/OIT/MKK - IHS LAB LINK TO PCC ; 11-Apr-2016 07:53 ; MKK
+ ;;5.2;IHS LABORATORY;**1022,1024,1025,1027,1033,1039**;NOV 01, 1997;Build 38
  ;
  ; Create BLRAPI4 INPUT array so that call to GETVISIT^APCDAPI4 will have
  ; valid INPUT variables.
@@ -29,6 +29,12 @@ EP ; EP
  ;
  ; Use NOW if no Collection Date/Time and Order Date/Time not today
  I $G(BLRCDT)=""&($P($G(BLRODT),".",1)'=TODAY) S VISITDT=$$NOW^XLFDT
+ ;
+ ; ----- BEGIN IHS/OIT/MKK LR*5.2*1039 MODIFICATIONS
+ ; If the BLR COLL DT PCC VISIT CREATION parameter is set, then use the
+ ; Collection Date for Visit Creation.
+ I +$$GET^XPAR("PKG","BLR COLL DT PCC VISIT CREATION",1,"Q") S VISITDT=$G(BLRCDT,VISITDT)
+ ; ----- END IHS/OIT/MKK LR*5.2*1039 MODIFICATIONS
  ;
  S BLRAPI4("VISIT DATE")=VISITDT
  ;

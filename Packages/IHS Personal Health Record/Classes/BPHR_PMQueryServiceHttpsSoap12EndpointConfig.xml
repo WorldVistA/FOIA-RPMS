@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:34">
+<Class name="BPHR.PMQueryServiceHttpsSoap12EndpointConfig">
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%SOAP.Configuration</Super>
+<TimeChanged>64097,55803.323095</TimeChanged>
+<TimeCreated>64097,55803.316225</TimeCreated>
+
+<Parameter name="REPORTANYERROR">
+<Description>
+Ignore any alternatives in Policy that are not understood.</Description>
+<Default>0</Default>
+</Parameter>
+
+<XData name="policy1">
+<Data><![CDATA[
+<wsp:Policy xmlns:cfg="http://www.intersystems.com/configuration" xmlns:wsp="http://www.w3.org/ns/ws-policy" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" wsu:Id="UsernameTokenOverHTTPS">
+  <wsp:ExactlyOne>
+    <wsp:All>
+      <sp:TransportBinding xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+        <wsp:Policy xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
+          <sp:TransportToken>
+            <wsp:Policy>
+              <sp:HttpsToken RequireClientCertificate="false"/>
+            </wsp:Policy>
+          </sp:TransportToken>
+          <sp:AlgorithmSuite>
+            <wsp:Policy>
+              <sp:Basic256/>
+            </wsp:Policy>
+          </sp:AlgorithmSuite>
+          <sp:Layout>
+            <wsp:Policy>
+              <sp:Lax/>
+            </wsp:Policy>
+          </sp:Layout>
+          <sp:IncludeTimestamp/>
+        </wsp:Policy>
+      </sp:TransportBinding>
+      <sp:SignedSupportingTokens xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+        <wsp:Policy xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
+          <sp:UsernameToken sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient">
+            <wsp:Policy/>
+          </sp:UsernameToken>
+        </wsp:Policy>
+      </sp:SignedSupportingTokens>
+    </wsp:All>
+  </wsp:ExactlyOne>
+</wsp:Policy>
+]]></Data>
+</XData>
+
+<XData name="service">
+<Data><![CDATA[
+<cfg:configuration xmlns:cfg="http://www.intersystems.com/configuration" name="service">
+  <cfg:service classname="BPHR.PMQueryServiceHttpsSoap12Endpoint">
+    <wsp:Policy xmlns:wsp="http://www.w3.org/ns/ws-policy" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" wsu:Id="UsernameTokenOverHTTPS" cfg:wsdlElement="service">
+      <wsp:ExactlyOne>
+        <wsp:All>
+          <sp:TransportBinding xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+            <wsp:Policy xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
+              <sp:TransportToken>
+                <wsp:Policy>
+                  <sp:HttpsToken RequireClientCertificate="false"/>
+                </wsp:Policy>
+              </sp:TransportToken>
+              <sp:AlgorithmSuite>
+                <wsp:Policy>
+                  <sp:Basic256/>
+                </wsp:Policy>
+              </sp:AlgorithmSuite>
+              <sp:Layout>
+                <wsp:Policy>
+                  <sp:Lax/>
+                </wsp:Policy>
+              </sp:Layout>
+              <sp:IncludeTimestamp/>
+            </wsp:Policy>
+          </sp:TransportBinding>
+          <sp:SignedSupportingTokens xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+            <wsp:Policy xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
+              <sp:UsernameToken sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient">
+                <wsp:Policy/>
+              </sp:UsernameToken>
+            </wsp:Policy>
+          </sp:SignedSupportingTokens>
+        </wsp:All>
+      </wsp:ExactlyOne>
+    </wsp:Policy>
+    <cfg:method name="queryRequest"/>
+  </cfg:service>
+</cfg:configuration>
+]]></Data>
+</XData>
+</Class>
+</Export>

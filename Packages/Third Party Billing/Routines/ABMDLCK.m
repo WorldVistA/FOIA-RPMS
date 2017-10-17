@@ -1,5 +1,5 @@
 ABMDLCK ; IHS/ASDST/DMJ - Eligibility Checker ;    
- ;;2.6;IHS 3P BILLING SYSTEM;**13**;NOV 12, 2009;Build 213
+ ;;2.6;IHS 3P BILLING SYSTEM;**13,21**;NOV 12, 2009;Build 379
  ;Original;TMD;
  ;
  ;This rtn expects that ABMVDFN, the visit file ien be defined
@@ -37,6 +37,10 @@ ABMDLCK ; IHS/ASDST/DMJ - Eligibility Checker ;
  ;
  ; IHS/SD/SDR - v2.5 p9 - IM19399
  ;    Added code to look at new worker's comp file for eligibility
+ ;
+ ;IHS/SD/SDR - 2.6*21 - HEAT234095 - Fix for <UNDEF>AA+11^ABMDLCK.
+ ;IHS/SD/SDR - 2.6*21 - VMBP - Added code for new VAMB Eligible File; will be last insurer,
+ ;    with non-ben as final
  ; *********************************************************************
  ;
 ELG(ABMVDFN,ABML,DFN,ABMVDT) ;EP Entry point - Eligibility checker
@@ -78,8 +82,11 @@ ELG(ABMVDFN,ABML,DFN,ABMVDT) ;EP Entry point - Eligibility checker
  ;3    - Railroad ret
  ;2    - Medicare
  ;4    - Medicaid
+ ;5.5  - VMBP VA billing (at linetag 7)  ;abm*2.6*21 IHS/SD/SDR VMBP RQMT_90
  ;6    - non-ben
- F ABM("PROC")="WRKC","AA","5^ABMDLCK2",3,2,"4^ABMDLCK2","6^ABMDLCK2" D
+ ;F ABM("PROC")="WRKC","AA","5^ABMDLCK2",3,2,"4^ABMDLCK2","6^ABMDLCK2" D  ;abm*2.6*21 IHS/SD/SDR VMBP RQMT_90
+ S ABM("VACHK")=0  ;abm*2.6*21 IHS/SD/SDR VMBP RQMT_90
+ F ABM("PROC")="WRKC","AA","5^ABMDLCK2",3,2,"4^ABMDLCK2","7^ABMDLCK4","6^ABMDLCK2" D  ;abm*2.6*21 IHS/SD/SDR VMBP RQMT_90
  .S (ABM("COV"),ABM("MDFN"))=""
  .K ABM("FLG"),ABM("XIT")
  .D @ABM("PROC")
@@ -249,7 +256,8 @@ AA ;Automobile accident or other accident or tort related.
  .S ACCDENT=1
  .K ABM("INS")
  F  S V=$O(^AUPNVPOV("AD",ABMVDFN,V)) Q:'V  D  Q:ACCDENT
- .I $P(^AUPNVPOV(V,0),U,11)]"" S ACCDENT=1
+ .;I $P(^AUPNVPOV(V,0),U,11)]"" S ACCDENT=1  ;abm*2.6*21 IHS/SD/SDR HEAT234095
+ .I $P($G(^AUPNVPOV(V,0)),U,11)]"" S ACCDENT=1  ;abm*2.6*21 IHS/SD/SDR HEAT234095
  Q:'ACCDENT                  ;Not accident related
  Q:'$D(^AUPNPRVT(DFN))   ;No accident insurance
  S ABM("PRI")=1

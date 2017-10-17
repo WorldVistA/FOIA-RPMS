@@ -1,6 +1,8 @@
 ABME5L3 ; IHS/ASDST/DMJ - Header 
- ;;2.6;IHS Third Party Billing System;**6,9**;NOV 12, 2009
+ ;;2.6;IHS Third Party Billing System;**6,9,14,21**;NOV 12, 2009;Build 379
  ;Header Segments
+ ;IHS/SD/SDR - 2.6*21 - HEAT119570 - Added code to look in secondary place for Case Number
+ ;IHS/SD/SDR - 2.6*21 - HEAT123457 - Updated 61044 check to be 'contains' not 'equals'
  ;
 START ;START HERE
  S ABMI=1
@@ -28,13 +30,15 @@ START ;START HERE
  .D EP^ABME5DMG(ABMSFILE,ABMSIEN)
  .D WR^ABMUTL8("DMG")
  ;IHS/SD/AML 12/22/2011 - HEAT51571 END NEW CODE
- I $P(ABMB7,U,13)'="",(+$G(ABMCHILD)=0) D  ;if patient is subscriber
+ ;I $P(ABMB7,U,13)'="",(+$G(ABMCHILD)=0) D  ;if patient is subscriber  ;abm*2.6*21 IHS/SD/SDR HEAT119570
+ I ($P(ABMB7,U,13)'=""!($P(ABMB4,U,8)'="")) D  ;if patient is subscriber  ;abm*2.6*21 IHS/SD/SDR HEAT119570
  .D EP^ABME5REF("Y4","","")
  .D WR^ABMUTL8("REF")
  S ABMLOOP="2010BB"
  D EP^ABME5NM1("PR",ABMP("INS"))
  D WR^ABMUTL8("NM1")
- I $$RCID^ABMUTLP(ABMP("INS"))'=610442 D
+ ;I $$RCID^ABMUTLP(ABMP("INS"))'=610442 D  ;abm*2.6*21 IHS/SD/SDR HEAT123457
+ I $$RCID^ABMUTLP(ABMP("INS"))'["61044" D  ;abm*2.6*21 IHS/SD/SDR HEAT123457
  .D EP^ABME5N3(9999999.18,ABMP("INS"))
  .D WR^ABMUTL8("N3")
  .D EP^ABME5N4(9999999.18,ABMP("INS"))

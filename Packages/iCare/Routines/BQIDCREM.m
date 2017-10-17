@@ -1,5 +1,5 @@
 BQIDCREM ;GDIT/HS/ALA-Reminders Panel Definition ; 07 Dec 2012  2:18 PM
- ;;2.3;ICARE MANAGEMENT SYSTEM;**3,4**;Apr 18, 2012;Build 66
+ ;;2.5;ICARE MANAGEMENT SYSTEM;**2**;May 24, 2016;Build 14
  ;
  Q
  ;
@@ -56,6 +56,7 @@ RMF ;EP - Find reminder
  . I $P(RDATA,U,3)="DUE NOW" Q
  . ;I $P(RDATA,U,3)="RESOLVED" S @DATA@(DFN)="" Q
  . I $P(RDATA,U,3)="RESOLVED" Q
+ . I $P(RDATA,U,3)="DONE" Q
  . I $P(RDATA,U,4)'="" D
  .. I $G(RFDT)'="" D
  ... I $P(RDATA,U,4)<RFDT!($P(RDATA,U,4)>REDT) Q
@@ -64,6 +65,7 @@ RMF ;EP - Find reminder
  ;
  I OVD'="" D  Q
  . I $P(RDATA,U,3)="RESOLVED" Q
+ . I $P(RDATA,U,3)="DONE" Q
  . I $P(RDATA,U,4)>DT Q
  . S @DATA@(DFN)="",@DCRIT@("REM",DFN,REMCODE)=""
  Q

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:35">
+<Class name="csp.hl7.hl7schemalist">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>CSPX.AutoPageCSP</Super>
+<TimeChanged>61501,53312.434502</TimeChanged>
+<TimeCreated>61501,53312.430283</TimeCreated>
+<GeneratedBy>/csp/goldb/HL7/HL7SchemaList.csp</GeneratedBy>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body>"
+	Write !,"<table border=""0"" class=""LayoutMain"" width=""100%"" cellpadding=""0"" cellspacing=""0"">"
+	Do ..WriteTitlePane("@Ensemble:HL7ManagerSchemaContents@Ensemble HL7 Schema Contents")
+	Write !,"</table>"
+	Write !
+	#Include EnsHL7
+	If ((category'="") && (element'="")) {
+	set name=$case(element, "MT":"Message Type", "MS":"Message Structure / DocType", "SS":"Segment Structure", "DS":"Data Structure", "CT":"Code Table", :"Unknown Structure")
+	set caption=name_"s"
+	set csppage="HL7Schema"_$tr($P(name,"/")," ")
+	&html<<div class="Text1">HL7 <b>#(caption)#</b> in Category '<b>#(category)#</b>'#($S(""=base:"",1:" (base category '<i><a href="_..Link("HL7SchemaList.csp?ELEMENT="_element_"&CATEGORY="_base)_">"_base_"</a></i>')"))# are displayed below:</div>>
+	Set max=0
+	Set next=$o($$$vaSchemaGbl(category,element,""))
+	Set n1st=$ZCVT($E(next),"U")
+	write "<table cellpadding=0 cellspacing=0 style=""margin-left: 20px;""><tr><td>"_$S(+next=next:"Num",1:n1st)_"</td><td><table border=1 cellpadding=4 cellspacing=0 style=""margin-left: 20px;"">"_$C(13,10)
+	For cnt=1:1 { Set item=next,i1st=n1st  Quit:item=""  Set next=$o($$$vaSchemaGbl(category,element,item)), n1st=$ZCVT($E(next),"U")
+	if cnt=1 write "<tr>"
+	set:cnt>max max=cnt
+	set tDesc=..EscapeHTML(##class(EnsLib.HL7.Schema).GetDescription(element_":"_category_":"_item))
+	write "<td><a title='"_$S(""'=tDesc:tDesc, 1:element_":"_category_":"_item)_"' href='"_..Link(csppage_".csp?"_element_"="_element_":"_category_":"_item)_"'>"
+	write item,"</a></td>"_$C(13,10) 
+	if i1st'=n1st&&'((+item=item)&&(+next=next)) {
+	While cnt#max {
+	write "<td>&nbsp;</td>"
+	set cnt=cnt+1
+	}
+	set max=0,cnt=0
+	write "</tr></table></td></tr><tr><td>&nbsp;</td></tr>"_$C(13,10)_
+	"<tr><td>"_$S(+next=next:"Num",1:n1st)_"</td><td><table border=1 cellpadding=4 cellspacing=0 style=""margin-left: 20px;"">"
+	}
+	Elseif cnt#10=0 { set cnt=0  write "</tr>"_$C(13,10) }
+	}
+	for  {
+	if cnt#10=1 quit
+	write "<td>&nbsp;</td>"
+	if cnt#10=0 quit
+	set cnt=cnt+1
+	}
+	}
+	Write !,!,"</tr></table></td></tr></table>",!
+	Write !,"<p>",!
+	Write "<div style=""margin-left: 20px; margin-right: 20px;"">"
+	Write !,"<a href="""_(..Link("HL7SchemaMain.csp"))_""">"
+	Write "(Show All Categories)"
+	Write "</a>"
+	Write "<br>",!
+	Write "</div>"
+	Write !,"</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<title>Ensemble HL7 Schema Contents</title>",!
+	Write "<link rel=""stylesheet"" type=""text/css"" href=""/csp/sys/csputils.css"" title=""Standard Style""/>"
+	Write !,!
+	#Include EnsHL7
+	set category=%request.Get("CATEGORY") Set:""=category category=0
+	set element=%request.Get("ELEMENT")
+	set base=$get($$$vaSchemaGbl(category,"base"))
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>C:\InterSystems\Ensemble\CSP\goldb\HL7\HL7SchemaList.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/goldb/HL7/HL7SchemaList.csp</Default>
+</Parameter>
+
+<Parameter name="DOMAIN">
+<Default>Ensemble</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>61286,9120</Default>
+</Parameter>
+
+<Parameter name="PAGENAME">
+<Default>HL7 Schema Contents</Default>
+</Parameter>
+
+<Parameter name="PARENTPAGE">
+<Default>HL7SchemaMain.csp</Default>
+</Parameter>
+</Class>
+</Export>

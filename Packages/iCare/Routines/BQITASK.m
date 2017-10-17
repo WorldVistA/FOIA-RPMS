@@ -1,5 +1,5 @@
 BQITASK ;PRXM/HC/ALA-Scheduled Task Program ; 20 Dec 2006  4:56 PM
- ;;2.5;ICARE MANAGEMENT SYSTEM;**1**;May 24, 2016;Build 17
+ ;;2.6;ICARE MANAGEMENT SYSTEM;**1**;Jul 07, 2017;Build 2
  Q
  ;
 EN ;EP - Entry point
@@ -104,7 +104,7 @@ GPR ;EP - Entry point to get GPRA values for all users
  ;
  NEW BGP3YE,BGPB3YE,BGPBBD,BGPBD,BGPBED,BGPED,BGPIND,BGPP3YE,BGPPBD,BGPPED
  NEW BGPQTR,BGPRPT,BGPRTYPE,BQIDATA,BQIGREF,BQIH,BQIINDG,BQIPUP,BQIROU,BQIY
- NEW BQIYR,IND,MCT,MEAS,SIND,BGPPER,BQIDFN,CT,GPMEAS,BQIMEASG
+ NEW BQIYR,IND,MCT,MEAS,SIND,BGPPER,BQIDFN,CT,GPMEAS,BQIMEASG,CRDT
  ;
  NEW UID
  S UID=$S($G(ZTSK):"Z"_ZTSK,1:$J)
@@ -175,14 +175,16 @@ GPR ;EP - Entry point to get GPRA values for all users
  . I '$$VTHR^BQIUL1(BQIDFN) Q
  . ;I '$$VTWR^BQIUL1(BQIDFN) Q
  . I $P($G(^AUPNPAT(BQIDFN,0)),U,1)="" Q
+ . ;  if the patient doesn't already exist in the iCare Patient file, add them
+ . I $G(^BQIPAT(BQIDFN,0))="" D NPT(BQIDFN)
+ . I $P($G(^BQIPAT(BQIDFN,0)),"^",1)="" S $P(^BQIPAT(BQIDFN,0),"^",1)=BQIDFN,^BQIPAT("B",BQIDFN,BQIDFN)=""
+ . ;
+ . ;S CRDT=$P($G(^BQIPAT(BQIDFN,0)),"^",5)
+ . ;I $$FMDIFF^XLFDT(DT,CRDT\1)<7 Q
  . ;
  . D @("BQI^"_BQIROU_"(BQIDFN,.BQIGREF)")
  . ; if the patient doesn't meet any GPRA logic, quit
  . I '$D(@BQIGREF@(BQIDFN)) Q
- . ;
- . ;  if the patient doesn't already exist in the iCare Patient file, add them
- . I $G(^BQIPAT(BQIDFN,0))="" D NPT(BQIDFN)
- . I $P($G(^BQIPAT(BQIDFN,0)),"^",1)="" S $P(^BQIPAT(BQIDFN,0),"^",1)=BQIDFN,^BQIPAT("B",BQIDFN,BQIDFN)=""
  . ;
  . S @BQIDATA@(BQIDFN,30,0)="^90507.53^^"
  . ;
@@ -216,7 +218,7 @@ GPR ;EP - Entry point to get GPRA values for all users
  . ;NEW DA,DIK
  . ;S DA=BQIDFN,DIK="^BQIPAT(" D IX1^DIK
  ;
- K ^XTMP("BGP15TAX",$J)
+ K ^XTMP("BGP15TAX",$J),^XTMP("BGPSNOMEDSUBSET",$J)
  ;
 EXIT ; Set the DATE/TIME GPRA STOPPED
  NEW DA

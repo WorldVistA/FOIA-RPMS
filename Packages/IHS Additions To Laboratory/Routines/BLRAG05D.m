@@ -1,5 +1,5 @@
-BLRAG05D ; IHS/MSC/SAT - SUPPORT FOR LABORATORY ACCESSION GUI RPCS ; Nov 30, 2012
- ;;5.2;IHS LABORATORY;**1031**;NOV 01, 1997;Build 185
+BLRAG05D ; IHS/MSC/SAT - SUPPORT FOR LABORATORY ACCESSION GUI RPCS ; 18-Jul-2016 15:43 ; MKK
+ ;;5.2;IHS LABORATORY;**1031,1037,1039**;NOV 01, 1997;Build 38
  ;
  ;
 LROE2 ;
@@ -178,13 +178,20 @@ BLRRL ;EP - cmi/anch/maw 8/4/2004 added to check for shipping manifest and print
  ;cmi/anch/maw REF LAB
  ;cmi/anch/maw 9/28/2004 changed to write only when a shipping manifest
  K BLRINS,BLRDXS  ;cmi/7/1/2010 reference lab ledi variables
+ K BLRASFLG  ;P1034
  Q:$G(BLRGUI)
  Q:'$G(^BLRSITE(DUZ(2),"RL"))  ;reference lab not set up
  Q:$P($G(^BLRSITE(DUZ(2),"RL")),U,22)
- I $D(^TMP("BLRRL",$J)) D
- . ;W !,"Printing Shipping Manifests for Reference Lab..."
- . D PRT^BLRSHPM
- Q
+ ;I $D(^TMP("BLRRL",$J)) D
+ I $G(LRORD),$O(^BLRRLO("B",LRORD,0)) D  ;p1034
+ . N OI
+ . S OI=$O(^BLRRLO("B",LRORD,0))
+ . Q:'$D(^BLRRLO(OI,3,0))  ;not accessioned yet
+ . ;W !,"Printing Shipping Manifests for Reference Lab..."  ;1036 moved to BLRRLEVN
+ . ;D PRT^BLRSHPM
+ . D SHIPMAN^BLRRLEVN(LRORD,0,0)  ;ihs/cmi/maw 12/17/2014 p1034 store and forward changes
+ K BLRINS,BLRASFLG,BLRDXS  ; ihs/cmi/maw p1037
+ Q  ; IHS/MSC/MKK - LR*5.2*1039
  ;----- END IHS MODIFICATIONS cmi/anch/maw end REF LAB LR*5.2*1021
  ;
 PTCS(BLRDT,BLRSPN,BLRUSER,BLRDTCF,BLRMETH) ;
@@ -210,17 +217,27 @@ PTCS(BLRDT,BLRSPN,BLRUSER,BLRDTCF,BLRMETH) ;
  I $D(BLRM("DIERR")) D ERR^BLRAGUT("BLRAG01: "_BLRM("DIERR",1,"TEXT",1)) L -^LRO(69,BLRDT,1,BLRSPN) TROLLBACK  Q
  Q
  ;
-ERROR ;
- D ENTRYAUD^BLRUTIL("ERROR^BLRAG05D 0.0")   ; Store Error data
- NEW ERRORMSG
- S ERRORMSG="$"_"Z"_"E=""ERROR^BLRAG05D"""  ; BYPASS SAC Checker
- S @ERRORMSG  D ^%ZTER
- D ERR("RPMS Error")
+ERROR ; EP
+ ; D ENTRYAUD^BLRUTIL("ERROR^BLRAG05D 0.0")   ; Store Error data
+ ; NEW ERRORMSG
+ ; S ERRORMSG="$"_"Z"_"E=""ERROR^BLRAG05D"""  ; BYPASS SAC Checker
+ ; S @ERRORMSG  D ^%ZTER
+ ;
+ ; D ERR("RPMS Error")
+ ;
+ ; ----- BEGIN IHS/MSC/MKK - LR*5.2*1039
+ NEW ERRSCFL,ERRCODE,LASTGLOR
+ S ERRCODE=$$EC^%ZOSV        ; Error Code
+ S ERRLGLO=$$LGR^%ZOSV       ; Last Global accessed
+ D FORCEIT^BLRUTIL7("ERROR^BLRAG05D")
+ D ERR("RPMS Error: "_ERRCODE)
+ ; ----- END IHS/MSC/MKK - LR*5.2*1039
  Q
  ;
 ERR(BLRERR) ;Error processing
  ; BLRERR = Error text OR error code
  ; BLRAGI   = pointer into return global array
+ ;
  D UNL69ERR^BLRAG05D
  I +BLRERR S BLRERR=BLRERR+134234112 ;vbObjectError
  S BLRAGI=BLRAGI+1

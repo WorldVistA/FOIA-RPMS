@@ -1,23 +1,20 @@
 ABMER20A ; IHS/ASDST/DMJ - UB92 EMC RECORD 20 (Patient) cont'd ;   
- ;;2.6;IHS 3P BILLING SYSTEM;;NOV 12, 2009
+ ;;2.6;IHS 3P BILLING SYSTEM;**21**;NOV 12, 2009;Build 379
  ;Original;DMJ;02/07/96 12:33 PM
  ;
  ;IHS/DSD/DMJ - 7/15/1999 NOIS BXX-0799-150034 Patch 3 #3
  ;      Modified to allow spaces in patient last name
  ; IHS/ASDS/DMJ - 04/20/00 - V2.4 Patch 1 - NOIS HQW-0500-100040
- ;     Modified location code to check for satellite first.  If no
- ;     satellite, use parent.
+ ;     Modified location code to check for satellite first.  If no satellite, use parent.
  ; IHS/ASDS/LSL - 07/10/00 - V2.4 Path 2 - NOIS NDA-0700-180029
- ;      Modified to strip off the leading zero of admission source
- ;      and admission type.
+ ;      Modified to strip off the leading zero of admission source and admission type.
  ; IHS/ASDS/LSL - 09/06/00 - V2.4 Patch 3 - NOIS CAA-0900-110008
- ;      If nothing in admission source or type, make it null instead
- ;      of 0 (zero).
- ;
+ ;      If nothing in admission source or type, make it null instead of 0 (zero).
  ; IHS/ASDS/SDH - 09/27/01 - v2.4 Patch 9 - NOIS XAA-0901-200095
- ;     After moving Kidscare to Page 5 from Page 7 found that there are
- ;     checks that are done for Medicaid that should also be done for
- ;     Kidscare.
+ ;     After moving Kidscare to Page 5 from Page 7 found that there are checks that are done for Medicaid that should also 
+ ;     be done for Kidscare.
+ ;
+ ;IHS/SD/SDR - 2.6*21 - HEAT169641 - Include comma and middle initial if AO Control# is 61044
  ;
  ; *********************************************************************
  ;            
@@ -79,6 +76,7 @@ LOOP ;LOOP HERE
  I ABMR(20,60)="BABY GIRL" S ABMR(20,60)=" " Q
  S ABMR(20,60)=$P(ABMR(20,60)," ",2)
  S ABMR(20,60)=$E(ABMR(20,60))
+ I ($$RCID^ABMERUTL(ABMP("INS"))[61044) S ABMR(20,60)=$P(ABME("PNM"),",",3)  ;abm*2.6*21 IHS/SD/SDR HEAT169641
  S ABMR(20,60)=$$FMT^ABMERUTL(ABMR(20,60),1)
  Q
  ;
@@ -156,6 +154,7 @@ PNM ; EP
  I ABMP("ITYPE")="D"!(ABMP("ITYPE")="K") D
  .Q:'$G(ABMCDNUM)
  .S ABME("PNM")=$P($G(^AUPNMCD(ABMCDNUM,21)),U) ; Pat name
+ .I $P($P(ABME("PNM"),",",2)," ",2)'=""&($$RCID^ABMERUTL(ABMP("INS"))[61044) S $P(ABME("PNM"),",",2)=$P($P(ABME("PNM"),",",2)," ",1)_","_$P($P(ABME("PNM"),",",2)," ",2)  ;abm*2.6*21 IHS/SD/SDR HEAT169641
  .S ABME("DOB")=$P($G(^AUPNMCD(ABMCDNUM,21)),"^",2) ; dob
  ;
  ; Else get from patient file

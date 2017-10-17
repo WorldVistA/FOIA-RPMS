@@ -1,5 +1,5 @@
 BGP7D34 ; IHS/CMI/LAB - measure C ;
- ;;17.0;IHS CLINICAL REPORTING;;AUG 30, 2016;Build 16
+ ;;17.1;IHS CLINICAL REPORTING;;MAY 10, 2017;Build 29
  ;
 CNTDTAP ;
  S (X,Y)="",C=0 F  S X=$O(BGPDTAP(X)) Q:X'=+X  S C=C+1 D
@@ -56,13 +56,13 @@ DTAP(P,EDATE) ;EP
  ...S Y=$P(^AUPNVCPT(X,0),U)
  ...Q:Y=""
  ...S Y=$P($$CPT^ICPTCOD(Y),U,2)
- ...I Y=90700!(Y=90721)!(Y=90723)!(Y=90701)!(Y=90711)!(Y=90720)!(Y=90702)!(Y=90718)!(Y=90719)!(Y=90703)!(Y=90698)!(Y=90715)!(Y=90714)!(Y=90696) S ^TMP($J,"CPT",9999999-$P(ED,"."),Y)=""
+ ...I Y=90700!(Y=90721)!(Y=90723)!(Y=90701)!(Y=90711)!(Y=90720)!(Y=90702)!(Y=90718)!(Y=90719)!(Y=90703)!(Y=90698)!(Y=90715)!(Y=90714)!(Y=90696)!(Y=90697) S ^TMP($J,"CPT",9999999-$P(ED,"."),Y)=""
  ..S X=0 F  S X=$O(^AUPNVTC("AD",V,X)) Q:X'=+X  D
  ...Q:'$D(^AUPNVTC(X,0))
  ...S Y=$P(^AUPNVTC(X,0),U,7)
  ...Q:Y=""
  ...S Y=$P($$CPT^ICPTCOD(Y),U,2)
- ...I Y=90700!(Y=90721)!(Y=90723)!(Y=90701)!(Y=90711)!(Y=90720)!(Y=90702)!(Y=90718)!(Y=90719)!(Y=90703)!(Y=90698)!(Y=90715)!(Y=90714)!(Y=90696) S ^TMP($J,"CPT",9999999-$P(ED,"."),Y)=""
+ ...I Y=90700!(Y=90721)!(Y=90723)!(Y=90701)!(Y=90711)!(Y=90720)!(Y=90702)!(Y=90718)!(Y=90719)!(Y=90703)!(Y=90698)!(Y=90715)!(Y=90714)!(Y=90696)!(Y=90697) S ^TMP($J,"CPT",9999999-$P(ED,"."),Y)=""
  ;now gather up all DTAP immunizations, cpts 
  K BGPDTAP
  S BGPEVTD=0,BGPEVDIP=0,BGPEVPER=0
@@ -75,7 +75,7 @@ DTAP(P,EDATE) ;EP
  I BGPDTAP>3 Q 1_U_"4 DTaP/DTP"  ;had 4 dtap by cvx so code is 1
  ;now get cpts for dtap or dtp
  S D=0 F  S D=$O(^TMP($J,"CPT",D)) Q:D'=+D  S Y="" F  S Y=$O(^TMP($J,"CPT",D,Y)) Q:Y=""  D
- .I Y=90700!(Y=90721)!(Y=90723)!(Y=90701)!(Y=90711)!(Y=90720)!(Y=90698)!(Y=90715)!(Y=90696) S BGPDTAP(D)=""
+ .I Y=90700!(Y=90721)!(Y=90723)!(Y=90701)!(Y=90711)!(Y=90720)!(Y=90698)!(Y=90715)!(Y=90696)!(Y=90697) S BGPDTAP(D)=""
  D CNTDTAP  ;count to see if there are 4
  I BGPDTAP>3 Q 1_U_"4 DTaP/DTP"  ;had 4 dtap cvx or cpts so code is 1
 DT ;add in dt's

@@ -1,14 +1,23 @@
 ABMDF35E ; IHS/SD/SDR - Set HCFA1500 (02/12) Print Array - Part 5 ;  
- ;;2.6;IHS 3P BILLING SYSTEM;**13**;NOV 12, 2009;Build 213
+ ;;2.6;IHS 3P BILLING SYSTEM;**13,21**;NOV 12, 2009;Build 379
+ ;IHS/SD/SDR - 2.6*21 - HEAT223194 - Fixed EPSDT field so it will print either the second character from the referral
+ ;  or an 'U' for no referral.
  ;
  ; *********************************************************************
  ;
 EMG ;EP for setting Emerg or Special Prog variable
- S (ABM,ABM("EPSDT"))=0
+ ;S (ABM,ABM("EPSDT"))=0  ;abm*2.6*21 IHS/SD/SDR HEAT223194
+ S ABM=0  ;abm*2.6*21 IHS/SD/SDR HEAT223194
+ S ABM("EPSDT")=""  ;abm*2.6*21 IHS/SD/SDR HEAT223194
  F  S ABM=$O(^ABMDBILL(DUZ(2),ABMP("BDFN"),59,ABM)) Q:'ABM  D
  .S ABM("X")=$P(^ABMDBILL(DUZ(2),ABMP("BDFN"),59,ABM,0),U)
  .Q:ABM("X")=""
- .I $P(^ABMDCODE(ABM("X"),0),U)["EPSDT"!($P(^(0),U))["FAMILY" S ABM("EPSDT")=1
+ .;I $P(^ABMDCODE(ABM("X"),0),U)["EPSDT"!($P(^(0),U))["FAMILY" S ABM("EPSDT")=1  ;abm*2.6*21 IHS/SD/SDR HEAT223194
+ .I ($P(^ABMDCODE(ABM("X"),0),U,3)["EPSDT") D  ;abm*2.6*21 IHS/SD/SDR HEAT223194
+ ..I $P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),59,ABM,0)),U,2)="N" S ABM("EPSDT")="U" Q  ;abm*2.6*21 IHS/SD/SDR HEAT223194
+ ..S ABM("EPSDT")=$O(^ABMDBILL(DUZ(2),ABMP("BDFN"),59,ABM,1,0))  ;abm*2.6*21 IHS/SD/SDR HEAT223194
+ ..S ABM("EPSDT")=$E($P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),59,ABM,1,ABM("EPSDT"),0)),U),2)  ;abm*2.6*21 IHS/SD/SDR HEAT223194
+ .I ($P(^(0),U,3)["FAMILY") S ABM("EPSDT")="X"  ;abm*2.6*21 IHS/SD/SDR HEAT223194
  S ABM("EMG")=$S($P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),8)),U,5)="Y":1,1:0)
  Q
  ;
@@ -60,7 +69,8 @@ PROC ;EP for setting the procedure portion of the ABMF array
  .S $P(ABMR(ABMS,ABMLN),U,5)=" "_$P(ABMS(ABMS),U,4)
  .; If CPT code, and modifier exists, add it
  .S $P(ABMR(ABMS,ABMLN),U,5)=" "_$P(ABMR(ABMS,ABMLN),U,5)_$S($E($P(ABMS(ABMS),U,8))="#":" "_$P($P(ABMS(ABMS),U,8)," "),1:"")
- .S:$G(ABM("EPSDT")) $P(ABMR(ABMS,ABMLN),U,9)="X"  ; Form locator 24H
+ .;S:$G(ABM("EPSDT")) $P(ABMR(ABMS,ABMLN),U,9)="X"  ; Form locator 24H  ;abm*2.6*21 IHS/SD/SDR HEAT223194
+ .S:$G(ABM("EPSDT"))'="" $P(ABMR(ABMS,ABMLN),U,9)=$G(ABM("EPSDT"))  ; Form locator 24H  ;abm*2.6*21 IHS/SD/SDR HEAT223194
  .S:$G(ABM("EMG")) $P(ABMR(ABMS,ABMLN),U,4)="X"   ; Form locator 24C
  E  D
  .I $P($G(^AUTNINS(ABMP("INS"),0)),U)["PHC MEDICAID" S $P(ABMS(ABMS),U,8)=$TR($P(ABMS(ABMS),U,8),"-")
@@ -93,7 +103,7 @@ PROC ;EP for setting the procedure portion of the ABMF array
  .I $P($G(^ABMNINS(DUZ(2),ABMP("INS"),1,ABMP("VTYP"),0)),"^",15)="MD" D
  ..S $P(ABMR(ABMS,ABMLN-1),U,3)=ABMLOCAL
  .K ABMLOCAL
-  I $G(ABMP("EXP"))=35 D
+ I $G(ABMP("EXP"))=35 D
  .S:+$G(ABMDUZ2)=0 ABMDUZ2=DUZ(2)
  .S ABMPQ=$S(ABMP("ITYPE")="R":"1C"_" ",ABMP("ITYPE")="D":"1D"_" ",$P($G(^ABMNINS(ABMDUZ2,ABMP("INS"),1,ABMP("VTYP"),1)),U)'="":$P($G(^ABMREFID($P($G(^ABMNINS(ABMDUZ2,ABMP("INS"),1,ABMP("VTYP"),1)),U),0)),U),1:"0B"_" ")
  I ($P(ABMS(ABMS),U,11)&($G(ABMP("NPIS"))'="")&(ABMP("NPIS")'="N")) D

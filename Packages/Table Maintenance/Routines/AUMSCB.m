@@ -1,5 +1,5 @@
 AUMSCB ;IHS/OIT/NKD - SCB UPDATE ENVIRONMENT CHECK/PRE/POST INSTALL 3/08/2013 ;
- ;;16.0;TABLE MAINTENANCE;**4**;OCT 16,2015;Build 1
+ ;;17.0;TABLE MAINTENANCE;**3**;AUG 18,2016;Build 1
  ; 03/12/14 - Removed use of AUMPRE for pre-install, changed to just remove AUMDATA entries
  ; 12/16/14 - Removed old/unused code, added support for future environment checking
  ; 03/11/15 - Modified environment checking display to write to screen
@@ -14,7 +14,7 @@ AUMSCB ;IHS/OIT/NKD - SCB UPDATE ENVIRONMENT CHECK/PRE/POST INSTALL 3/08/2013 ;
  ;
  S:'$$VCHK("XU","8.0") XPDQUIT=2
  S:'$$VCHK("DI","22.0") XPDQUIT=2
- S:'$$PCHK("AUM","16.0","3") XPDQUIT=2
+ S:'$$PCHK("AUM","17.0","2") XPDQUIT=2
  S:'$$VCHK("AUT","98.1","27") XPDQUIT=2
  ;
  NEW DA,DIC

@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:34">
+<Class name="BEDDAPPL.EDWarning">
+<Description>
+BEDDAPPL.EDWarning</Description>
+<CompileAfter>%ZEN.Generator,BEDDAPPL.EDMenu</CompileAfter>
+<Super>%ZEN.Component.page</Super>
+<TimeChanged>62465,71711.029664</TimeChanged>
+<TimeCreated>61957,70607.761569</TimeCreated>
+<DependsOn>%ZEN.Generator,BEDDAPPL.EDMenu</DependsOn>
+
+<Parameter name="APPLICATION">
+<Description>
+Class name of application this page belongs to.</Description>
+<Default>BEDDAPPL.EDManager</Default>
+</Parameter>
+
+<Parameter name="PAGENAME">
+<Description>
+Displayed name of this page.</Description>
+<Default>EDWarning</Default>
+</Parameter>
+
+<Parameter name="DOMAIN">
+<Description>
+Domain used for localization.</Description>
+</Parameter>
+
+<XData name="Style">
+<Description>
+This Style block contains page-specific CSS style definitions.</Description>
+<Data><![CDATA[
+<style type="text/css"> 
+
+</style>
+]]></Data>
+</XData>
+
+<XData name="Contents">
+<Description>
+This XML block defines the contents of this page.</Description>
+<XMLNamespace>http://mynation.chickasaw.net/BEDD</XMLNamespace>
+<Data><![CDATA[
+<page title="ED Dashboard Warnings" 
+	xmlns:beddappl="http://www.intersystems.com/BEDDAPPL" 
+	xmlns="http://www.intersystems.com/zen"  >
+	
+	<beddappl:EDMenu width="100%"/>
+<hgroup width="100%">
+    <vgroup width="2%"></vgroup>
+  
+    <vgroup width="94%">
+    <spacer width="2" />
+ 	<tableNavigator id="warnNav" tablePaneId="warnTable"/>
+ 	<spacer width="2" />
+    <tablePane
+    width="1000px"
+    id="warnTable" 
+    tableName="BEDD.EDWarning"
+    orderByClause="EDStatus,WaitTime"
+    onselectrow="zenPage.rowSelected(zenThis);"
+    maxRows="1000" 
+    pageSize="15" 
+    showRowNumbers="true" 
+    showZebra="true" 
+    useSnapshot="true"
+    extraColumnWidth="3%"
+    caption="Warnings"
+    valueColumn="ID">    
+   <column colName="ID" hidden="true"/>
+   <column header="EDStatus" width="8%" colName="EDStatus" filterType="text"/>
+   <column header="WaitTime" width="6%" colName="WaitTime"/>
+   <column header="Color" width="8%" colName="Color"/>
+   <column header="Contact Name:" width="12%" colName="NotifyMgr"/>
+   <column header="Email" width="20%" colName="NotifyByEmail"/>
+   <column header="Pager" width="12%" colName="NotifyByPager"/>
+   <column header="Start Time" width="8%" colName="StartTm"/>
+   <column header="End Time" width="8%" colName="EndTm"/>
+ </tablePane>
+
+    </vgroup>
+  
+    <vgroup width="2%"></vgroup>
+   </hgroup>
+   <spacer width="10"/>
+<dataController id="warnData"  
+    modelClass="BEDDAPPL.EDWarningModel" 
+    modelId="" />
+<spacer width="5"/>
+
+<fieldSet id="warnFormGroup" hidden="false" legend="Warning Setup">
+<form id="warnForm" 
+         controllerId="warnData" 
+         layout="vertical"
+         cellStyle="padding: 2px; padding-left: 5px; padding-right: 5px;">
+
+<hgroup>
+<vgroup width="20">
+<hgroup>
+<combobox label="EDStatus:" id="EDStatus" name="EDStatus" dataBinding="EDStatus" >
+	<option value="Check In" text="Check-In"/>
+	<option value="Triage" text="Triage"/>
+	<option value="Room Management" text="Room Management"/>
+	</combobox>
+	
+	<spacer width="10"/>  
+	<text label="Exceeds Wait Time (mins):" dataBinding="WaitTime" id="WaitTime" name="WaitTime" size="10" />
+	<spacer width="10"/>  
+	<radioSet label="Color:" dataBinding="Color" id="Color" name="Color" displayList="yellow,green,blue,red" valueList="yellow,green,blue,red"/>
+	<spacer width="10"/>  
+ </hgroup>
+ </vgroup>
+</hgroup>
+ 
+<hgroup >
+<spacer width="10"/>
+<vgroup>
+<hgroup>
+	<text label="Contact:" dataBinding="NotifyMgr" id="NotifyMgr" name="NotifyMgr" size="20" />
+	<spacer width="10"/>  
+	<text label="Email:" dataBinding="NotifyByEmail" id="NotifyByEmail" name="NotifyByEmail" size="25" />
+	<spacer width="10"/>  
+	<text label="Pager:" dataBinding="NotifyByPager" id="NotifyByPager" name="NotifyByPager" size="15" />
+	<spacer width="10"/>  
+	<text label="Starting Time:" dataBinding="StartTm" id="StartTm" name="StartTm" size="12" />
+	<spacer width="10"/>  
+	<text label="Ending:" dataBinding="EndTm" id="EndTm" name="EndTm" size="12" />
+	<spacer width="10"/>
+</hgroup>
+</vgroup>
+</hgroup>
+
+<hgroup>
+<spacer width="10"/>
+<vgroup>
+<hgroup>
+	<button caption="Save" onclick="zenPage.saveEntry();" />
+	<spacer width="2" />	
+	<button caption="Add" onclick="zenPage.newEntry();" />	
+	<spacer width="2" />	
+	<button caption="Delete" onclick="zenPage.deleteEntry();" />	
+</hgroup>
+</vgroup>
+</hgroup>
+</form>
+</fieldSet>
+</page>
+]]></Data>
+</XData>
+
+<Property name="dlID">
+<Type>%ZEN.Datatype.string</Type>
+<Parameter name="ZENURL" value="dlID"/>
+</Property>
+
+<Method name="showwarnForm">
+<FormalSpec>id</FormalSpec>
+<Language>javascript</Language>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[
+  var controller = zenPage.getComponentById('warnData');
+  controller.setProperty('modelId',id);
+  var warnFormGroup=zenPage.getComponentById("warnFormGroup");
+  warnFormGroup.setProperty('hidden',false);
+]]></Implementation>
+</Method>
+
+<Method name="rowSelected">
+<Description>
+user selected a row in the table</Description>
+<Language>javascript</Language>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[
+  var table=zenPage.getComponentById('warnTable');
+   //update details pan using ID value from table
+  var id = table.getProperty('value');
+  this.showwarnForm(id)
+]]></Implementation>
+</Method>
+
+<Method name="newEntry">
+<Description>
+Create a new entry</Description>
+<Language>javascript</Language>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[
+	var controller = zenPage.getComponentById('warnData');
+	controller.createNewObject();
+]]></Implementation>
+</Method>
+
+<Method name="deleteEntry">
+<Description>
+Delete current item from database</Description>
+<Language>javascript</Language>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[
+	if (confirm(this.deleteMsg)) {
+		var controller = zenPage.getComponentById('warnData');
+		controller.deleteId(controller.getModelId());
+	
+		var table = zenPage.getComponentById('warntable');
+		table.executeQuery(true);
+	}
+]]></Implementation>
+</Method>
+
+<Method name="saveEntry">
+<Description>
+save visitmodel to database</Description>
+<Language>javascript</Language>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[
+  // validate and save form
+  var form = zenPage.getComponentById('warnForm');
+  form.save();
+
+  //refresh data in contact table  
+  var table=zenPage.getComponentById('warnTable');
+  table.executeQuery();
+  alert('Save Complete.');
+	return true;
+]]></Implementation>
+</Method>
+</Class>
+</Export>

@@ -1,5 +1,5 @@
 ABMDE6 ; IHS/ASDST/DMJ - Page 6 - DENTAL ;
- ;;2.6;IHS Third Party Billing System;**2,8**;NOV 12, 2009
+ ;;2.6;IHS Third Party Billing System;**2,8,10,21**;NOV 12, 2009;Build 379
  ;
  ; IHS/SD/SDR - v2.5 p9 - IM17106 - <UNDEFINED>PC1^ABMDE6 regarding
  ;    a cross reference with no entry
@@ -10,6 +10,7 @@ ABMDE6 ; IHS/ASDST/DMJ - Page 6 - DENTAL ;
  ; IHS/SD/SDR - v2.5 p11 - NPI - change for needed fields for ADA-2006 format
  ;   field was there but not being asked
  ; IHS/SD/SDR - abm*2.6*2 - 3PMS10003A - modified to call ABMFEAPI
+ ;IHS/SD/SDR - 2.6*21 - HEAT124092 - Made default revenue code 512
  ;
 OPT9 K ABM,ABME
  S ABM("TOTL")=0
@@ -88,7 +89,8 @@ E ;EDIT LINE ITEM
  .D ^DIR K DIR
  .W !
  .S ABMXANS=Y
- .Q:ABMXANS=""
+ .;Q:ABMXANS=""  ;abm*2.6*10 HEAT69379
+ .Q:ABMXANS=""!$D(DTOUT)!$D(DUOUT)!$D(DIRUT)!$D(DIROUT)  ;abm*2.6*10 HEAT69379
  .F ABM("I")=1:1 S ABM=$P(ABMXANS,",",ABM("I")) Q:ABM=""  D
  ..I $G(ABMX("ANS"))'="" S ABMX("ANS")=ABMX("ANS")_","_$P(ABMZ(ABM),U)
  ..E  S ABMX("ANS")=$P(ABMZ(ABM),U)
@@ -119,13 +121,15 @@ E2 ;
  S ABMZ("CHRG")=+$P($$ONE^ABMFEAPI(ABMP("FEE"),21,1_ABMZ("DCD"),ABMP("VDT")),U)  ;abm*2.6*2 3PMS10003A
  S DIE="^ABMDCLM(DUZ(2),"_DA(1)_",33,"
  I $P(^ABMDEXP(ABMP("EXP"),0),"^",1)["UB" D  Q:$D(Y)
- .S DR="W !;.02" D ^DIE
+ .;S DR="W !;.02" D ^DIE  ;abm*2.6*21 IHS/SD/SDR HEAT124092
+ .S DR="W !;.02//512" D ^DIE  ;abm*2.6*21 IHS/SD/SDR HEAT124092
  S DR="W !;.07//"_ABMP("VISTDT") D ^DIE Q:$D(Y)
  S ABMZ("OPSITE")=1 S:$P(^AUTTADA(ABMZ("ADACODE"),0),"^",9)="n" ABMZ("OPSITE")=0
  I ABMZ("OPSITE") D  Q:$D(Y)
  .S DR="W !;.05;W !;.06;W !;.11"
  .D ^DIE
- D DX^ABMDEMLC S DR=".04///"_Y(0) D ^DIE Q:$D(Y)
+ ;D DX^ABMDEMLC S DR=".04///"_Y(0) D ^DIE Q:$D(Y)  ;abm*2.6*10 ICD10 002I
+ D DX^ABMDEMLC I +$G(Y(0)) S DR=".04///"_Y(0) D ^DIE Q:$D(Y)  ;abm*2.6*10 ICD10 002I
  S DR=".09//1" D ^DIE Q:$D(Y)
  S DR=".08//"_ABMZ("CHRG") D ^DIE Q:$D(Y)
  S DR=".17///M" D ^DIE

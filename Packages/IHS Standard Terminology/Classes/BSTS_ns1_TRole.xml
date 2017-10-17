@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:35">
+<Class name="BSTS.ns1.TRole">
+<Description>
+Created from: http://VDENMIHSDEVD01:8082/soap/DtsQueryDaoWS?wsdl</Description>
+<CompileAfter>BSTS.ns1.TRoleModifier</CompileAfter>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject,%XML.Adaptor</Super>
+<TimeChanged>63616,48124.690202</TimeChanged>
+<TimeCreated>63616,48124.674012</TimeCreated>
+
+<Parameter name="ELEMENTQUALIFIED">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="NAMESPACE">
+<Default>http://apelon.com/dtsserver/types</Default>
+</Parameter>
+
+<Parameter name="XMLNAME">
+<Default>TRole</Default>
+</Parameter>
+
+<Parameter name="XMLSEQUENCE">
+<Default>1</Default>
+</Parameter>
+
+<Property name="roleModifier">
+<Type>BSTS.ns1.TRoleModifier</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="roleModifier"/>
+</Property>
+
+<Property name="roleType">
+<Type>BSTS.ns1.TRoleType</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="roleType"/>
+</Property>
+
+<Property name="valueConcept">
+<Type>BSTS.ns1.TOntylogConcept</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="valueConcept"/>
+</Property>
+
+<Property name="groupNum">
+<Type>%xsd.int</Type>
+<Parameter name="XMLNAME" value="groupNum"/>
+</Property>
+
+<Property name="revisionIn">
+<Type>%TimeStamp</Type>
+<Parameter name="XMLNAME" value="revisionIn"/>
+</Property>
+
+<Property name="revisionOut">
+<Type>%TimeStamp</Type>
+<Parameter name="XMLNAME" value="revisionOut"/>
+</Property>
+</Class>
+</Export>

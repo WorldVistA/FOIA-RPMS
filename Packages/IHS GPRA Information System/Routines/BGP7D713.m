@@ -1,5 +1,5 @@
 BGP7D713 ; IHS/CMI/LAB - measure 31 ;
- ;;17.0;IHS CLINICAL REPORTING;;AUG 30, 2016;Build 16
+ ;;17.1;IHS CLINICAL REPORTING;;MAY 10, 2017;Build 29
  ;
 PREGSCRN ;EP
  S BGPTOB=$$TOBHF^BGP7D712(DFN,BGP20M,BGPEDATE)  ;get last HF from the 3 categories during the report period

@@ -1,8 +1,10 @@
 ABMDRUN1 ; IHS/ASDST/DMJ - Unpaid Bills Listing-80 width ;
- ;;2.6;IHS 3P BILLING SYSTEM;;NOV 12, 2009
+ ;;2.6;IHS 3P BILLING SYSTEM;**21**;NOV 12, 2009;Build 379
  ;Original;TMD;
+ ;IHS/SD/SDR - 2.6*21 - HEAT195285 - Updated so it will print all headers for report, not just UNPAID BILLS part.
  ;
 PRINT ;EP for printing data
+ D ^ABMDRHD  ;abm*2.6*21 IHS/SD/SDR HEAT195285
  S ABM("PG")=0 D HDB
  S (ABM("CNT1"),ABM("CNT2"),ABM("CNT"),ABM("TOT1"),ABM("TOT2"),ABM("TOT"),ABM("PD"),ABM("PDT1"),ABM("PDT2"),ABM("PDT"))=0,(ABM("A"),ABM("L"),ABM("V"))=""
  S ABM("Z")="TMP(""ABM-AL"","_$J,ABM="^"_ABM("Z")_")" I '$D(@ABM) Q

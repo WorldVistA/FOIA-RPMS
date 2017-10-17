@@ -1,6 +1,8 @@
 ABMFEAPI ; IHS/SD/SDR - 3P Fee Table API
- ;;2.6;IHS THIRD PARTY BILLING SYSTEM;**2,3,8**;NOV 12, 2009
+ ;;2.6;IHS THIRD PARTY BILLING SYSTEM;**2,3,8,14,21**;NOV 12, 2009;Build 379
  ; IHS/SD/SDR - abm*2.6*3 - FIXPMS10008 and FIXPMS10012 - corrections to RANGE tag
+ ;IHS/SD/SDR - 2.6*21 - HEAT130924 - Made correction to fee lookup for dental codes.
+ ;  Was using the code to lookup in the "B" x-ref but that one is by IEN.
  ;
 ONE(ABMFSCHD,ABMMLT,ABMCODE,ABMDT) ;PEP - returns charge for one code
  ; One of two errors may be returned with a "0"
@@ -19,9 +21,13 @@ ONE(ABMFSCHD,ABMMLT,ABMCODE,ABMDT) ;PEP - returns charge for one code
  I ABMMLT=21 S ABMCODE=$G(^ABMDFEE(ABMFSCHD,ABMMLT,ABMCODE,0))  ;dental
  I $G(ABMCODE)="" S ABMA="0^Code not in Fee Schedule" Q ABMA
  ;I '$D(^ABMDFEE(ABMFSCHD,ABMMLT,"B",ABMCODE)) S ABMA="0^Code not in Fee Schedule" Q ABMA  ;abm*2.6*2
- I '$D(^ABMDFEE(ABMFSCHD,ABMMLT,"B",+ABMCODE)) S ABMA="0^Code not in Fee Schedule" Q ABMA  ;abm*2.6*2
+ ;I '$D(^ABMDFEE(ABMFSCHD,ABMMLT,"B",+ABMCODE)) S ABMA="0^Code not in Fee Schedule" Q ABMA  ;abm*2.6*2  ;abm*2.6*21 IHS/SD/SDR HEAT130924
+ I ABMMLT'=21,'$D(^ABMDFEE(ABMFSCHD,ABMMLT,"B",+ABMCODE)) S ABMA="0^Code not in Fee Schedule" Q ABMA  ;abm*2.6*21 IHS/SD/SDR HEAT130924
+ I ABMMLT=21,'$D(^ABMDFEE(ABMFSCHD,ABMMLT,1_$S(+$G(ABMR("CODE"))'=0:ABMR("CODE"),+$G(ABMZ("DCD"))'=0:ABMZ("DCD"),1:""))) S ABMA="0^Code not in Fee Schedule" Q ABMA  ;abm*2.6*21 IHS/SD/SDR HEAT130924
  ;S ABMI=$O(^ABMDFEE(ABMFSCHD,ABMMLT,"B",ABMCODE,0))  ;abm*2.6*2
- S ABMI=$O(^ABMDFEE(ABMFSCHD,ABMMLT,"B",+ABMCODE,0))  ;abm*2.6*2
+ ;S ABMI=$O(^ABMDFEE(ABMFSCHD,ABMMLT,"B",+ABMCODE,0))  ;abm*2.6*2  ;abm*2.6*21 IHS/SD/SDR HEAT130924
+ S:(ABMMLT'=21) ABMI=$O(^ABMDFEE(ABMFSCHD,ABMMLT,"B",+ABMCODE,0))  ;abm*2.6*21 IHS/SD/SDR HEAT130924
+ S:(ABMMLT=21) ABMI=1_$S(+$G(ABMR("CODE"))'=0:ABMR("CODE"),+$G(ABMZ("DCD"))'=0:ABMZ("DCD"),1:"")  ;abm*2.6*21 IHS/SD/SDR HEAT130924
  ;
  S ABMFDT=0,ABMEDT=0,ABMFLG=0,ABMSV=0
  F  S ABMFDT=$O(^ABMDFEE(ABMFSCHD,ABMMLT,ABMI,1,"B",ABMFDT)) Q:(+$G(ABMFDT)=0)  D  Q:(ABMFLG'=0)

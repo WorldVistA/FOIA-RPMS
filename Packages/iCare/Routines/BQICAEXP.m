@@ -1,5 +1,5 @@
 BQICAEXP ;VNGT/HS/ALA-Community Alerts Export ; 01 Sep 2010  8:35 PM
- ;;2.5;ICARE MANAGEMENT SYSTEM;**1**;May 24, 2016;Build 17
+ ;;2.6;ICARE MANAGEMENT SYSTEM;;Jul 07, 2017;Build 72
  ;
  ;
 EN ; Entry Point
@@ -142,8 +142,8 @@ EN ; Entry Point
  .. S LAB=$P(DATA,U,11),RIEN=$P(DATA,U,10)
  .. S SITE=$P($G(^AUPNVLAB(RIEN,11)),U,3),UNITS=$P($G(^AUPNVLAB(RIEN,11)),U,1)
  .. S RLOW=$P($G(^AUPNVLAB(RIEN,11)),U,4),RHIGH=$P($G(^AUPNVLAB(RIEN,11)),U,5)
- .. S RESULT=$P(^AUPNVLAB(RIEN,0),U,4)
- .. S ABN=$P(^AUPNVLAB(RIEN,0),U,5)
+ .. S RESULT=$P($G(^AUPNVLAB(RIEN,0)),U,4)
+ .. S ABN=$P($G(^AUPNVLAB(RIEN,0)),U,5)
  .. I SITE="" D  Q
  ... S $P(RECORD,DELIM,25)=LAB_"^"_$P(^LAB(60,LAB,0),U,1)_"^99"_$P(^AUTTLOC(ASUN,0),U,7)_"="_RESULT
  ... S $P(RECORD,DELIM,31)=UNITS,$P(RECORD,DELIM,32)=RLOW_"^"_RHIGH,$P(RECORD,DELIM,33)=ABN
@@ -185,6 +185,8 @@ EN ; Entry Point
  .. F  S IEN=$O(^AUPNVMSR("AA",DFN,TMN,RVDT,IEN)) Q:IEN=""  D
  ... S RESULT=$P($G(^AUPNVMSR(IEN,0)),"^",4) I RESULT="" Q
  ... I $P($G(^AUPNVMSR(IEN,2)),"^",1)=1 Q
+ ... ; if the new ENTERED IN ERROR field exists, exclude the record if it is marked as an error
+ ... I $$VFIELD^DILFD(9000010.01,2) Q:$$GET1^DIQ(9000010.01,IEN_",",2,"I")=1
  ... S ZZ(RESULT)=""
  .. S $P(RECORD,DELIM,23)=$O(ZZ(""),-1)
  . ; Vitals for OBX

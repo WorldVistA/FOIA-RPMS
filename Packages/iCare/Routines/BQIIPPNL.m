@@ -1,5 +1,5 @@
 BQIIPPNL ;GDIT/HS/ALA-Panel Aggregate ; 09 Sep 2011  12:17 PM
- ;;2.5;ICARE MANAGEMENT SYSTEM;;May 24, 2016;Build 27
+ ;;2.6;ICARE MANAGEMENT SYSTEM;;Jul 07, 2017;Build 72
  ;
  ;
 EN(DATA,OWNR,PLIEN,PLIST) ;EP - BQI GET IPC PROV AGG
@@ -122,15 +122,15 @@ RPT(DFN) ;  Get the CRS Clinical Performance information
  .. S BQIND=$O(^BQIPAT(DFN,30,"B",CODE,"")) I BQIND="" D  Q
  ... S @TDATA@("NDA",DFN)=1
  ... S NDA=1,DEN=0,NUM=0 D STOR(ORD)
- .. S BQMEAS=$P(^BQIPAT(DFN,30,BQIND,0),U,1),VALUE=$P(^(0),U,2),NUM=$P(^(0),U,3),DEN=$P(^(0),U,4)
+ .. S BQMEAS=$P(^BQIPAT(DFN,30,BQIND,0),U,1),VALUE=$P(^(0),U,2),NUM=$P(^(0),U,3),DEN=$P(^(0),U,4),NDA=0
  .. ;
  .. D STOR(ORD)
  Q
  ;
 STOR(ORD) ;EP
- S @TDATA@(ORD,"NUM")=$G(@TDATA@(ORD,"NUM"))+NUM
- S @TDATA@(ORD,"DEN")=$G(@TDATA@(ORD,"DEN"))+DEN
- S @TDATA@(ORD,"NDA")=$G(@TDATA@(ORD,"NDA"))+NDA
+ S @TDATA@(ORD,"NUM")=$G(@TDATA@(ORD,"NUM"))+$G(NUM)
+ S @TDATA@(ORD,"DEN")=$G(@TDATA@(ORD,"DEN"))+$G(DEN)
+ S @TDATA@(ORD,"NDA")=$G(@TDATA@(ORD,"NDA"))+$G(NDA)
  Q
  ;
 CK ;Check and store

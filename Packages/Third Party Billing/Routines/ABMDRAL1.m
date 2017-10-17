@@ -1,7 +1,9 @@
 ABMDRAL1 ; IHS/ASDST/DMJ - Bills Listing-80 Width ;
- ;;2.6;IHS 3P BILLING SYSTEM;**9**;NOV 12, 2009
+ ;;2.6;IHS 3P BILLING SYSTEM;**9,14,21**;NOV 12, 2009;Build 379
  ;Original;TMD;
  ; IHS/SD/SDR - 2.6*9 = HEAT35406 - Correction to itemized report
+ ;IHS/SD/SDR - 2.6*21 - HEAT112271 - Changed PAID to POSTED.  It looks for an entry in the 3P multiple, not
+ ;  specifically for a pymt.
  ;
 PRINT ;EP for printing data
  D ^ABMDRHD  ;abm*2.6*9 HEAT35406
@@ -43,7 +45,8 @@ TOT Q:ABM("CNT")=0
 HD D PAZ^ABMDRUTL Q:$D(DTOUT)!$D(DUOUT)!$D(DIROUT)
 HDB S ABM("PG")=ABM("PG")+1,ABM("I")="" D WHD^ABMDRHD
  W !,?20,"Claim",?36,"Export",?50,"Billed",?60,"Date",?72,"Paid"
- W !?5,"Insurer",?20,"Number",?29,"HRN",?36,"Date",?50,"Amount",?60,"Paid",?71,"Amount"
+ ;W !?5,"Insurer",?20,"Number",?29,"HRN",?36,"Date",?50,"Amount",?60,"Paid",?71,"Amount"  ;abm*2.6*21 IHS/SD/SDR HEAT112271
+ W !?5,"Insurer",?20,"Number",?29,"HRN",?36,"Date",?50,"Amount",?60,"Posted",?71,"Amount"  ;abm*2.6*21 IHS/SD/SDR HEAT112271
  S $P(ABM("LINE"),"-",80)="" W !,ABM("LINE") K ABM("LINE")
  Q
  ;

@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:34">
+<Class name="BEDD.EDProc">
+<Description>
+BEDD.EDProc CLASS - MAIN STORAGE FOR ED Procedure PATIENT DATA</Description>
+<Super>%Persistent</Super>
+<TimeChanged>62482,78500.459456</TimeChanged>
+<TimeCreated>61957,70013.38529</TimeCreated>
+
+<Property name="DFN">
+<Type>%String</Type>
+</Property>
+
+<Property name="EDVISITID">
+<Type>%String</Type>
+</Property>
+
+<Property name="EDProc">
+<Type>%String</Type>
+</Property>
+
+<Property name="EDProcN">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {EDProcN}=##class(BEDD.EDProc).GetProcN({EDProc})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="ProcStf">
+<Type>%String</Type>
+</Property>
+
+<Property name="ProcStfN">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {ProcStfN}=##class(BEDD.EDProc).GetStfN({ProcStf})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="ProcNotes">
+<Type>%GlobalCharacterStream</Type>
+</Property>
+
+<Property name="PtName">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {PtName}=##class(BEDD.EDProc).GetName({EDVISITID})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="Chart">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {Chart}=##class(BEDD.EDProc).GetChart({EDVISITID}) </SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="DOB">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {DOB}=##class(BEDD.EDProc).GetDOB({EDVISITID})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="Age">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {Age}=##class(BEDD.EDProc).GetAge({EDVISITID})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="Sex">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {Sex}=##class(BEDD.EDProc).GetSex({EDVISITID})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="CIDt">
+<Type>%Date</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {CIDt}=##class(BEDD.EDProc).GetCIDt({EDVISITID}) </SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="CITm">
+<Type>%Time</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {CITm}=##class(BEDD.EDProc).GetCITm({EDVISITID}) </SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="PtCIDT">
+<Description>
+combine CIDt and CITm for display</Description>
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {PtCIDT}=##class(BEDD.EDProc).CmbDt({CIDt},{CITm})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="ProcDt">
+<Type>%Date</Type>
+</Property>
+
+<Property name="ProcSTm">
+<Type>%Time</Type>
+</Property>
+
+<Property name="ProcEDt">
+<Type>%Date</Type>
+</Property>
+
+<Property name="ProcETm">
+<Type>%Time</Type>
+</Property>
+
+<Property name="ProcTime">
+<Description>
+calculate procedure time spent</Description>
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {ProcTime}=##class(BEDD.EDProc).CalcTime({ProcSTm},{ProcETm})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="PtProcDT">
+<Description>
+combine ProcDt and ProcTm for display</Description>
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {PtProcDT}=##class(BEDD.EDProc).CmbDtT({ProcDt},{ProcSTm},{ProcETm})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Method name="GetName">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>edvisitid:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set ptName=""
+	If (edvisitid'="") {
+		Set edref=##class(BEDD.EDVISIT).%OpenId(edvisitid)
+		Set ptName=edref.PtName
+		Set edref=""
+	}
+	Quit ptName
+]]></Implementation>
+</Method>
+
+<Method name="GetStfN">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ien:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set stfName=""
+	If (ien'="") {
+		Set stfName=$$GETF^BEDDUTIL(200,ien,.01,"I")
+	}
+	Quit stfName
+]]></Implementation>
+</Method>
+
+<Method name="GetChart">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>edvisitid:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set ptChart=""
+	If (edvisitid'="") {
+		Set edref=##class(BEDD.EDVISIT).%OpenId(edvisitid)
+		Set ptChart=edref.Chart
+		Set edref=""
+	}
+	Quit ptChart
+]]></Implementation>
+</Method>
+
+<Method name="GetAge">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>edvisitid:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%Integer</ReturnType>
+<Implementation><![CDATA[
+	Set ptAge=0
+	If (edvisitid'="") {
+		Set edref=##class(BEDD.EDVISIT).%OpenId(edvisitid)
+		Set ptAge=edref.Age
+		Set edref=""
+	}
+	Quit ptAge
+]]></Implementation>
+</Method>
+
+<Method name="GetSex">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>edvisitid:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set ptSex=""
+	If (edvisitid'="") {
+		Set edref=##class(BEDD.EDVISIT).%OpenId(edvisitid)
+		Set ptSex=edref.Sex
+		Set edref=""
+	}
+	Quit ptSex
+]]></Implementation>
+</Method>
+
+<Method name="GetCIDt">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>edvisitid:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set ptcidt=""
+	If (edvisitid'="") {
+		Set edref=##class(BEDD.EDVISIT).%OpenId(edvisitid)
+		Set ptcidt=edref.CIDt
+		Set edref=""
+	}
+	Quit ptcidt
+]]></Implementation>
+</Method>
+
+<Method name="CalcTime">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>stm:%Time,etm:%Time</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%Integer</ReturnType>
+<Implementation><![CDATA[
+	Set calctm=0
+	If ((stm="")||(etm="")) {
+		Quit calctm
+	}
+	Set calctm=((etm-stm)\60)
+	Quit calctm
+]]></Implementation>
+</Method>
+
+<Method name="GetCITm">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>edvisitid:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set ptcitm=""
+	If (edvisitid'="") {
+		Set edref=##class(BEDD.EDVISIT).%OpenId(edvisitid)
+		Set ptcitm=edref.CITm
+		Set edref=""
+	}
+	Quit ptcitm
+]]></Implementation>
+</Method>
+
+<Method name="CmbDt">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>cidt:%Date,citm:%Time</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set cdt=""
+	If ((cidt="")||(citm="")) {
+		Quit cdt
+	}
+	Set rpf1=cidt_","_citm s cdt=$$HTE^XLFDT(rpf1,"5D")
+	Quit cdt
+]]></Implementation>
+</Method>
+
+<Method name="CmbDtT">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>cidt:%Date,stm:%Time,etm:%Time</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set cdt=""
+	If ((cidt="")||(stm="")) {
+		Quit cdt
+	}
+	Set rpf1=cidt_","_stm
+	Set cdt=$$HTE^XLFDT(rpf1,"5D")_" - "_$$HTIME^BEDDUTID(etm)
+	Quit cdt
+]]></Implementation>
+</Method>
+
+<Method name="GetDOB">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>edvisitid:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set ptDOB=""
+	If (edvisitid'="") {
+		Set edref=##class(BEDD.EDVISIT).%OpenId(edvisitid)
+		Set ptDOB=edref.DOB
+		Set edref=""
+	}
+	Quit ptDOB
+]]></Implementation>
+</Method>
+
+<Method name="GetProcN">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ien:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set prn=""
+	If ((ien'="")&&(+ien>0)) {
+		Set prn=$$GETF^BEDDUTIL(9009083,ien,".01","I")
+	}
+	Quit prn
+]]></Implementation>
+</Method>
+
+<Query name="procPrint">
+<Type>%SQLQuery</Type>
+<FormalSpec>edvisitid:%String</FormalSpec>
+<SqlQuery>SELECT EDProc as EDProc, EDProcN as EDProcN, ProcStf as ProcStf, ProcDt as ProcDt, ProcSTm as ProcSTm, ProcEDt as ProcEDt, ProcETm as ProcETm
+FROM BEDD.EDProc
+WHERE EDVISITID=:edvisitid</SqlQuery>
+</Query>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^BEDD.EDProcD</DataLocation>
+<DefaultData>EDProcDefaultData</DefaultData>
+<IdLocation>^BEDD.EDProcD</IdLocation>
+<IndexLocation>^BEDD.EDProcI</IndexLocation>
+<StreamLocation>^BEDD.EDProcS</StreamLocation>
+<ExtentSize>100000</ExtentSize>
+<Data name="EDProcDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>DFN</Value>
+</Value>
+<Value name="3">
+<Value>EDVISITID</Value>
+</Value>
+<Value name="4">
+<Value>EDProc</Value>
+</Value>
+<Value name="5">
+<Value>ProcStf</Value>
+</Value>
+<Value name="6">
+<Value>ProcDt</Value>
+</Value>
+<Value name="7">
+<Value>ProcSTm</Value>
+</Value>
+<Value name="8">
+<Value>ProcETm</Value>
+</Value>
+<Value name="9">
+<Value>ProcNotes</Value>
+</Value>
+<Value name="10">
+<Value>ProcEDt</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

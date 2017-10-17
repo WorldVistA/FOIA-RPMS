@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:34">
+<Class name="BEDD.EDConsults">
+<Description>
+BEDD.EDConsults CLASS - MAIN STORAGE FOR ED Consults PATIENT DATA</Description>
+<Super>%Persistent</Super>
+<TimeChanged>62476,48592.073906</TimeChanged>
+<TimeCreated>61957,69897.357796</TimeCreated>
+
+<Property name="DFN">
+<Type>%String</Type>
+</Property>
+
+<Property name="EDVISITID">
+<Type>%String</Type>
+</Property>
+
+<Property name="CNotes">
+<Type>%GlobalCharacterStream</Type>
+</Property>
+
+<Property name="ConsultSrv">
+<Type>%String</Type>
+</Property>
+
+<Property name="ConsultSrvN">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {ConsultSrvN}=##class(BEDD.EDConsults).GetCNS({ConsultSrv})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="Consult">
+<Type>%String</Type>
+</Property>
+
+<Property name="ConsultN">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {ConsultN}=##class(BEDD.EDConsults).GetCN({Consult})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="DateNotify">
+<Type>%Date</Type>
+</Property>
+
+<Property name="TimeNotify">
+<Type>%Time</Type>
+</Property>
+
+<Property name="DateSeen">
+<Type>%Date</Type>
+</Property>
+
+<Property name="TimeSeen">
+<Type>%Time</Type>
+</Property>
+
+<Property name="PtName">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {PtName}=##class(BEDD.EDConsults).GetName({EDVISITID})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="Chart">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {Chart}=##class(BEDD.EDConsults).GetChart({EDVISITID}) </SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="DOB">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {DOB}=##class(BEDD.EDConsults).GetDOB({EDVISITID})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="Age">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {Age}=##class(BEDD.EDConsults).GetAge({EDVISITID})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="Sex">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {Sex}=##class(BEDD.EDConsults).GetSex({EDVISITID})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="CIDt">
+<Type>%Date</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {CIDt}=##class(BEDD.EDConsults).GetCIDt({EDVISITID}) </SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="CITm">
+<Type>%Time</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {CITm}=##class(BEDD.EDConsults).GetCITm({EDVISITID}) </SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="PtCIDT">
+<Description>
+combine CIDt and CITm for display</Description>
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {PtCIDT}=##class(BEDD.EDConsults).CmbDt({CIDt},{CITm})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="ConsNotify">
+<Description>
+combine DateNotify and TimeNotify for display and FileMan </Description>
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {ConsNotify}=##class(BEDD.EDConsults).CmbNotify({DateNotify},{TimeNotify})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Method name="GetName">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>edvisitid:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set ptName=""
+	If (edvisitid'="") {
+		Set edref=##class(BEDD.EDVISIT).%OpenId(edvisitid) 
+		Set ptName=edref.PtName
+		Set edref=""
+	}
+	Q ptName
+]]></Implementation>
+</Method>
+
+<Method name="GetChart">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>edvisitid:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set ptChart=""
+	If (edvisitid'="") {
+		Set edref=##class(BEDD.EDVISIT).%OpenId(edvisitid)
+		Set ptChart=edref.Chart
+		Set edref=""
+	}
+	Q ptChart
+]]></Implementation>
+</Method>
+
+<Method name="GetAge">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>edvisitid:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%Integer</ReturnType>
+<Implementation><![CDATA[
+	Set ptAge=0
+	If (edvisitid'="") {
+		Set edref=##class(BEDD.EDVISIT).%OpenId(edvisitid)
+		Set ptAge=edref.Age
+		Set edref=""
+	}
+	Q ptAge
+]]></Implementation>
+</Method>
+
+<Method name="GetSex">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>edvisitid:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set ptSex=""
+	If (edvisitid'="") {
+		Set edref=##class(BEDD.EDVISIT).%OpenId(edvisitid)
+		Set ptSex=edref.Sex
+		Set edref=""
+	}
+	Q ptSex
+]]></Implementation>
+</Method>
+
+<Method name="GetCIDt">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>edvisitid:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set ptcidt=""
+	If (edvisitid'="") {
+		Set edref=##class(BEDD.EDVISIT).%OpenId(edvisitid)
+		Set ptcidt=edref.CIDt
+		Set edref=""
+	}
+	Q ptcidt
+]]></Implementation>
+</Method>
+
+<Method name="GetCITm">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>edvisitid:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set ptcitm=""
+	If (edvisitid'="") {
+		Set edref=##class(BEDD.EDVISIT).%OpenId(edvisitid)
+		Set ptcitm=edref.CITm
+		Set edref=""
+	}
+	Q ptcitm
+]]></Implementation>
+</Method>
+
+<Method name="CmbDt">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>cidt:%Date,citm:%Time</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set cdt=""
+	If ((cidt="")||(citm="")) {
+		Quit cdt
+	}
+	Set rpf1=cidt_","_citm
+	Set cdt=$$HTE^XLFDT(rpf1,"5D")
+	Quit cdt
+]]></Implementation>
+</Method>
+
+<Method name="CmbNotify">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ndt:%Date,ntm:%Time</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set notify=""
+	If ((ndt="")||(ntm="")) {
+		Quit notify
+	}
+	Set notify=ndt_","_ntm
+	Quit notify
+]]></Implementation>
+</Method>
+
+<Method name="GetDOB">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>edvisitid:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set ptDOB=""
+	If (edvisitid'="") {
+		Set edref=##class(BEDD.EDVISIT).%OpenId(edvisitid)
+		Set ptDOB=edref.DOB
+		Set edref=""
+	}
+	Quit ptDOB
+]]></Implementation>
+</Method>
+
+<Method name="GetCNS">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ien:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set cns=""
+	If ((ien'="")&&(+ien>0)) {
+		Set cns=$$GETF^BEDDUTIL(9009082.9,ien,.01,"I")
+	}
+	Quit cns
+]]></Implementation>
+</Method>
+
+<Method name="GetCN">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ien:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	//Set cn=""
+	//If ((ien'="")&&(+ien>0)) {
+	//	Set cn=$$GETF^BEDDUTIL(200,ien,.01,"I")
+	//}
+	//Q cn
+	Q ien
+]]></Implementation>
+</Method>
+
+<Query name="consPrint">
+<Type>%SQLQuery</Type>
+<FormalSpec>edvisitid:%String</FormalSpec>
+<SqlQuery>SELECT ConsultSrv As ConsultSrv, ConsultN As ConsultN, DateSeen As DateSeen, TimeSeen As TimeSeen
+FROM BEDD.EDConsults 
+WHERE (EDVISITID=:edvisitid)</SqlQuery>
+</Query>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^BEDD.EDConsultsD</DataLocation>
+<DefaultData>EDConsultsDefaultData</DefaultData>
+<IdLocation>^BEDD.EDConsultsD</IdLocation>
+<IndexLocation>^BEDD.EDConsultsI</IndexLocation>
+<StreamLocation>^BEDD.EDConsultsS</StreamLocation>
+<ExtentSize>100000</ExtentSize>
+<Data name="EDConsultsDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>EDVISITID</Value>
+</Value>
+<Value name="3">
+<Value>ConsultSrv</Value>
+</Value>
+<Value name="4">
+<Value>Consult</Value>
+</Value>
+<Value name="5">
+<Value>DateNotify</Value>
+</Value>
+<Value name="6">
+<Value>TimeNotify</Value>
+</Value>
+<Value name="7">
+<Value>DateSeen</Value>
+</Value>
+<Value name="8">
+<Value>TimeSeen</Value>
+</Value>
+<Value name="9">
+<Value>CNotes</Value>
+</Value>
+<Value name="10">
+<Value>DFN</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

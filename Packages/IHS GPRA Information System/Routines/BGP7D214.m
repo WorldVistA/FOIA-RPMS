@@ -1,5 +1,5 @@
 BGP7D214 ; IHS/CMI/LAB - measure 6 19 Sep 2014 8:12 AM ;
- ;;17.0;IHS CLINICAL REPORTING;;AUG 30, 2016;Build 16
+ ;;17.1;IHS CLINICAL REPORTING;;MAY 10, 2017;Build 29
  ;
 STATIN(P,BDATE,EDATE,BGPNDAYS) ;EP - GET STATIN MEDS
  NEW X,Y,Z,%,E
@@ -9,7 +9,7 @@ STATIN(P,BDATE,EDATE,BGPNDAYS) ;EP - GET STATIN MEDS
  I % Q 1_U_"Statin: "_$$DATE^BGP7UTL($P(%,U,2))_" CPT 4013F"
  K BGPMEDS1 S K=0,R=""
  D GETMEDS^BGP7UTL2(P,BDATE,EDATE,,,,,.BGPMEDS1)
- I '$D(BGPMEDS1) Q ""
+ ;I '$D(BGPMEDS1) Q ""
  S T=$O(^ATXAX("B","BGP PQA STATIN MEDS",0))
  S T1=$O(^ATXAX("B","BGP PQA STATIN NDC",0))
  S X=0 F  S X=$O(BGPMEDS1(X)) Q:X'=+X!(R]"")  S Y=+$P(BGPMEDS1(X),U,4) D
@@ -34,7 +34,7 @@ STAT1 .;
 STATPRIO ;now add in any before BEG DATE
  K BGPMEDS1
  S R=""
- D GETMEDS^BGP7UTL2(P,$$FMADD^XLFDT(BDATE,-365),BDATE,,,,,.BGPMEDS1)
+ D GETMEDS^BGP7UTL2(P,$$FMADD^XLFDT(BDATE,-380),$$FMADD^XLFDT(BDATE,-1),,,,,.BGPMEDS1)
  I '$D(BGPMEDS1) Q ""
  S X=0 F  S X=$O(BGPMEDS1(X)) Q:X'=+X!(R]"")  S Y=+$P(BGPMEDS1(X),U,4) D
  .Q:'$D(^AUPNVMED(Y,0))
@@ -52,7 +52,7 @@ STAT2 .;
  .Q:'$D(^AUPNVSIT(V,0))
  .;S IS DAYS SUPPLY, J IS DATE DISCONTINUED
  .Q:J]""  ;don't use if discontinued
- .S D=$$FMDIFF^XLFDT(BDATE,$P($P(^AUPNVSIT(V,0),U),"."))  ;difference between dsch date and date prescribed
+ .S D=$$FMDIFF^XLFDT($$FMADD^XLFDT(BDATE,-1),$P($P(^AUPNVSIT(V,0),U),"."))  ;difference between dsch date and date prescribed
  .S S=$P(^AUPNVMED(Y,0),U,7)
  .S S=S-D  ;subtract the number of days used
  .S:S<0 S=0

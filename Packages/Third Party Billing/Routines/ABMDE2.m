@@ -1,28 +1,23 @@
 ABMDE2 ; IHS/ASDST/DMJ - Edit Page 2 - PAYERS ;  
- ;;2.6;IHS 3P BILLING SYSTEM;**6,8**;NOV 12, 2009
+ ;;2.6;IHS 3P BILLING SYSTEM;**6,8,10,21**;NOV 12, 2009;Build 379
  ;
- ; IHS/SD/SDR - 10/29/02 - V2.5 P2 - NHA-0402-180088
- ;     Modified so it would allow the deletion of insurer from page 2
- ;     if accident or work related claim.
+ ;IHS/SD/SDR - 10/29/02 - V2.5 P2 - NHA-0402-180088
+ ;    Modified so it would allow the deletion of insurer from page 2 if accident or work related claim.
+ ;IHS/SD/SDR - v2.5 p8 - IM15307/IM14092 - Modified to display MSP error on page if applicable
+ ;IHS/SD/SDR - v2.5 p8 - task 8 - Added code to display replacment insurer
+ ;IHS/SD/SDR - v2.5 p9 - IM19040 - Added ability to delete insurers all the time
+ ;IHS/SD/SDR - v2.5 p10 - IM20593 - Changed default for MSP reason to NO MSP ON FILE
  ;
- ; IHS/SD/SDR - v2.5 p8 - IM15307/IM14092
- ;    Modified to display MSP error on page if applicable
- ;
- ; IHS/SD/SDR - v2.5 p8 - task 8
- ;   Added code to display replacment insurer
- ;
- ; IHS/SD/SDR - v2.5 p9 - IM19040
- ;   Added ability to delete insurers all the time
- ;
- ; IHS/SD/SDR - v2.5 p10 - IM20593
- ;   Changed default for MSP reason to NO MSP ON FILE
+ ;IHS/SD/SDR - 2.6*21 - HEAT131494 - Changed code to populate priority for added insurer.  It wasn't being
+ ;  populated so insurer wasn't showing up on display.
+ ;IHS/SD/SDR - 2.6*21 - HEAT238757 - Fixed so ADD option shows up all the time, nut just when an accident/employment related claim.
  ;
 OPT ;
  K ABM,ABME,ABMV,ABMG
  S ABMZ("NUM")=""
  ;S ABMP("OPT")="DPVNJBQ"  ;abm*2.6*6 NOHEAT
  S ABMP("OPT")="ADPVNJBQ"  ;abm*2.6*6 NOHEAT
- I $P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),8)),U,3)!($P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),9)),U)="Y") S ABMP("OPT")="A"_ABMP("OPT")
+ ;I $P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),8)),U,3)!($P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),9)),U)="Y") S ABMP("OPT")="A"_ABMP("OPT")  ;abm*2.6*21 IHS/SD/SDR HEAT238757
  I $D(^ABMDCLM(DUZ(2),ABMP("CDFN"),13,"C",1))=10 D
  .I $O(^ABMDCLM(DUZ(2),ABMP("CDFN"),13,"C",1))="" D
  ..S ABMP("OPT")=$P(ABMP("OPT"),"P")_$P(ABMP("OPT"),"P",2)
@@ -78,11 +73,14 @@ DISP ;
  .W ?40,"Bill Type...: ",$P(^ABMDCLM(DUZ(2),ABMP("CDFN"),0),"^",12)
  .W:$D(ABMP("VTYP",999)) ?68,"========="
  .W !?4,$P(ABMV("X5"),U,2)
- .W ?40,"Proc. Code..: ",$S($P(ABMV("X6"),U,2)="C":"CPT4",$P(ABMV("X6"),U,2)="A":"ADA",1:"ICD9")
+ .;W ?40,"Proc. Code..: ",$S($P(ABMV("X6"),U,2)="C":"CPT4",$P(ABMV("X6"),U,2)="A":"ADA",1:"ICD9")  ;abm*2.6*10 ICD10 002D
+ .W ?40,"Proc. Code..: ",$S($P(ABMV("X6"),U,2)="C":"CPT4",$P(ABMV("X6"),U,2)="A":"ADA",1:"ICD")  ;abm*2.6*10 ICD10 002D
  .I $D(ABMP("VTYP",999)) D
  ..I '$D(ABMP("FLAT")) D  Q
- ...W ?68,$S($P(ABMV("X6"),U,2)="C":"CPT4",$P(ABMV("X6"),U,2)="A":"ADA",1:"ICD9")
- ..W ?68,$S($P(ABMP("FLAT"),U,5)="C":"CPT4",$P(ABMP("FLAT"),U,5)="A":"ADA",1:"ICD9")
+ ...;W ?68,$S($P(ABMV("X6"),U,2)="C":"CPT4",$P(ABMV("X6"),U,2)="A":"ADA",1:"ICD9")  ;abm*2.6*10 ICD10 002D
+ ...W ?68,$S($P(ABMV("X6"),U,2)="C":"CPT4",$P(ABMV("X6"),U,2)="A":"ADA",1:"ICD")  ;abm*2.6*10 ICD10 002D
+ ..;W ?68,$S($P(ABMP("FLAT"),U,5)="C":"CPT4",$P(ABMP("FLAT"),U,5)="A":"ADA",1:"ICD9")  ;abm*2.6*10 ICD10 002D
+ ..W ?68,$S($P(ABMP("FLAT"),U,5)="C":"CPT4",$P(ABMP("FLAT"),U,5)="A":"ADA",1:"ICD")  ;abm*2.6*10 ICD10 002D
  .W !?4,$P(ABMV("X5"),U,3)
  .W ?40,"Export Mode.: "
  .I +ABMV("X6") W $P($G(^ABMDEXP(+ABMV("X6"),0)),U)
@@ -96,11 +94,14 @@ DISP ;
  .W:'$D(ABMP("VTYP",999)) ?40,"Bill Type...: ",$P(^ABMDCLM(DUZ(2),ABMP("CDFN"),0),"^",12)
  .W:$D(ABMP("VTYP",999)) ?54,"========="
  .W !?4,$P(ABMV("X5"),U,2)
- .W:'$D(ABMP("VTYP",999)) ?40,"Proc. Code..: ",$S($P(ABMV("X6"),U,2)="C":"CPT4",$P(ABMV("X6"),U,2)="A":"ADA",1:"ICD9")
+ .;W:'$D(ABMP("VTYP",999)) ?40,"Proc. Code..: ",$S($P(ABMV("X6"),U,2)="C":"CPT4",$P(ABMV("X6"),U,2)="A":"ADA",1:"ICD9")  ;abm*2.6*10 ICD10 002D
+ .W:'$D(ABMP("VTYP",999)) ?40,"Proc. Code..: ",$S($P(ABMV("X6"),U,2)="C":"CPT4",$P(ABMV("X6"),U,2)="A":"ADA",1:"ICD")  ;abm*2.6*10 ICD10 002D
  .I $D(ABMP("VTYP",999)) D
  ..I '$D(ABMP("FLAT")) D  Q
- ...W ?40,"Proc. Code..: ",$S($P(ABMV("X6"),U,2)="C":"CPT4",$P(ABMV("X6"),U,2)="A":"ADA",1:"ICD9")
- ..W ?40,"Proc. Code..: ",$S($P(ABMP("FLAT"),U,5)="C":"CPT4",$P(ABMP("FLAT"),U,5)="A":"ADA",1:"ICD9")
+ ...;W ?40,"Proc. Code..: ",$S($P(ABMV("X6"),U,2)="C":"CPT4",$P(ABMV("X6"),U,2)="A":"ADA",1:"ICD9")  ;abm*2.6*10 ICD10 002D
+ ...W ?40,"Proc. Code..: ",$S($P(ABMV("X6"),U,2)="C":"CPT4",$P(ABMV("X6"),U,2)="A":"ADA",1:"ICD")  ;abm*2.6*10 ICD10 002D
+ ..;W ?40,"Proc. Code..: ",$S($P(ABMP("FLAT"),U,5)="C":"CPT4",$P(ABMP("FLAT"),U,5)="A":"ADA",1:"ICD9")  ;abm*2.6*10 ICD10 002D
+ ..W ?40,"Proc. Code..: ",$S($P(ABMP("FLAT"),U,5)="C":"CPT4",$P(ABMP("FLAT"),U,5)="A":"ADA",1:"ICD")  ;abm*2.6*10 ICD10 002D
  .W !?4,$P(ABMV("X5"),U,3)
  .I '$D(ABMP("VTYP",999)) W ?40,"Export Mode.: " I +ABMV("X6") W $P($G(^ABMDEXP(+ABMV("X6"),0)),U)
  .I $G(ABMP("VTYP",999)) W ?40,"Export Mode.: ",$P(^ABMDEXP(ABMP("VTYP",999),0),U)
@@ -160,7 +161,8 @@ LOOP ;LOOP HERE
  .S ABM("XIEN")=$O(^ABMDCLM(DUZ(2),ABMP("CDFN"),13,"C",ABM,""))
  .S ABM("X")=$P(^ABMDCLM(DUZ(2),ABMP("CDFN"),13,ABM("XIEN"),0),U)
  .D INS
- S ABMZ("DR2")=";.02////"_(ABMZ("LNUM")+1)
+ ;S ABMZ("DR2")=";.02////"_(ABMZ("LNUM")+1)  ;abm*2.6*21 IHS/SD/SDR HEAT131494
+ S ABMZ("DR")=ABMZ("DR")_";.02////"_(ABMZ("LNUM")+1)  ;abm*2.6*21 IHS/SD/SDR HEAT131494
  I ABMZ("NUM")=0 W *7,!?5,"*** ERROR: No "_ABMZ("ITEM")_" Exists, at Least One is Required! ***",!
  K ABME
  S ABME("CONT")=""
@@ -199,7 +201,9 @@ INS ;
  W ?37,ABM("Y0")
  W ?49,$P($P(ABMV("X2"),U),";",2)
  I ABM("Y")="I" S ABM("E")=0 F  S ABM("E")=$O(ABME(ABM("E"))) Q:'ABM("E")  S ABMG(ABM("E"))=ABME(ABM("E"))
- S ABM("PRI")=$S($P($G(^AUTNINS(ABM("X"),2)),U)="D":4,"MR"[$P($G(^(2)),U):3,$P($G(^(2)),U)="H":2,1:1)
+ ;S ABM("PRI")=$S($P($G(^AUTNINS(ABM("X"),2)),U)="D":4,"MR"[$P($G(^(2)),U):3,$P($G(^(2)),U)="H":2,1:1)  ;abm*2.6*10 HEAT73780
+ S ABMITYP=$$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,ABM("X"),".211","I"),1,"I")  ;abm*2.6*10 HEAT73780
+ S ABM("PRI")=$S(ABMITYP="D":4,"MR"[ABMITYP:3,ABMITYP="H":2,1:1)  ;abm*2.6*10 HEAT73780
  S ABM(ABM("PRI"))=""
  Q
  ;

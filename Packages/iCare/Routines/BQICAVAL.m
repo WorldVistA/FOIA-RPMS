@@ -1,5 +1,5 @@
 BQICAVAL ;GDIT/HS/ALA-Community Alert Validation ; 24 Jul 2012  1:42 PM
- ;;2.5;ICARE MANAGEMENT SYSTEM;**1**;May 24, 2016;Build 17
+ ;;2.6;ICARE MANAGEMENT SYSTEM;;Jul 07, 2017;Build 72
  ;
 EN ;EP
  S TMFRAME="T-"_$$GET1^DIQ(90508,"1,",.24,"E")
@@ -265,6 +265,8 @@ FORM ; Format the data
  . S IEN=""
  . F  S IEN=$O(^AUPNVMSR("AA",DFN,TMN,RVDT,IEN)) Q:IEN=""  D
  .. S RESULT=$P($G(^AUPNVMSR(IEN,0)),"^",4) I RESULT="" Q
+ .. ; if the new ENTERED IN ERROR field exists, exclude the record if it is marked as an error
+ .. I $$VFIELD^DILFD(9000010.01,2) Q:$$GET1^DIQ(9000010.01,IEN_",",2,"I")=1
  .. S ZZ(RESULT)=""
  . S $P(RECORD,DELIM,23)=$O(ZZ(""),-1)
  ; Vitals for OBX

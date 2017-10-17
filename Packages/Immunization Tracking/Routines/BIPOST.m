@@ -1,5 +1,5 @@
 BIPOST ;IHS/CMI/MWR - POST-INIT ROUTINE; OCT 15, 2010
- ;;8.5;IMMUNIZATION;**13**;AUG 01,2016
+ ;;8.5;IMMUNIZATION;**14**;AUG 01,2017
  ;;* MICHAEL REMILLARD, DDS * CIMARRON MEDICAL INFORMATICS, FOR IHS *
  ;;  PATCH 3: Set MenCY-Hib (148) and Flu-nasal4 (149) and all Skin Tests
  ;;           in the Vaccine Table to Inactive.   START+30
@@ -19,6 +19,8 @@ BIPOST ;IHS/CMI/MWR - POST-INIT ROUTINE; OCT 15, 2010
  ;;            Update BI TABLE DATA ELEMENTS File.  START+154
  ;;  PATCH 12: Restandardize Vaccine Table, with updates from BITN.
  ;;  PATCH 13: Restandardize Vaccine Table, with updates from BITN (and BIMAN below).
+ ;;  PATCH 14: Make old Rabies CVX 18 inactive.
+ ;;            Set High Risk parameter selection = zero/none.
  ;
  ;
  ;----------
@@ -57,8 +59,8 @@ START ;EP
  ;---> Update Manufacturer Table.
  ;S ^BIMAN(169,0)="PaxVax^PAX^1^PaxVax"
  ;S ^BIMAN(170,0)="MCM Vaccine Company^MCM^1^MCM Vaccine Company"
- S ^BIMAN(171,0)="Seqirus^SEQ^1^Seqirus"
- S ^BIMAN(172,0)="VALNEVA^VAL^1^Valneva"
+ ;S ^BIMAN(171,0)="Seqirus^SEQ^1^Seqirus"
+ ;S ^BIMAN(172,0)="VALNEVA^VAL^1^Valneva"
  ;
  ;**********
  ;
@@ -81,7 +83,7 @@ START ;EP
  ;---> Insert CVX Codes into For loop below.
  ;
  ;---> Make these CVX's ACTIVE:
- N BICVX F BICVX=171 D
+ N BICVX F BICVX=150,158,168,185 D
  .N N S N=$$HL7TX^BIUTL2(BICVX)
  .;---> Quit if CVX is Unknown.
  .Q:(N=137)
@@ -91,7 +93,7 @@ START ;EP
  .;
  ;---> Make these CVX's INACTIVE:
  ;N BICVX F BICVX=123,125,126,127,147,160 D
- N BICVX F BICVX=26,149,169,170,172,173,174 D
+ N BICVX F BICVX=25,29,37,40,51,62,118,183,184 D
  .N N S N=$$HL7TX^BIUTL2(BICVX)
  .;---> Quit if CVX is Unknown.
  .Q:(N=137)
@@ -182,10 +184,16 @@ START ;EP
  ;---> Update BI TABLE DATA ELEMENTS File.
  ;D ^BIDE
  ;
+ ;********** PATCH 14, v8.5, AUG 01,2017, IHS/CMI/MWR
+ ;---> Set High Risk parameter selection = zero/none. Install notes advise
+ ;---> manager to revisit and reselect High Risk Factors.
  ;---> Update "Last Version Fully Installed" Field in BI SITE PARAMETER File.
- N N S N=0 F  S N=$O(^BISITE(N)) Q:'N  S $P(^BISITE(N,0),"^",15)=$$VER^BILOGO
+ N N S N=0 F  S N=$O(^BISITE(N)) Q:'N  D
+ .S $P(^BISITE(N,0),"^",15)=$$VER^BILOGO
+ .S $P(^BISITE(N,0),"^",19)=0
+ .;**********
  ;
- ;D TEXT2,DIRZ^BIUTL3()
+ D TEXT2,DIRZ^BIUTL3()
  D TEXT1,DIRZ^BIUTL3()
  ;
  D EXIT
@@ -211,7 +219,7 @@ TEXT1 ;EP
  ;;
  ;;                       * CONGRATULATIONS! *
  ;;
- ;;          You have successfully installed Immunization v8.5 p13.
+ ;;          You have successfully installed Immunization v8.5 p14.
  ;;
  ;;
  ;;
@@ -234,13 +242,13 @@ TEXT2 ;EP
  ;;
  ;;                            * NOTE!!! *
  ;;
- ;; NOTE: Be sure that you have installed the new TCH FORECASTER,
- ;;       as outlined in the TCH Forecaster Installation Instructions
- ;;       (separate document in this distribution).
+ ;;     NOTE: Be sure to check and edit the High Risk parameter #18
+ ;;     on the Edit Site Parameter screen, found on the Manager Menu.
  ;;
- ;;       Immunization forecasting will not work if you have not
- ;;       performed this crucial step in addition to the KIDS file
- ;;       installation.
+ ;;     The High Risk parameter options have changed significantly,
+ ;;     and so this parameter has been set equal to "0 - None."
+ ;;     Be sure to examine this setting and edit it per your site's
+ ;;     preferences.  Thank you.
  ;;
  ;;                            * NOTE!!! *
  ;;

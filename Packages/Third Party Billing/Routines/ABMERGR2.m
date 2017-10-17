@@ -1,31 +1,30 @@
-ABMERGR2 ; IHS/ASDST/DMJ - GET ANCILLARY SVCS REVENUE CODE INFO ; 
- ;;2.6;IHS 3P BILLING SYSTEM;**6,8,9,10,11,19,20**;NOV 12, 2009;Build 317
+ABMERGR2 ; IHS/SD/SDR - GET ANCILLARY SVCS REVENUE CODE INFO ; 
+ ;;2.6;IHS 3P BILLING SYSTEM;**6,8,9,10,11,19,20,21**;NOV 12, 2009;Build 379
  ;
- ; IHS/SD/LSL - 08/30/02 - V2.5 Patch 1 - HIPAA
- ;            Added prescription number as 14th piece of ABMRV array
- ;            for Pharmacy
- ; IHS/SD/SDR - V2.5 P2 - 5/9/02 -  NOIS HQW-0302-100190
- ;     Modified to display 2nd and 3rd modifiers and units
- ; IHS/SD/EFG - V2.5 P8 - IM16385
- ;    Correction to calculate cumulative charges correctly for dental
- ; IHS/SD/SDR - v2.5 p8 - task 6 - Added code for new ambulance multiple 47
- ; IHS/SD/SDR - v2.5 p9 - IM19492 - Corrected HCPCS issue (was +'ing HCPCS, making it 0)
- ; IHS/SD/SDR - v2.5 p9 - split for routine size ABMERGR3
- ; IHS/SD/SDR - v2.5 p10 - IM20018 - Added code to get CPT code on Revenue code page
- ; IHS/SD/SDR - v2.5 p10 - IM20395 - Split out lines bundled by Rev Code
+ ; IHS/SD/LSL 08/30/02 V2.5 Patch 1 HIPAA Added prescription number as 14th piece of ABMRV array for Pharmacy
+ ;IHS/SD/SDR V2.5 P2 5/9/02 -NOIS HQW-0302-100190 -Modified to display 2nd and 3rd modifiers and units
+ ;IHS/SD/EFG V2.5 P8 IM16385 -Correction to calculate cumulative charges correctly for dental
+ ;IHS/SD/SDR v2.5 p8 task 6 -Added code for new ambulance multiple 47
+ ;IHS/SD/SDR v2.5 p9 IM19492 -Corrected HCPCS issue (was +'ing HCPCS, making it 0)
+ ;IHS/SD/SDR v2.5 p9 split for routine size ABMERGR3
+ ;IHS/SD/SDR v2.5 p10 IM20018 -Added code to get CPT code on Revenue code page
+ ;IHS/SD/SDR v2.5 p10 IM20395 -Split out lines bundled by Rev Code
  ;   NOTE: old code removed due to routine size
- ; IHS/SD/SDR - v2.5 p11 - IM24135 - Fixed Rx number not printing (wasn't looking at both fields)
- ; IHS/SD/SDR - v2.5 p12 - IM25207 - Changed default to RX number
- ; IHS/SD/SDR - v2.5 p12 - IM25947 - Don't include dental charges if not doing ADA billing
+ ;IHS/SD/SDR v2.5 p11 IM24135 -Fixed Rx number not printing (wasn't looking at both fields)
+ ;IHS/SD/SDR v2.5 p12 IM25207 -Changed default to RX number
+ ;IHS/SD/SDR v2.5 p12 IM25947 -Don't include dental charges if not doing ADA billing
  ;
- ; IHS/SD/SDR - v2.6 CSV
- ; IHS/SD/SDR - abm*2.6*6 - 5010 - added date written
- ; IHS/SD/SDR - abm*2.6*6 - HEAT28973 - if 55 modifier present use '1' for units to calculate charges
- ; IHS/SD/SDR - 2.6*9 - HEAT18507 - Fixed where RX number was coming from (p14, not p6)
- ;IHS/SD/SDR - 2.6*19 - HEAT173117 - Correction to CPT Narrative for 23 multiple.
- ;IHS/SD/AML - 2.6*20 - HEAT262141 - Made changes for AHCCCS RX billing.
- ;
- ; ********************************************************************
+ ;IHS/SD/SDR v2.6 CSV
+ ;IHS/SD/SDR 2.6*6 5010 -added date written
+ ;IHS/SD/SDR 2.6*6 HEAT28973 -if 55 modifier present use '1' for units to calculate charges
+ ;IHS/SD/SDR 2.6*9 HEAT18507 -Fixed where RX number was coming from (p14, not p6)
+ ;IHS/SD/SDR 2.6*19 HEAT173117 -Correction to CPT Narrative for 23 multiple.
+ ;IHS/SD/AML 2.6*20 HEAT262141 -Made changes for AHCCCS RX billing.
+ ;IHS/SD/SDR 2.6*21 HEAT106899 -Get operating and rendering provider for 21 mult.
+ ;IHS/SD/SDR 2.6*21 HEAT120880 Added code for SERVICE DATE TO in ABMRV array for all multiples.
+ ;IHS/SD/SDR 2.6*21 HEAT168435 -Added code for pharmacy modifiers (23 mult).
+ ;IHS/SD/SDR 2.6*21 HEAT294086 -Change for <UNDEF>23+25^ABMERGR2.
+ ; **************************
  ; All line tags adhere to the following description unless specified
  ; otherwise in the appropriate line tag:
  ;
@@ -34,7 +33,7 @@ ABMERGR2 ; IHS/ASDST/DMJ - GET ANCILLARY SVCS REVENUE CODE INFO ;
  ;     charges ^ ^ Unit Charge ^ NDC/ADA ^ from date/time ^ 
  ;     ^ 3rd Modifier ^ 4th Modifier ^ Prescription ^ Attending Provider
  ;     ^ Operating Provider ^ Referring Provider ^ Other Provider
- ;*********************************************************************
+ ;***************************
  ;
 21 ;EP - Med/Surg
  S DA=0
@@ -54,15 +53,21 @@ ABMERGR2 ; IHS/ASDST/DMJ - GET ANCILLARY SVCS REVENUE CODE INFO ;
  .S $P(ABMRV(+ABM(3),ABM(1),ABMLCNT),U,16)=ABM(14)  ;Operating Provider
  .S $P(ABMRV(+ABM(3),ABM(1),ABMLCNT),U,8)=ABM(7)  ;Unit charge
  .S $P(ABMRV(+ABM(3),ABM(1),ABMLCNT),U,12)=ABM(12)  ;3rd Modifier
+ .S $P(ABMRV(+ABM(3),ABM(1),ABMLCNT),U,27)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),21,DA,0)),U,19)  ;abm*2.6*21 IHS/SD/SDR HEAT120880
  .S $P(ABMRV(+ABM(3),ABM(1),ABMLCNT),U,38)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),21,DA,2)),U)  ;abm*2.6*8 5010 line item control number
  .S $P(ABMRV(+ABM(3),ABM(1),ABMLCNT),U,39)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),21,DA,2)),U,2)  ;abm*2.6*9 NARR
+ .;start new abm*2.6*21 IHS/SD/SDR HEAT106899
+ .I $D(^ABMDBILL(DUZ(2),ABMP("BDFN"),21,DA,"P","C","O")) D
+ ..S ABMPIEN=$O(^ABMDBILL(DUZ(2),ABMP("BDFN"),21,DA,"P","C","O",0))
+ ..S $P(ABMRV(+ABM(3),ABM(1),ABMLCNT),U,16)=$P(^ABMDBILL(DUZ(2),ABMP("BDFN"),21,DA,"P",ABMPIEN,0),U)
+ .I $D(^ABMDBILL(DUZ(2),ABMP("BDFN"),21,DA,"P","C","R")) D
+ ..S ABMPIEN=$O(^ABMDBILL(DUZ(2),ABMP("BDFN"),21,DA,"P","C","R",0))
+ ..S $P(ABMRV(+ABM(3),ABM(1),ABMLCNT),U,18)=$P(^ABMDBILL(DUZ(2),ABMP("BDFN"),21,DA,"P",ABMPIEN,0),U)
+ .;end new abm*2.6*21 IHS/SD/SDR HEAT106899
  Q
  ;
 23 ;EP - Pharmacy
- ;
- ; ABMRV(IEN to REVENUE CODE, Medication IEN)= IEN to REVENUE CODE ^ 
- ;           ^ ^ ^ cumulative units ^ cumulative charges ^ ^ ^
- ;           NDC code_" "_generic name ^ date/time ^ ^ ^ ^ Prescription
+ ; ABMRV(IEN to REVENUE CODE, Medication IEN)= IEN to REVENUE CODE ^ ^ ^ ^ cumulative units ^ cumulative charges ^ ^ ^ NDC code_" "_generic name ^ date/time ^ ^ ^ ^ Prescription
  S DA=0
  F  S DA=$O(^ABMDBILL(DUZ(2),ABMP("BDFN"),23,DA)) Q:'DA  D
  .;F J=1:1:6,14,22 S ABM(J)=$P(^ABMDBILL(DUZ(2),ABMP("BDFN"),23,DA,0),"^",J)  ;abm*2.6*6 5010
@@ -76,6 +81,8 @@ ABMERGR2 ; IHS/ASDST/DMJ - GET ANCILLARY SVCS REVENUE CODE INFO ;
  .S ABMLCNT=+$G(ABMLCNT)+1
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U)=ABM(2)  ;revenue code IEN
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,2)=$S(+$G(ABM(29))'=0:$P($$CPT^ABMCVAPI(ABM(29),ABMP("VDT")),U,2),$G(ABMP("EXP"))=32:"J3490",1:0) ;abm*2.6*10 IHS/SD/AML 8/31/2012 HEAT78446
+ .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,3)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),23,DA,2)),U,3)  ;modifier  ;abm*2.6*21 IHS/SD/SDR HEAT168435
+ .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,4)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),23,DA,2)),U,4)  ;2nd modifier  ;abm*2.6*21 IHS/SD/SDR HEAT168435
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,5)=ABM(3)  ;units
  .;S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,14)=$S($G(ABM(6))'="":ABM(6),+$G(ABM(22))'=0:$P($G(^PSRX(ABM(22),0)),U),1:"")  ;Prescription (RX)  ;abm*2.6*9 HEAT18507
  .;S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,13)=$S($G(ABM(14))'="":ABM(14),+$G(ABM(22))'=0:$P($G(^PSRX(ABM(22),0)),U),1:"")  ;Prescription (RX)  ;abm*2.6*9 HEAT18507  ;abm*2.6*10 HEAT78446
@@ -83,21 +90,25 @@ ABMERGR2 ; IHS/ASDST/DMJ - GET ANCILLARY SVCS REVENUE CODE INFO ;
  .S ABM(6)=ABM(3)*ABM(4)+ABM(5)  ;units * units cost + dispense fee
  .S ABM(6)=$J(ABM(6),1,2)
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,6)=ABM(6)  ;charges
- .I $$RCID^ABMERUTL(ABMP("INS"))=99999 S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,6)=0  ;abm*2.6*20 IHS/SD/AML HEAT262141 1/4/2016 - AHCCCS RX REQUIREMENT
+ .;I $$RCID^ABMERUTL(ABMP("INS"))=99999 S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,6)=0  ;abm*2.6*20 IHS/SD/AML HEAT262141 1/4/2016 - AHCCCS RX REQUIREMENT  ;abm*2.6*21 IHS/SD/SDR HEAT294692
+ .I $$RCID^ABMERUTL(+$G(ABMP("INS")))=99999 S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,6)=0  ;abm*2.6*20 IHS/SD/AML HEAT262141 1/4/2016 - AHCCCS RX REQUIREMENT  ;abm*2.6*21 IHS/SD/SDR HEAT294692
  .;S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,9)=$P($G(^PSDRUG(ABM(1),2)),U,4)_" "_$P($G(^PSDRUG(ABM(1),0)),U)  ;NDC generic name  ;abm*2.6*11
- .I ABM(24)'="" S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,9)=ABM(24)_" "_$P($G(^PSDRUG(ABM(1),0)),U)  ;NDC generic name  ;abm*2.6*11
- .I ABM(24)="" S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,9)=$P($G(^PSDRUG(ABM(1),2)),U,4)_" "_$P($G(^PSDRUG(ABM(1),0)),U)  ;NDC generic name  ;abm*2.6*11
+ .;I ABM(24)'="" S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,9)=ABM(24)_" "_$P($G(^PSDRUG(ABM(1),0)),U)  ;NDC generic name  ;abm*2.6*11  ;abm*2.6*21 IHS/SD/SDR HEAT168435
+ .I ABM(24)'="" S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,9)=ABM(24)  ;NDC  ;abm*2.6*11  ;abm*2.6*21 IHS/SD/SDR HEAT168435
+ .;I ABM(24)="" S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,9)=$P($G(^PSDRUG(ABM(1),2)),U,4)_" "_$P($G(^PSDRUG(ABM(1),0)),U)  ;NDC generic name  ;abm*2.6*11  ;abm*2.6*21 IHS/SD/SDR HEAT168435
+ .I ABM(24)="" S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,9)=$P($G(^PSDRUG(ABM(1),2)),U,4)  ;NDC generic name  ;abm*2.6*11  ;abm*2.6*21 IHS/SD/SDR HEAT168435
+ .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,9)=$S("^31^32^33^"'[("^"_$G(ABMP("EXP"))_"^"):"N4",1:"")_$P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,9)  ;abm*2.6*21 IHS/SD/SDR HEAT168435
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,10)=ABM(10)  ;Date/Time
+ .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,12)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),23,DA,2)),U,5)  ;3rd modifier  ;abm*2.6*21 IHS/SD/SDR HEAT168435
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,32)=ABM(25)  ;date written  ;abm*2.6*6 5010
+ .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,27)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),23,DA,0)),U,28)  ;abm*2.6*21 IHS/SD/SDR HEAT120880
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,38)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),23,DA,2)),U)  ;abm*2.6*8 5010 line item control number
  .;S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,39)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),23,DA,2)),U,2)  ;abm*2.6*9 NARR  ;abm*2.6*19 IHS/SD/SDR HEAT173117
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,39)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),23,DA,3)),U,2)  ;abm*2.6*19 IHS/SD/SDR HEAT173117
  Q
  ;
 25 ;EP - Revenue Code
- ;
- ; ABMVR(IEN,0) = IEN to REVENUE CODE ^ ^ ^ ^ Cumulative units ^
- ;                Charges ^ ^ Unit charge ^ ^ start date/time
+ ; ABMVR(IEN,0) = IEN to REVENUE CODE ^ ^ ^ ^ Cumulative units ^ Charges ^ ^ Unit charge ^ ^ start date/time
  ;
  S DA=0
  F  S DA=$O(^ABMDBILL(DUZ(2),ABMP("BDFN"),25,DA)) Q:'DA  D
@@ -116,6 +127,7 @@ ABMERGR2 ; IHS/ASDST/DMJ - GET ANCILLARY SVCS REVENUE CODE INFO ;
  .S $P(ABMRV(450,0,ABMLCNT),U,5)=1
  .S $P(ABMRV(450,0,ABMLCNT),U,6)=$P(^ABMDBILL(DUZ(2),ABMP("BDFN"),8),U,10)  ;emergency room surcharge
  .S $P(ABMRV(450,0,ABMLCNT),U,8)=$P(ABMRV(450,0,ABMLCNT),U,6)
+ .S $P(ABMRV(450,0,ABMLCNT),U,27)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),25,DA,0)),U,5)  ;abm*2.6*21 IHS/SD/SDR HEAT120880
  .S $P(ABMRV(450,0,ABMLCNT),U,38)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),25,DA,2)),U)  ;abm*2.6*8 5010 line item control number
  .S $P(ABMRV(450,0,ABMLCNT),U,39)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),25,DA,2)),U,2)  ;abm*2.6*9 NARR
  Q
@@ -137,15 +149,13 @@ ABMERGR2 ; IHS/ASDST/DMJ - GET ANCILLARY SVCS REVENUE CODE INFO ;
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,8)=ABM(4)  ;Unit Charge
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,10)=ABM(7)  ;Date/Time
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,12)=ABM(9)  ;3rd Modifier
+ .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,27)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),27,DA,0)),U,12)  ;abm*2.6*21 IHS/SD/SDR HEAT120880
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,38)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),27,DA,2)),U)  ;abm*2.6*8 5010 line item control number
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,39)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),27,DA,2)),U,2)  ;abm*2.6*9 NARR
  Q
  ;
 33 ;EP - Dental
- ;
- ; ABMRV(IEN, Dental Code) = IEN to REVENUE CODE ^ Dental code ^ ^
- ;            ^ Cumulative units ^ Cumulative charges ^ ^ ^
- ;            ADA Description ^ Date of Service
+ ; ABMRV(IEN, Dental Code) = IEN to REVENUE CODE ^ Dental code ^ ^ ^ Cumulative units ^ Cumulative charges ^ ^ ^ ADA Description ^ Date of Service
  ;
  S DA=0
  I $G(ABMP("LDFN"))'="",($G(ABMP("INS"))'=""),($G(ABMP("VTYP"))'="") Q:$P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),1,ABMP("VTYP"),0)),U,2)'="A"
@@ -166,6 +176,7 @@ ABMERGR2 ; IHS/ASDST/DMJ - GET ANCILLARY SVCS REVENUE CODE INFO ;
  .S $P(ABMRV(+ABM(2),+ABM("DCODE"),ABMLCNT),U,6)=(ABM(8)*ABM(9))  ;charges
  .S $P(ABMRV(+ABM(2),+ABM("DCODE"),ABMLCNT),U,9)=$P(^AUTTADA(ABM(1),0),U,2)  ; ADA Description
  .S $P(ABMRV(+ABM(2),+ABM("DCODE"),ABMLCNT),U,10)=ABM(7)  ; Date of service
+ .S $P(ABMRV(+ABM(2),+ABM("DCODE"),ABMLCNT),U,27)=ABM(7)  ;abm*2.6*21 IHS/SD/SDR HEAT120880
  .S $P(ABMRV(+ABM(2),+ABM("DCODE"),ABMLCNT),U,38)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),33,DA,2)),U)  ;abm*2.6*8 5010 line item control number
  .S $P(ABMRV(+ABM(2),+ABM("DCODE"),ABMLCNT),U,39)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),33,DA,2)),U,2)  ;abm*2.6*9 NARR
  Q
@@ -187,6 +198,7 @@ ABMERGR2 ; IHS/ASDST/DMJ - GET ANCILLARY SVCS REVENUE CODE INFO ;
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,10)=ABM(9)  ;Date/Time
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,12)=ABM(7)  ;3rd Modifier
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,15)=ABM(10)  ;Attending Provider
+ .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,27)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),35,DA,0)),U,12)  ;abm*2.6*21 IHS/SD/SDR HEAT120880
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,38)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),35,DA,2)),U)  ;abm*2.6*8 5010 line item control number
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,39)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),35,DA,2)),U,2)  ;abm*2.6*9 NARR
  Q

@@ -1,13 +1,14 @@
 ABMDF27E ; IHS/ASDST/DMJ - Set HCFA1500 Print Array - Part 5 ;  
- ;;2.6;IHS 3P BILLING SYSTEM;**3,4,8,9,11**;NOV 12, 2009;Build 133
+ ;;2.6;IHS 3P BILLING SYSTEM;**3,4,8,9,11,21**;NOV 12, 2009;Build 379
  ;
- ; IHS/SD/SDR - v2.5 p12 - IM25331 - Put taxonomy code if NPI ONLY
- ; IHS/SD/SDR - v2.5 p12 - IM25352 - Included fix supplied by Walt Reich (PIMC)
+ ;IHS/SD/SDR - v2.5 p12 - IM25331 - Put taxonomy code if NPI ONLY
+ ;IHS/SD/SDR - v2.5 p12 - IM25352 - Included fix supplied by Walt Reich (PIMC)
  ;   Put space between anes. data for readability
- ; IHS/SD/SDR - v2.5 p13 - IM25899 - Alignment changes
- ; IHS/SD/SDR,AML - v2.5 p13 - NO IM - Change for satellite prov# in 24k
- ; IHS/SD/SDR,AML - abm*2.6*3 - NOHEAT - Correction to box 24K when NPI or not
- ; IHS/SD/SDR - abm*2.6*4 - HEAT12115 - Allow 5+ DX codes
+ ;IHS/SD/SDR - v2.5 p13 - IM25899 - Alignment changes
+ ;IHS/SD/SDR,AML - v2.5 p13 - NO IM - Change for satellite prov# in 24k
+ ;IHS/SD/SDR,AML - abm*2.6*3 - NOHEAT - Correction to box 24K when NPI or not
+ ;IHS/SD/SDR - abm*2.6*4 - HEAT12115 - Allow 5+ DX codes
+ ;IHS/SD/SDR - 2.6*21 - HEAT168435 - Changed change to see if line item is a drug, now only checks for N4, not length of field
  ;
  ; *********************************************************************
  ;
@@ -88,7 +89,8 @@ PROC ;EP for setting the procedure portion of the ABMF array
  ;.K ABMU
  ;.S $P(ABMR(ABMS,ABMLN),U,5)=$P(ABMS(ABMS),U,8)
  ;end old code start new code
- I $L($P(ABMS(ABMS),U,8))>16,($E($P(ABMS(ABMS),U,8),1,2)="N4") D
+ ;I $L($P(ABMS(ABMS),U,8))>16,($E($P(ABMS(ABMS),U,8),1,2)="N4") D  ;abm*2.6*21 IHS/SD/SDR HEAT168435
+ I ($E($P(ABMS(ABMS),U,8),1,2)="N4") D  ;abm*2.6*21 IHS/SD/SDR HEAT168435
  .S ABMU("LNG")=60
  .S ABMU("TXT")=$P(ABMS(ABMS),U,8)
  .S ABMU=3

@@ -1,10 +1,11 @@
 BIPATVW3 ;IHS/CMI/MWR - ADD OTHER ITEMS, DISPLAY HELP; MAY 10, 2010
- ;;8.5;IMMUNIZATION;**9**;OCT 01,2014
+ ;;8.5;IMMUNIZATION;**14**;AUG 01,2017
  ;;* MICHAEL REMILLARD, DDS * CIMARRON MEDICAL INFORMATICS, FOR IHS *
  ;;  BUILD LISTMANAGER ARRAY FOR DISPLAY AND EDIT OF
  ;;  PATIENT'S IMMUNIZATION DATA, DISPLAY HELP.
  ;;  PATCH 8: Changes to discontinue High Risk forecast for Flu  HADINFO+51,+56
  ;;  PATCH 9: Accommodate new parameter options for HepB (Diabetes).  ADDINFO+51
+ ;;  PATCH 14: Code to collect High Risk Pneumo, HepB (DM), HepA&B (CLD/HepC) ADDINFO+64
  ;
  ;
  ;----------
@@ -161,18 +162,20 @@ ADDINFO(BIDFN,BILINE,BIENT,BIDUZ2,BIFDT) ;EP
  .;
  .;---> New parameter to return Hep B risk. (No longer include Flu.)
  .;D RISK^BIDX(BIDFN,BIFDT,2,.BIRISKI,.BIRISKP)
- .D RISK^BIDX(BIDFN,BIFDT,BIRSK,,.BIRISKP,.BIRISKH)
- .;**********
  .;
- .;********** PATCH 8, v8.5, MAR 15,2014, IHS/CMI/MWR
- .;---> No longer report on Flu forecast.
- .;I BIRISKI S X="Influenza" I BIRISKP S X=X_" and "
- .I BIRISKH S X="HepB(DM)" I BIRISKP S X=X_" and "
- .I BIRISKP S X=X_"Pneumo"
- I X="" S X="None on record"
- ;S X="   High Risk Flu/Pneumo.: "_X
- ;S X="   High Risk for Pneumo.: "_X
- S X="   High Risk HepB/Pneumo: "_X
+ .;********** PATCH 14, v8.5, AUG 01,2017, IHS/CMI/MWR
+ .;---> Code to collect High Risk Pneumo, HepB (DM), HepA&B (CLD/HepC)
+ .;D RISK^BIDX(BIDFN,BIFDT,BIRSK,,.BIRISKP,.BIRISKH)
+ .;
+ .;---> Set Patient Age in years for this Forecast Date.
+ .N BIAGE S BIAGE=$$AGE^BIUTL1(BIDFN,1,BIFDT)
+ .N BIRISKF S BIRISKF="",BIRSK=""
+ .D RISKP^BIDX(BIDFN,BIFDT,BIAGE,1,.BIRISKF) S:BIRISKF BIRSK=BIRSK_1
+ .D RISKB^BIDX(BIDFN,BIFDT,BIAGE,.BIRISKF) S:BIRISKF BIRSK=BIRSK_2
+ .D RISKAB^BIDX(BIDFN,BIFDT,.BIRISKF) S:BIRISKF BIRSK=BIRSK_3
+ .I 'BIRSK S X="None on record" Q
+ .S X=$$RISKTX^BISITE1(BIRSK)
+ S X="   High Risk Pneumo,Hep.: "_X
  ;**********
  ;
  S X=X_" (as of "_$$SLDT2^BIUTL5(BIFDT,1)_")"

@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:34">
+<Class name="BEDD.EDInjury">
+<Description>
+BEDD.EDInjury CLASS - MAIN STORAGE FOR ED Injury PATIENT DATA</Description>
+<ClassType>serial</ClassType>
+<Super>%SerialObject,%Populate,%XML.Adaptor</Super>
+<TimeChanged>63270,28444.497489</TimeChanged>
+<TimeCreated>61957,69951.117881</TimeCreated>
+<Inheritance>right</Inheritance>
+
+<Property name="AtFaultAddress">
+<Type>%String</Type>
+</Property>
+
+<Property name="AtFaultInsAdd">
+<Type>%String</Type>
+</Property>
+
+<Property name="AtFaultInsPolicy">
+<Type>%String</Type>
+</Property>
+
+<Property name="AtFaultInsurance">
+<Type>%String</Type>
+</Property>
+
+<Property name="AtFaultName">
+<Type>%String</Type>
+</Property>
+
+<Property name="AtFaultOther">
+<Type>%GlobalCharacterStream</Type>
+</Property>
+
+<Property name="InjuryDetails">
+<Type>%GlobalCharacterStream</Type>
+</Property>
+
+<Property name="BusOffc">
+<Type>%GlobalCharacterStream</Type>
+</Property>
+
+<Property name="BusOffcCmp">
+<Type>%String</Type>
+</Property>
+
+<Property name="BusOffcStat">
+<Type>%String</Type>
+</Property>
+
+<Property name="EmplAddress">
+<Type>%String</Type>
+</Property>
+
+<Property name="EmplCitySt">
+<Type>%String</Type>
+</Property>
+
+<Property name="EmplName">
+<Type>%String</Type>
+</Property>
+
+<Property name="EmplPh">
+<Type>%String</Type>
+</Property>
+
+<Property name="InjLocat">
+<Type>%String</Type>
+</Property>
+
+<Property name="InjDt">
+<Type>%Date</Type>
+</Property>
+
+<Property name="InjTm">
+<Type>%Time</Type>
+</Property>
+
+<Property name="InjDtTm">
+<Type>%String</Type>
+</Property>
+
+<Property name="VIEN">
+<Type>%String</Type>
+</Property>
+
+<Property name="PtDFN">
+<Type>%String</Type>
+</Property>
+
+<Property name="InjCause">
+<Type>%String</Type>
+</Property>
+
+<Property name="InjCauseIEN">
+<Type>%String</Type>
+</Property>
+
+<Property name="InjSet">
+<Type>%String</Type>
+</Property>
+
+<Property name="WrkRel">
+<Type>%String</Type>
+</Property>
+
+<Property name="SafetyEquip">
+<Type>%String</Type>
+</Property>
+
+<Property name="MVCLoc">
+<Type>%String</Type>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheSerialState</Type>
+<State>EDInjuryState</State>
+<StreamLocation>^BEDD.EDInjuryS</StreamLocation>
+<Data name="EDInjuryState">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>AtFaultAddress</Value>
+</Value>
+<Value name="2">
+<Value>AtFaultInsAdd</Value>
+</Value>
+<Value name="3">
+<Value>AtFaultInsPolicy</Value>
+</Value>
+<Value name="4">
+<Value>AtFaultInsurance</Value>
+</Value>
+<Value name="5">
+<Value>AtFaultName</Value>
+</Value>
+<Value name="6">
+<Value>AtFaultOther</Value>
+</Value>
+<Value name="7">
+<Value>InjuryDetails</Value>
+</Value>
+<Value name="8">
+<Value>BusOffc</Value>
+</Value>
+<Value name="9">
+<Value>BusOffcCmp</Value>
+</Value>
+<Value name="10">
+<Value>BusOffcStat</Value>
+</Value>
+<Value name="11">
+<Value>EmplAddress</Value>
+</Value>
+<Value name="12">
+<Value>EmplCitySt</Value>
+</Value>
+<Value name="13">
+<Value>EmplName</Value>
+</Value>
+<Value name="14">
+<Value>EmplPh</Value>
+</Value>
+<Value name="15">
+<Value>InjLocat</Value>
+</Value>
+<Value name="16">
+<Value>InjDt</Value>
+</Value>
+<Value name="17">
+<Value>InjTm</Value>
+</Value>
+<Value name="18">
+<Value>VIEN</Value>
+</Value>
+<Value name="19">
+<Value>PtDFN</Value>
+</Value>
+<Value name="20">
+<Value>InjCause</Value>
+</Value>
+<Value name="21">
+<Value>InjSet</Value>
+</Value>
+<Value name="22">
+<Value>WrkRel</Value>
+</Value>
+<Value name="23">
+<Value>SafetyEquip</Value>
+</Value>
+<Value name="24">
+<Value>InjDtTm</Value>
+</Value>
+<Value name="25">
+<Value>MVCLoc</Value>
+</Value>
+<Value name="26">
+<Value>InjCauseIEN</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

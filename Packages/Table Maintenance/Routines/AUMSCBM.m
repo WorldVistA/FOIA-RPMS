@@ -1,5 +1,5 @@
 AUMSCBM  ;IHS/OIT/NKD - SCB UPDATE - MAP 12/12/2012 ;
- ;;16.0;TABLE MAINTENANCE;**2**;OCT 16,2015;Build 1
+ ;;17.0;TABLE MAINTENANCE;**1**;AUG 18,2016;Build 1
  ; 03/12/14 - Modified Inactivate processing for Education tables
  ; 05/28/14 - Added Tribe Inactivate and Pre processing
  ; 12/16/14 - Removed old/unused code

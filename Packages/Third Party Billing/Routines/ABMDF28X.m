@@ -1,15 +1,19 @@
 ABMDF28X ; IHS/ASDST/DMJ - PRINT UB-04 ;  
- ;;2.6;IHS Third Party Billing;**1,3,9**;NOV 12, 2009
+ ;;2.6;IHS Third Party Billing;**1,3,9,10,21**;NOV 12, 2009;Build 379
  ;
- ; IHS/SD/SDR - v2.5 p12 - IM25033 - Made changes for NM Medicaid
- ; IHS/SD/SDR - v2.5 p12 - IM25136 - Made change for alignment of FL4
- ; IHS/SD/SDR - v2.5 p12 - IM24881 - Form alignment changes
- ; IHS/SD/SDR - v2.5 p13 - IM25889 - Fix for blank page between forms
- ; IHS/SD/SDR - abm*2.6*1 - HEAT4566 - Override address for San Felipe Pueblo
- ; IHS/SD/SDR - abm*2.6*1 - HEAT5837 - Print delayed reason code
- ; IHS/SD/SDR - abm*2.6*1 - HEAT7998 - print patient when ITYP="N"
- ; IHS/SD/SDR - abm*2.6*1 - FIXPMS10028 - check FL38 and what address to print
- ; IHS/SD/SDR - abm*2.6*3 - HEAT13774 - fix <UNDEF>12+28^ABMDF28X
+ ;IHS/SD/SDR - v2.5 p12 - IM25033 - Made changes for NM Medicaid
+ ;IHS/SD/SDR - v2.5 p12 - IM25136 - Made change for alignment of FL4
+ ;IHS/SD/SDR - v2.5 p12 - IM24881 - Form alignment changes
+ ;IHS/SD/SDR - v2.5 p13 - IM25889 - Fix for blank page between forms
+ ;
+ ;IHS/SD/SDR - 2.6*1 - HEAT4566 - Override address for San Felipe Pueblo
+ ;IHS/SD/SDR - 2.6*1 - HEAT5837 - Print delayed reason code
+ ;IHS/SD/SDR - 2.6*1 - HEAT7998 - print patient when ITYP="N"
+ ;IHS/SD/SDR - 2.6*1 - FIXPMS10028 - check FL38 and what address to print
+ ;IHS/SD/SDR - 2.6*3 - HEAT13774 - fix <UNDEF>12+28^ABMDF28X
+ ;IHS/SD/SDR - 2.6*21 - HEAT97615 - Remove date from box 37B
+ ;IHS/SD/SDR - 2.6*21 - HEAT169641 - Added comma and middle initial if AO Control# is 61044
+ ;IHS/SD/SDR - 2.6*21 - HEAT183995 - Made change so delayed reason code will only print 1 digit, no leading zero.
  ;
  ;**********************************************************************
  ;
@@ -116,6 +120,7 @@ ABMDF28X ; IHS/ASDST/DMJ - PRINT UB-04 ;
  D WRT^ABMDF28W
  W !
  S ABMP("PNAME")=ABMR(20,40)_", "_ABMR(20,50)_" "_ABMR(20,60)
+ I ($$RCID^ABMERUTL(ABMP("INS"))[61044)&(ABMR(20,60)'="") S ABMP("PNAME")=ABMR(20,40)_", "_ABMR(20,50)_", "_ABMR(20,60)  ;abm*2.6*21 IHS/SD/SDR HEAT169641
  S ABMDE=ABMP("PNAME")_"^2^29"  ;#8b
  D WRT^ABMDF28W
  S ABMDE=ABMR(20,140)_"^31^30"  ;patient city #9b
@@ -236,7 +241,8 @@ ABMDF28X ; IHS/ASDST/DMJ - PRINT UB-04 ;
  D WRT^ABMDF28W  ; form locator #36a
  ;start new code abm*2.6*1 HEAT5837
  S ABMDE=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),9)),U,16)  ;delayed reason code
- I ABMDE S ABMDE=$P($G(^ABMDCODE(ABMDE,0)),U)_"^74^7" D WRT^ABMDF28W  ;form locator #37a
+ ;I ABMDE S ABMDE=$P($G(^ABMDCODE(ABMDE,0)),U)_"^74^7" D WRT^ABMDF28W  ;form locator #37a  ;abm*2.6*21 IHS/SD/SDR HEAT183995
+ I ABMDE S ABMDE=+$P($G(^ABMDCODE(ABMDE,0)),U)_"^74^7" D WRT^ABMDF28W  ;form locator #37a  ;abm*2.6*21 IHS/SD/SDR HEAT183995
  ;end new code HEAT5837
 11 ;
  W !
@@ -275,9 +281,11 @@ ABMDF28X ; IHS/ASDST/DMJ - PRINT UB-04 ;
  S ABMDE=ABMR(40,400)_"^67^6"  ; Occur. Span thru date - 4
  D WRT^ABMDF28W  ; form locator #36b
  ;
- S ABMDE=$E($P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),4)),U,9),1,22)
- S:ABMDE'="" ABMDE=ABMDE_"^58^22"
- D WRT^ABMDF28W
+ ;start old abm*2.6*21 IHS/SD/SDR HEAT97615
+ ;S ABMDE=$E($P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),4)),U,9),1,22)
+ ;S:ABMDE'="" ABMDE=ABMDE_"^58^22"
+ ;D WRT^ABMDF28W
+ ;end old abm*2.6*21 IHS/SD/SDR HEAT97615
  ;
 12 ;
  ; If private insurance and relationship of policy holder to patient

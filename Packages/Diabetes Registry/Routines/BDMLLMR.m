@@ -1,5 +1,5 @@
 BDMLLMR ; IHS/CMI/LAB - PCC HEALTH SUMMARY ; 
- ;;2.0;DIABETES MANAGEMENT SYSTEM;**4,6,7,8**;JUN 14, 2007;Build 53
+ ;;2.0;DIABETES MANAGEMENT SYSTEM;**4,6,7,8,10**;JUN 14, 2007;Build 12
  ;
  W:$D(IOF) @IOF
  W !!,"This report will list all lab tests or medications that are used at"
@@ -194,7 +194,7 @@ GUIEP ;-- lets do the GUI report
  Q:$G(BDMDSP)  ;quit if to screen
  S X=0,C=0 F  S X=$O(^TMP($J,"BDMLAB",X)) Q:X'=+X  D
  .S BDMDCTA=^TMP($J,"BDMLAB",X)
- .I BDMDCTA="ZZZZZZZ" S BDMDCTA=$C(12)
+ .;I BDMDCTA="ZZZZZZZ" S BDMDCTA=$C(12)
  .S ^BDMGUI(BDMGIEN,11,X,0)=BDMDCTA,C=C+1
  S ^BDMGUI(BDMGIEN,11,0)="^^"_C_"^"_C_"^"_DT_"^"
  S DA=BDMGIEN,DIK="^BDMGUI(" D IX1^DIK

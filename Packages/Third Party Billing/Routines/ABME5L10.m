@@ -1,7 +1,11 @@
 ABME5L10 ; IHS/ASDST/DMJ - Header 
- ;;2.6;IHS Third Party Billing System;**6,8,10,11,19**;NOV 12, 2009;Build 300
+ ;;2.6;IHS Third Party Billing System;**6,8,10,11,19,21**;NOV 12, 2009;Build 379
  ;Header Segments
  ;IHS/SD/SDR - 2.6*19 - HEAT116949 - Include LIN segment in 837I if line item has an NDC.
+ ;IHS/SD/SDR - 2.6*21 - HEAT106899 - Updated to print operating.  Fixed so it would print both
+ ;   oper. and rend. if both populated.  Also made correction to patch 19 code.  There was a QUIT that was
+ ;   causing none of the line item provider lines to print if there wasn't an NDC on the line.
+ ;IHS/SD/SDR - 2.6*21 - HEAT120880 - Made change for OK Medicaid to print date range in loop 2400.
  ;
 EP ;START HERE
  S ABMLXCNT=0
@@ -27,10 +31,23 @@ LOOP ;
  D WR^ABMUTL8("LX")
  D EP^ABME5SV2
  D WR^ABMUTL8("SV2")
- I $P(ABMRV(ABMI,ABMJ,ABMK),U,10) D
- .D EP^ABME5DTP("472","D8",$P(ABMRV(ABMI,ABMJ,ABMK),U,10))
- I '$P(ABMRV(ABMI,ABMJ,ABMK),U,10) D
- .D EP^ABME5DTP(472,"D8",$P(ABMB7,U))
+ ;start old abm*2.6*21 IHS/SD/SDR HEAT120880
+ ;I $P(ABMRV(ABMI,ABMJ,ABMK),U,10) D
+ ;.D EP^ABME5DTP("472","D8",$P(ABMRV(ABMI,ABMJ,ABMK),U,10))
+ ;I '$P(ABMRV(ABMI,ABMJ,ABMK),U,10) D
+ ;.D EP^ABME5DTP(472,"D8",$P(ABMB7,U))
+ ;end old start new abm*2.6*21 IHS/SD/SDR HEAT120880
+ I $$GET1^DIQ(9999999.18,ABMP("INS"),".01","E")="OKLAHOMA MEDICAID" D
+ .I $P(ABMRV(ABMI,ABMJ,ABMK),U,10) D
+ ..D EP^ABME5DTP("472","RD8",$P(ABMRV(ABMI,ABMJ,ABMK),U,10),$S($P(ABMRV(ABMI,ABMJ,ABMK),U,27):$P(ABMRV(ABMI,ABMJ,ABMK),U,27),1:$P(ABMRV(ABMI,ABMJ,ABMK),U,10)))
+ .I '$P(ABMRV(ABMI,ABMJ,ABMK),U,10) D
+ ..D EP^ABME5DTP(472,"RD8",$P(ABMB7,U),$P(ABMB7,U,2))
+ I $$GET1^DIQ(9999999.18,ABMP("INS"),".01","E")'="OKLAHOMA MEDICAID" D	
+ .I $P(ABMRV(ABMI,ABMJ,ABMK),U,10) D
+ ..D EP^ABME5DTP("472","D8",$P(ABMRV(ABMI,ABMJ,ABMK),U,10))
+ .I '$P(ABMRV(ABMI,ABMJ,ABMK),U,10) D
+ ..D EP^ABME5DTP(472,"D8",$P(ABMB7,U))
+ ;end new abm*2.6*21 IHS/SD/SDR HEAT120880
  D WR^ABMUTL8("DTP")
  ;D EP^ABME5REF("6R","")   ;line item control number  ;abm*2.6*11 HEAT92070
  ;D WR^ABMUTL8("REF")  ;abm*2.6*11 HEAT92070
@@ -46,22 +63,35 @@ LOOP ;
  ;I $P($G(ABMRV(ABMI,ABMJ,ABMK)),U,13)'="" D  ;abm*2.6*10 HEAT72307  ;abm*2.6*10 HEAT78446
  ;I $P($G(ABMRV(ABMI,ABMJ,ABMK)),U,28)'="" D  ;abm*2.6*10 HEAT72307  ;abm*2.6*10 HEAT78446  ;abm*2.6*19 HEAT116949
  S NDC=$P($P(ABMRV(ABMI,ABMJ,ABMK),U,9)," ")  ;abm*2.6*19 HEAT116949
- S NDC=$TR(NDC,"-") I ($L(NDC)'=10&($L(NDC)'=11)) Q  ;abm*2.6*19 HEAT116949
- I NDC D  ;abm*2.6*19 HEAT116949
+ ;start old abm*2.6*21 IHS/SD/SDR HEAT106899
+ ;S NDC=$TR(NDC,"-") I ($L(NDC)'=10&($L(NDC)'=11)) Q  ;abm*2.6*19 HEAT116949
+ ;I NDC D  ;abm*2.6*19 HEAT116949
+ ;.I $P($P(ABMRV(ABMI,ABMJ,ABMK),U,9)," ")'="" D
+ ;..D EP^ABME5LIN
+ ;..D WR^ABMUTL8("LIN")
+ ;.I +$P(ABMRV(ABMI,ABMJ,ABMK),U,5) D
+ ;..D EP^ABME5CTP
+ ;..D WR^ABMUTL8("CTP")
+ ;.;start old abm*2.6*19 HEAT116949
+ ;.;D EP^ABME5REF("XZ",$P(ABMRV(ABMI,ABMJ,ABMK),U,14))
+ ;.;D WR^ABMUTL8("REF")
+ ;.;end old start new abm*2.6*19 HEAT116949
+ ;.I $P($G(ABMRV(ABMI,ABMJ,ABMK)),U,14)'="" D
+ ;..D EP^ABME5REF("XZ",$P(ABMRV(ABMI,ABMJ,ABMK),U,14))
+ ;..D WR^ABMUTL8("REF")
+ ;end old start new abm*2.6*21 IHS/SD/SDR HEAT106899
+ S NDC=$TR(NDC,"-")
+ I NDC&(($L(NDC)=10)!($L(NDC)=11)) D
  .I $P($P(ABMRV(ABMI,ABMJ,ABMK),U,9)," ")'="" D
  ..D EP^ABME5LIN
  ..D WR^ABMUTL8("LIN")
  .I +$P(ABMRV(ABMI,ABMJ,ABMK),U,5) D
  ..D EP^ABME5CTP
  ..D WR^ABMUTL8("CTP")
- .;start old abm*2.6*19 HEAT116949
- .;D EP^ABME5REF("XZ",$P(ABMRV(ABMI,ABMJ,ABMK),U,14))
- .;D WR^ABMUTL8("REF")
- .;end old start new abm*2.6*19 HEAT116949
  .I $P($G(ABMRV(ABMI,ABMJ,ABMK)),U,14)'="" D
  ..D EP^ABME5REF("XZ",$P(ABMRV(ABMI,ABMJ,ABMK),U,14))
  ..D WR^ABMUTL8("REF")
- ;end new abm*2.6*19 HEAT116949
+ ;end new abm*2.6*21 IHS/SD/SDR HEAT106899
  ;
  ; Loop 2420A - Operating Physician Name
  S ABMLOOP="2420A"
@@ -80,8 +110,10 @@ LOOP ;
  ; Loop 2420C - Other Physician Name
  I $P($G(ABMRV(ABMI,ABMJ,ABMK)),U,18) D
  .S ABM("PRV")=$P(ABMRV(ABMI,ABMJ,ABMK),U,18)
- .Q:ABM("PRV")=$O(ABMP("PRV","T",0))
- .D EP^ABME5NM1("73")
+ .;Q:ABM("PRV")=$O(ABMP("PRV","T",0))  ;abm*2.6*21 IHS/SD/SDR HEAT106899
+ .Q:ABM("PRV")=$O(ABMP("PRV","R",0))  ;abm*2.6*21 IHS/SD/SDR HEAT106899
+ .;D EP^ABME5NM1("73")  ;abm*2.6*21 IHS/SD/SDR HEAT106899
+ .D EP^ABME5NM1("82")  ;abm*2.6*21 IHS/SD/SDR HEAT106899
  .D WR^ABMUTL8("NM1")
  .I ABMNPIU="N" D
  ..D EP^ABME5REF("EI",9999999.06,DUZ(2))

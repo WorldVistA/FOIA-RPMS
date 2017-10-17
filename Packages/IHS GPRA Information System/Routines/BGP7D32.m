@@ -1,5 +1,5 @@
 BGP7D32 ; IHS/CMI/LAB - measure C 28 Sep 2015 11:39 AM ; 
- ;;17.0;IHS CLINICAL REPORTING;;AUG 30, 2016;Build 16
+ ;;17.1;IHS CLINICAL REPORTING;;MAY 10, 2017;Build 29
  ;
 I14 ;EP
  ;3 denominators, 32 numerators

@@ -1,5 +1,5 @@
 BDMDR31 ; IHS/CMI/LAB - patients dm list - chinle ;
- ;;2.0;DIABETES MANAGEMENT SYSTEM;**2,3,4**;JUN 14, 2007
+ ;;2.0;DIABETES MANAGEMENT SYSTEM;**2,3,4,10**;JUN 14, 2007;Build 12
  ;
  ;
 PRINT ;EP - called from xbdbque

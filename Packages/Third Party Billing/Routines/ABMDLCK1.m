@@ -1,5 +1,5 @@
 ABMDLCK1 ; IHS/ASDST/DMJ - check visit for elig - CONT'D ;    
- ;;2.6;IHS 3P BILLING SYSTEM;**11**;NOV 12, 2009;Build 133
+ ;;2.6;IHS 3P BILLING SYSTEM;**11,21**;NOV 12, 2009;Build 379
  ;;Y2K/OK - IHS/ADC/JLG 12-18-97
  ;Original;TMD;
  ; Code has been added to use the billing limit from the parameters file
@@ -17,12 +17,10 @@ ABMDLCK1 ; IHS/ASDST/DMJ - check visit for elig - CONT'D ;
  ;    found in this routine. Changes are not documented inside routine.
  ;    I will take responsibility for the entire routine for patch 9.
  ;
- ; IHS/SD/SDR - v2.5 p10 - IM19802
- ;   Fixed check for error 56 (user would get error if any provider met
- ;   criteria
+ ; IHS/SD/SDR - v2.5 p10 - IM19802 - Fixed check for error 56 (user would get error if any provider met criteria
+ ; IHS/SD/SDR - v2.5 p10 - IM20771 - Added check for outpatient visit and patient has MCR Part A only
  ;
- ; IHS/SD/SDR - v2.5 p10 - IM20771
- ;   Added check for outpatient visit and patient has MCR Part A only
+ ;IHS/SD/SDR - 2.6*21 - HEAT127079 - Made change to show error 58 for POV correctly
  ;
  ; *********************************************************************
  ;
@@ -198,5 +196,6 @@ CHK2 ;
  I ABM("FLG") D
  .S ABM("XIT")=11
  .S $P(ABML(99,ABM("INS")),U,6)=58
+ I $G(ABM("XIT")) D UNCHK^ABMDLCK2  ;abm*2.6*21 IHS/SD/SDR HEAT127079
  Q
  ; ABM("XIT") serves as a flag that the priority needs to be 99

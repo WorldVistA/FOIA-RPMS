@@ -1,5 +1,5 @@
 APCM25ET ;IHS/CMI/LAB - IHS MU PATIENT LIST;
- ;;1.0;MU PERFORMANCE REPORTS;**7**;MAR 26, 2012;Build 15
+ ;;1.0;MU PERFORMANCE REPORTS;**7,9**;MAR 26, 2012;Build 25
  ;
  ;
  ;
@@ -62,6 +62,7 @@ TP ;
  ;
  W !
 MUYEAR ;
+ K APCMPER,APCMVDT,APCMEDUD  ;IHS/CMI/LAB - PATCH 9 06/06/2017
  K DIR S DIR(0)="D^::EP"
  W !,"Enter the Calendar Year for which the EP is demonstrating Meaningful"
  S DIR("A")="Use.  Use a 4 digit year, e.g. 2015"
@@ -73,6 +74,7 @@ MUYEAR ;
  I $E(Y,4,7)'="0000" W !!,"Please enter a year only!",! G MUYEAR
  I $E(Y,1,3)<315 W !!,"Year entered cannot be prior to 2015.",! G MUYEAR
  S APCMPER=APCMVDT
+ I $E(APCMPER,1,3)=317 S APCMEDUD=3171231  ;IHS/CMI/LAB - PATCH 9 06/06/2017
  S APCMLD=$E(APCMPER,1,3)_"0101",APCMHD=$E(APCMPER,1,3)_"1231"   ;LOW AND HIGH DATES ALLOWED BELOW
  ;
 YEAR ;
@@ -137,7 +139,13 @@ SUM ;display summary of this report
  W !,$$CTR("SUMMARY OF IHS MODIFIED STAGE 2 MEANINGFUL USE REPORT TO BE GENERATED")
  W !!,"The date ranges for this report are:"
  W !?5,"Report Period: ",?31,$$FMTE^XLFDT(APCMBD)," to ",?31,$$FMTE^XLFDT(APCMED)
- W !!,"Providers: "
+ I $E(APCMPER,1,3)="317",($$HAS("S2.021.EP")!($$HAS("S2.020.EP"))!($$HAS("S2.023.EP"))) D    ;IHS/CMI/LAB - PATCH 9 06/06/2017
+ .S C=0
+ .W !!,"Please note: the date range is ",$$FMTE^XLFDT(APCMBD)," to ",$$FMTE^XLFDT(APCMEDUD)," for ",!
+ .I $$HAS("S2.021.EP") W ?5,"Patient Education",!
+ .I $$HAS("S2.020.EP") W ?5,"Patient Electronic Access",!
+ .I $$HAS("S2.023.EP") W ?5,"Summary of Care (HIE)",!
+ W !,"Providers: "
  S X=0 F  S X=$O(APCMPRV(X)) Q:X'=+X  W !?5,$P(^VA(200,X,0),U,1)
  D PT^APCM25SL
  I APCMROT="" G DEMO
@@ -223,3 +231,8 @@ LISTS ;any lists with measures?
  I '$D(APCMLIST) W !!,"No lists selected.",!
  I $D(APCMLIST) S APCMLIST="A" ;I '$D(APCMLIST)!($D(APCMQUIT)) G LISTS ;get report type for each list
  Q
+HAS(I) ;EP
+ NEW X,Y
+ S Y=0
+ S X=0 F  S X=$O(APCMIND(X)) Q:X'=+X  I $P(^APCM25OB(X,0),U,1)=I S Y=1
+ Q Y

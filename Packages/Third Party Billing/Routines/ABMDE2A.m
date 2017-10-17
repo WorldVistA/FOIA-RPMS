@@ -1,18 +1,14 @@
-ABMDE2A ; IHS/ASDST/DMJ - PAGE 2 - INSURER VIEW OPTION ;  
- ;;2.6;IHS 3P BILLING SYSTEM;;NOV 12, 2009
+ABMDE2A ; IHS/SD/SDR - PAGE 2 - INSURER VIEW OPTION ;  
+ ;;2.6;IHS 3P BILLING SYSTEM;**21**;NOV 12, 2009;Build 379
  ;
- ; IHS/SD/SDR - V2.5 P2 - 4/17/02 - NOIS NEA-0401-180046
- ;     Modified to include coverage type in claim editor for
- ;     the insurer view portion
+ ; IHS/SD/SDR - V2.5 P2 - 4/17/02 - NOIS NEA-0401-180046 - Modified to include coverage
+ ;    type in claim editor for the insurer view portion
  ;
- ; IHS/SD/SDR - v2.5 p8 task 8
- ;    Added code to look for replacement insurer
+ ; IHS/SD/SDR - v2.5 p8 task 8 - Added code to look for replacement insurer
+ ; IHS/SD/SDR - v2.5 p9 - IM18938 - Added RATE CODE to display
+ ; IHS/SD/SDR - v2.5 p12 - UFMS - Added display of TIN
  ;
- ; IHS/SD/SDR - v2.5 p9 - IM18938
- ;    Added RATE CODE to display
- ;
- ; IHS/SD/SDR - v2.5 p12 - UFMS
- ;   Added display of TIN
+ ;IHS/SD/SDR - 2.6*21 - VMBP RQMT_109 - Updated View option for VAMB Eligible data
  ;
  ; *********************************************************************
  ;
@@ -53,11 +49,20 @@ V2 ;
  .W $P($G(^AUTNINS($P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),13,ABM("XIEN"),0)),U),0)),U)
  .W " for this claim only!"
  W !,ABMV
- W !,$S($P($P(ABMV("X1"),U),";",2)="MEDICARE":"HIC Number.......: ",1:"Policy Number....: "),$P(ABMV("X1"),U,4)
+ ;W !,$S($P($P(ABMV("X1"),U),";",2)="MEDICARE":"HIC Number.......: ",1:"Policy Number....: "),$P(ABMV("X1"),U,4)  ;abm*2.6*21 IHS/SD/SDR VMBP RQMT_109
+ ;start new abm*2.6*21 IHS/SD/SDR VMBP RQMT_109
+ W !,$S($P($P(ABMV("X1"),U),";",2)="MEDICARE":"HIC Number....: ",$$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,+ABMV("X1"),".211","I"),1,"I")="V":"VMBP Enrollment Number..: ",1:"Policy Number...: "),$P(ABMV("X1"),U,4)
+ ;end new abm*2.6*21 IHS/SD/SDR VMBP RQMT_109
  I $P($G(ABMV("X1")),U,13)'="" W ?45,"Rate Code.......:",$P($G(ABMV("X1")),U,13)
  I ABMV("X2")="" G ERR
- W !,"Group Name.......: ",$P(ABMV("X3"),U,6)
- W ?45,"Group Number....: ",$P(ABMV("X3"),U,7)
+ ;start old code abm*2.6*21 IHS/SD/SDR VMBP RQMT_109
+ ;W !,"Group Name.......: ",$P(ABMV("X3"),U,6)
+ ;W ?45,"Group Number....: ",$P(ABMV("X3"),U,7)
+ ;end old start new abm*2.6*21 IHS/SD/SDR VMBP RQMT_109
+ I $$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,+ABMV("X1"),".211","I"),1,"I")'="V" D
+ .W !,"Group Name.......: ",$P(ABMV("X3"),U,6)
+ .W ?45,"Group Number....: ",$P(ABMV("X3"),U,7)
+ ;end new abm*2.6*21 IHS/SD/SDR VMBP RQMT_109
  S ABMCOV=""
  F  S ABMCOV=$O(ABMP("COV",ABMCOV)) Q:ABMCOV=""  D
  .S ABMEDT=$P(ABMP("COV",ABMCOV),U)

@@ -1,5 +1,5 @@
 BQIUL3 ;APTIV/HC/DB-BQI utilities for Code Set Versioning ; 16 Apr 2008  6:00 PM
- ;;2.4;ICARE MANAGEMENT SYSTEM;;Apr 01, 2015;Build 41
+ ;;2.5;ICARE MANAGEMENT SYSTEM;**2**;May 24, 2016;Build 14
  ;
 ICD9(VAL,IDT,PC) ; EP - Return value of CSV pc of the ICD DIAGNOSIS file (#80)
  ;
@@ -68,3 +68,6 @@ ICDD(FILE,VAL,IDT) ;EP - Return description for ^ICD9 or ^ICD0
  S DESC="" F I=1:1 Q:'$D(ARRAY(I))  Q:ARRAY(I)=" "  S DESC=DESC_ARRAY(I)_" "
  S DESC=$$TKO^BQIUL1(DESC," ")
  Q DESC
+ ;
+PUNC(X) ;EP
+ Q $TR(X,"`~!@#$%^&*()-_=+\|[{]};:'"",<.>/?","")

@@ -1,5 +1,5 @@
 BQIREFPL ;GDIT/HS/ALA-Get Referrals by Panel ; 31 Dec 2014  2:27 PM
- ;;2.5;ICARE MANAGEMENT SYSTEM;;May 24, 2016;Build 27
+ ;;2.6;ICARE MANAGEMENT SYSTEM;;Jul 07, 2017;Build 72
  ;
  ;
  Q
@@ -10,7 +10,7 @@ EN(DATA,OWNR,PLIEN,PLIST) ;EP -- BQI GET REFERRALS BY PANEL
  ;  OWNR  - Owner of panel
  ;  PLIEN - Panel IEN
  ;  PLIST - List of DFNs (optional)
- NEW UID,II,DFN,HEADER,TMP,BHEADR,BVALUE,VAL,VALUE,FLDS,RFIEN,CIEN,CTYPD00015
+ NEW UID,II,DFN,HEADER,TMP,BHEADR,BVALUE,VAL,VALUE,FLDS,RFIEN,CIEN,CTYPD00015,QFL,TQFL
  S UID=$S($G(ZTSK):"Z"_ZTSK,1:$J)
  S DATA=$NA(^TMP("BQIREFPL",UID))
  K @DATA
@@ -52,6 +52,7 @@ PAT(DATA,OWNR,PLIEN,DFN) ;EP - Build record by patient
  K VALUE
  D HDR^BQIHEADR(OWNR,PLIEN,DFN,.BHEADR,.BVALUE)
  S BVALUE=$$TKO^BQIUL1(BVALUE,"^"),VALUE(0)=BVALUE
+ ;S VALUE(0)=BVALUE
  S HEADR=BHEADR_RHEADR,HEADR=$$TKO^BQIUL1(HEADR,"^")
  I II=0 S @DATA@(II)=HEADR_$C(30)
  S CTYP="RF",CRE=0
@@ -74,9 +75,9 @@ PAT(DATA,OWNR,PLIEN,DFN) ;EP - Build record by patient
  . S TEMPL=$$GET1^DIQ(90505.14,IENS,.01,"E")
  ;
  ; If template, use it
- I TEMPL'="" S QFL=0 D  Q
+ I TEMPL'="" S TQFL=0 D  G FIN:'TQFL
  . S LYIEN=$$TPN^BQILYUTL(DUZ,TEMPL)
- . I LYIEN="" S QFL=1 Q
+ . I LYIEN="" S TQFL=1 Q
  . I DFN="" S VALUE(1)="" Q
  . I '$D(@TMP@(DFN)) S CRE=CRE+1,VALUE(CRE)=VALUE(0)_"^"
  . S RFIEN="" F  S RFIEN=$O(@TMP@(DFN,RFIEN)) Q:RFIEN=""  S CRE=CRE+1,VALUE(CRE)=VALUE(0)_"^"
@@ -100,7 +101,8 @@ PAT(DATA,OWNR,PLIEN,DFN) ;EP - Build record by patient
  .. F C=1:1:CRE S CLNG=$L(HEADR,"^")-$L(VALUE(C),"^") D
  ... I CLNG>0 S $P(VALUE(C),"^",$L(HEADR,"^"))=""
  ... I CLNG<0 S VALUE(C)=$P(VALUE(C),"^",1,$L(HEADR,"^"))
- . F C=1:1:CRE S II=II+1,VALUE(C)=$$TKO^BQIUL1(VALUE(C),"^"),@DATA@(II)=VALUE(C)_$C(30)
+ . ;F C=1:1:CRE S II=II+1,VALUE(C)=$$TKO^BQIUL1(VALUE(C),"^"),@DATA@(II)=VALUE(C)_$C(30)
+ . F C=1:1:CRE S II=II+1,@DATA@(II)=VALUE(C)_$C(30)
  . K VALUE S VALUE(0)=BVALUE
  . ;
  ; If no template, check for customized
@@ -125,7 +127,8 @@ PAT(DATA,OWNR,PLIEN,DFN) ;EP - Build record by patient
  .. F C=1:1:CRE S CLNG=$L(HEADR,"^")-$L(VALUE(C),"^") D
  ... I CLNG>0 S $P(VALUE(C),"^",$L(HEADR,"^"))=""
  ... I CLNG<0 S VALUE(C)=$P(VALUE(C),"^",1,$L(HEADR,"^"))
- .. F C=1:1:CRE S II=II+1,VALUE(C)=$$TKO^BQIUL1(VALUE(C),"^"),@DATA@(II)=VALUE(C)_$C(30)
+ .. ;F C=1:1:CRE S II=II+1,VALUE(C)=$$TKO^BQIUL1(VALUE(C),"^"),@DATA@(II)=VALUE(C)_$C(30)
+ .. F C=1:1:CRE S II=II+1,@DATA@(II)=VALUE(C)_$C(30)
  . K VALUE S VALUE(0)=BVALUE
  . ; If no customized found, use default
  . I CIEN="" D STAND()
@@ -151,7 +154,8 @@ PAT(DATA,OWNR,PLIEN,DFN) ;EP - Build record by patient
  .. F C=1:1:CRE S CLNG=$L(HEADR,"^")-$L(VALUE(C),"^") D
  ... I CLNG>0 S $P(VALUE(C),"^",$L(HEADR,"^"))=""
  ... I CLNG<0 S VALUE(C)=$P(VALUE(C),"^",1,$L(HEADR,"^"))
- .. F C=1:1:CRE S II=II+1,VALUE(C)=$$TKO^BQIUL1(VALUE(C),"^"),@DATA@(II)=VALUE(C)_$C(30)
+ .. ;F C=1:1:CRE S II=II+1,VALUE(C)=$$TKO^BQIUL1(VALUE(C),"^"),@DATA@(II)=VALUE(C)_$C(30)
+ .. F C=1:1:CRE S II=II+1,@DATA@(II)=VALUE(C)_$C(30)
  . K VALUE S VALUE(0)=BVALUE
  . ; If no customized found, use default
  . I CIEN="" D STAND()
@@ -191,7 +195,8 @@ STAND() ;EP - Get standard display
  . F C=1:1:CRE S CLNG=$L(HEADR,"^")-$L(VALUE(C),"^") D
  .. I CLNG>0 S $P(VALUE(C),"^",$L(HEADR,"^"))=""
  .. I CLNG<0 S VALUE(C)=$P(VALUE(C),"^",1,$L(HEADR,"^"))
- F C=1:1:CRE S II=II+1,VALUE(C)=$$TKO^BQIUL1(VALUE(C),"^"),@DATA@(II)=VALUE(C)_$C(30)
+ ;F C=1:1:CRE S II=II+1,VALUE(C)=$$TKO^BQIUL1(VALUE(C),"^"),@DATA@(II)=VALUE(C)_$C(30)
+ F C=1:1:CRE S II=II+1,@DATA@(II)=VALUE(C)_$C(30)
  K VALUE S VALUE(0)=BVALUE
  ;
 FIN ;
@@ -266,7 +271,7 @@ DSP() ;EP
  ;
 RHD ;EP - Referral header
  ; Check for template
- NEW DA,IENS,TEMPL,LYIEN,QFL
+ NEW DA,IENS,TEMPL,LYIEN,QFL,TQFL
  S TEMPL=""
  I OWNR'=DUZ D
  . S DA=$O(^BQICARE(OWNR,1,PLIEN,30,DUZ,4,"C",CTYP,""))
@@ -280,9 +285,9 @@ RHD ;EP - Referral header
  . S TEMPL=$$GET1^DIQ(90505.14,IENS,.01,"E")
  ;
  ; If template, use it
- I TEMPL'="" S QFL=0 D  G FH:'QFL
+ I TEMPL'="" S TQFL=0 D  G FH:'TQFL
  . S LYIEN=$$TPN^BQILYUTL(DUZ,TEMPL)
- . I LYIEN="" S QFL=1 Q
+ . I LYIEN="" S TQFL=1 Q
  . S DOR=""
  . F  S DOR=$O(^BQICARE(DUZ,15,LYIEN,1,"C",DOR)) Q:DOR=""  D
  .. S IEN=""

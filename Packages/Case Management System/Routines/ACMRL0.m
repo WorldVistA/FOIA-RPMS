@@ -1,5 +1,5 @@
 ACMRL0 ;cmi/anch/maw - SCREEN LOGIC ; 
- ;;2.0;ACM CASE MANAGEMENT SYSTEM;**1,4,6,7**;AUG 27, 2007
+ ;;2.0;DIABETES MANAGEMENT SYSTEM;**10**;JUN 14, 2007;Build 12
  ;IHS/CMI/LAB - TMP TO XTMP
  ;
  ;
@@ -59,9 +59,9 @@ D ;EP;DATE RANGE
 BD ;get beginning date
  ;cmi/anch/maw 9/6/2007 patch 7 begin mods
  ;W ! S DIR(0)="D^::EP",DIR("A")="Enter beginning "_ACMTEXT_" for Search" D ^DIR K DIR S:$D(DUOUT) DIRUT=1
- W ! S %DT="AE",%DT("A")="Enter beginning "_ACMTEXT_" for Search:  " D ^%DT
+ K %DT W ! S %DT="AE",%DT("A")="Enter beginning "_ACMTEXT_" for Search:  " D ^%DT
  ;I $D(DIRUT) Q
- Q:'Y  
+ Q:'Y
  S ACMBD=Y
  ;cmi/anch/maw 9/6/2007 patch 7 end mods
 ED ;get ending date IHS/CMI/TMJ PATCH #6 date display
@@ -70,7 +70,7 @@ ED ;get ending date IHS/CMI/TMJ PATCH #6 date display
  ;control did not work
  ;cmi/anch/maw 9/6/2007 patch 7 begin mods
  ;W ! S DIR(0)="D^"_ACMBD_"::EX",DIR("A")="Enter ending "_ACMTEXT_" for Search" S Y=ACMBD D DD^%DT S DIR("B")=Y,Y="" D ^DIR K DIR S:$D(DUOUT) DIRUT=1
- W ! S %DT="AE",%DT(0)=ACMBD,%DT("A")="Enter ending "_ACMTEXT_" for Search:  ",%DT("B")=$$FMTE^XLFDT(ACMBD) D ^%DT
+ K %DT W ! S %DT="AE",%DT(0)=ACMBD,%DT("A")="Enter ending "_ACMTEXT_" for Search:  ",%DT("B")=$$FMTE^XLFDT(ACMBD) D ^%DT
  ;I $D(DIRUT) G BD
  G BD:'Y
  ;cmi/anch/maw 9/6/2007 end of mods

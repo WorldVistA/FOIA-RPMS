@@ -1,5 +1,5 @@
 BGP7DL ; IHS/CMI/LAB - IHS GPRA 16 SELECTED REPORT DRIVER 21 May 2010 12:10 PM 09 Feb 2017 1:35 PM ;
- ;;17.0;IHS CLINICAL REPORTING;;AUG 30, 2016;Build 16
+ ;;17.1;IHS CLINICAL REPORTING;;MAY 10, 2017;Build 29
  ;
  ;
  W:$D(IOF) @IOF
@@ -44,7 +44,10 @@ TP ;get time period
  I BGPQTR=3 S BGPBD=($E(BGPPER,1,3)-1)_"0701",BGPED=$E(BGPPER,1,3)_"0630"
  I BGPQTR=4 S BGPBD=($E(BGPPER,1,3)-1)_"1001",BGPED=$E(BGPPER,1,3)_"0930"
  ;I BGPQTR=5 S D=$$FMADD^XLFDT(BGPPER,1) S BGPBD=($E(BGPPER,1,3)-1)_$E(D,4,7),BGPED=BGPPER,BGPPER=$E(BGPED,1,3)_"0000"
- I BGPQTR=5 S D=$$FMADD^XLFDT(BGPPER,1) S BGPBD=($E(BGPPER,1,3)-1)_$E(D,4,7),BGPED=BGPPER,BGPPER=$E(BGPED,1,3)_"0000"
+ I BGPQTR=5 D
+ .S D=$$FMADD^XLFDT(BGPPER,1)
+ .I $E(BGPPER,4,7)'=1231 S BGPBD=($E(BGPPER,1,3)-1)_$E(D,4,7),BGPED=BGPPER,BGPPER=$E(BGPED,1,3)_"0000"
+ .I $E(BGPPER,4,7)=1231 S BGPBD=$E(BGPPER,1,3)_$E(D,4,7),BGPED=BGPPER,BGPPER=$E(BGPED,1,3)_"0000"
  I BGPED>DT D  G:BGPDO=1 TP
  .W !!,"You have selected Current Report period ",$$FMTE^XLFDT(BGPBD)," through ",$$FMTE^XLFDT(BGPED),"."
  .W !,"The end date of this report is in the future; your data will not be",!,"complete.",!
@@ -74,14 +77,22 @@ BY ;get baseline year
  W !?5,"Baseline Period: ",?31,$$FMTE^XLFDT(BGPBBD)," to ",?31,$$FMTE^XLFDT(BGPBED)
  I BGPPBD=BGPBBD,BGPPED=BGPBED K Y D CHKY I Y K BGPBBD,BGPBED,BGPPBD,BGPPED G BY
 COMM ;
- W !!,"Specify the community taxonomy to determine which patients will be",!,"included in the report.  You should have created this taxonomy using QMAN.",!
+ ;W !!,"Specify the community taxonomy to determine which patients will be",!,"included in the report.  You should have created this taxonomy using QMAN.",!
  K BGPTAX
- S BGPTAXI=""
+ S BGPTAXI="",BGPCOMMI=""
  D ^XBFMK
+ K DIR
+ W ! S DIR(0)="Y",DIR("A")="Run Report for One Community",DIR("B")="N" KILL DA D ^DIR KILL DIR
+ I $D(DIRUT) G BY
+ I Y D  G:BGPCOMMI="" COMM  G:BGPCOMMI COMQ
+ .S DIC="^AUTTCOM(",DIC(0)="AEMQ",DIC("A")="Which Community: " D ^DIC K DIC
+ .I Y=-1 Q
+ .S BGPCOMMI=+Y
+ ;
  S DIC("S")="I $P(^(0),U,15)=9999999.05",DIC="^ATXAX(",DIC(0)="AEMQ",DIC("A")="Enter the Name of the Community Taxonomy: "
  S B=$P($G(^BGPSITE(DUZ(2),0)),U,5) I B S DIC("B")=$P(^ATXAX(B,0),U)
  D ^DIC
- I Y=-1 Q
+ I Y=-1 G COMM
  S BGPTAXI=+Y
 COM1 ;
  S X=0
@@ -103,12 +114,12 @@ COM1 ;
  .I $D(DIRUT) S BGPQUIT=1
  .I Y S BGPQUIT=1
  .Q
- K BGPQUIT
+COMQ K BGPQUIT
  ;
 HOME ;
  S BGPHOME=$P($G(^BGPSITE(DUZ(2),0)),U,2)
  I BGPHOME="" W !!,"Home Location not found in Site File!!",!,"PHN Visits counts to Home will be calculated using clinic 11 only!!" H 2 G BEN
- W !,"Your HOME location is defined as: ",$P(^DIC(4,BGPHOME,0),U)," asufac:  ",$P(^AUTTLOC(BGPHOME,0),U,10)
+ W !!,"Your HOME location is defined as: ",$P(^DIC(4,BGPHOME,0),U)," asufac:  ",$P(^AUTTLOC(BGPHOME,0),U,10)
  D LISTS
 BEN ;
  S BGPBEN=""
@@ -123,7 +134,8 @@ SUM ;display summary of this report
  W !?5,"Report Period: ",?31,$$FMTE^XLFDT(BGPBD)," to ",?31,$$FMTE^XLFDT(BGPED)
  W !?5,"Previous Year Period: ",?31,$$FMTE^XLFDT(BGPPBD)," to ",?31,$$FMTE^XLFDT(BGPPED)
  W !?5,"Baseline Period: ",?31,$$FMTE^XLFDT(BGPBBD)," to ",?31,$$FMTE^XLFDT(BGPBED)
- W !!,"The COMMUNITY Taxonomy to be used is: ",$P(^ATXAX(BGPTAXI,0),U)
+ I BGPTAXI W !!,"The COMMUNITY Taxonomy to be used is: ",$P(^ATXAX(BGPTAXI,0),U)
+ I BGPCOMMI W !!,"The COMMUNITY is: ",$P(^AUTTCOM(BGPCOMMI,0),U,1)
  I BGPHOME W !,"The HOME location is: ",$P(^DIC(4,BGPHOME,0),U)," ",$P(^AUTTLOC(BGPHOME,0),U,10)
  I 'BGPHOME W !,"No HOME Location selected."
  W !!,"These performance measures will be calculated: " S X=0 F  S X=$O(BGPIND(X)) Q:X'=+X  W $P(^BGPINDG(X,0),U,3)," ; "

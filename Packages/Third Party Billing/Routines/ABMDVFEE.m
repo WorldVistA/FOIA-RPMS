@@ -1,5 +1,6 @@
 ABMDVFEE ; IHS/SD/SDR - VIEW CPT FEES ;
- ;;2.6;IHS Third Party Billing System;**9**;NOV 12, 2009
+ ;;2.6;IHS Third Party Billing System;**9,21**;NOV 12, 2009;Build 379
+ ;IHS/SD/SDR 2.6*21 HEAT135354 fixed display of code when one is selected; was printing a dash, no description, and 0.00 all the time, no matter the charge.
  ;
  S U="^" W !
 FEE K DIC
@@ -27,7 +28,8 @@ EDIT K DIC
  S ABM("DICS")=9002274.01_ABM("SUB") X:$D(^DD(ABM("DICS"),.01,12.1)) ^DD(ABM("DICS"),.01,12.1)
  I ABM=7 S DIC("W")="W "" - "",$P($G(^AUTTREVN(Y,0)),U,2),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),31,Y,DT),U),"","",2),9)"
  I ABM=6 S DIC("W")="W "" - "",$P($G(^AUTTADA(Y,0)),U,2),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),21,Y,DT),U),"","",2),9)"
- I "123458"[ABM S DIC("W")="W "" - "",$P($$CPT^ABMCVAPI(Y,DT),U,3),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),ABM(""SUB""),Y,DT),U),"","",2),9)"  ;CSV-c
+ ;I "123458"[ABM S DIC("W")="W "" - "",$P($$CPT^ABMCVAPI(Y,DT),U,3),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),ABM(""SUB""),Y,DT),U),"","",2),9)"  ;CSV-c  ;abm*2.6*21 IHS/SD/SDR HEAT135354
+ I "123458"[ABM S DIC("W")="W "" - "",$P($$CPT^ABMCVAPI(X,DT),U,3),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),ABM(""SUB""),$P($$CPT^ABMCVAPI(X,DT),U),DT),U),"","",2),9)"  ;CSV-c  ;abm*2.6*21 IHS/SD/SDR HEAT135354
  ;
  W !!
  S DIC(0)="QEAM"

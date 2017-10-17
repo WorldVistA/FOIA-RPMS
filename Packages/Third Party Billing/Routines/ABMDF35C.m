@@ -1,5 +1,7 @@
 ABMDF35C ; IHS/SD/SDR - Set HCFA1500 (02/12) Print Array ;  
- ;;2.6;IHS 3P BILLING SYSTEM;**13**;NOV 12, 2009;Build 213
+ ;;2.6;IHS 3P BILLING SYSTEM;**13,21**;NOV 12, 2009;Build 379
+ ;IHS/SD/SDR 2.6*21 HEAT298958 PROPERTY/CASUALTY PATIENT NUMBER prints in box 1A.  PROPERTY/CASUALTY CLAIM NUMBER should print in box 11B.
+ ;  If no PROPERTY/CASUALTY CLAIM NUMBER, print the CASE NUMBER in box 11B.
  ;
  ; *********************************************************************
  ;
@@ -62,7 +64,7 @@ PRIM ;
  .I ("^T^W^"[(ABMP("ITYPE"))) D
  ..;I $P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),7)),U,13)'="" S $P(ABMF(1),U,8)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),7)),U,13) Q  ;abm*2.6*13 box 11B
  ..I $P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),7)),U,26)'="" S $P(ABMF(1),U,8)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),7)),U,26) Q
- ..I $P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),4)),U,8)'="" S $P(ABMF(1),U,8)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),4)),U,8)
+ ..;I $P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),4)),U,8)'="" S $P(ABMF(1),U,8)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),4)),U,8)  ;abm*2.6*21 IHS/SD/SDR HEAT298958
  .I $P($G(^ABMNINS(DUZ(2),ABMP("INS"),1,ABMP("VTYP"),1)),U,7)="N" S $P(ABMF(1),U,8)=$TR($P(ABMF(1),U,8),"-","")
  .;S $P(ABMF(15),U,7)=$P(ABMV("X3"),U,1)  ;abm*2.6*13 remove box 9B
  .;S $P(ABMF(17),U,4)=$P($P(ABMV("X1"),U),";",2)  ;abm*2.6*13 remove box 9C
@@ -89,4 +91,5 @@ PRIM ;
  .E  S ABM("RLSH")=$S(ABM("RLSH")=5:4,1:5)
  .S $P(ABMF(5),U,ABM("RLSH"))="X"
  I $P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),7)),U,13)'="" S $P(ABMF(15),U,4)="Y4 "_$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),7)),U,13)  ;abm*2.6*13 box 11B
+ I ($P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),4)),U,8)'="")&($P(ABMF(1),U,8)="") S $P(ABMF(1),U,8)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),4)),U,8)  ;abm*2.6*21 IHS/SD/SDR HEAT298958
  Q

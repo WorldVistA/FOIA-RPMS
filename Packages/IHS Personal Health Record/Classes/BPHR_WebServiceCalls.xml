@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:34">
+<Class name="BPHR.WebServiceCalls">
+<Description>
+This class contains a method call to retrieve PHR login history information</Description>
+<Super>%Persistent</Super>
+<TimeChanged>64111,35925.37595</TimeChanged>
+<TimeCreated>63050,57450.991251</TimeCreated>
+
+<Method name="PMQueryRequest">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&pParams:%String="",&pResult:%String]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Set tStatus=$$$OK
+	
+	//Data needed passed by pParams array required for call
+	Set tDebug=$Get(pParams("DEBUG"))
+	Set tWebServiceTimeout=$Get(pParams("TIMEOUT"))
+	If tWebServiceTimeout="" {
+		Set tWebServiceTimeout=30
+	}
+	
+	//Set up location
+	Set tLocation=$Get(pParams("URLROOT"))_":"_$Get(pParams("PORT"))_$Get(pParams("SERVICEPATH"))_"/PMQueryService.PMQueryServiceHttpsSoap12Endpoint/"
+		
+	//Initialize new web client to make the SOAP call
+	Set tWebClient=##class(BPHR.PMQueryServiceHttpsSoap12Endpoint).%New()
+	Set tWebClient.Location=tLocation
+	Set tWebClient.Timeout=tWebServiceTimeout
+	Set tWebClient.SSLConfiguration=$Get(pParams("SSL"))
+
+	Do ..AddSecElements(.tWebClient,$Get(pParams("USER")),$Get(pParams("PASS")))
+
+	Set tStartTime=$now()
+	
+	//Set up inputs
+	Set PMRequest=##class(BPHR.ax21.PMRequest).%New()
+	Set PMRequest.loginId=$Get(pParams("USER"))
+	Set PMRequest.password=$Get(pParams("PASS"))
+	Set PMQuery=##class(BPHR.ax21.Query).%New()
+	Set PMQuery.euid=$Get(pParams("EUID"))
+	Set PMQuery.from=$Get(pParams("FROM"))
+	Set PMQuery.to=$Get(pParams("TO"))
+	Set PMQuery.providerDomainAddress=$G(pParams("ADDR"))
+	Set PMRequest.query=PMQuery
+	
+	// Setup response
+	Set tResponse=##class(BPHR.ax21.PMQueryResponse).%New()
+	
+	try {
+		
+		Set tResponse=tWebClient.queryRequest(PMRequest)
+		If (tDebug) {
+			Do $System.OBJ.Dump(tWebClient)
+			If $ISOBJECT(tWebClient.HttpResponse) {
+				Set tHTTPResponse=##class(%Net.HttpResponse).%New()
+				Set tHTTPResponse=tWebClient.HttpResponse
+				Set pResponse("DEBUG","HTTP_RESPONSE_DATA")=tHTTPResponse.Data
+				Set pResponse("DEBUG","HTTP_REASON_PHRASE")=tHTTPResponse.ReasonPhrase
+				Set pResponse("DEBUG","HTTP_HEADERS_DATE")=tHTTPResponse.Headers("DATE")
+				zw pResponse
+			}								
+		}		
+	}
+	Catch Exception
+	{
+		Set tError=""
+		Set tErrorText=""
+		If ($ZERROR["<ZSOAP>") {
+			Set tError=$System.Status.DecomposeStatus(%objlasterror,.tError)
+			Set tErrorText=$Get(tError(1))
+		} 
+		
+		else {
+			Set tErrorText=$$$ERROR($$$CacheError,$ZERROR)
+		}
+
+		Set tHttpRetRsn=""
+		If $ISOBJECT(tWebClient.HttpResponse) {
+			Set tHTTPResponse=##class(%Net.HttpResponse).%New()
+			Set tHTTPResponse=tWebClient.HttpResponse
+			Set tHttpRetRsn=tHTTPResponse.ReasonPhrase
+		}
+		Set tStatus="0^"_tErrorText_tHttpRetRsn_"^"_..GetElapsedTime(tStartTime,$now())	
+	}
+
+	// If the result of the web call was an error - Quit now. 
+	If ($Piece(tStatus,"^",1)=0) Quit tStatus
+	
+	//Determine results returned
+	Set tPHRaccessDate=tResponse.PHRaccessDate
+	Set tlastLoginDate=tResponse.lastLoginDate
+	Set tlastSecureMessageDate=tResponse.lastSecureMessageDate
+	Set tpatientDirectEmailAddress=tResponse.patientDirectEmailAddress
+	
+	//Display results
+	If $Get(tDebug) {
+		Write !,"PHRaccessDate: ",tPHRaccessDate
+		Write !,"lastLoginDate: ",tlastLoginDate
+		Write !,"lastSecureMessageDate: ",tlastSecureMessageDate
+		Write !,"patientDirectEmailAddress: ",tpatientDirectEmailAddress
+	}
+
+	//Return responses
+	Set pResult("ACCESS")=tPHRaccessDate
+	Set pResult("LOGIN")=tlastLoginDate
+	Set pResult("SMESSAGE")=tlastSecureMessageDate
+	Set pResult("SDIRECT")=tpatientDirectEmailAddress
+	
+	//End Here - instead of parsing
+	Quit 1_"^^"_..GetElapsedTime(tStartTime,$now())
+]]></Implementation>
+</Method>
+
+<Method name="AddSecElements">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&client:%SOAP.WebClient,pUser:%String="",pPass:%String=""]]></FormalSpec>
+<Implementation><![CDATA[
+   Set utoken=##class(%SOAP.Security.UsernameToken).Create(pUser,pPass)
+   Do client.SecurityOut.AddSecurityElement(utoken)
+
+   Set ts=##class(%SOAP.Security.Timestamp).Create()
+   Do client.SecurityOut.AddSecurityElement(ts) 
+   Quit
+]]></Implementation>
+</Method>
+
+<Method name="GetElapsedTime">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pStartDate:%String="",pEndDate:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Quit:pStartDate="" ""
+	Set pEndDate=$select(pEndDate="":$now(),1:pEndDate)	// Default $now() if no pEndDate passed
+	Quit $Piece(pEndDate,",")-$Piece(pStartDate,",")*86000+$Piece(pEndDate,",",2)-$Piece(pStartDate,",",2)
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^BPHR.WebServiceCallsD</DataLocation>
+<DefaultData>WebServiceCallsDefaultData</DefaultData>
+<IdLocation>^BPHR.WebServiceCallsD</IdLocation>
+<IndexLocation>^BPHR.WebServiceCallsI</IndexLocation>
+<StreamLocation>^BPHR.WebServiceCallsS</StreamLocation>
+<ExtentSize>100000</ExtentSize>
+<Data name="WebServiceCallsDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

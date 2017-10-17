@@ -1,10 +1,11 @@
 ABMPPADJ ; IHS/SD/SDR - Prior Payments/Adjustments page (CE); 
- ;;2.6;IHS 3P BILLING SYSTEM;**4,6,8,9,10,19**;NOV 12, 2009;Build 300
+ ;;2.6;IHS 3P BILLING SYSTEM;**4,6,8,9,10,19,21**;NOV 12, 2009;Build 379
  ; split routine to ABMPPAD1 because of size
  ;
  ; IHS/SD/SDR - v2.5 p13 - NO IM
  ; IHS/SD/SDR - abm*2.6*6 - 5010 - added export mode 32
  ;IHS/SD/SDR - 2.6*19 - HEAT168248 - Added code to put each SAR only once with the total amt.  In split routine, ABMPPAD3
+ ;IHS/SD/SDR - 2.6*21 - HEAT118718 - Check for replacement insurer
  ;
  ; ABMPL(Insurer priority, Insurer IEN)=
  ;        P1=13 multiple IEN
@@ -71,6 +72,15 @@ GATHER Q:$G(ABMCHK)=1  ;quit if no complete insurer or 2 export modes on claim
  .....I ABMADJC=19 S ABMAMT=$P(ABMPREC,U,13)
  .....I ABMADJC=20 S ABMAMT=$P(ABMPREC,U,14)
  ....S ABMBINS=$P($G(^ABMDBILL(DUZ(2),ABMBFIEN,0)),U,8)
+ ....;start new abm*2.6*21 IHS/SD/SDR HEAT118718
+ ....I '$D(^ABMDBILL(DUZ(2),ABMBFIEN,13,"B",ABMBINS)) D  ;means it is a replacement insruer
+ .....S ABMTIEN=0,ABMTFLG=0
+ .....F  S ABMTIEN=$O(^ABMDBILL(DUZ(2),ABMBFIEN,13,ABMTIEN)) Q:'ABMTIEN  D  Q:ABMTFLG
+ ......I $P($G(^ABMDBILL(DUZ(2),ABMBFIEN,13,ABMTIEN,0)),U,11)=ABMBINS D  ;this is our replacement
+ .......S ABMBINS=$P($G(^ABMDBILL(DUZ(2),ABMBFIEN,13,ABMTIEN,0)),U)
+ .......S ABMTFLG=1
+ .....K ABMTIEN,ABMTFLG
+ ....;end new abm*2.6*21 IHS/SD/SDR HEAT118718
  ....Q:(+$G(ABMAMT)=0)&(($G(ABMCAT)="A")&(+$G(ABMADJC)=0))  ;stop <UNDEF>GATHER+42 error
  ....S ABMPP(ABMBINS,ABMCAT,ABMLN)=ABMAMT_$S(ABMCAT="A":"^"_ABMADJC_"^"_ABMADJT_"^"_ABMSAR,1:"")
  ....I ABMCAT="P" S $P(ABMPP(ABMBINS,ABMCAT,ABMLN),U,5)="N"
@@ -106,6 +116,16 @@ GATHER Q:$G(ABMCHK)=1  ;quit if no complete insurer or 2 export modes on claim
  ..I +$G(ABMAIEN)=0 S:+$G(ABMHOLD)'=0 DUZ(2)=ABMHOLD K ABMHOLD Q  ;there isn't an A/R bill w/this number
  ..Q:$P($G(^BARAC(DUZ(2),$P($G(^BARBL(DUZ(2),ABMAIEN,0)),U,3),0)),U)'["AUTNINS"  ;abm*2.6*10 HEAT70085
  ..S ABMBINS=+$P($G(^BARAC(DUZ(2),$P($G(^BARBL(DUZ(2),ABMAIEN,0)),U,3),0)),U)  ;abm*2.6*10 HEAT70085
+ ..;start new abm*2.6*21 IHS/SD/SDR HEAT118718
+ ..I '$D(^ABMDBILL(DUZ(2),ABMBFIEN,13,"B",ABMBINS)) D  ;means it is a replacement insruer
+ ...S ABMTIEN=0,ABMTFLG=0
+ ...F  S ABMTIEN=$O(^ABMDBILL(DUZ(2),ABMBFIEN,13,ABMTIEN)) Q:'ABMTIEN  D  Q:ABMTFLG
+ ....I $P($G(^ABMDBILL(DUZ(2),ABMBFIEN,13,ABMTIEN,0)),U,11)=ABMBINS D  ;this is our replacement
+ .....S ABMBINS=$P($G(^ABMDBILL(DUZ(2),ABMBFIEN,13,ABMTIEN,0)),U)
+ .....S ABMTFLG=1
+ ...K ABMTIEN,ABMTFLG
+ ...S ABMILST(ABMBINS,ABMBFIEN)=""
+ ..;end new abm*2.6*21 IHS/SD/SDR HEAT118718
  ..S ABMTRIEN=0,ABMLN=1
  ..F  S ABMTRIEN=$O(^BARTR(DUZ(2),"AC",ABMAIEN,ABMTRIEN)) Q:ABMTRIEN=""  D
  ...S ABMREC=$G(^BARTR(DUZ(2),ABMTRIEN,0))

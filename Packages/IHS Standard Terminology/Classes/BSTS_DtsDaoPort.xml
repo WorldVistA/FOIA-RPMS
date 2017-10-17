@@ -1,0 +1,1211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:34">
+<Class name="BSTS.DtsDaoPort">
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%SOAP.WebClient</Super>
+<TimeChanged>62977,80238.573819</TimeChanged>
+<TimeCreated>62977,80238.446247</TimeCreated>
+
+<Method name="addAuthority">
+<Final>1</Final>
+<FormalSpec>arg0:BSTS.ns1.TAuthority</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TAuthority</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("addAuthority").Invoke($this,"",.arg0)
+]]></Implementation>
+</Method>
+
+<Method name="addAuthorityProperty">
+<Final>1</Final>
+<FormalSpec>authority:BSTS.ns1.TAuthority,property:BSTS.ns1.TProperty</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TProperty</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("addAuthorityProperty").Invoke($this,"",.authority,.property)
+]]></Implementation>
+</Method>
+
+<Method name="addConcept">
+<Final>1</Final>
+<FormalSpec>concept:BSTS.ns1.TOntylogConcept</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TOntylogConcept</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("addConcept").Invoke($this,"",.concept)
+]]></Implementation>
+</Method>
+
+<Method name="addNamespace">
+<Final>1</Final>
+<FormalSpec>namespace:BSTS.ns1.TNamespace</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TNamespace</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("addNamespace").Invoke($this,"",.namespace)
+]]></Implementation>
+</Method>
+
+<Method name="addNamespaceProperty">
+<Final>1</Final>
+<FormalSpec>namespaceId:BSTS.ns1.TNamespace,property:BSTS.ns1.TProperty</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TProperty</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("addNamespaceProperty").Invoke($this,"",.namespaceId,.property)
+]]></Implementation>
+</Method>
+
+<Method name="addVersion">
+<Final>1</Final>
+<FormalSpec>arg0:BSTS.ns1.TContentVersion</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TContentVersion</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("addVersion").Invoke($this,"",.arg0)
+]]></Implementation>
+</Method>
+
+<Method name="addVersionProperty">
+<Final>1</Final>
+<FormalSpec>version:BSTS.ns1.TContentVersion,property:BSTS.ns1.TProperty</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TProperty</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("addVersionProperty").Invoke($this,"",.version,.property)
+]]></Implementation>
+</Method>
+
+<Method name="deleteAuthorityById">
+<Final>1</Final>
+<FormalSpec>arg0:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Boolean</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("deleteAuthorityById").Invoke($this,"",.arg0)
+]]></Implementation>
+</Method>
+
+<Method name="deleteAuthorityByName">
+<Final>1</Final>
+<FormalSpec>arg0:%String</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Boolean</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("deleteAuthorityByName").Invoke($this,"",.arg0)
+]]></Implementation>
+</Method>
+
+<Method name="deleteAuthorityProperty">
+<Final>1</Final>
+<FormalSpec>authority:BSTS.ns1.TAuthority,property:BSTS.ns1.TProperty</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Boolean</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("deleteAuthorityProperty").Invoke($this,"",.authority,.property)
+]]></Implementation>
+</Method>
+
+<Method name="deleteConcept">
+<Final>1</Final>
+<FormalSpec>concept:BSTS.ns1.TConcept</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Boolean</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("deleteConcept").Invoke($this,"",.concept)
+]]></Implementation>
+</Method>
+
+<Method name="deleteNamespaceById">
+<Final>1</Final>
+<FormalSpec>namespaceId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Boolean</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("deleteNamespaceById").Invoke($this,"",.namespaceId)
+]]></Implementation>
+</Method>
+
+<Method name="deleteNamespaceByName">
+<Final>1</Final>
+<FormalSpec>namespaceName:%String</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Boolean</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("deleteNamespaceByName").Invoke($this,"",.namespaceName)
+]]></Implementation>
+</Method>
+
+<Method name="deleteNamespaceProperty">
+<Final>1</Final>
+<FormalSpec>namespaceId:BSTS.ns1.TNamespace,property:BSTS.ns1.TProperty</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Boolean</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("deleteNamespaceProperty").Invoke($this,"",.namespaceId,.property)
+]]></Implementation>
+</Method>
+
+<Method name="deleteVersionById">
+<Final>1</Final>
+<FormalSpec>arg0:%xsd.int,arg1:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Boolean</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("deleteVersionById").Invoke($this,"",.arg0,.arg1)
+]]></Implementation>
+</Method>
+
+<Method name="deleteVersionByName">
+<Final>1</Final>
+<FormalSpec>arg0:%String,arg1:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Boolean</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("deleteVersionByName").Invoke($this,"",.arg0,.arg1)
+]]></Implementation>
+</Method>
+
+<Method name="deleteVersionProperty">
+<Final>1</Final>
+<FormalSpec>version:BSTS.ns1.TContentVersion,property:BSTS.ns1.TProperty</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Boolean</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("deleteVersionProperty").Invoke($this,"",.version,.property)
+]]></Implementation>
+</Method>
+
+<Method name="executeConceptTextSearch">
+<Final>1</Final>
+<FormalSpec>sql:%String,casd:BSTS.ns1.TConceptAttributeSetDescriptor</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TConceptSearchResult",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("executeConceptTextSearch").Invoke($this,"",.sql,.casd)
+]]></Implementation>
+</Method>
+
+<Method name="executeSQL">
+<Final>1</Final>
+<FormalSpec>sql:%String</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns2.stringArray",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("executeSQL").Invoke($this,"",.sql)
+]]></Implementation>
+</Method>
+
+<Method name="findAssociationTypeById">
+<Final>1</Final>
+<FormalSpec>id:%xsd.int,namespaceId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TAssociationType</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("findAssociationTypeById").Invoke($this,"",.id,.namespaceId)
+]]></Implementation>
+</Method>
+
+<Method name="findAssociationTypeByName">
+<Final>1</Final>
+<FormalSpec>name:%String,namespaceId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TAssociationType</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("findAssociationTypeByName").Invoke($this,"",.name,.namespaceId)
+]]></Implementation>
+</Method>
+
+<Method name="findAuthorityPropertyTypeById">
+<Final>1</Final>
+<FormalSpec>id:%xsd.int,authorityId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TPropertyType</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("findAuthorityPropertyTypeById").Invoke($this,"",.id,.authorityId)
+]]></Implementation>
+</Method>
+
+<Method name="findAuthorityPropertyTypeByName">
+<Final>1</Final>
+<FormalSpec>name:%String,authorityId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TPropertyType</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("findAuthorityPropertyTypeByName").Invoke($this,"",.name,.authorityId)
+]]></Implementation>
+</Method>
+
+<Method name="findAuthorityQualifierTypeById">
+<Final>1</Final>
+<FormalSpec>id:%xsd.int,authorityId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TQualifierType</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("findAuthorityQualifierTypeById").Invoke($this,"",.id,.authorityId)
+]]></Implementation>
+</Method>
+
+<Method name="findAuthorityQualifierTypeByName">
+<Final>1</Final>
+<FormalSpec>name:%String,authorityId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TQualifierType</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("findAuthorityQualifierTypeByName").Invoke($this,"",.name,.authorityId)
+]]></Implementation>
+</Method>
+
+<Method name="findConceptByCode">
+<Final>1</Final>
+<FormalSpec>conceptCode:%String,namespaceId:%xsd.int,attributeSetDescriptor:BSTS.ns1.TConceptAttributeSetDescriptor</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TOntylogConcept</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("findConceptByCode").Invoke($this,"",.conceptCode,.namespaceId,.attributeSetDescriptor)
+]]></Implementation>
+</Method>
+
+<Method name="findConceptById">
+<Final>1</Final>
+<FormalSpec>conceptId:%xsd.int,namespaceId:%xsd.int,attributeSetDescriptor:BSTS.ns1.TConceptAttributeSetDescriptor</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TOntylogConcept</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("findConceptById").Invoke($this,"",.conceptId,.namespaceId,.attributeSetDescriptor)
+]]></Implementation>
+</Method>
+
+<Method name="findConceptByName">
+<Final>1</Final>
+<FormalSpec>conceptName:%String,namespaceId:%xsd.int,attributeSetDescriptor:BSTS.ns1.TConceptAttributeSetDescriptor</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TOntylogConcept</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("findConceptByName").Invoke($this,"",.conceptName,.namespaceId,.attributeSetDescriptor)
+]]></Implementation>
+</Method>
+
+<Method name="findConceptsWithAllSynonymMatching">
+<Final>1</Final>
+<FormalSpec>pattern:%String,options:BSTS.ns1.TConceptSearchOptions</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TOntylogConcept",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("findConceptsWithAllSynonymMatching").Invoke($this,"",.pattern,.options)
+]]></Implementation>
+</Method>
+
+<Method name="findConceptsWithConceptAssociationMatching">
+<Final>1</Final>
+<FormalSpec>associationType:BSTS.ns1.TAssociationType,pattern:%String,options:BSTS.ns1.TConceptSearchOptions</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TOntylogConcept",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("findConceptsWithConceptAssociationMatching").Invoke($this,"",.associationType,.pattern,.options)
+]]></Implementation>
+</Method>
+
+<Method name="findConceptsWithInverseConceptAssociationMatching">
+<Final>1</Final>
+<FormalSpec>associationType:BSTS.ns1.TAssociationType,pattern:%String,options:BSTS.ns1.TConceptSearchOptions</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TOntylogConcept",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("findConceptsWithInverseConceptAssociationMatching").Invoke($this,"",.associationType,.pattern,.options)
+]]></Implementation>
+</Method>
+
+<Method name="findConceptsWithInverseRoleMatching">
+<Final>1</Final>
+<FormalSpec>roleType:BSTS.ns1.TRoleType,pattern:%String,options:BSTS.ns1.TConceptSearchOptions</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TOntylogConcept",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("findConceptsWithInverseRoleMatching").Invoke($this,"",.roleType,.pattern,.options)
+]]></Implementation>
+</Method>
+
+<Method name="findConceptsWithNameMatching">
+<Final>1</Final>
+<FormalSpec>pattern:%String,options:BSTS.ns1.TConceptSearchOptions</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TOntylogConcept",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("findConceptsWithNameMatching").Invoke($this,"",.pattern,.options)
+]]></Implementation>
+</Method>
+
+<Method name="findConceptsWithPropertyMatching">
+<Final>1</Final>
+<FormalSpec>propType:BSTS.ns1.TPropertyType,pattern:%String,options:BSTS.ns1.TConceptSearchOptions</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TOntylogConcept",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("findConceptsWithPropertyMatching").Invoke($this,"",.propType,.pattern,.options)
+]]></Implementation>
+</Method>
+
+<Method name="findConceptsWithRoleMatching">
+<Final>1</Final>
+<FormalSpec>roleType:BSTS.ns1.TRoleType,pattern:%String,options:BSTS.ns1.TConceptSearchOptions</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TOntylogConcept",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("findConceptsWithRoleMatching").Invoke($this,"",.roleType,.pattern,.options)
+]]></Implementation>
+</Method>
+
+<Method name="findConceptsWithSynonymMatching">
+<Final>1</Final>
+<FormalSpec>associationType:BSTS.ns1.TAssociationType,pattern:%String,options:BSTS.ns1.TConceptSearchOptions</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TOntylogConcept",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("findConceptsWithSynonymMatching").Invoke($this,"",.associationType,.pattern,.options)
+]]></Implementation>
+</Method>
+
+<Method name="findNamespaceByCode">
+<Final>1</Final>
+<FormalSpec>namespaceCode:%String,attributeSetDescriptor:BSTS.ns1.TContentAttributeSetDescriptor</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TNamespace</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("findNamespaceByCode").Invoke($this,"",.namespaceCode,.attributeSetDescriptor)
+]]></Implementation>
+</Method>
+
+<Method name="findNamespaceById">
+<Final>1</Final>
+<FormalSpec>namespaceId:%xsd.int,attributeSetDescriptor:BSTS.ns1.TContentAttributeSetDescriptor</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TNamespace</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("findNamespaceById").Invoke($this,"",.namespaceId,.attributeSetDescriptor)
+]]></Implementation>
+</Method>
+
+<Method name="findNamespaceByName">
+<Final>1</Final>
+<FormalSpec>namespaceName:%String,attributeSetDescriptor:BSTS.ns1.TContentAttributeSetDescriptor</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TNamespace</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("findNamespaceByName").Invoke($this,"",.namespaceName,.attributeSetDescriptor)
+]]></Implementation>
+</Method>
+
+<Method name="findPropertyTypeById">
+<Final>1</Final>
+<FormalSpec>id:%xsd.int,namespaceId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TPropertyType</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("findPropertyTypeById").Invoke($this,"",.id,.namespaceId)
+]]></Implementation>
+</Method>
+
+<Method name="findPropertyTypeByName">
+<Final>1</Final>
+<FormalSpec>name:%String,namespaceId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TPropertyType</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("findPropertyTypeByName").Invoke($this,"",.name,.namespaceId)
+]]></Implementation>
+</Method>
+
+<Method name="findQualifierTypeById">
+<Final>1</Final>
+<FormalSpec>id:%xsd.int,namespaceId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TQualifierType</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("findQualifierTypeById").Invoke($this,"",.id,.namespaceId)
+]]></Implementation>
+</Method>
+
+<Method name="findQualifierTypeByName">
+<Final>1</Final>
+<FormalSpec>name:%String,namespaceId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TQualifierType</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("findQualifierTypeByName").Invoke($this,"",.name,.namespaceId)
+]]></Implementation>
+</Method>
+
+<Method name="findSubsetPropertyTypeById">
+<Final>1</Final>
+<FormalSpec>id:%xsd.int,subsetId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TPropertyType</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("findSubsetPropertyTypeById").Invoke($this,"",.id,.subsetId)
+]]></Implementation>
+</Method>
+
+<Method name="findSubsetPropertyTypeByName">
+<Final>1</Final>
+<FormalSpec>name:%String,subsetId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TPropertyType</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("findSubsetPropertyTypeByName").Invoke($this,"",.name,.subsetId)
+]]></Implementation>
+</Method>
+
+<Method name="findSubsetQualifierTypeById">
+<Final>1</Final>
+<FormalSpec>id:%xsd.int,subsetId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TQualifierType</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("findSubsetQualifierTypeById").Invoke($this,"",.id,.subsetId)
+]]></Implementation>
+</Method>
+
+<Method name="findSubsetQualifierTypeByName">
+<Final>1</Final>
+<FormalSpec>name:%String,subsetId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TQualifierType</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("findSubsetQualifierTypeByName").Invoke($this,"",.name,.subsetId)
+]]></Implementation>
+</Method>
+
+<Method name="findTermByCode">
+<Final>1</Final>
+<FormalSpec>termCode:%String,namespaceId:%xsd.int,attributeSetDescriptor:BSTS.ns1.TTermAttributeSetDescriptor</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TTerm</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("findTermByCode").Invoke($this,"",.termCode,.namespaceId,.attributeSetDescriptor)
+]]></Implementation>
+</Method>
+
+<Method name="findTermById">
+<Final>1</Final>
+<FormalSpec>termId:%xsd.int,namespaceId:%xsd.int,attributeSetDescriptor:BSTS.ns1.TTermAttributeSetDescriptor</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TTerm</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("findTermById").Invoke($this,"",.termId,.namespaceId,.attributeSetDescriptor)
+]]></Implementation>
+</Method>
+
+<Method name="findTermsByName">
+<Final>1</Final>
+<FormalSpec>termName:%String,namespaceId:%xsd.int,attributeSetDescriptor:BSTS.ns1.TTermAttributeSetDescriptor</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TTerm",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("findTermsByName").Invoke($this,"",.termName,.namespaceId,.attributeSetDescriptor)
+]]></Implementation>
+</Method>
+
+<Method name="findTermsWithInverseTermAssociationMatching">
+<Final>1</Final>
+<FormalSpec>associationType:BSTS.ns1.TAssociationType,pattern:%String,options:BSTS.ns1.TTermSearchOptions</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TTerm",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("findTermsWithInverseTermAssociationMatching").Invoke($this,"",.associationType,.pattern,.options)
+]]></Implementation>
+</Method>
+
+<Method name="findTermsWithNameMatching">
+<Final>1</Final>
+<FormalSpec>pattern:%String,options:BSTS.ns1.TTermSearchOptions</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TTerm",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("findTermsWithNameMatching").Invoke($this,"",.pattern,.options)
+]]></Implementation>
+</Method>
+
+<Method name="findTermsWithPropertyMatching">
+<Final>1</Final>
+<FormalSpec>propertyType:BSTS.ns1.TPropertyType,pattern:%String,options:BSTS.ns1.TTermSearchOptions</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TTerm",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("findTermsWithPropertyMatching").Invoke($this,"",.propertyType,.pattern,.options)
+]]></Implementation>
+</Method>
+
+<Method name="findTermsWithTermAssociationMatching">
+<Final>1</Final>
+<FormalSpec>associationType:BSTS.ns1.TAssociationType,pattern:%String,options:BSTS.ns1.TTermSearchOptions</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TTerm",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("findTermsWithTermAssociationMatching").Invoke($this,"",.associationType,.pattern,.options)
+]]></Implementation>
+</Method>
+
+<Method name="getAllNamespaceQualifierTypes">
+<Final>1</Final>
+<FormalSpec>namespaceId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TQualifierType",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("getAllNamespaceQualifierTypes").Invoke($this,"",.namespaceId)
+]]></Implementation>
+</Method>
+
+<Method name="getAllSubsetQualifierTypes">
+<Final>1</Final>
+<FormalSpec>subsetId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TQualifierType",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("getAllSubsetQualifierTypes").Invoke($this,"",.subsetId)
+]]></Implementation>
+</Method>
+
+<Method name="getAssociationNavChildContext">
+<Final>1</Final>
+<FormalSpec>focusConcept:BSTS.ns1.TConcept,attributeSetDescriptor:BSTS.ns1.TConceptAttributeSetDescriptor,arg2:BSTS.ns1.TAssociationType</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TNavChildContext</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("getAssociationNavChildContext").Invoke($this,"",.focusConcept,.attributeSetDescriptor,.arg2)
+]]></Implementation>
+</Method>
+
+<Method name="getAssociationNavParentContext">
+<Final>1</Final>
+<FormalSpec>focusConcept:BSTS.ns1.TConcept,attributeSetDescriptor:BSTS.ns1.TConceptAttributeSetDescriptor,namespace:BSTS.ns1.TAssociationType</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TNavParentContext</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("getAssociationNavParentContext").Invoke($this,"",.focusConcept,.attributeSetDescriptor,.namespace)
+]]></Implementation>
+</Method>
+
+<Method name="getAssociationTypes">
+<Final>1</Final>
+<FormalSpec>namespaceId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TAssociationType",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("getAssociationTypes").Invoke($this,"",.namespaceId)
+]]></Implementation>
+</Method>
+
+<Method name="getAuthorities">
+<Final>1</Final>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TAuthority",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("getAuthorities").Invoke($this,"")
+]]></Implementation>
+</Method>
+
+<Method name="getAuthorityPropertyQualifierTypes">
+<Final>1</Final>
+<FormalSpec>authorityId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TQualifierType",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("getAuthorityPropertyQualifierTypes").Invoke($this,"",.authorityId)
+]]></Implementation>
+</Method>
+
+<Method name="getAuthorityPropertyTypes">
+<Final>1</Final>
+<FormalSpec>authorityId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TPropertyType",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("getAuthorityPropertyTypes").Invoke($this,"",.authorityId)
+]]></Implementation>
+</Method>
+
+<Method name="getConceptAssociationTypes">
+<Final>1</Final>
+<FormalSpec>namespaceId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TAssociationType",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("getConceptAssociationTypes").Invoke($this,"",.namespaceId)
+]]></Implementation>
+</Method>
+
+<Method name="getConceptChildRoots">
+<Final>1</Final>
+<FormalSpec>attributeSetDescriptor:BSTS.ns1.TConceptAttributeSetDescriptor,namespaceId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TConceptNode",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("getConceptChildRoots").Invoke($this,"",.attributeSetDescriptor,.namespaceId)
+]]></Implementation>
+</Method>
+
+<Method name="getConceptPropertyQualifierTypes">
+<Final>1</Final>
+<FormalSpec>namespaceId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TQualifierType",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("getConceptPropertyQualifierTypes").Invoke($this,"",.namespaceId)
+]]></Implementation>
+</Method>
+
+<Method name="getConceptPropertyTypes">
+<Final>1</Final>
+<FormalSpec>namespaceId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TPropertyType",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("getConceptPropertyTypes").Invoke($this,"",.namespaceId)
+]]></Implementation>
+</Method>
+
+<Method name="getNamespacePropertyQualifierTypes">
+<Final>1</Final>
+<FormalSpec>namespaceId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TQualifierType",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("getNamespacePropertyQualifierTypes").Invoke($this,"",.namespaceId)
+]]></Implementation>
+</Method>
+
+<Method name="getNamespacePropertyTypes">
+<Final>1</Final>
+<FormalSpec>namespaceId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TPropertyType",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("getNamespacePropertyTypes").Invoke($this,"",.namespaceId)
+]]></Implementation>
+</Method>
+
+<Method name="getNamespaces">
+<Final>1</Final>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TNamespace",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("getNamespaces").Invoke($this,"")
+]]></Implementation>
+</Method>
+
+<Method name="getNavChildContext">
+<Final>1</Final>
+<FormalSpec>focusConcept:BSTS.ns1.TOntylogConcept,attributeSetDescriptor:BSTS.ns1.TConceptAttributeSetDescriptor</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TNavChildContext</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("getNavChildContext").Invoke($this,"",.focusConcept,.attributeSetDescriptor)
+]]></Implementation>
+</Method>
+
+<Method name="getNavParentContext">
+<Final>1</Final>
+<FormalSpec>focusConcept:BSTS.ns1.TOntylogConcept,attributeSetDescriptor:BSTS.ns1.TConceptAttributeSetDescriptor</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TNavParentContext</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("getNavParentContext").Invoke($this,"",.focusConcept,.attributeSetDescriptor)
+]]></Implementation>
+</Method>
+
+<Method name="getRoleTypes">
+<Final>1</Final>
+<FormalSpec>namespaceId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TRoleType",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("getRoleTypes").Invoke($this,"",.namespaceId)
+]]></Implementation>
+</Method>
+
+<Method name="getSubsetPropertyQualifierTypes">
+<Final>1</Final>
+<FormalSpec>subsetId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TQualifierType",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("getSubsetPropertyQualifierTypes").Invoke($this,"",.subsetId)
+]]></Implementation>
+</Method>
+
+<Method name="getSubsetPropertyTypes">
+<Final>1</Final>
+<FormalSpec>subsetId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TPropertyType",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("getSubsetPropertyTypes").Invoke($this,"",.subsetId)
+]]></Implementation>
+</Method>
+
+<Method name="getSubsetVersionPropertyQualifierTypes">
+<Final>1</Final>
+<FormalSpec>subsetId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TQualifierType",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("getSubsetVersionPropertyQualifierTypes").Invoke($this,"",.subsetId)
+]]></Implementation>
+</Method>
+
+<Method name="getSubsetVersionPropertyTypes">
+<Final>1</Final>
+<FormalSpec>subsetId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TPropertyType",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("getSubsetVersionPropertyTypes").Invoke($this,"",.subsetId)
+]]></Implementation>
+</Method>
+
+<Method name="getSynonymTypes">
+<Final>1</Final>
+<FormalSpec>namespaceId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TAssociationType",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("getSynonymTypes").Invoke($this,"",.namespaceId)
+]]></Implementation>
+</Method>
+
+<Method name="getTermAssociationTypes">
+<Final>1</Final>
+<FormalSpec>namespaceId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TAssociationType",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("getTermAssociationTypes").Invoke($this,"",.namespaceId)
+]]></Implementation>
+</Method>
+
+<Method name="getTermPropertyQualifierTypes">
+<Final>1</Final>
+<FormalSpec>namespaceId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TQualifierType",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("getTermPropertyQualifierTypes").Invoke($this,"",.namespaceId)
+]]></Implementation>
+</Method>
+
+<Method name="getTermPropertyTypes">
+<Final>1</Final>
+<FormalSpec>namespaceId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TPropertyType",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("getTermPropertyTypes").Invoke($this,"",.namespaceId)
+]]></Implementation>
+</Method>
+
+<Method name="getVersionPropertyQualifierTypes">
+<Final>1</Final>
+<FormalSpec>namespaceId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TQualifierType",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("getVersionPropertyQualifierTypes").Invoke($this,"",.namespaceId)
+]]></Implementation>
+</Method>
+
+<Method name="getVersionPropertyTypes">
+<Final>1</Final>
+<FormalSpec>namespaceId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TPropertyType",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("getVersionPropertyTypes").Invoke($this,"",.namespaceId)
+]]></Implementation>
+</Method>
+
+<Method name="getVersions">
+<Final>1</Final>
+<FormalSpec>namespaceId:%xsd.int</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%ListOfObjects</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<ReturnTypeParams>ELEMENTTYPE="BSTS.ns1.TContentVersion",XMLPROJECTION="element",XMLNAME="return"</ReturnTypeParams>
+<Implementation><![CDATA[ Quit ..WebMethod("getVersions").Invoke($this,"",.namespaceId)
+]]></Implementation>
+</Method>
+
+<Method name="isAssociationTypeUsed">
+<Final>1</Final>
+<FormalSpec>assocType:BSTS.ns1.TAssociationType</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Boolean</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("isAssociationTypeUsed").Invoke($this,"",.assocType)
+]]></Implementation>
+</Method>
+
+<Method name="isPropertyTypeUsed">
+<Final>1</Final>
+<FormalSpec>propType:BSTS.ns1.TPropertyType</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Boolean</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("isPropertyTypeUsed").Invoke($this,"",.propType)
+]]></Implementation>
+</Method>
+
+<Method name="isQualifierTypeUsed">
+<Final>1</Final>
+<FormalSpec>type:BSTS.ns1.TQualifierType</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Boolean</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("isQualifierTypeUsed").Invoke($this,"",.type)
+]]></Implementation>
+</Method>
+
+<Method name="updateAuthority">
+<Final>1</Final>
+<FormalSpec>arg0:BSTS.ns1.TAuthority,arg1:BSTS.ns1.TAuthority</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Boolean</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("updateAuthority").Invoke($this,"",.arg0,.arg1)
+]]></Implementation>
+</Method>
+
+<Method name="updateAuthorityProperty">
+<Final>1</Final>
+<FormalSpec>authority:BSTS.ns1.TAuthority,oldProp:BSTS.ns1.TProperty,newProp:BSTS.ns1.TProperty</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TProperty</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("updateAuthorityProperty").Invoke($this,"",.authority,.oldProp,.newProp)
+]]></Implementation>
+</Method>
+
+<Method name="updateConcept">
+<Final>1</Final>
+<FormalSpec>oldConcept:BSTS.ns1.TOntylogConcept,newConcept:BSTS.ns1.TOntylogConcept</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TOntylogConcept</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("updateConcept").Invoke($this,"",.oldConcept,.newConcept)
+]]></Implementation>
+</Method>
+
+<Method name="updateNamespace">
+<Final>1</Final>
+<FormalSpec>oldNamespace:BSTS.ns1.TNamespace,newNamespace:BSTS.ns1.TNamespace</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Boolean</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("updateNamespace").Invoke($this,"",.oldNamespace,.newNamespace)
+]]></Implementation>
+</Method>
+
+<Method name="updateNamespaceProperty">
+<Final>1</Final>
+<FormalSpec>namespaceId:BSTS.ns1.TNamespace,oldProp:BSTS.ns1.TProperty,newProp:BSTS.ns1.TProperty</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TProperty</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("updateNamespaceProperty").Invoke($this,"",.namespaceId,.oldProp,.newProp)
+]]></Implementation>
+</Method>
+
+<Method name="updateVersion">
+<Final>1</Final>
+<FormalSpec>arg0:BSTS.ns1.TContentVersion,arg1:BSTS.ns1.TContentVersion</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TContentVersion</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("updateVersion").Invoke($this,"",.arg0,.arg1)
+]]></Implementation>
+</Method>
+
+<Method name="updateVersionProperty">
+<Final>1</Final>
+<FormalSpec>version:BSTS.ns1.TContentVersion,oldProp:BSTS.ns1.TProperty,newProp:BSTS.ns1.TProperty</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BSTS.ns1.TProperty</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("updateVersionProperty").Invoke($this,"",.version,.oldProp,.newProp)
+]]></Implementation>
+</Method>
+
+<Parameter name="ELEMENTQUALIFIED">
+<Description>
+Non-default elementFormQualified for types XML namespace.</Description>
+<Default>0</Default>
+</Parameter>
+
+<Parameter name="LOCATION">
+<Description>
+This is the URL used to access the web service.</Description>
+<Default>http://localhost:8080/dtsserverws/DtsDaoService/DtsDaoWS</Default>
+</Parameter>
+
+<Parameter name="NAMESPACE">
+<Description>
+This is the namespace used by the Service</Description>
+<Default>http://apelon.com/dtsserver/ws/dts</Default>
+</Parameter>
+
+<Parameter name="OUTPUTTYPEATTRIBUTE">
+<Description>
+Use xsi:type attribute for literal types.</Description>
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="SECURITYIN">
+<Description>
+Determines handling of Security header.</Description>
+<Default>ALLOW</Default>
+</Parameter>
+
+<Parameter name="SERVICENAME">
+<Description>
+This is the name of the Service</Description>
+<Default>DtsDaoService</Default>
+</Parameter>
+
+<Parameter name="SOAPVERSION">
+<Description>
+This is the SOAP version supported by the service.</Description>
+<Default>1.1</Default>
+</Parameter>
+
+<Parameter name="TYPENAMESPACE">
+<Description>
+This is the namespace used for types by the Service</Description>
+<Default>http://ws.dao.dtsserver.apelon.com/</Default>
+</Parameter>
+</Class>
+</Export>

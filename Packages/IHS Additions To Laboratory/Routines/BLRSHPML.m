@@ -1,5 +1,5 @@
-BLRSHPML ;cmi/anch/maw - BLR Reference Lab Shipping Manifest: Others ; 10-Dec-2014 10:23 ; MKK
- ;;5.2;IHS LABORATORY;**1027,1028,1031,1034**;NOV 01, 1997;Build 88
+BLRSHPML ;cmi/anch/maw - BLR Reference Lab Shipping Manifest: Others ; 18-May-2016 11:26 ; MAW
+ ;;5.2;IHS LABORATORY;**1027,1028,1031,1034,1039,1040**;NOV 01, 1997;Build 5
  ;
  ;
  ;
@@ -14,13 +14,25 @@ BLRSHPML ;cmi/anch/maw - BLR Reference Lab Shipping Manifest: Others ; 10-Dec-20
  ;7/29/2008 cmi/anch/maw added lab shipping instructions
  ;8/28/2008 cmi/anch/maw added call to go to quest manifest
  ;10/1/2008 cmi/anch/maw masked all but 4 digits on SSN at labcorp request
+ ;4/11/2016 ihs/cmi/maw added written authorization
  ;
  ;
-PRT ;EP - print shipping manifest
+PRT(CP) ;EP - print shipping manifest
  Q:'$D(^TMP("BLRRL",$J))  ;don't print shipping manifest if no data
  W:'+$G(BLRAGUI) !!,"Now printing shipping manifest for this accession"
  D ^%ZISC  ;maw 3/28/2006
+ I '$G(CP) S CP=1
  U $$DEV
+ F I=1:1:CP D
+ . D NEWPRT
+ . I $G(CP)>1 W @IOF
+ ;D WA^BLRSHPL2  ;written authorization p1039
+ D ^%ZISC  ;maw 3/28/2006
+ I I=1 D STOR(.BLRSHIEN,^TMP("BLRRL",$J,"COMMON","UID"))  ;store the shipping manifest as well as print
+ D EOJ
+ Q
+ ;
+NEWPRT  ;-now want copies
  S BLRFAC=$$GET1^DIQ(9999999.06,$S($G(BLRALTDZ):BLRALTDZ,1:DUZ(2)),.01)
  S BLRSTR=$$GET1^DIQ(9999999.06,$S($G(BLRALTDZ):BLRALTDZ,1:DUZ(2)),.14)
  S BLRCTY=$$GET1^DIQ(9999999.06,$S($G(BLRALTDZ):BLRALTDZ,1:DUZ(2)),.15)
@@ -33,21 +45,15 @@ PRT ;EP - print shipping manifest
  S BLRPGC=$$GETPG
  S BLRNPG=1
  D ALL
- D ^%ZISC  ;maw 3/28/2006
- D STOR(.BLRSHIEN,^TMP("BLRRL",$J,"COMMON","UID"))  ;store the shipping manifest as well as print
- D EOJ
  Q
  ;
 ALL ;-- run all sub routines after initial vars
  D XHDR
  D PHDR
  D WRTS
- ;D DX
- ;D INS
  Q
  ;
 STOR(BLRSHIEN,ACC) ;-- this will store the shipping manifest
- ;accession number gets passed in
  N BLRFDA,BLRIENS,BLRERR
  S BLRIENS=""
  S BLRFDA(9009026.2,"+1,",.01)=ACC
@@ -65,13 +71,14 @@ STOR(BLRSHIEN,ACC) ;-- this will store the shipping manifest
  S DA=BLRSHIEN,DIK="^BLRSHPM(" D IX1^DIK
  Q
  ;
+SPHDR ;-- sub patient header
+ Q:'$P($G(^BLRSITE(DUZ(2),"RLA")),U,17)
 PHDR ;-- write the common stuff to the device
  W !!,"ORDER (Control): "_^TMP("BLRRL",$J,"COMMON","ORD")
  W ?30,"ORDER DATE: "_$$FMTE^XLFDT(^TMP("BLRRL",$J,"COMMON","ODT"))
  W ?60,"MID: "_$$MID(+$G(BHLMSG))
  W !,"PATIENT: "_$P($G(^DPT(^TMP("BLRRL",$J,"COMMON","PAT"),0)),U)
  W ?30,"Chart # (Alt Patn ID): "_$$LZERO(BLRCHT,6),?60,"PHONE: "_$S($P($G(^BLRSITE(DUZ(2),"RL")),U,17):$P($G(^DPT(^TMP("BLRRL",$J,"COMMON","PAT"),.13)),U),1:"")  ;cmi/maw 2/4/2008 added home phone
- ; W !,"SEX: "_$G(SEX),?10,"DOB: "_$G(DOB),?30,"SSN: "_$S($P($G(^DPT(^TMP("BLRRL",$J,"COMMON","PAT"),0)),U,9)]"":"XXX-XX-"_$E($P($G(^DPT(^TMP("BLRRL",$J,"COMMON","PAT"),0)),U,9),6,9),1:"NOT ON FILE")  ;cmi/maw 10/1/08 mask ssn
  ; ----- BEGIN IHS/MSC/MKK - LR*5.2*1031
  ;       DOB must be in human-readable format 
  W !,"SEX: "_$G(SEX),?10,"DOB: "_$S(+$G(DOB)>1950101:$$FMTE^XLFDT(DOB),1:$G(DOB))
@@ -89,11 +96,11 @@ PHDR ;-- write the common stuff to the device
  ;
 WRTS ;-- write the output to the device
  N BLRDA,BLRIEN
- ;cmi/anch/maw 7/23/2007 here is where you could sort by order if BLRDA was the order num
  S BLRDA=0 F  S BLRDA=$O(^TMP("BLRRL",$J,BLRDA)) Q:BLRDA=""  D
  . Q:BLRDA="COMMON"
  . S BLRSAMP=$P($G(^LAB(62,^TMP("BLRRL",$J,BLRDA,"SAMP"),0)),U)
- . I $Y+($$CHKOEQ(BLRDA))>IOSL D XHDR,PHDR Q:$G(DIRUT)
+ . I $Y+($$CHKOEQ(BLRDA))>IOSL D XHDR,SPHDR Q:$D(DIRUT)  ;p1039 ,PHDR Q:$G(DIRUT) p1040 added SPHDR
+ . I $Y+2>IOSL D XHDR Q:$D(DIRUT)  ;p1039 ,PHDR Q:$G(DIRUT)
  . W !!!,"TEST NAME: "_$P(^TMP("BLRRL",$J,BLRDA,"TCNM"),U,2)_" ("_$P(^TMP("BLRRL",$J,BLRDA,"TCNM"),U)_")"
  . W ?45,"SAMPLE: "_BLRSAMP
  . W !,"SOURCE: "_^TMP("BLRRL",$J,BLRDA,"SRC")
@@ -105,7 +112,6 @@ WRTS ;-- write the output to the device
  .. N BLRODA
  .. S BLRODA=0 F  S BLRODA=$O(^TMP("BLRRL",$J,BLRDA,"COMMENT",BLRODA)) Q:'BLRODA  D
  ... S ORDC=$G(^TMP("BLRRL",$J,BLRDA,"COMMENT",BLRODA))
- ... ;W !,?5,$P(ORDC,U,2),?50,$P(ORDC,U,3)  ;cmi/maw 12/12/2007 orig line
  ... W !,?5,$P(ORDC,U,2),!,?5,$P(ORDC,U,3)  ;cmi/maw 12/12/2007 split line here
  . I $O(LRTCOM(BLRDA,0)) D
  .. W !!,"COMMENTS: "
@@ -141,7 +147,7 @@ DX(BDA) ;-- if insurance info print DX
 INS(BDA) ;-- if insurance info print insurance
  Q:'$G(BDA)
  Q:'$D(^TMP("BLRRL",$J,"COMMON","INSE"))
- W !!,"INSURANCE"
+ W !!,"PRIMARY INSURANCE"
  W !,"Ins Carrier Code: "_$G(^TMP("BLRRL",$J,BDA,"INSID")),?40,"Insured Name: "_$E($G(^TMP("BLRRL",$J,BDA,"INSNOIE")),1,26)
  W !,?40,"Relationship: "_$G(^TMP("BLRRL",$J,BDA,"INSRELE"))
  W !,"Insurer Name: ",$E($G(^TMP("BLRRL",$J,BDA,"INSCNME")),1,30),?40,"Insured Add: "_$P($G(^TMP("BLRRL",$J,BDA,"PATADDE")),"~")
@@ -151,9 +157,70 @@ INS(BDA) ;-- if insurance info print insurance
  W !,"Insurer Group: "_$G(^TMP("BLRRL",$J,BDA,"INSGRP")),?50,$P($G(^TMP("BLRRL",$J,BDA,"GT1ADDE")),"~",2)
  W !,"Insured ID: "_$G(^TMP("BLRRL",$J,BDA,"INSPOL")),?40,"Guarantor Phone: "_$G(^TMP("BLRRL",$J,BDA,"GT1PHO"))
  W !
- N I
- F I=1:1:80 W "-"  ;write hyphens to separate
+ D CHKSECI(^TMP("BLRRL",$J,"COMMON","PAT"))
+ W !
+ N J
+ F J=1:1:80 W "-"  ;write hyphens to separate
  Q
+ ;
+CHKSECI(PAT,COUNTER) ;-- check to see if secondary insurance for labcorp
+ N CD,CNT,SEQ
+ S SECFLG=0
+ S DFN=PAT
+ D ^AGINS
+ Q:'$D(AGINS(1))
+ S CD=$S($G(^TMP("BLRRL",$J,"COMMON","CDT"))]"":^TMP("BLRRL",$J,"COMMON","CDT"),1:DT)
+ D SEQINS(.AGINS,PAT,CD)
+ S CNT=0
+ S SEQ=0 F  S SEQ=$O(BLRSEQ(SEQ)) Q:'SEQ  D
+ . S CNT=CNT+1
+ . Q:CNT<2
+ . Q:CNT>2
+ . S SECFLG=1
+ . I '$G(COUNTER) D PRTSECI^BLRSHPL2(BLRSEQ(SEQ),PAT)
+ Q
+ ;
+SEQINS(BINS,PT,RLCDT) ;-- lets go through sequencing insurers
+ Q:'$O(BINS(""))
+ K BLRSEQ  ;ihs/cmi/maw 10/07/2013 patch 1033
+ N BDA
+ S BDA=0 F  S BDA=$O(BINS(BDA)) Q:'BDA  D
+ . N BINI,SEQ,POLI
+ . S BINI=$P(BINS(BDA),U,2)
+ . S POLI=$P(BINS(BDA),U,9)
+ . S SEQ=$$FNDSEQ(BINI,PT,POLI,RLCDT)
+ . Q:'SEQ
+ . S BLRSEQ(SEQ)=$G(BINS(BDA))
+ Q
+ ;
+FNDSEQ(BN,PTI,POL,CDT) ;-- find the category prioritization
+ N SQDA,EFF,SQPRI
+ S EFF=$O(^AUPNICP("EFF",PTI,"M",""),-1)
+ I '$G(EFF) Q ""
+ S SQDA=0 F  S SQDA=$O(^AUPNICP("EFF",PTI,"M",EFF,SQDA)) Q:'SQDA!($G(SQPRI))  D
+ . N SQDATA,SQPAT,SQPOL,SQINS
+ . S SQDATA=$G(^AUPNICP(SQDA,0))
+ . S SQPAT=$P(SQDATA,U,2)
+ . S SQINS=$P(SQDATA,U,3)
+ . S SQPOL=$P(SQDATA,U,10)
+ . Q:SQPAT'=PTI
+ . Q:SQINS'=BN
+ . Q:SQPOL'=POL
+ . S SQPRI=$P(SQDATA,U,5)
+ Q $G(SQPRI)
+ ;
+INSTYP(TYP) ;-- get insurance type
+ N TYPE
+ I $G(TYP)]"" D
+ . I TYP="H" S TYPE="HMO"
+ . I TYP="MD" S TYPE="Medicare"
+ . I TYP="M" S TYPE="Medicare"
+ . I TYP="P" S TYPE="Private Insurance"
+ . I TYP="D" S TYPE="Medicaid"
+ . I TYP="R" S TYPE="Medicare"
+ . I TYP="MH" S TYPE="Medicaid"
+ I TYP="" S TYPE="Private Insurance"
+ Q $G(TYPE)
  ;
 LABINST(TST,SAMP) ;-- get the lab processing instructions
  I '$G(SAMP) Q ""
@@ -176,20 +243,48 @@ CHKOEQ(CDA) ;-- check the number of order entry questions to determine lines lef
  Q $G(BLRLN)+(+$G(BLRCNT))
  ;
 GETPG() ;-- lets try and get a page count
- S BLRHDC=8
- S BLRPDC=6
+ ;S BLRHDC=8
+ ;S BLRPDC=9
  S BLRWTC=9
- N BLRNDA,BLRNCNT,BLRNIEN
- S BLRNDA=0,BLRNCNT=0
+ N BLRNDA,BLRNCNT,BLRNIEN,BLRCMCNT,BLRNACC,BLRDXCNT,BLRPGG,BLRIC,BLRSC
+ S BLRNDA=0,BLRNCNT=0,BLRCMCNT=0,BLRNACC=0,BLRDXCNT=0
  F  S BLRNDA=$O(^TMP("BLRRL",$J,BLRNDA)) Q:'BLRNDA  D
+ . S BLRNACC=BLRNACC+1
+ . S BLRDXCNT=BLRDXCNT+$$GETDXCNT(BLRNDA)
  . S BLRNIEN=0 F  S BLRNIEN=$O(^TMP("BLRRL",$J,BLRNDA,"COMMENT",BLRNIEN)) Q:'BLRNIEN  D
- .. S BLRNCNT=BLRNCNT+1
- S BLRNCNT=(BLRHDC+BLRPDC+BLRWTC+BLRNCNT)
+ .. S BLRCMCNT=BLRCMCNT+1
+ S BLRNACC=(BLRNACC*BLRWTC)
+ S BLRDXCNT=(BLRDXCNT*3)
+ ;S BLRNCNT=(BLRHDC+BLRPDC+BLRNACC+(+$G(BLRCMCNT)))
+ S BLRNCNT=(BLRNACC+(+$G(BLRCMCNT)))
+ N BLRINSCN,BLRSECC
+ I $D(^TMP("BLRRL",$J,"COMMON","INSE")) D
+ . S BLRINSCN=12
+ . D CHKSECI(^TMP("BLRRL",$J,"COMMON","PAT"),1)
+ I $G(SECFLG) S BLRSECC=10
+ S BLRNCNT=BLRNCNT+(+$G(BLRDXCNT))
+ S BLRPGG=(BLRNCNT/(IOSL-2))
+ I $E($P(BLRPGG,".",2),1,1)>4 S BLRPGG=$P(BLRPGG,".")+1
+ S BLRHDC=(8*BLRPGG)
+ S BLRPDC=$S($P($G(^BLRSITE(DUZ(2),"RLA")),U,17):(9*BLRPGG),1:9)
+ S BLRIC=(12*BLRPGG)
+ I $G(SECFLG) S BLRSC=(10*BLRPGG)
+ S BLRNCNT=BLRNCNT+BLRPDC+BLRHDC+BLRIC+(+$G(BLRSC))
  S BLRPG=(BLRNCNT/(IOSL-2))
  S BLRPGP=$P(BLRPG,".")
  S BLRPGE=$P(BLRPG,".",2)
  I BLRPGE>0 S BLRPGP=BLRPGP+1
  Q BLRPGP
+ ;
+GETDXCNT(BDA) ;-- get number of dx to display
+ N DXCNT,ORD,ORDI,DXDATA,DXSTR,UID
+ S DXCNT=0
+ S UID=^TMP("BLRRL",$J,BDA,"UID")
+ I '$G(UID) S UID=LRUID
+ S ORD=$O(^BLRRLO("ACC",UID,0))
+ S ORDI=0 F  S ORDI=$O(^BLRRLO(ORD,1,ORDI)) Q:'ORDI  D
+ . S DXCNT=DXCNT+1
+ Q DXCNT
  ;
 WRT(SDA) ; -- write the output to the device
  S BLRSAMP=$P($G(^LAB(62,RL(SDA,"SAMP"),0)),U)
@@ -216,7 +311,7 @@ WRT(SDA) ; -- write the output to the device
 HDR ;-- this is the header
  K DIR I $E(IOST,1)="C" S DIR(0)="E" D ^DIR I Y<1 S DIRUT=1 Q
 XHDR W @IOF
- W !,?28,"INDIAN HEALTH SERVICE EREQ",?65,"PAGE: "_BLRNPG_" of "_BLRPGC
+ W !,?28,"INDIAN HEALTH SERVICE EREQ",?65,"PAGE: "_BLRNPG  ;_" of "_BLRPGC  1040
  W !!,"REF LAB NAME: "_$S($P($G(^BLRSITE(DUZ(2),"RL")),U,20)]"":$P(^BLRSITE(DUZ(2),"RL"),U,20),1:$P($G(^BLRRL(^TMP("BLRRL",$J,"COMMON","RL"),0)),U))  ;cmi/maw 2/28/2008 added for custon header on ship manifest.
  W ?40,"CLIENT #: "_^TMP("BLRRL",$J,"COMMON","CLIENT")
  W !
@@ -236,9 +331,9 @@ MID(MSG) ;-- get message id
  ;
 EOJ ;-- kill vars and quit     
  D ^%ZISC
- K ^TMP("BLRRL",$J)
+ ;K ^TMP("BLRRL",$J)
  K ^TMP($J,"BLRSHPM")  ;cmi/anch/maw 4/4/2006
- K BLRODA,DIRUT,ORDC,BLRSDA,MIEN,MSG,BLRRLCNT,BLRRLASK,BLRRLCLT,BLRRLCLA,BLRRLBTP,BLRDX
+ K BLRODA,DIRUT,ORDC,BLRSDA,MIEN,MSG,BLRRLCNT,BLRRLASK,BLRRLCLT,BLRRLCLA,BLRRLBTP,BLRDX,BLRDXCNT,SECFLG
  Q
  ;
 DEV() ;-- device handler

@@ -1,5 +1,5 @@
 ABMDVST1 ; IHS/ASDST/DMJ - PCC VISIT STUFF - PART 2 (PURPOSE OF VISIT) ;   
- ;;2.6;IHS 3P BILLING SYSTEM;**10,14,16,18**;NOV 12, 2009;Build 289
+ ;;2.6;IHS 3P BILLING SYSTEM;**10,14,16,18,21**;NOV 12, 2009;Build 379
  ;Original;TMD;03/26/96 12:11 PM
  ;
  ;IHS/ASDS/DMJ - 10/31/00 - V2.4 Patch 3 - NOIS NDA-0500-180002
@@ -29,6 +29,8 @@ ABMDVST1 ; IHS/ASDST/DMJ - PCC VISIT STUFF - PART 2 (PURPOSE OF VISIT) ;
  ;  a workman's comp claim.  Wasn't doing lookup correctly (data needed wasn't defined).
  ;IHS/SD/SDR - 2.6*16 - HEAT217211 - Added code to populated External Cause 2, External Cause 3, Place of Occurrence, and Place of Occurrence (E849)
  ;IHS/SD/SDR - 2.6*18 - HEAT239392 - Correction for E-code not crossing over from PCC Visit.
+ ;IHS/SD/SDR - 2.6*21 - HEAT234796 - Made change so only visits with a Service Category of 'H' for Hospitalization will have the Present on Admission (POA)
+ ;   indicator cross over onto the claim in TPB.
  ;
  ;
  Q:ABMIDONE
@@ -149,7 +151,8 @@ POVCHK ;POV is dinumed.  Each POV is only entered once.
  S DIC("DR")=$S($G(DIC("DR"))'="":DIC("DR")_";",1:"")_".03////"_ABMR("NAR")  ;abm*2.6*14 ICD10 002F
  ;S DIC("DR")=DIC("DR")_";.04////"_$P(ABMPOV0,U,9)  ;E-code  ;abm*2.6*14 E-codes
  S:(+ABM("ECODE")'=0) DIC("DR")=DIC("DR")_";.04////"_ABM("ECODE")  ;E-code  ;abm*2.6*14 E-codes
- S DIC("DR")=DIC("DR")_";.05////"_$P(ABMPOV0,U,22)
+ ;S DIC("DR")=DIC("DR")_";.05////"_$P(ABMPOV0,U,22)  ;abm*2.6*21 IHS/SD/SDR HEAT234796
+ I SERVCAT="H" S DIC("DR")=DIC("DR")_";.05////"_$P(ABMPOV0,U,22)  ;abm*2.6*21 IHS/SD/SDR HEAT234796
  I $P($$DX^ABMCVAPI(+X,ABMP("VDT")),U,20)=30 S DIC("DR")=DIC("DR")_";.06////1"  ;abm*2.6*14 ICD10 002F and updated API call
  ;start new code abm*2.6*14 ICD10 SNOMED/dual coding
  S:$P(ABMPOV0,U,18)'="" DIC("DR")=DIC("DR")_";.07////"_$P(ABMPOV0,U,18)  ;abm*2.6*16 IHS/SD/SDR HEAT217211

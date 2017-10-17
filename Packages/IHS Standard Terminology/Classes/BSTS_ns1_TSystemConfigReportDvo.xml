@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:35">
+<Class name="BSTS.ns1.TSystemConfigReportDvo">
+<Description>
+Created from: http://VDENMIHSDEVD01:8082/soap/DtsQueryDaoWS?wsdl</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject,%XML.Adaptor</Super>
+<TimeChanged>63616,48124.879796</TimeChanged>
+<TimeCreated>63616,48124.860177</TimeCreated>
+
+<Parameter name="ELEMENTQUALIFIED">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="NAMESPACE">
+<Default>http://apelon.com/dtsserver/types</Default>
+</Parameter>
+
+<Parameter name="XMLNAME">
+<Default>TSystemConfigReportDvo</Default>
+</Parameter>
+
+<Parameter name="XMLSEQUENCE">
+<Default>1</Default>
+</Parameter>
+
+<Property name="usedMemory">
+<Type>%Integer</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="usedMemory"/>
+</Property>
+
+<Property name="freeMemory">
+<Type>%Integer</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="freeMemory"/>
+</Property>
+
+<Property name="totalMemory">
+<Type>%Integer</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="totalMemory"/>
+</Property>
+
+<Property name="maxMemory">
+<Type>%Integer</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="maxMemory"/>
+</Property>
+
+<Property name="processors">
+<Type>%xsd.int</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="processors"/>
+</Property>
+
+<Property name="javaImplementationVersion">
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="MAXLEN"/>
+<Parameter name="XMLNAME" value="javaImplementationVersion"/>
+</Property>
+
+<Property name="javaSystemVersion">
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="MAXLEN"/>
+<Parameter name="XMLNAME" value="javaSystemVersion"/>
+</Property>
+
+<Property name="osName">
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="MAXLEN"/>
+<Parameter name="XMLNAME" value="osName"/>
+</Property>
+
+<Property name="osVersion">
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="MAXLEN"/>
+<Parameter name="XMLNAME" value="osVersion"/>
+</Property>
+
+<Property name="osArchitecture">
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="MAXLEN"/>
+<Parameter name="XMLNAME" value="osArchitecture"/>
+</Property>
+
+<Property name="javaClassPath">
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="MAXLEN"/>
+<Parameter name="XMLNAME" value="javaClassPath"/>
+</Property>
+
+<Property name="sessionContext">
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="MAXLEN"/>
+<Parameter name="XMLNAME" value="sessionContext"/>
+</Property>
+
+<Property name="databaseSystemContext">
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="MAXLEN"/>
+<Parameter name="XMLNAME" value="databaseSystemContext"/>
+</Property>
+
+<Property name="displayString">
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="MAXLEN"/>
+<Parameter name="XMLNAME" value="displayString"/>
+</Property>
+</Class>
+</Export>

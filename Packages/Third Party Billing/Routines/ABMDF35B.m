@@ -1,9 +1,10 @@
 ABMDF35B ; IHS/SD/SDR - Set HCFA1500 (02/12) Print Array PART 2 ;   
- ;;2.6;IHS 3P BILLING SYSTEM;**13,14**;NOV 12, 2009;Build 238
+ ;;2.6;IHS 3P BILLING SYSTEM;**13,14,21**;NOV 12, 2009;Build 379
  ;IHS/SD/SDR - 2.6*14 - HEAT156735 - Populated box 19 with:
  ;  1. VA CONTRACT NUMBER (existing code)
  ;  2. claim attachments from page 9G (new code)
  ;  3. what it did before (existing code)
+ ;IHS/SD/SDR - 2.6*21 - HEAT187159 - Added accident state in 10B
  ;
  ; *********************************************************************
 BNODES S ABM("B5")=$G(^ABMDBILL(DUZ(2),ABMP("BDFN"),5)),ABM("B6")=$G(^(6)),ABM("B7")=$G(^(7)),ABM("B8")=$G(^(8)),ABM("B9")=$G(^(9)),ABM("B10")=$G(^(10))
@@ -30,6 +31,7 @@ ACCD ;
  S $P(ABMF(15),U,$S('$P(ABM("B8"),U,3):2,"12"[$P(ABM("B8"),U,3):1,1:2))="X"  ;abm*2.6*13 remove box 9B
  ;S $P(ABMF(17),U,$S("12"[$P(ABM("B8"),U,3):3,1:2))="X"  ;abm*2.6*13 remove box 9C
  S $P(ABMF(17),U,$S("12"[$P(ABM("B8"),U,3):2,1:1))="X"  ;abm*2.6*13 remove box 9C
+ I $P(ABM("B8"),U,16)'="" S $P(ABMF(15),U,3)=$P($G(^DIC(5,$P(ABM("B8"),U,16),0)),U,2)  ;abm*2.6*21 IHS/SD/SDR HEAT187159
 FSYM ; (box 14)
  ;S $P(ABMF(25),U)=$P(ABM("B8"),U,6)  ;abm*2.6*13 box 14
  ;start new code abm*2.6*13 box 14

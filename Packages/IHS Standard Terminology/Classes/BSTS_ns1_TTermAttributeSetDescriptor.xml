@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:35">
+<Class name="BSTS.ns1.TTermAttributeSetDescriptor">
+<Description>
+Created from: http://VDENMIHSDEVD01:8082/soap/DtsQueryDaoWS?wsdl</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>BSTS.ns1.TAttributeSetDescriptor</Super>
+<TimeChanged>63616,48124.946706</TimeChanged>
+<TimeCreated>63616,48124.927575</TimeCreated>
+
+<Parameter name="ELEMENTQUALIFIED">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="NAMESPACE">
+<Default>http://apelon.com/dtsserver/types</Default>
+</Parameter>
+
+<Parameter name="XMLNAME">
+<Default>TTermAttributeSetDescriptor</Default>
+</Parameter>
+
+<Parameter name="XMLSEQUENCE">
+<Default>1</Default>
+</Parameter>
+
+<Property name="allAssociationTypes">
+<Type>%Boolean</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="allAssociationTypes"/>
+</Property>
+
+<Property name="associationTypes">
+<Type>BSTS.ns1.TAssociationType</Type>
+<Collection>list</Collection>
+<Parameter name="XMLNAME" value="associationTypes"/>
+<Parameter name="XMLPROJECTION" value="ELEMENT"/>
+</Property>
+
+<Property name="allInverseAssociationTypes">
+<Type>%Boolean</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="allInverseAssociationTypes"/>
+</Property>
+
+<Property name="inverseAssociationTypes">
+<Type>BSTS.ns1.TAssociationType</Type>
+<Collection>list</Collection>
+<Parameter name="XMLNAME" value="inverseAssociationTypes"/>
+<Parameter name="XMLPROJECTION" value="ELEMENT"/>
+</Property>
+
+<Property name="allSynonymTypes">
+<Type>%Boolean</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="allSynonymTypes"/>
+</Property>
+
+<Property name="synonymTypes">
+<Type>BSTS.ns1.TAssociationType</Type>
+<Collection>list</Collection>
+<Parameter name="XMLNAME" value="synonymTypes"/>
+<Parameter name="XMLPROJECTION" value="ELEMENT"/>
+</Property>
+</Class>
+</Export>

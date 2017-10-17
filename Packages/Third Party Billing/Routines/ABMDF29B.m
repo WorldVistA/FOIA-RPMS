@@ -1,5 +1,5 @@
 ABMDF29B ; IHS/SD/SDR - ADA 2006 Dental Export -part 2 ;    
- ;;2.6;IHS Third Party Billing;**1,2,3,4,6,8,9,10,11,13**;NOV 12, 2009;Build 213
+ ;;2.6;IHS Third Party Billing;**1,2,3,4,6,8,9,10,11,13**;NOV 12, 2009;Build 379
  ;abm*2.6*1 - split from ABMDF29A due to routine size
  ;IHS/SD/SDR - abm*2.6*2 - FIXPMS10006 - check what date to print FL37
  ;IHS/SD/PMT - abm*2.6*3 - HEAT8604 - moved entire form up one line

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:35">
+<Class name="BSTS.ns1.TQualifier">
+<Description>
+Created from: http://VDENMIHSDEVD01:8082/soap/DtsQueryDaoWS?wsdl</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject,%XML.Adaptor</Super>
+<TimeChanged>63616,48124.661866</TimeChanged>
+<TimeCreated>63616,48124.647876</TimeCreated>
+
+<Parameter name="ELEMENTQUALIFIED">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="NAMESPACE">
+<Default>http://apelon.com/dtsserver/types</Default>
+</Parameter>
+
+<Parameter name="XMLNAME">
+<Default>TQualifier</Default>
+</Parameter>
+
+<Parameter name="XMLSEQUENCE">
+<Default>1</Default>
+</Parameter>
+
+<Property name="id">
+<Type>%Integer</Type>
+<Parameter name="XMLNAME" value="id"/>
+</Property>
+
+<Property name="namespaceId">
+<Type>%xsd.int</Type>
+<Parameter name="XMLNAME" value="namespaceId"/>
+</Property>
+
+<Property name="qualifierType">
+<Type>BSTS.ns1.TQualifierType</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="qualifierType"/>
+</Property>
+
+<Property name="value">
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="MAXLEN"/>
+<Parameter name="XMLNAME" value="value"/>
+</Property>
+
+<Property name="revisionIn">
+<Type>%TimeStamp</Type>
+<Parameter name="XMLNAME" value="revisionIn"/>
+</Property>
+
+<Property name="revisionOut">
+<Type>%TimeStamp</Type>
+<Parameter name="XMLNAME" value="revisionOut"/>
+</Property>
+</Class>
+</Export>

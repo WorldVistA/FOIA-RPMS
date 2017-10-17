@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:35">
+<Class name="csp.beddlogin1">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeChanged>64446,69327.776355</TimeChanged>
+<TimeCreated>64446,69327.771831</TimeCreated>
+<GeneratedBy>/csp/foia_goldb/BEDDLogin1.csp</GeneratedBy>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<BODY bgcolor=#DCDCDC OnLoad=""document.BEDDLogin.Acode.focus();"">"
+	Write !,"<script language='javascript'>"
+	Write !,!,"function verify_user(Acode,Vcode){",!
+	Write "	",!
+	Write "	"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".getUser"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',Acode,Vcode);",!
+	Write "	          ",!
+	Write "	if( duz>1 ){",!
+	Write "		alert(""Login successfull"");",!
+	Write "		return true;",!
+	Write "	}",!
+	Write "	",!
+	Write "	if( duz<1 ){",!
+	Write "		alert(""Login Failed"");",!
+	Write "		return false;",!
+	Write "	}",!
+	Write "}",!
+	Write "</script>"
+	Write !,!,"	"
+	Write "<form action="""" method=""post"" name=""BEDDLogin"">"
+	Write !,..InsertHiddenFields(""),!
+	Write !,"	",!
+	Write "	<table cellspacing=""3"" align=""center"" vspacing=""center"">",!
+	Write "    <tr></tr><tr></tr><tr></tr><tr>",!
+	Write "    	<td>"
+	Write "<div align=""right"">"
+	Write "<font face=""Times New Roman"" size=""+2"">Access Code:</font>"
+	Write "</div>"
+	Write "	</td>",!
+	Write "    	<td>"
+	Write "<input name=""Acode"" type=""password"">"
+	Write "</td>",!
+	Write "    	<tr></tr>",!
+	Write "    	<td>"
+	Write "<div align=""right"">"
+	Write "<font face=""Times New Roman"" size=""+2"">Verify Code:</font>"
+	Write "</div>"
+	Write "</td>",!
+	Write "		<td>"
+	Write "<input type=""password"" name=""Vcode"">"
+	Write "</td>",!
+	Write "	</tr>",!
+	Write "	<tr></tr>",!
+	Write "		<td>"
+	Write "<div align=""right"">"
+	Write "<font face=""Times New Roman"" size=""+2"">Select the Site </font>"
+	Write "</div>"
+	Write "</td>",!
+	Write "		<td>",!
+	Write "		"
+	Write "<select name=""BEDDSITE"">"
+	Write !,"        	"
+	Write "<option value="""">"
+	Write "</option>",!
+	Write "        	"
+	Kill beddst
+	Do SINIT^BEDDUTW()
+	Do SITE^BEDDUTIL(.beddst)
+	Set beddst=$O(beddst(""))
+	While (beddst]"") {
+	&html<<option value=#($P(beddst(beddst),"^",2))#> #($P(beddst(beddst),"^"))# </option>>
+	Set beddst=$O(beddst(beddst))
+	}
+	Write !,"			"
+	Write "</select>"
+	Write !,"		</td>",!
+	Write "	<tr>",!
+	Write "	",!
+	Write "	</tr>",!
+	Write "	<tr>",!
+	Write "	<td>&nbsp;</td>",!
+	Write "	<td>",!
+	Write "	"
+	Write "<input name=""Submit"" type=""submit"" value=""Login"">"
+	Write !,"	"
+	Write "<input name=""Whiteboard"" type=""submit"" value=""Whiteboard Login"">"
+	Write !,"	</td>",!
+	Write "   </tr>",!
+	Write " </table>",!
+	Write "</form>"
+	Write !,!,!,!,!,"</BODY>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<!-- BEDDLogin1.csp - Main BEDD ACCESS/VERIFY Entry Page -->"
+	Write !,"<!-- ;;2.0;IHS EMERGENCY DEPT DASHBOARD;;Apr 02, 2014 -->"
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<HEAD>"
+	Write !,"	<TITLE>	BEDD Emergency Room Dashboard Login </TITLE>",!
+	Write !,(..HyperEventHead(0,0))
+	Write "</HEAD>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<HTML>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !,"<h1><b>"
+	Write "<div align=""center"">"
+	Write "Welcome to the BEDD Emergency Room Dashboard Login"
+	Write "</div>"
+	Write "</b></h1>",!
+	Write !
+	Do ..OnPageBODY()
+	Write !,"</HTML>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>Acode:%String,Vcode:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+ 	#; Check to see if BEDD installed correctly
+ 	If $$VERSION^XPDUTL("BEDD")="" {
+ 		Set %response.Redirect=..Link("BEDDIL.csp?BEDD=No")
+ 		Quit 1
+ 	}
+     #;
+     #; Whiteboard Login
+     If ($Data(%request.Data("Whiteboard",1))) {
+ 	   	Set beddac=$Get(%request.Data("Acode",1))
+ 		Set beddvc=$Get(%request.Data("Vcode",1))
+ 		Set Success=$$CHECKWB^BEDDPREF(beddac_";"_beddvc)
+ 		
+ 		#; If not success, see if they entered their access/verify and have dashboard access
+ 		If Success=0 {
+ 			Set duz=$$CHECKAV^BEDDUTIL(beddac_";"_beddvc)
+ 			If duz>0 {
+ 				If $$AUTH^BEDDUTIL(duz)'=0 {
+ 					Set Success=1
+ 					D LOG^BEDDUTIU(duz,"S","","BEDDLogin1.csp","User logged into the ED Dashboard","")
+ 				}
+ 			}
+ 		}
+ 		
+ 		#; Success - Login
+ 		If Success=1 {
+ 			Set %session.Data("SITE")="Whiteboard"
+ 			Set %session.Data("LOC")="SA"
+ 			Set %session.Data("DUZ")="99999"
+ 			Set %session.Data("Y")="0"
+ 			Set %response.Redirect=..Link("BEDD.csp?DUZ="_%session.Data("DUZ")_"&SITE="_%session.Data("SITE")_"&LOC=SA")
+ 			Quit 1
+ 		}
+ 		Else {
+ 			Set %response.Redirect=..Link("BEDDUA.csp?SITE="_%request.Get("BEDDSITE"))
+ 		}
+ 		
+     }
+ 	#;	
+ 	#; Authenticate ACCESS CODE/VERIFY CODE on server
+ 	Kill beddac,beddvc,beddsite
+ 	
+ 	#; First retrieve DUZ value
+ 	Set beddac=$Get(%request.Data("Acode",1))
+ 	Set beddvc=$Get(%request.Data("Vcode",1))
+ 	
+ 	If ((beddac="")&&(beddvc="")) Quit 1
+ 	Set %session.Data("DUZ")=$$CHECKAV^BEDDUTIL(beddac_";"_beddvc)
+ 	Set duz=%session.Data("DUZ")
+ 	
+ 	#; Check if user logged in correctly and active
+ 	If %session.Data("DUZ")<1 {
+ 		Set %response.Redirect=..Link("BEDDIL.csp")
+ 	} 
+ 	
+ 	#; Check if user has BEDDZDASH key
+ 	Elseif ($$AUTH^BEDDUTIL(%session.Data("DUZ"))=0) {
+ 		Set %response.Redirect=..Link("BEDDUA.csp?SITE="_%request.Get("BEDDSITE"))
+ 	}
+ 	
+ 	#; Successful login - Route to Dashboard
+ 	Else {
+ 		Set beddsite=%request.Get("BEDDSITE")
+ 		Set %session.Data("SITE")=beddsite
+ 		Set %session.Data("LOC")="SA"
+ 		#;
+ 		#;Audit the login
+ 		D LOG^BEDDUTIU(duz,"S","","BEDDLogin1.csp","User logged into the ED Dashboard","")
+ 		Set %response.Redirect=..Link("BEDD.csp?DUZ="_%session.Data("DUZ")_"&SITE="_beddsite_"&LOC=SA")
+ 		
+ 	}
+   	
+     Quit 1
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>D:\intersystems\E3IHS\CSP\foia_goldb\BEDDLogin1.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/foia_goldb/BEDDLogin1.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>64447,3926</Default>
+</Parameter>
+</Class>
+</Export>

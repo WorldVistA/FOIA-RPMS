@@ -1,83 +1,77 @@
 ABMAPASS ; IHS/ASDST/DMJ - PASS INFO TO A/R ;    
- ;;2.6;IHS 3P BILLING SYSTEM;**3,4,6,8,10,11,13**;NOV 12, 2009;Build 213
+ ;;2.6;IHS 3P BILLING SYSTEM;**3,4,6,8,10,11,13,21**;NOV 12, 2009;Build 379
  ;Original;DMJ
  ;
  ;IHS/DSD/MRS-4/1/1999 Modify to check for missing root of insurer array
  ;IHS/DSD/MRS - 6/23/1999 - NOIS PYA-0499-90061 Patch 3 #2
- ;  Code assumed ICPT ien was equal to .01, not true for type II & III
- ;  HCPCS. Modified to retrieve numerical ien from "B" cross-reference
- ; IHS/ASDS/LSL - 05/18/2001 - V2.4 Patch 6 - Modified to accomodate
- ;     Pharmacy POS posting.  Allow RX to pass to A/R Bill file as 
+ ;  Code assumed ICPT ien was equal to .01, not true for type II & III HCPCS. Modified to retrieve numerical ien from "B" cross-reference
+ ; IHS/ASDS/LSL - 05/18/2001 - V2.4 Patch 6 - Modified to accomodate Pharmacy POS posting.  Allow RX to pass to A/R Bill file as 
  ;     Other Bill Identifier.
  ;
- ; IHS/SD/SDR - v2.5 p8
- ;    added code to pass ambulance charges
- ; IHS/SD/SDR - v2.5 p9 - IM16864
- ;    Correction to bill suffix when rolling over for satellites
- ; IHS/SD/SDR - v2.5 p10 - IM20395
- ;   Split out lines bundled by rev code
+ ; IHS/SD/SDR - v2.5 p8 added code to pass ambulance charges
+ ; IHS/SD/SDR - v2.5 p9 IM16864 Correction to bill suffix when rolling over for satellites
+ ; IHS/SD/SDR - v2.5 p10 - IM20395 Split out lines bundled by rev code
  ;
  ; IHS/SD/SDR - v2.6 CSV
- ; IHS/SD/SDR - abm*2.6*3 - modified to pass POS Rejection info if it exists for bill
- ; IHS/SD/SDR - abm*2.6*3 - modified to pass Re-export dates if any exist on bill
- ; IHS/SD/SDR - abm*2.6*4 - POS rejection change was causing 3P CREDIT A/R transactions to create.
+ ; IHS/SD/SDR - 2.6*3 modified to pass POS Rejection info if it exists for bill
+ ; IHS/SD/SDR - 2.6*3 modified to pass Re-export dates if any exist on bill
+ ; IHS/SD/SDR - 2.6*4 POS rejection change was causing 3P CREDIT A/R transactions to create.
  ;  Modified to only pass the codes not the whole ABMPOS array.
- ; IHS/SD/SDR - abm*2.6*6 - NOHEAT - Added code to put a partial bill number as other identifier
- ;IHS/SD/SDR - 2.6*13 - NOHEAT1 - Made change to default date/time approved if there is no export date.
+ ; IHS/SD/SDR - 2.6*6 NOHEAT - Added code to put a partial bill number as other identifier
+ ;IHS/SD/SDR - 2.6*13 NOHEAT1 - Made change to default date/time approved if there is no export date.
+ ;IHS/SD/SDR - 2.6*21 HEAT118656 - Made changes for total credit for Upload option in A/R
  ;
  ; *********************************************************************
- ; This routine is called each time the Bill Status is changed in
- ; the 3P BILL file.  It is called as part of a cross-reference on
- ; the Bill Status (.04) field.  It will send the ABMA array to A/R.
- ; The ABMA array is stored in ^TMP($J,"ABMAPASS") and it is this
- ; global that is passed to A/R.  The array can be defined as follows
- ; (Field numbers are as they relate to the 3P BILL file):
+ ; This routine is called each time the Bill Status is changed in the 3P BILL file.  It is called as part of
+ ; a cross-reference on the Bill Status (.04) field.  It will send the ABMA array to A/R.
+ ; The ABMA array is stored in ^TMP($J,"ABMAPASS") and it is this global that is passed to A/R.  The array
+ ; can be defined as follows (Field numbers are as they relate to the 3P BILL file):
  ; This rtn has been modified so it will work with either A/R 1.1 or 1.0
  ;
  ; VARIABLE       FIELD #    DESCRIPTION
  ;
  ; ABMA("BLDA")   = .001 = IEN to 3P BILL file
- ; ABMA("ACTION") =        Insurance priority or cancelled status
- ;                           value  1 = Primary Insurer
- ;                           value  2 = Secondary Insurer
- ;                           value  3 = Tertiary Insurer
- ;                           value 99 = Cancelled Status
- ; ABMA("BLNM")   = .01  = Bill name (bill #-Bill # suffix-HRN)
- ; ABMA("VSLC")   = .03  = Visit location
- ; ABMA("PTNM")   = .05  = Patient (Pointer)
- ; ABMA("VSTP")   = .07  = Visit Type
- ; ABMA("INS")    = .08  = Active Insurer
- ; ABMA("CLNC")   = .1   = Clinic
- ; ABMA("DTAP")   = .15  = Date/Time Approved
- ; ABMA("DTBILL") = .17  = Export number
- ; ABMA("BLAMT")  = .21  = Bill Amount
- ; ABMA("DOSB")   = .71  = Service Date From
- ; ABMA("DOSE")   = .72  = Service Date To
- ; ABMA("PRIM")   =        Primary Insurer (Pointer)
- ; ABMA("SEC")    =        Secondary Insurer (Pointer)
- ; ABMA("TERT")   =        Tertiary Insurer (Pointer)
- ; ABMA("POLH")   =        Policy Holder of active insurance
- ; ABMA("POLN")   =        Policy Number of active insurance
- ; ABMA("PROV")   =        Attending Provider (Pointer)
- ; ABMA("CREDIT") =        Total payments (payment+deductable+coins)
- ; ABMA("OTHIDENT") =      Other Bill Identifier for A/R (from POS)
- ; ABMA("LICN") =          Line Item Control Number (if flat rate)  ;abm*2.6*8
+ ; ABMA("ACTION") =   Insurance priority or cancelled status
+ ;                       value  1 = Primary Insurer
+ ;                       value  2 = Secondary Insurer
+ ;                       value  3 = Tertiary Insurer
+ ;                       value 99 = Cancelled Status
+ ; ABMA("BLNM")   = .01  Bill name (bill #-Bill # suffix-HRN)
+ ; ABMA("VSLC")   = .03  Visit location
+ ; ABMA("PTNM")   = .05  Patient (Pointer)
+ ; ABMA("VSTP")   = .07  Visit Type
+ ; ABMA("INS")    = .08  Active Insurer
+ ; ABMA("CLNC")   = .1   Clinic
+ ; ABMA("DTAP")   = .15  Date/Time Approved
+ ; ABMA("DTBILL") = .17  Export number
+ ; ABMA("BLAMT")  = .21  Bill Amount
+ ; ABMA("DOSB")   = .71  Service Date From
+ ; ABMA("DOSE")   = .72  Service Date To
+ ; ABMA("PRIM")   =      Primary Insurer (Pointer)
+ ; ABMA("SEC")    =      Secondary Insurer (Pointer)
+ ; ABMA("TERT")   =      Tertiary Insurer (Pointer)
+ ; ABMA("POLH")   =      Policy Holder of active insurance
+ ; ABMA("POLN")   =      Policy Number of active insurance
+ ; ABMA("PROV")   =      Attending Provider (Pointer)
+ ; ABMA("CREDIT") =      Total payments (payment+deductable+coins)
+ ; ABMA("OTHIDENT") =    Other Bill Identifier for A/R (from POS)
+ ; ABMA("LICN") =        Line Item Control Number (if flat rate)  ;abm*2.6*8
  ;
  ;  ITEM ARRAY
  ;
- ; ABMA(counter,"BLSRV")  = Type of service (ie: Dental,Pharmacy)
- ; ABMA(counter,"ITCODE") = IEN to REVENUE CODE file
- ; ABMA(counter,"ITQT")   = total units (quantity)
- ; ABMA(counter,"ITTOT")  = total charges
- ; ABMA(counter,"ITUC")   = unit charge
- ; ABMA(counter,"OTUC")   = dispense fee (pharmacy)
- ; ABMA(counter,"OTIT")   = "DISPENSE FEE" (Pharmacy)
- ; ABMA(counter,"ITNM")   = Revenue code description (item)
- ; ABMA(counter,"ITCODE") = Revenue code (item code)
- ; ABMA(counter,"DOS")    = Date of service
- ; ABMA(counter,"LICN")   = Line Item Control Number  ;abm*2.6*8
+ ; ABMA(cntr,"BLSRV")  = Type of service (ie: Dental,Pharmacy)
+ ; ABMA(cntr,"ITCODE") = IEN to REVENUE CODE file
+ ; ABMA(cntr,"ITQT")   = total units (quantity)
+ ; ABMA(cntr,"ITTOT")  = total charges
+ ; ABMA(cntr,"ITUC")   = unit charge
+ ; ABMA(cntr,"OTUC")   = dispense fee (pharmacy)
+ ; ABMA(cntr,"OTIT")   = "DISPENSE FEE" (Pharmacy)
+ ; ABMA(cntr,"ITNM")   = Revenue code description (item)
+ ; ABMA(cntr,"ITCODE") = Revenue code (item code)
+ ; ABMA(cntr,"DOS")    = Date of service
+ ; ABMA(cntr,"LICN")   = Line Item Control Number  ;abm*2.6*8
  ;
- ; start new code abm*2.6*3 POS Rejection codes
+ ; start new abm*2.6*3 POS Rejection codes
  ; ABMA(73,"REJDATE") = POS rejection date
  ; ABMA(73,cnt,"CODE") = code
  ; ABMA(73,cnt,"REASON") = reason
@@ -88,9 +82,9 @@ ABMAPASS ; IHS/ASDST/DMJ - PASS INFO TO A/R ;
  ; ABMA(74,ABMMIEN,"GCN")
  ; ABMA(74,ABMMIEN,"RSN")
  ; ABMA(74,ABMMIEN,"USR")
- ; end new code abm*2.6*3
+ ; end new abm*2.6*3
  ; 
- ; *********************************************************************
+ ; ******************************
  ;
 START ; START HERE
  ; X = Bill status in 3P BILL file
@@ -104,7 +98,7 @@ START ; START HERE
  K ABMA,ABM,ABMR,^TMP($J,"ABMPASS")
  Q
  ;
- ; *********************************************************************
+ ; ********************************
 BLD ; PEP
  ; BUILD ABMA ARRAY (STORED IN TMP for ver 1.1)
  ; NEEDS X AND DA IF CALLED FROM HERE
@@ -124,7 +118,7 @@ BLD ; PEP
  . I ABMA("DR")=.17,ABMA("DTBILL") S ABMA("DTBILL")=$$VALI^XBDIQ1(^DIC(9002274.6,0,"GL"),ABMA("DTBILL"),.01)
  ;I ABMA("ACTION")="B",ABMA("DTBILL")="" S ABMA("DTBILL")=DT  ;abm*2.6*13 NOHEAT1
  I ABMA("ACTION")="B",ABMA("DTBILL")="" S ABMA("DTBILL")=ABMA("DTAP")  ;abm*2.6*13 NOHEAT1
- D BLNM                      ; Calculate complete bill name
+ D BLNM    ;Calculate complete bill name
  N I,DA,K
  S K=0
  ; Loop through each type of bill service and find ITEM ARRAY data
@@ -135,11 +129,11 @@ BLD ; PEP
  ;end new code HEAT90370
  F I=21,23,25,27,33,35,37,39,43,47 D
  . K ABM,ABMRV
- . D @(I_"^ABMERGR2")  ; Build ABRV Array for all items for service type
- . Q:'$D(ABMRV)        ; quit if no items for this service type
- . D CONV              ; Convert ABRV Array to ABMA array 
+ . D @(I_"^ABMERGR2")  ;Build ABRV Array for all items for service type
+ . Q:'$D(ABMRV)   ;quit if no items for this service type
+ . D CONV         ;Convert ABRV Array to ABMA array 
  K ABMRV
- D ORV^ABMERGRV        ; Find other items (Revenue codes)
+ D ORV^ABMERGRV   ;Find other items (Revenue codes)
  N I
  S I=.97
  D CONV
@@ -147,8 +141,8 @@ BLD ; PEP
  ; Get insurer data
  ;S ABMP("ITYPE")=$P($G(^AUTNINS(+ABMA("INS"),2)),"^",1)  ;abm*2.6*10 HEAT73780
  S ABMP("ITYPE")=$$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,+ABMA("INS"),".211","I"),1,"I")  ;abm*2.6*10 HEAT73780
- D ISET^ABMERUTL       ; Set insurer priorities based on 3P BILL
- D CONV2               ; Convert insurer to ABMA array
+ D ISET^ABMERUTL   ;Set insurer priorities based on 3P BILL
+ D CONV2     ;Convert insurer to ABMA array
  K ABMP("SET")
  S ABMP("PDFN")=ABMA("PTNM")
  S ABME("INS")=ABMA("INS")
@@ -159,8 +153,9 @@ BLD ; PEP
  S ABMA("POLH")=$G(ABME("PHNM"))
  S ABMA("POLN")=$G(ABMR(30,70))
  ;
- D PROV                ; Get Attending provider
- S ABMA("CREDIT")=$$TCR^ABMERUTL(ABMP("BDFN"))  ; Total Credit
+ D PROV    ;Get Attending provider
+ ;S ABMA("CREDIT")=$$TCR^ABMERUTL(ABMP("BDFN"))  ;Total Credit  ;abm*2.6*21 IHS/SD/SDR HEAT118656
+ D TCR  ;Total Credit abm*2.6*21 IHS/SD/SDR HEAT118656
  S ABMA("OTHIDENT")=$G(ABMPOS("OTHIDENT"))
  I ($G(ABMA("OTHIDENT"))=""),($L(ABMA("BLNM")>14)) S ABMA("OTHIDENT")=$E(ABMA("BLNM"),1,14)  ;abm*2.6*6 NOHEAT
  K ABMA("LINE"),ABMA("DR"),ABMA("DA")
@@ -169,7 +164,7 @@ BLD ; PEP
  ;
  ;I $D(ABMPOS) M ABMA=ABMPOS  ;abm*2.6*3 POS Rejections  ;abm*2.6*4
  I $D(ABMPOS) M ABMA(73)=ABMPOS(73)  ;abm*2.6*4
- ;start new code abm*2.6*3 re-export dates
+ ;start new abm*2.6*3 re-export dates
  I $G(ABMREX("BDFN")),$D(^ABMDBILL(DUZ(2),ABMREX("BDFN"),74)) D
  .S ABMMIEN=0
  .F  S ABMMIEN=$O(^ABMDBILL(DUZ(2),ABMREX("BDFN"),74,ABMMIEN)) Q:(+$G(ABMMIEN)=0)  D
@@ -194,10 +189,43 @@ BLD ; PEP
  ..S ABMA(74,ABMMIEN,"STAT")=ABMSTAT
  ..S ABMA(74,ABMMIEN,"USR")=$P($G(^ABMDTXST(DUZ(2),ABMP("XMIT"),3,ABMTXIEN,0)),U,4)
  ..S ABMA(74,ABMMIEN,"RSN")=$P($G(^ABMDTXST(DUZ(2),ABMP("XMIT"),3,ABMTXIEN,0)),U,5)
- ;end new code abm*2.6*3 re-export dates
+ ;end new abm*2.6*3 re-export dates
  ;
  I ABMP("ARVERS")'<1.1 M @ABMA=ABMA  ;abm*2.6*3
  Q
+ ;
+ ;start new abm*2.6*21  IHS/SD/SDR HEAT118656
+TCR ;EP
+ ;transactions from A/R
+ ; ABMA("TRNS",ADJ TYP,COUNTER)=ADJ AMT^DATE^ADJ CAT^ADJ TYPE^SAR
+ K ABMA("TRNS")
+ N ABMATREC,ABMTCNT,ABMTAMT
+ S I=0
+ F  S I=$O(^ABMDBILL(DUZ(2),ABMP("BDFN"),3,I)) Q:'I  D
+ .S ABMATREC=$G(^ABMDBILL(DUZ(2),ABMP("BDFN"),3,I,0))
+ .S ABMTCNT=+$G(ABMTCNT)+1
+ .I +$P(ABMATREC,U,10)'=0 S ABMA("TRNS","PAYMENT CREDIT",ABMTCNT)=+$P(ABMATREC,U,10),ABMRTYP="PAYMENT CREDIT",ABMTAMT=+$G(ABMTAMT)+$P(ABMATREC,U,10)
+ .I +$P(ABMATREC,U,3) S ABMA("TRNS","DEDUCTIBLE",ABMTCNT)=+$P(ABMATREC,U,3),ABMRTYP="DEDUCTIBLE",ABMTAMT=+$G(ABMTAMT)+$P(ABMATREC,U,3)
+ .I +$P(ABMATREC,U,4) S ABMA("TRNS","CO-PAY",ABMTCNT)=+$P(ABMATREC,U,4),ABMRTYP="CO-PAY",ABMTAMT=+$G(ABMTAMT)+$P(ABMATREC,U,4)
+ .I +$P(ABMATREC,U,6) S ABMA("TRNS","WRITE OFF",ABMTCNT)=+$P(ABMATREC,U,6),ABMRTYP="WRITE OFF",ABMTAMT=+$G(ABMTAMT)+$P(ABMATREC,U,6)
+ .I +$P(ABMATREC,U,7) S ABMA("TRNS","NON PAYMENT",ABMTCNT)=+$P(ABMATREC,U,7),ABMRTYP="NON PAYMENT",ABMTAMT=+$G(ABMTAMT)+$P(ABMATREC,U,7)
+ .I +$P(ABMATREC,U,9) S ABMA("TRNS","PENALTY",ABMTCNT)=+$P(ABMATREC,U,9),ABMRTYP="PENALTY",ABMTAMT=+$G(ABMTAMT)+$P(ABMATREC,U,9)
+ .I +$P(ABMATREC,U,12) S ABMA("TRNS","GROUPER ALLOWANCE",ABMTCNT)=+$P(ABMATREC,U,12),ABMRTYP="GROUPER ALLOWANCE",ABMTAMT=+$G(ABMTAMT)+$P(ABMATREC,U,12)
+ .I +$P(ABMATREC,U,13) S ABMA("TRNS","REFUND",ABMTCNT)=+$P(ABMATREC,U,13),ABMTYP="REFUND",ABMTAMT=+$G(ABMTAMT)+$P(ABMATREC,U,13)
+ .S $P(ABMA("TRNS",ABMRTYP,ABMTCNT),U,2)=$P(ABMATREC,U)
+ .I +$P(ABMATREC,U,14)'=0 D
+ ..S ABMTCNT=+$G(ABMTCNT)+1
+ ..S ABMA("TRNS","PAYMENT CREDIT",ABMTCNT)=+$P(ABMATREC,U,14)
+ ..S ABMRTYP="PAYMENT CREDIT"
+ ..S ABMTAMT=+$G(ABMTAMT)+$P(ABMATREC,U,14)
+ ..S $P(ABMA("TRNS",ABMRTYP,ABMTCNT),U,2)=$P(ABMATREC,U)
+ .Q:(ABMRTYP="PAYMENT CREDIT")  ;below this is for adjs only
+ .S $P(ABMA("TRNS",ABMRTYP,ABMTCNT),U,3)=$P(ABMATREC,U,15)
+ .S $P(ABMA("TRNS",ABMRTYP,ABMTCNT),U,4)=$P(ABMATREC,U,16)
+ .S $P(ABMA("TRNS",ABMRTYP,ABMTCNT),U,5)=$P(ABMATREC,U,17)
+ S ABMA("CREDIT")=+$G(ABMTAMT)
+ Q
+ ;end new abm*2.6*21 IHS/SD/SDR HEAT118656
  ;
 PASS ;
  ;PASS TO A/R
@@ -207,7 +235,7 @@ PASS ;
  S $P(^ABMDBILL(DUZ(2),DA,2),U,6)=$G(^TMP($J,"ABMPASS","ARLOC"))
  Q
  ;
- ; *********************************************************************
+ ; ***************************
 BLNM ;EP - get full bill name
  I $P($G(^ABMDPARM(ABMA("VSLC"),1,2)),"^",4)]"" S ABMA("BLNM")=ABMA("BLNM")_"-"_$P(^(2),"^",4)
  I $P($G(^ABMDPARM(ABMA("VSLC"),1,3)),"^",3)=1 D
@@ -215,7 +243,7 @@ BLNM ;EP - get full bill name
  .S:ABM("HRN")]"" ABMA("BLNM")=ABMA("BLNM")_"-"_ABM("HRN")
  Q
  ;
- ; *********************************************************************
+ ; ***************************
 CONV ;
  ;CONVERT ABMRV ARRAY TO ABMA ARRAY
  N L
@@ -245,7 +273,7 @@ CONV ;
  ...I I=25 S ABMA(K,"ITNM")=$P($G(^AUTTREVN(L,0)),U,2)
  ...I J]"",I'=23,I'=33 D
  ....N ABMJIEN
- ....S ABMJIEN=$O(^ICPT("B",J,""))     ; GET NUMERICAL ien
+ ....S ABMJIEN=$O(^ICPT("B",J,""))  ;GET NUMERICAL ien
  ....I ABMJIEN S ABMA(K,"ITNM")=$P($$CPT^ABMCVAPI(ABMJIEN,$P(ABMRV(L,J,M),U,10),ABMP("VDT")),U,3) Q  ;CSV-c
  ....S ABMA(K,"ITNM")=$P($$CPT^ABMCVAPI(J,$P(ABMRV(L,J,M),U,10),ABMP("VDT")),U,3)  ;CSV-c
  ....S ABMA(K,"ITCODE")=J
@@ -260,7 +288,7 @@ CONV ;
  ....K ABMA(K)
  Q
  ;
- ; *********************************************************************
+ ; ****************************
 CONV2 ;
  ;CONVERT INSURER ARRAY
  F I=1:1:3 D
@@ -273,7 +301,7 @@ CONV2 ;
  S ABMA("TERT")=$P($G(ABMP("INS",3)),"^",1)
  Q
  ;
- ; *********************************************************************
+ ; *************************
 PROV ;
  ;GET ATTENDING PROVIDER
  S ABMA("PROV")=""
@@ -284,7 +312,7 @@ PROV ;
  S ABMA("PROV")=J
  Q
  ;
- ; *********************************************************************
+ ; **********************
 TXT ;FIELDS
  ;;.01;;BLNM
  ;;.03;;VSLC
@@ -301,9 +329,9 @@ TXT ;FIELDS
  ;;END
  ;abm*2.6*8 added .29 field above
  ;
- ; *********************************************************************
+ ; ********************************
 EXT ;EP 
- ;  EXTERNAL CALL (NEEDS DA DEFINED)
+ ;EXTERNAL CALL (NEEDS DA DEFINED)
  S DIC="^ABMDBILL(DUZ(2),"
  S X="A"
  D START

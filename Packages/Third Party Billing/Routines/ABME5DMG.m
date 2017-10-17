@@ -1,5 +1,5 @@
 ABME5DMG ; IHS/ASDST/DMJ - 837 DMG Segment 
- ;;2.6;IHS Third Party Billing System;**6**;NOV 12, 2009
+ ;;2.6;IHS Third Party Billing System;**6**;NOV 12, 2009;Build 379
  ;Demographic Information
 EP(X,Y) ;EP
  ;x=file

@@ -1,5 +1,5 @@
  ;BEDD.EDSYSTEM.1
- ;(C)InterSystems, generated for class BEDD.EDSYSTEM.  Do NOT edit. 04/14/2017 08:47:49AM
+ ;(C)InterSystems, generated for class BEDD.EDSYSTEM.  Do NOT edit. 06/12/2017 07:15:25PM
  ;;614D7672;BEDD.EDSYSTEM
  ;
 SQLUPPER(v,l) { quit $zu(28,v,7,$g(l,32767)) }

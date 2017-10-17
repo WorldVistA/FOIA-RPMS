@@ -1,5 +1,5 @@
-LRLABELF ;SLC/CJS/DALISC/DRH - PRINT COLLECTION LIST (CONT.) ; 3/28/89  19:39
- ;;5.2;LR;**1003,1018,1031**;Nov 01, 1997
+LRLABELF ;SLC/CJS/DALISC/DRH - PRINT COLLECTION LIST (CONT.) ; 15-Jun-2016 14:02 ; MKK
+ ;;5.2;LR;**1003,1018,1031,1039**;Nov 01, 1997;Build 38
  ;
  ;;VA LR Patch(s): 121,161
  ;
@@ -42,7 +42,8 @@ PHDR W:$G(CHDR) !?20,"< CONTINUATION >"
  S LRNEW=PNM
  W !,PNM I $L($G(LRRB))>1 W ?32,LRRB
  ; W ?42,SSN,?57,"Order #: ",LRCE
- W ?42,HRCN,?57,"Order #: ",LRCE                 ; IHS/MSC/MKK - LR*5.2*1031
+ ; W ?42,HRCN,?57,"Order #: ",LRCE               ; IHS/MSC/MKK - LR*5.2*1031
+ W ?42,HRCN,?53,"Order #: ",LRCE                 ; IHS/MSC/MKK - LR*5.2*1039
  W:$L($G(^LR(+LRNODE0,.091))) !?4,"Pat Info: ",^(.091)
  S LRPCT=$$FMTE^XLFDT(LRCT,1) S:$P(LRPCT,"@",2) LRPCT=$P(LRPCT,"@",2)_"  "_$P(LRPCT,"@")
  W !?5,LRPCT,?25,"[ "_LRTYPE_" ]"

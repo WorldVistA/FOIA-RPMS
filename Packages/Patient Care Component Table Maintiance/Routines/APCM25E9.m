@@ -1,5 +1,5 @@
 APCM25E9 ;IHS/CMI/LAB - IHS MU;  ; 29 Jul 2013  4:09 PM
- ;;1.0;MU PERFORMANCE REPORTS;**7,8**;MAR 26, 2012;Build 22
+ ;;1.0;MU PERFORMANCE REPORTS;**7,8,9**;MAR 26, 2012;Build 25
  ;;;;;;Build 3
 CPOE ;EP - CALCULATE EPRESCRIBING
  ;for each provider or for the facility count all prescriptions that meet criteria and if it is not written it meets numerator
@@ -125,7 +125,12 @@ B .;measure b - did they access in ehr report period
  .I $P($G(APCMATTE("S2.020.EP.1",APCMP)),U,1)="Yes"!($P($G(APCMATTE("S2.026.EP",APCMP)),U,1)="Yes") S F=$P(^APCM25OB($O(^APCM25OB("B","S2.020.EP.1",0)),0),U,11) D
  ..D S^APCM25E1(APCMRPT,$O(^APCM25OB("B","S2.020.EP.1",0)),"Yes",APCMP,APCMRPTT,APCMTIME,F,1)
  .I '$D(APCMHVTP(APCMP)) Q
- .S V="" I $T(PHR^BPHRMUPM)]"" D PHR^BPHRMUPM(DFN,APCMBDAT,DT,.V)
+ .S APCMNEDV=DT  ;ALL YEARS
+ .;I $G(APCMEDUD),APCMEDUD>DT S APCMNEDV=DT
+ .;I $G(APCMEDUD),APCMEDUD'>DT S APCMNEDV=APCMEDUD
+ .I $G(APCMEDUD) S APCMNEDV=APCMEDUD
+ .I APCMNEDV>DT S APCMNEDV=DT
+ .S V="" I $T(PHR^BPHRMUPM)]"" D PHR^BPHRMUPM(DFN,APCMBDAT,APCMNEDV,.V)
  .;I DUZ=2881 W !,"DFN:  ",DFN,"V: ",V
  .S APCMVALU="# visits: "_$P(APCMEP,U,1)_" # elec access: "_+$P(APCMEP,U,2)_" |||"_$P(APCMEP,U,3)_" "_$P(APCMEP,U,4)_" accessed PHR: "_$$DATE^APCM1UTL($P(V,U,4))_"|||"_$S($P(APCMEP,U,2):1,1:0)_"|||"_$P(V,U,3)
  .I $P(V,U,1)="-1" S APCMVDTE=1_U_"("_$P($P(V,U,10),":")_")"
@@ -181,7 +186,12 @@ HB .;measure b - did they access in ehr report period
  .I $G(APCMATTE("S2.025.H.1",APCMP))="Yes" S F=$P(^APCM25OB($O(^APCM25OB("B","S2.025.H.1",0)),0),U,11) D
  ..D S^APCM25E1(APCMRPT,$O(^APCM25OB("B","S2.025.H.1",0)),"Yes",APCMP,APCMRPTT,APCMTIME,F,1)
  .Q:'$D(APCMHER)
- .S V="" I $T(PHR^BPHRMUPM)]"" D PHR^BPHRMUPM(DFN,APCMBDAT,DT,.V)
+ .;S V="" I $T(PHR^BPHRMUPM)]"" D PHR^BPHRMUPM(DFN,APCMBDAT,DT,.V)  ;IHS/CMI/LAB - PATCH 9
+ .S APCMNEDV=DT  ;ALL YEARS
+ .;I $G(APCMEDUD),APCMEDUD>DT S APCMNEDV=DT
+ .;I $G(APCMEDUD),APCMEDUD'>DT S APCMNEDV=APCMEDUD
+ .I $G(APCMEDUD) S APCMNEDV=APCMEDUD
+ .S V="" I $T(PHR^BPHRMUPM)]"" D PHR^BPHRMUPM(DFN,APCMBDAT,APCMNEDV,.V)
  .;I DUZ=2881 W !,"DFN:  ",DFN,!,V
  .S APCMVALU="# visits: "_$P(APCMEP,U,1)_" # elec access: "_+$P(APCMEP,U,2)_" |||"_$P(APCMEP,U,3)_" "_$P(APCMEP,U,4)_" accessed PHR: "_$$DATE^APCM1UTL($P(V,U,4))_"|||"_$S($P(APCMEP,U,2):1,1:0)_"|||"_$P(V,U,3)
  .I $P(V,U,1)="-1" S APCMVDTE=1_U_"("_$P($P(V,U,10),":")_")"

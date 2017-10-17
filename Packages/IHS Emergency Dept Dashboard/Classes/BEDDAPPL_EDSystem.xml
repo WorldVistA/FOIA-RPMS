@@ -1,0 +1,783 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:34">
+<Class name="BEDDAPPL.EDSystem">
+<Description>
+BEDDAPPL.EDSystem</Description>
+<CompileAfter>%ZEN.Generator,BEDDAPPL.EDMenu</CompileAfter>
+<Super>%ZEN.Component.page</Super>
+<TimeChanged>64169,31084.762056</TimeChanged>
+<TimeCreated>61957,70413.300807</TimeCreated>
+<DependsOn>%ZEN.Generator,BEDDAPPL.EDMenu</DependsOn>
+
+<Parameter name="APPLICATION">
+<Description>
+Class name of application this page belongs to.</Description>
+<Default>BEDDAPPL.EDManager</Default>
+</Parameter>
+
+<Parameter name="PAGENAME">
+<Description>
+Displayed name of this page.</Description>
+<Default>EDSystem</Default>
+</Parameter>
+
+<Parameter name="DOMAIN">
+<Description>
+Domain used for localization.</Description>
+</Parameter>
+
+<XData name="Style">
+<Description>
+This Style block contains page-specific CSS style definitions.</Description>
+<Data><![CDATA[
+<style type="text/css"> 
+
+.textboxdisabled {
+	background: #C0C0C0;
+}
+
+</style>
+]]></Data>
+</XData>
+
+<XData name="Contents">
+<Description>
+This XML block defines the contents of this page.</Description>
+<XMLNamespace>http://www.intersystems.com/zen</XMLNamespace>
+<Data><![CDATA[
+<page title="Emergency Dashboard Setup"
+
+	xmlns:beddappl="http://www.intersystems.com/zen" 
+	xmlns="http://www.intersystems.com/zen"  >
+	
+	<beddappl:EDMenu width="100%"/>
+
+        
+<hgroup width="100%">
+    <vgroup width="2%"></vgroup>
+  
+    <vgroup width="94%">
+    <spacer width="2" />
+ 	
+    <tablePane
+    caption="ED Dashboard Setup"
+    width="1000px"
+    id="sysTable" 
+    tableName="BEDD.EDSYSTEM"
+    onselectrow="zenPage.rowSelected(zenThis);"
+    maxRows="100" 
+    pageSize="100" 
+    showRowNumbers="true" 
+    showZebra="true" 
+    useSnapshot="true"
+    extraColumnWidth="5%"
+    valueColumn="ID">    
+   <column colName="ID" width="5"/>
+<column header="SMTPSERVER" width="20" colName="SMTPSERVER" />
+<column header="SiteName" width="40" colName="SiteName"/>
+</tablePane>
+</vgroup>
+</hgroup>
+<spacer height="10"/>
+<spacer width="10"/>
+<hgroup>
+<dataController id="sysData" modelClass="BEDDAPPL.EDSystemModel" modelId="" />
+<spacer width="5"/>
+
+<fieldSet id="sysFormGroup" hidden="false" enclosingStyle="border: 2px solid black;" legend="Dashboard System Setup">
+	<form id="sysForm" controllerId="sysData" layout="vertical" cellStyle="padding: 2px; padding-left: 5px; padding-right: 5px;">
+
+   		<fieldSet id="SystemPreferences" enclosingStyle="border: 2px solid grey;" hidden="false" legend="System Preferences">
+			<spacer height="10" />
+   	
+			<hgroup>
+				<spacer width="5"/>
+				<vgroup>
+					<hgroup>
+						<text id="Site" name="Site" dataBinding="Site" hidden="true" disabled="true" />
+						<text label="ID:" id="ID" name="ID" dataBinding="%id" disabled="true" size="5"	readOnly="true"/>
+						<spacer width="5"/>
+						<text label="SMTPSERVER:" id="SMTPSERVER" name="SMTPSERVER" disabled="true" dataBinding="SMTPSERVER" size="30" />
+						<spacer width="5"/>
+						<text label="Phone:" id="Phone" name="Phone" disabled="true" dataBinding="Phone" size="15"/>
+						<spacer width="5"/>
+						<text label="Screen Timeout (in seconds)" disabled="true" id="TimeOut" name="TimeOut" dataBinding="TimeOut" size="15" onchange="zenPage.TimeOutChk();" />
+
+					</hgroup>
+				</vgroup>
+			</hgroup>
+
+			<hgroup >
+				<spacer width="5"/>
+				<vgroup>
+					<hgroup>
+ 						<spacer width="5"/>
+ 						<pane paneName="Dashboard Operations"/>
+						<checkbox label="Operate Dashboard Stand Alone:" id="StandAlone" name="StandAlone" disabled="true" dataBinding="StandAlone"/>
+ 						<spacer width="5"/>
+						<checkbox label="Use more than 1 Clinic:" id="TwoClinics" name="TwoClinics" disabled="true" dataBinding="TwoClinics"/>
+ 						<spacer width="5"/>
+						<checkbox label="Show Daily Summary on Dashboard:" id="ShoDlySum" disabled="true" name="ShoDlySum" dataBinding="ShoDlySum"/>
+					</hgroup>
+				</vgroup>
+			</hgroup>
+
+			<hgroup>
+				<spacer width="5"/>
+				<vgroup>
+					<hgroup>
+ 						<spacer width="5"/>
+ 						<pane paneName="Check in functions"/>
+ 						<spacer width="5"/>
+ 						<checkbox label="Print Med-Rec Worksheet:" id="MedRec" disabled="true" name="MedRec" dataBinding="MedRec" />
+ 						<spacer width="5"/>
+ 						<checkbox label="Print Pt Routing Sheet" id="PtRtSheet" disabled="true" name="PtRtSheet" dataBinding="PtRtSheet"/>
+ 						<spacer width="5"/>
+ 						<checkbox label="Print Arm Band" id="PtArmBand" disabled="true" name="PtArmBand" dataBinding="PtArmBand"/>
+					</hgroup>
+				</vgroup>
+			</hgroup>
+
+			<hgroup>
+				<spacer width="5"/>
+				<vgroup>
+ 					<hgroup>
+ 						<pane paneName="Dashboard Table options"/>
+						<checkbox label="Show Used Rooms:" id="ShoUsedRm" disabled="true" name="ShoUsedRm" dataBinding="ShoUsedRm"/>
+						<spacer width="5"/>
+						<checkbox label="Show Provider:" id="ShoPrv" disabled="true" name="ShoPrv" dataBinding="ShoPrv"/>
+						<spacer width="5"/>
+						<checkbox label="Show Nurse:" id="ShoNrse" name="ShoNrse" disabled="true" dataBinding="ShoNrse"/>
+						<spacer width="5"/>
+						<checkbox label="Show Consult:" id="ShoCons" disabled="true" name="ShoCons" dataBinding="ShoCons"/>
+					</hgroup>
+				</vgroup>
+			</hgroup>
+
+			<hgroup>
+				<spacer width="5"/>
+				<vgroup>
+					<hgroup>
+ 						<pane paneName="Dashboard Table functions"/>
+						<checkbox label="Use AutoNote:" id="AutoNote" disabled="true" name="AutoNote" dataBinding="AutoNote"/>
+						<spacer width="5"/>
+						<checkbox label="Use Comm Board:" id="CommBoard" disabled="true" name="CommBoard" dataBinding="CommBoard"/>
+						<spacer width="5"/>
+						<checkbox label="Print Triage Report upon Save:" disabled="true" id="TriageRpt" name="TriageRpt" dataBinding="TriageRpt"/>
+						<spacer width="5"/>
+						<checkbox label="Switch EHR Patient on Edit: " disabled="true" id="SwitchEHRPat" name="SwitchEHRPat" dataBinding="SwitchEHRPat"/>
+						<spacer width="5"/>
+
+					</hgroup>
+
+				</vgroup>
+			</hgroup>
+
+			<hgroup >
+				<spacer width="5"/>
+				<vgroup>
+					<hgroup>
+ 						<spacer width="5"/>
+ 						<pane paneName="Pending Status Look Back"/>
+ 						<text label="Pending Status Look Back Days:" disabled="true" id="PendingStsLookBack" name="PendingStsLookBack" dataBinding="PendingStsLookBack" size="30" readOnly="false" onchange="zenPage.PendingDaysChk()" />
+ 						<spacer width="5"/>
+					</hgroup>
+				</vgroup>
+			</hgroup>
+		</fieldSet>
+
+		<vgroup>
+			<spacer height="10" />
+		</vgroup>
+		
+		<fieldSet id="UserPreferences" enclosingStyle="border: 2px solid grey;" hidden="false" legend="User Specific Preferences">
+			<spacer height="10" />
+			<vgroup>
+				<hgroup>
+					<text label="User ID:" id="DUZ" hidden="true" name="DUZ" size="8" readOnly="true" />
+
+					<dataCombo label="User Name:" id="UserName" name="UserName" size="24"
+					 	disabled="true"	
+						dropdownWidth="300"
+						dropdownHeight="100"
+						editable="true"
+						searchKeyLen="5"
+						required="false"
+						comboType="button"
+						buttonCaption="Lookup User"
+						buttonTitle="Search for a record by Patient Name"
+						sql="SELECT TOP 100 NEW_PERSON.IEN,NEW_PERSON.NAME,KEYS_200C200_051.KEY_01->NAME,KEYS_200C200_051.NEW_PERSON->IEN FROM BMW.NEW_PERSON NEW_PERSON,BMW.KEYS_200C200_051 KEYS_200C200_051 WHERE  NEW_PERSON.NAME %STARTSWITH UPPER(?) AND KEYS_200C200_051.KEY_01->NAME = 'BEDDZDASH' AND NEW_PERSON.IEN = KEYS_200C200_051.NEW_PERSON->IEN ORDER BY NEW_PERSON.NAME"						
+						unrestricted="true"
+						displayColumns="2"
+						choiceColumn="2"
+						valueColumn="2"
+						auxColumn="1"
+						title="This list will contain users who have been assigned the BEDDZDASH security key"
+						onchange="zenPage.selectUser(zenThis);"
+						/>
+				</hgroup>
+			</vgroup>
+			
+			<spacer height="10" />
+			<vgroup>
+				<fieldSet id="PatDispGrp" hidden="false" legend="Patient Name Format Display">
+					<hgroup>
+						<radioButton name="Patient Name" id="FLFF" disabled="true" caption="Last Name, First Name" optionValue="FLFF" />
+						<radioButton name="Patient Name" id="FLIF" disabled="true" caption="Last Name, First Initial" optionValue="FLIF"/>
+						<radioButton name="Patient Name" id="ILIF" disabled="true" caption="Last Initial. First Initial." optionValue="ILIF"/>
+						<radioButton name="Patient Name" id="L3F2" disabled="true" caption="Last Three, First Two." optionValue="L3F2"/>
+					</hgroup>
+				</fieldSet>
+			</vgroup>
+	
+			<vgroup>
+				<spacer height="10" />
+				<hgroup>
+					<spacer width="15"/>
+	 				<checkbox label="Hide DOB:" id="UserPrefDOB" name="UserPrefDOB"  disabled="true" />
+					<spacer width="25"/>
+					<checkbox label="Hide Complaint:" id="UserPrefComp" name="UserPrefComp" disabled="true"/>
+					<spacer width="25"/>
+	 				<checkbox label="Hide Gender:" id="UserPrefSex" name="UserPrefSex" disabled="true" />
+				</hgroup>
+			</vgroup>
+		</fieldSet>
+		
+		<fieldSet id="Whiteboard Display" enclosingStyle="border: 2px solid grey;" hidden="false" legend="Whiteboard Display Settings"
+				title="Click on the Whiteboard Display entry above to edit. Only users holding the BEDDZWHITEBOARD security key can edit this information">
+			<spacer height="10" />
+			<vgroup>
+				<hgroup>
+					<text label="Whiteboard Access:" id="WACCESS" hidden="false" name="WACCESS" value="Whiteboard" controlStyle="background: grey" size="12" readOnly="true" 
+							title="Click on the Whiteboard Display entry above to edit. Only users holding the BEDDZWHITEBOARD security key can edit this information"/>
+					<spacer width="25"/>
+					<password label="Whiteboard Verify:" id="WVERIFY" hidden="false" name="WVERIFY" dataBinding="Verify" size="12" disabled="true" readOnly="false"
+							title="Click on the Whiteboard Display entry above to edit. Only users holding the BEDDZWHITEBOARD security key can edit this information"/>
+				</hgroup>
+			</vgroup>
+			<spacer height="10" />
+			<vgroup>
+				<hgroup>
+					<checkbox label="Whiteboard Access: " id="WhiteboardAccess" name="WhiteboardAccess" dataBinding="WhiteboardAccess" disabled="true"
+							title="Click on the Whiteboard Display entry above to edit. Only users holding the BEDDZWHITEBOARD security key can edit this information"/>
+	 				<checkbox label="Show Age:" id="WhiteboardShowAge" name="WhiteboardShowAge" dataBinding="WhiteboardShowAge" disabled="true"
+							title="Click on the Whiteboard Display entry above to edit. Only users holding the BEDDZWHITEBOARD security key can edit this information"/>
+	 				<spacer width="25"/>
+	 				<checkbox label="Show Provider:" id="WhiteboardShowProvider" name="WhiteboardShowProvider" dataBinding="WhiteboardShowProvider" disabled="true"
+	 						title="Click on the Whiteboard Display entry above to edit. Only users holding the BEDDZWHITEBOARD security key can edit this information"/>
+	 				<spacer width="25"/>
+	 				<checkbox label="Show Nurse:" id="WhiteboardShowNurse" name="WhiteboardShowNurse" dataBinding="WhiteboardShowNurse" disabled="true"
+	 						title="Click on the Whiteboard Display entry above to edit. Only users holding the BEDDZWHITEBOARD security key can edit this information"/>
+	 				<spacer width="25"/>
+	 				<checkbox label="Show Orders:" id="WhiteboardShowOrders" name="WhiteboardShowOrders" dataBinding="WhiteboardShowOrders" disabled="true"
+	 						title="Click on the Whiteboard Display entry above to edit. Only users holding the BEDDZWHITEBOARD security key can edit this information"/>
+	 				<spacer width="25"/>
+	 				<checkbox label="Show Name:" id="WhiteboardShowName" name="WhiteboardShowName" dataBinding="WhiteboardShowName" disabled="true"
+	 						title="Click on the Whiteboard Display entry above to edit. Only users holding the BEDDZWHITEBOARD security key can edit this information"/>
+
+				</hgroup>
+			</vgroup>
+			<vgroup>
+				<hgroup>
+	 				<checkbox label="Show Info:" id="WhiteboardShowNotes" name="WhiteboardShowNotes" dataBinding="WhiteboardShowNotes" disabled="true"
+	 						title="Click on the Whiteboard Display entry above to edit. Only users holding the BEDDZWHITEBOARD security key can edit this information"/>
+	 				<spacer width="25"/>
+	 				<checkbox label="Show Complaint:" id="WhiteboardShowComplaint" name="WhiteboardShowComplaint" dataBinding="WhiteboardShowComplaint" disabled="true"
+	 						title="Click on the Whiteboard Display entry above to edit. Only users holding the BEDDZWHITEBOARD security key can edit this information"/>
+	 				<spacer width="25"/>
+	 				<checkbox label="Show Chart Number:" id="WhiteboardShowChartNumber" name="WhiteboardShowChartNumber" dataBinding="WhiteboardShowChartNumber" disabled="true"
+	 						title="Click on the Whiteboard Display entry above to edit. Only users holding the BEDDZWHITEBOARD security key can edit this information"/>
+	 				<spacer width="25"/>
+	 				<checkbox label="Show Room:" id="WhiteboardShowRoom" name="WhiteboardShowRoom" dataBinding="WhiteboardShowRoom" disabled="true"
+	 						title="Click on the Whiteboard Display entry above to edit. Only users holding the BEDDZWHITEBOARD security key can edit this information"/>
+					<spacer width="25"/>
+					<checkbox label="Show Acuity: " id="WhiteboardShowAcuity" name="WhiteboardShowAcuity" dataBinding="WhiteboardShowAcuity" disabled="true"
+							title="Click on the Whiteboard Display entry above to edit. Only users holding the BEDDZWHITEBOARD security key can edit this information"/>
+				</hgroup>
+			</vgroup>
+		</fieldSet>
+			
+		<hgroup>
+			<spacer height="10"/>
+			<vgroup>
+				<hgroup>
+					<button caption="Save" id="Save" disabled="true" onclick="zenPage.saveItem();" />
+					<spacer width="10"/>
+					<button caption="Cancel" id="Cancel" onclick="zenPage.cancel();" />
+					<spacer width="10"/>
+				</hgroup>
+			</vgroup>
+		</hgroup>
+	</form>
+</fieldSet>
+</hgroup>
+</page>
+]]></Data>
+</XData>
+
+<Property name="dlID">
+<Type>%ZEN.Datatype.string</Type>
+<Parameter name="ZENURL" value="dlID"/>
+</Property>
+
+<Method name="showsysForm">
+<FormalSpec>id</FormalSpec>
+<Language>javascript</Language>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[
+	var controller = zenPage.getComponentById('sysData');
+  	controller.setProperty('modelId',id);
+  	var sysFormGroup=zenPage.getComponentById("sysFormGroup");
+  	sysFormGroup.setProperty('hidden',false);
+ 	
+ 	var wAccess=zenPage.getWhiteboardAccess();
+ 	
+ 	var saveButton=zenPage.getComponentById('Save');
+ 	var UserName=zenPage.getComponentById('UserName');
+  	var FLFF=zenPage.getComponentById('FLFF');
+  	var FLIF=zenPage.getComponentById('FLIF');
+ 	var ILIF=zenPage.getComponentById('ILIF');
+  	var L3F2=zenPage.getComponentById('L3F2');
+  	var upDOB=zenPage.getComponentById('UserPrefDOB');
+  	var upComp=zenPage.getComponentById('UserPrefComp');
+  	var upSex=zenPage.getComponentById('UserPrefSex');
+	var upVerify=zenPage.getComponentById('WVERIFY');
+	var pTimeOut=zenPage.getComponentById('TimeOut');
+	var pID=zenPage.getComponentById('ID');
+	var SMTPServer=zenPage.getComponentById('SMTPSERVER');
+	var pPhone=zenPage.getComponentById('Phone');
+	var pStandAlone=zenPage.getComponentById('StandAlone');
+	var pTwoClinics=zenPage.getComponentById('TwoClinics');
+	var pShoDlySum=zenPage.getComponentById('ShoDlySum');
+	var pMedRec=zenPage.getComponentById('MedRec');
+	var pPtRtSheet=zenPage.getComponentById('PtRtSheet');
+	var pPtArmBand=zenPage.getComponentById('PtArmBand');
+  	var pShoUsedRm=zenPage.getComponentById('ShoUsedRm');
+  	var pShoNrse=zenPage.getComponentById('ShoNrse');
+  	var pShoPrv=zenPage.getComponentById('ShoPrv');
+  	var pShoCons=zenPage.getComponentById('ShoCons');
+  	var pAutoNote=zenPage.getComponentById('AutoNote');
+  	var pCommBoard=zenPage.getComponentById('CommBoard');
+  	var pTriageRpt=zenPage.getComponentById('TriageRpt');
+  	var pSwitchEHRPat=zenPage.getComponentById('SwitchEHRPat');
+	var pWhiteboardShowProv=zenPage.getComponentById('WhiteboardShowProvider');
+	var pWhiteboardShowNurse=zenPage.getComponentById('WhiteboardShowNurse');
+  	var pPendingStsLookBack=zenPage.getComponentById('PendingStsLookBack');
+  	var pWhiteboardShowOrders=zenPage.getComponentById('WhiteboardShowOrders');
+  	var pWhiteboardShowNotes=zenPage.getComponentById('WhiteboardShowNotes');
+  	var pWhiteboardShowAge=zenPage.getComponentById('WhiteboardShowAge');
+  	var pWhiteboardShowComplaint=zenPage.getComponentById('WhiteboardShowComplaint');
+  	var pWhiteboardShowChartNumber=zenPage.getComponentById('WhiteboardShowChartNumber');
+  	var pWhiteboardShowRoom=zenPage.getComponentById('WhiteboardShowRoom');
+  	var pWhiteboardShowName=zenPage.getComponentById('WhiteboardShowName');
+  	var pWhiteboardShowAcuity=zenPage.getComponentById('WhiteboardShowAcuity');
+  	var site=zenPage.getComponentById('Site');
+  	
+	if (site.value!="999999") {
+
+  		saveButton.setDisabled(false);
+  		UserName.setDisabled(false);
+  		FLFF.setDisabled(false);
+  		FLIF.setDisabled(false);
+  		ILIF.setDisabled(false);
+  		L3F2.setDisabled(false);
+  		upDOB.setDisabled(false);
+  		upComp.setDisabled(false);
+  		upSex.setDisabled(false);
+  		upVerify.setDisabled(true);
+  		pTimeOut.setDisabled(false);
+  		pID.setDisabled(false);
+  		SMTPServer.setDisabled(false);
+  		pPhone.setDisabled(false);
+  		pStandAlone.setDisabled(false);
+  		pTwoClinics.setDisabled(false);
+  		pShoDlySum.setDisabled(false);
+  		pMedRec.setDisabled(false);
+  		pPtRtSheet.setDisabled(false);
+  		pPtArmBand.setDisabled(false);
+  		pShoUsedRm.setDisabled(false);
+  		pShoPrv.setDisabled(false);
+  		pShoNrse.setDisabled(false);
+  		pShoCons.setDisabled(false);
+  		pAutoNote.setDisabled(false);
+  		pCommBoard.setDisabled(false);
+  		pTriageRpt.setDisabled(false);
+  		pSwitchEHRPat.setDisabled(false);
+  		pPendingStsLookBack.setDisabled(false);
+  		pWhiteboardShowProv.setDisabled(true);
+  		pWhiteboardShowNurse.setDisabled(true);
+ 		pWhiteboardShowOrders.setDisabled(true);
+  		pWhiteboardShowNotes.setDisabled(true);
+  		pWhiteboardShowAge.setDisabled(true);
+  		pWhiteboardShowComplaint.setDisabled(true);
+  		pWhiteboardShowChartNumber.setDisabled(true);
+  		pWhiteboardShowRoom.setDisabled(true);
+  		pWhiteboardShowName.setDisabled(true);
+  		pWhiteboardShowAcuity.setDisabled(true);
+
+	}
+
+	//Whiteboard update
+  	if (site.value=="999999") {
+  		UserName.setDisabled(true);
+  		FLFF.setDisabled(true);
+  		FLIF.setDisabled(true);
+  		ILIF.setDisabled(true);
+  		L3F2.setDisabled(true);
+  		upDOB.setDisabled(true);
+  		upComp.setDisabled(true);
+  		upSex.setDisabled(true);
+  		pTimeOut.setDisabled(true);
+  		pID.setDisabled(true);
+  		SMTPServer.setDisabled(true);
+  		pPhone.setDisabled(true);
+  		pStandAlone.setDisabled(true);
+  		pTwoClinics.setDisabled(true);
+  		pShoDlySum.setDisabled(true);
+  		pMedRec.setDisabled(true);
+  		pPtRtSheet.setDisabled(true);
+  		pPtArmBand.setDisabled(true);
+  		pShoUsedRm.setDisabled(true);
+  		pShoPrv.setDisabled(true);
+  		pShoNrse.setDisabled(true);
+  		pShoCons.setDisabled(true);
+   		pAutoNote.setDisabled(true);
+  		pCommBoard.setDisabled(true);
+  		pTriageRpt.setDisabled(true);
+  		pSwitchEHRPat.setDisabled(true);
+  	   	pPendingStsLookBack.setDisabled(true);
+		pWhiteboardShowProv.setDisabled(true);
+		pWhiteboardShowNurse.setDisabled(true);
+  		pWhiteboardShowOrders.setDisabled(true);
+  		pWhiteboardShowNotes.setDisabled(true);
+  		pWhiteboardShowAge.setDisabled(true);
+  		pWhiteboardShowComplaint.setDisabled(true);
+  		pWhiteboardShowChartNumber.setDisabled(true);
+  		pWhiteboardShowRoom.setDisabled(true);
+  		pWhiteboardShowName.setDisabled(true);
+  		pWhiteboardShowAcuity.setDisabled(true);
+		upVerify.setDisabled(true);
+		saveButton.setDisabled(true);
+  		
+	  	//Disable if no Whiteboard Key
+  		if (wAccess==1) {
+
+   			pPendingStsLookBack.setDisabled(false);
+			pWhiteboardShowProv.setDisabled(false);
+			pWhiteboardShowNurse.setDisabled(false);
+  			pWhiteboardShowOrders.setDisabled(false);
+  			pWhiteboardShowNotes.setDisabled(false);
+  			pWhiteboardShowAge.setDisabled(false);
+  			pWhiteboardShowComplaint.setDisabled(false);
+  			pWhiteboardShowChartNumber.setDisabled(false);
+  			pWhiteboardShowRoom.setDisabled(false);
+  			pWhiteboardShowName.setDisabled(false);
+  			pWhiteboardShowAcuity.setDisabled(false);
+			upVerify.setDisabled(false);
+			saveButton.setDisabled(false);
+  		}
+  	}
+  	
+	//Check for user update
+	this.CheckUser();
+]]></Implementation>
+</Method>
+
+<Method name="getWhiteboardAccess">
+<Description>
+Get Whiteboard Access</Description>
+<ReturnType>%Integer</ReturnType>
+<ZenMethod>1</ZenMethod>
+<Implementation><![CDATA[
+	If $G(%session.Data("DUZ"))
+		{Q $$WACCESS^BEDDPREF($G(%session.Data("DUZ")))}
+
+  	else
+     {Q 0}
+]]></Implementation>
+</Method>
+
+<Method name="rowSelected">
+<Description>
+user selected a row in the table</Description>
+<Language>javascript</Language>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[
+  var table=zenPage.getComponentById('sysTable');
+   //update details pan using ID value from table
+  var id = table.getProperty('value');
+  this.showsysForm(id);
+]]></Implementation>
+</Method>
+
+<Method name="newEntry">
+<Description>
+Create a new entry</Description>
+<Language>javascript</Language>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[
+	var controller = zenPage.getComponentById('sysData');
+	controller.createNewObject();
+]]></Implementation>
+</Method>
+
+<Method name="deleteEntry">
+<Description>
+Delete current item from database</Description>
+<Language>javascript</Language>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[
+	if (confirm(this.deleteMsg)) {
+		var controller = zenPage.getComponentById('sysData');
+		controller.deleteId(controller.getModelId());
+	
+		var table = zenPage.getComponentById('systable');
+		table.executeQuery(true);
+	}
+]]></Implementation>
+</Method>
+
+<Method name="saveItem">
+<Description>
+save modeldata to database</Description>
+<Language>javascript</Language>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[
+
+	// validate and save form
+	var form = zenPage.getComponentById('sysForm');
+	form.save();
+	  
+	//Save user preferences
+	this.SaveUserPref(form);
+	
+	//Save public information
+	this.SaveWhiteboardPref(form);
+
+	//refresh data in contact table  
+	var table=zenPage.getComponentById('sysTable');
+	table.executeQuery();
+	alert('Save Complete.');
+	
+	// go to server; get user data
+	var duz = document.getElementById('DUZ');
+	this.LoadUser(form, DUZ.value);
+	
+	return true;
+]]></Implementation>
+</Method>
+
+<Method name="SaveWhiteboardPref">
+<FormalSpec>form:%ZEN.Component.form</FormalSpec>
+<ZenMethod>1</ZenMethod>
+<Implementation><![CDATA[
+	Set wVerify = %page.%GetValueById("WVERIFY")
+	Set Status=$$WBPREF^BEDDPREF(wVerify)
+]]></Implementation>
+</Method>
+
+<Method name="SaveUserPref">
+<FormalSpec>form:%ZEN.Component.form</FormalSpec>
+<ZenMethod>1</ZenMethod>
+<Implementation><![CDATA[
+	Set HideDOB = %page.%GetValueById("UserPrefDOB")
+	Set HideCOMP = %page.%GetValueById("UserPrefComp")
+	Set HideSex = %page.%GetValueById("UserPrefSex")
+	Set NameFRMT = %page.%GetValueById("FLFF")
+	Set Site = %page.%GetValueById("Site")
+	Set DUZ = %page.%GetValueById("DUZ")
+	Set Status=$$SUPREF^BEDDPREF(Site,DUZ,HideDOB,HideCOMP,HideSex,NameFRMT)
+]]></Implementation>
+</Method>
+
+<Method name="cancel">
+<Language>javascript</Language>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[
+	var form = zenPage.getComponentById('sysForm');
+	form.reset();
+
+	var table = zenPage.getComponentById('sysTable');
+	table.selectRow(-1);
+]]></Implementation>
+</Method>
+
+<Method name="TimeOutChk">
+<Language>javascript</Language>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[
+	//Check TimeOut Value
+	var timeout=zenPage.getComponentById('TimeOut');
+	var apptimeout=zenPage.getAppTimeout();
+	var maxapptimeout=apptimeout-15
+	
+	if (timeout.value>maxapptimeout)
+	{
+		alert("Timeout cannot exceed "+maxapptimeout);
+		zenPage.getComponentById('TimeOut').setValue(maxapptimeout);
+		zenPage.getComponentById('TimeOut').onchangeHandler();
+	}
+	if (timeout.value!="")
+	{
+	
+		if (isNaN(timeout.value)) {
+			alert("Timeout Must be Numeric");
+			zenPage.getComponentById('TimeOut').setValue("60");
+			zenPage.getComponentById('TimeOut').onchangeHandler();
+		}			
+
+		if (timeout.value<60)
+		{
+			alert("Timeout cannot be less than 60 seconds");
+			zenPage.getComponentById('TimeOut').setValue("60");
+			zenPage.getComponentById('TimeOut').onchangeHandler();
+
+		}
+	}
+]]></Implementation>
+</Method>
+
+<Method name="PendingDaysChk">
+<Language>javascript</Language>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[
+	//Check Pending Days Value
+	var PendingDays=zenPage.getComponentById('PendingStsLookBack');
+	
+	if (PendingDays.value!="")
+	{
+		if (isNaN(PendingDays.value)) {
+			alert("Pending Status Look Back Days Must be Numeric");
+			zenPage.getComponentById('PendingStsLookBack').setValue("10");
+			zenPage.getComponentById('PendingStsLookBack').onchangeHandler();
+		}			
+	
+		if (PendingDays.value<5)
+		{
+			alert("Pending Status Look Back Days Cannot Be Less Than 5 Days");
+			zenPage.getComponentById('PendingStsLookBack').setValue("10");
+			zenPage.getComponentById('PendingStsLookBack').onchangeHandler();
+
+		}
+		
+		if (PendingDays.value>30)
+		{
+			alert("Pending Status Look Back Days Cannot Be Greater Than 30 Days");
+			zenPage.getComponentById('PendingStsLookBack').setValue("10");
+			zenPage.getComponentById('PendingStsLookBack').onchangeHandler();
+		}
+
+	}
+]]></Implementation>
+</Method>
+
+<Method name="CheckUser">
+<Description>
+User has selected a new Site from the list</Description>
+<Language>javascript</Language>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[
+	var ctrl = zenPage.getComponentById('DUZ');
+	var id = ctrl.getValue();
+	
+	// if id is populated, load it
+	if (id != "") {
+
+		var form = zenPage.getComponentById('sysForm');
+		
+		// go to server; get user data
+		this.LoadUser(form, id);
+	}
+
+	if (id == "") {
+			var form = zenPage.getComponentById('sysForm');
+		
+			//Clear User Data
+			this.ClearUser(form);
+	}
+]]></Implementation>
+</Method>
+
+<Method name="selectUser">
+<Description>
+User has selected a new User from the list.</Description>
+<FormalSpec>cb</FormalSpec>
+<Language>javascript</Language>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[
+	var ctrl = zenPage.getComponentById('DUZ');
+	var userid = ctrl.getValue();
+
+	// get id of user
+	// this is in the "auxiliary" value of the dataCombo
+	var id = cb.getAuxValue();
+
+	// get box value
+	var dbvalue = cb.getValue();
+	
+	// if user has selected a new id, load it
+	if (id != "") {
+		if (userid != id) {
+			var form = zenPage.getComponentById('sysForm');
+		
+			// go to server; get user data
+			this.LoadUser(form, id);
+		}
+	}
+
+	if (dbvalue == "") {
+			var form = zenPage.getComponentById('sysForm');
+		
+			//Clear User Data
+			this.ClearUser(form);
+	}
+]]></Implementation>
+</Method>
+
+<Method name="LoadUser">
+<Description>
+Load given user data into the form.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pForm:%ZEN.Component.form,pID:%ZEN.Datatype.string</FormalSpec>
+<ZenMethod>1</ZenMethod>
+<Implementation><![CDATA[
+    Set site=%page.%GetValueById("Site")
+    Set duz=pID
+    If pID="" {
+    	Set duz=%page.%GetValueById("DUZ")
+    }
+    Set Result=$$LUPREF^BEDDPREF(site,duz)
+   	Do %page.%SetValueById("UserPrefDOB",$P(Result,"^"))
+    Do %page.%SetValueById("UserPrefComp",$P(Result,"^",2))
+    Do %page.%SetValueById("UserPrefSex",$P(Result,"^",3))
+    Do %page.%SetValueByName("Patient Name",$P(Result,"^",4))
+    Do %page.%SetValueById("DUZ",duz)
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="ClearUser">
+<Description>
+Load given user data into the form.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pForm:%ZEN.Component.form</FormalSpec>
+<ZenMethod>1</ZenMethod>
+<Implementation><![CDATA[
+   	Do %page.%SetValueById("UserPrefDOB","")
+    Do %page.%SetValueById("UserPrefComp","")
+    Do %page.%SetValueById("UserPrefSex","")
+    Do %page.%SetValueByName("Patient Name","")
+    Do %page.%SetValueById("UserName","")
+    Do %page.%SetValueById("DUZ","")
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="getAppTimeout">
+<ReturnType>%String</ReturnType>
+<ZenMethod>1</ZenMethod>
+<Implementation><![CDATA[	quit %session.AppTimeout
+]]></Implementation>
+</Method>
+</Class>
+</Export>

@@ -1,20 +1,13 @@
 ABMDF51Y ;IHS/DSD/DMJ/LSL - PRINT UB92      ;   
- ;;2.6;IHS 3P BILLING SYSTEM;;NOV 12, 2009
+ ;;2.6;IHS 3P BILLING SYSTEM;**14,21**;NOV 12, 2009;Build 379
  ;Original;DMJ; IHS/CAO/JLB 2/6/2000  added to CAO changes 
  ;
- ;IHS/DSD/LSL -3/23/98 - Add to line tag  18 to quit print if
- ;itemized for flat rate billing on a UB-92.
+ ;IHS/DSD/LSL -3/23/98 - Add to line tag 18 to quit print if itemized for flat rate billing on a UB-92.
+ ;IHS/SD/SDR - v2.5 p9 - IM15936 - Correct print format issues
+ ;IHS/SD/SDR - v2.5 p10 - IM20395 - Split out lines being bundled by rev code
+ ;IHS/SD/SDR - v2.5 p11 - IM24315 - Line items weren't printing box 50 s/b O/P MEDI-CAL if AO CONTROL NUMBER is 61044
  ;
- ; IHS/SD/SDR - v2.5 p9 - IM15936
- ;    Correct print format issues
- ;
- ; IHS/SD/SDR - v2.5 p10 - IM20395
- ;   Split out lines being bundled by rev code
- ;
- ; IHS/SD/SDR - v2.5 p11 - IM24315
- ;   Line items weren't printing
- ;   box 50 s/b O/P MEDI-CAL if AO CONTROL NUMBER is 61044
- ;
+ ;IHS/SD/SDR - 2.6*21 - HEAT123457 - Updated 61044 check from 'equals' to 'contains'
 13 ;
  W !
  K ABMR
@@ -220,7 +213,8 @@ ABMDF51Y ;IHS/DSD/DMJ/LSL - PRINT UB92      ;
  .Q:'$D(ABMREC(30,I))
  .W ! S ABMFLAG=I
  .; Insurer name_" "_Payor Sub Identification
- .I $E(ABMREC(30,I),26,30)=61044 S ABMDE="O/P MEDI-CAL^^25"
+ .;I $E(ABMREC(30,I),26,30)=61044 S ABMDE="O/P MEDI-CAL^^25"  ;abm*2.6*21 IHS/SD/SDR HEAT123457
+ .I $E(ABMREC(30,I),26,30)["61044" S ABMDE="O/P MEDI-CAL^^25"  ;abm*2.6*21 IHS/SD/SDR HEAT123457
  .E  S ABMDE=$E(ABMREC(30,I),54,78)_" "_$E(ABMREC(30,I),31,34)_"^^25"
  .D WRT^ABMDF11W                                 ; form locator #50
  .S ABMDE=$E(ABMREC(30,I),160,172)_"^26^13"  ; Provider ID (blank)

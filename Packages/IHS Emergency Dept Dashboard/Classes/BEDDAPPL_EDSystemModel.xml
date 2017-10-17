@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:34">
+<Class name="BEDDAPPL.EDSystemModel">
+<Description>
+BEDDAPPL.EDSystemModel</Description>
+<Super>%ZEN.DataModel.ObjectDataModel</Super>
+<TimeChanged>64168,72769.585509</TimeChanged>
+<TimeCreated>61957,74136.592455</TimeCreated>
+
+<Property name="Verify">
+<Description>
+BEDD*2.0*1;Added Whiteboard fields</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="WhiteboardShowProvider">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="WhiteboardShowNurse">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="WhiteboardShowOrders">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="WhiteboardShowNotes">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="WhiteboardShowAge">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="WhiteboardShowComplaint">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="WhiteboardShowChartNumber">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="WhiteboardShowRoom">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="WhiteboardShowName">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="WhiteboardShowAcuity">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="SMTPSERVER">
+<Description>
+enter your facility email server name</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="TimeOut">
+<Type>%String</Type>
+</Property>
+
+<Property name="ChiefofStaff">
+<Type>%String</Type>
+</Property>
+
+<Property name="NrseMgr">
+<Type>%String</Type>
+</Property>
+
+<Property name="Site">
+<Type>%String</Type>
+</Property>
+
+<Property name="SiteName">
+<Type>%String</Type>
+</Property>
+
+<Property name="ChargeNrseA">
+<Type>%String</Type>
+</Property>
+
+<Property name="ChargeNrseP">
+<Type>%String</Type>
+</Property>
+
+<Property name="Phone">
+<Type>%String</Type>
+</Property>
+
+<Property name="Pager">
+<Type>%String</Type>
+</Property>
+
+<Property name="MedRec">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="RtSheet">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="PtRtSheet">
+<Description>
+Patient routing slip</Description>
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="PtLabels">
+<Description>
+Patient Labels at CI</Description>
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="PtArmBand">
+<Description>
+Patient ArmBand at CI</Description>
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="StandAlone">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="TwoClinics">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="TriageRpt">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="ShoUsedRm">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="ShoNrse">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="SwitchEHRPat">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="ShoPrv">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="ShoCons">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="ShoDlySum">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="PCPFlag">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="CommBoard">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="AutoNote">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="PendingStsLookBack">
+<Type>%String</Type>
+</Property>
+
+<Property name="PatientNameFormat">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="VALUELIST" value=",FLFF,FLIF,ILIF"/>
+</Property>
+
+<Property name="UserPrefDOB">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="UserPrefComp">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="UserPrefSex">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="UserName">
+<Type>%String</Type>
+</Property>
+
+<Property name="User">
+<Type>%String</Type>
+</Property>
+
+<Property name="UserDUZ">
+<Type>%String</Type>
+</Property>
+
+<Method name="%OnOpenSource">
+<FormalSpec>pID:%String</FormalSpec>
+<ReturnType>%RegisteredObject</ReturnType>
+<Implementation><![CDATA[  Quit ##class(BEDD.EDSYSTEM).%OpenId(pID)
+]]></Implementation>
+</Method>
+
+<Method name="%OnSaveSource">
+<FormalSpec>pSource:BEDD.EDSYSTEM</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+   Set tSC = pSource.%Save()
+   Set ..%id = pSource.%Id()
+   Quit tSC
+]]></Implementation>
+</Method>
+
+<Method name="%OnNewSource">
+<FormalSpec>*pSC:%Status=$$$OK</FormalSpec>
+<ReturnType>%RegisteredObject</ReturnType>
+<Implementation><![CDATA[  Quit ##class(BEDD.EDSYSTEM).%New()
+]]></Implementation>
+</Method>
+
+<Method name="%OnDeleteSource">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pID:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[  Quit ##class(BEDD.EDSYSTEM).%DeleteId(pID)
+]]></Implementation>
+</Method>
+
+<Method name="%OnLoadModel">
+<FormalSpec>pSource:BEDD.EDSYSTEM</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    Set ..SMTPSERVER = pSource.SMTPSERVER
+    Set ..TimeOut = pSource.TimeOut
+    Set ..Site = pSource.Site
+    Set ..Phone = pSource.Phone
+    Set ..MedRec = pSource.MedRec
+    Set ..RtSheet = pSource.RtSheet
+    Set ..PtRtSheet=pSource.PtRtSheet
+    Set ..PtArmBand=pSource.PtArmBand
+    Set ..PtLabels=pSource.PtLabels
+    Set ..StandAlone = pSource.StandAlone
+    Set ..TwoClinics = pSource.TwoClinics
+    Set ..TriageRpt = pSource.TriageRpt
+    Set ..ShoUsedRm = pSource.ShoUsedRm
+    Set ..ShoNrse = pSource.ShoNrse
+    Set ..ShoPrv = pSource.ShoPrv
+    Set ..ShoCons = pSource.ShoCons
+    Set ..ShoDlySum = pSource.ShoDlySum
+    Set ..CommBoard = pSource.CommBoard
+    Set ..AutoNote = pSource.AutoNote
+    Set ..PCPFlag = pSource.PCPFlag
+    Set ..SwitchEHRPat = pSource.SwitchEHRPat
+    Set ..PendingStsLookBack = pSource.PendingStsLookBack
+    Set ..Verify = pSource.Verify
+	Set ..WhiteboardShowProvider = pSource.WhiteboardShowProvider
+	Set ..WhiteboardShowNurse = pSource.WhiteboardShowNurse
+	Set ..WhiteboardShowOrders = pSource.WhiteboardShowOrders
+	Set ..WhiteboardShowNotes = pSource.WhiteboardShowNotes
+	Set ..WhiteboardShowAge = pSource.WhiteboardShowAge
+	Set ..WhiteboardShowComplaint = pSource.WhiteboardShowComplaint
+	Set ..WhiteboardShowChartNumber = pSource.WhiteboardShowChartNumber
+	Set ..WhiteboardShowRoom = pSource.WhiteboardShowRoom
+	Set ..WhiteboardShowName = pSource.WhiteboardShowName
+	Set ..WhiteboardShowAcuity = pSource.WhiteboardShowAcuity
+	
+    Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="%OnStoreModel">
+<FormalSpec>pSource:BEDD.EDSYSTEM</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    Set pSource.SMTPSERVER = ..SMTPSERVER
+    Set pSource.TimeOut = ..TimeOut
+    Set pSource.Site = ..Site
+    Set pSource.Phone = ..Phone
+    Set pSource.MedRec = ..MedRec
+    Set pSource.RtSheet = ..RtSheet
+    Set pSource.PtArmBand = ..PtArmBand
+    Set pSource.PtLabels = ..PtLabels
+    Set pSource.PtRtSheet = ..PtRtSheet
+    Set pSource.StandAlone = ..StandAlone
+    Set pSource.TwoClinics = ..TwoClinics
+    Set pSource.TriageRpt = ..TriageRpt
+    Set pSource.ShoUsedRm = ..ShoUsedRm
+    Set pSource.ShoNrse = ..ShoNrse
+    Set pSource.ShoPrv = ..ShoPrv
+    Set pSource.ShoCons = ..ShoCons
+    Set pSource.ShoDlySum = ..ShoDlySum
+    Set pSource.CommBoard = ..CommBoard
+    Set pSource.AutoNote = ..AutoNote
+    Set pSource.PCPFlag = ..PCPFlag
+    Set pSource.SwitchEHRPat = ..SwitchEHRPat
+    Set pSource.PendingStsLookBack = ..PendingStsLookBack
+    Set pSource.WhiteboardShowProvider = ..WhiteboardShowProvider
+    Set pSource.WhiteboardShowNurse = ..WhiteboardShowNurse
+    Set pSource.WhiteboardShowOrders = ..WhiteboardShowOrders
+    Set pSource.WhiteboardShowNotes = ..WhiteboardShowNotes
+    Set pSource.WhiteboardShowAge = ..WhiteboardShowAge
+    Set pSource.WhiteboardShowComplaint = ..WhiteboardShowComplaint
+    Set pSource.WhiteboardShowChartNumber = ..WhiteboardShowChartNumber
+    Set pSource.WhiteboardShowRoom = ..WhiteboardShowRoom
+    Set pSource.WhiteboardShowName = ..WhiteboardShowName
+    Set pSource.WhiteboardShowAcuity = ..WhiteboardShowAcuity
+
+    Quit pSource.%Save()
+]]></Implementation>
+</Method>
+</Class>
+</Export>

@@ -1,26 +1,22 @@
 ABMDEMLC ; IHS/ASDST/DMJ - Edit Utility - FOR MULTIPLES - PART 4 ;  
- ;;2.6;IHS Third Party Billing System;**2,3,6,9,10,18**;NOV 12, 2009;Build 289
+ ;;2.6;IHS Third Party Billing System;**2,3,6,9,10,18,21**;NOV 12, 2009;Build 379
  ;
- ; IHS/SD/SDR - V2.5 P2 - 5/9/02 - NOIS HQW-0302-100190
+ ;IHS/SD/SDR - V2.5 P2 - 5/9/02 - NOIS HQW-0302-100190
  ;     Modified to display 2nd and 3rd modifiers and units
- ; IHS/SD/SDR - V2.5 P3 - 1/22/03 - QBA-0103-130075
+ ;IHS/SD/SDR - V2.5 P3 - 1/22/03 - QBA-0103-130075
  ;    Modified to use IEN for HCPCS for Fee Schedule lookup
- ; IHS/SD/SDR v2.5 p5 - 5/18/04 - Modified to put POS and TOS by line item
- ; IHS/SD/SDR - v2.5 p6 - 7/9/04 - IM14079 - Notes regarding removal of TOS for now
- ; IHS/SD/SDR - v2.5 p8 - task 6
- ;    Added code for POS ambulance default 41
- ; IHS/SD/SDR - v2.5 p9 - IM19297
- ;    Added message about 4 corresponding Dxs when 837
- ; IHS/SD/SDR - v2.5 p11 - Corrections to 4 corr. Dxs
- ;    If they answered NO it would put NO on the claim, not the selected
- ;    Dxs.
+ ;IHS/SD/SDR v2.5 p5 - 5/18/04 - Modified to put POS and TOS by line item
+ ;IHS/SD/SDR - v2.5 p6 - 7/9/04 - IM14079 - Notes regarding removal of TOS for now
+ ;IHS/SD/SDR - v2.5 p8 - task 6 - Added code for POS ambulance default 41
+ ;IHS/SD/SDR - v2.5 p9 - IM19297 - Added message about 4 corresponding Dxs when 837
+ ;IHS/SD/SDR - v2.5 p11 - Corrections to 4 corr. Dxs.  If they answered NO it would put NO on the claim, not the selected Dxs.
  ;
- ; IHS/SD/SDR - v2.6 CSV
- ; IHS/SD/SDR - abm*2.6*2 - 3PMS10003A - Modified to call ABMFEAPI
- ; IHS/SD/SDR - abm*2.6*3 - NOHEAT - fixed modifiers so they work correctly; it would let
- ;   user but garbage
- ; IHS/SD/SDR - abm*2.6*6 - 5010 - added export mode 32
+ ;IHS/SD/SDR - v2.6 CSV
+ ;IHS/SD/SDR - abm*2.6*2 - 3PMS10003A - Modified to call ABMFEAPI
+ ;IHS/SD/SDR - abm*2.6*3 - NOHEAT - fixed modifiers so they work correctly; it would let user put garbage
+ ;IHS/SD/SDR - abm*2.6*6 - 5010 - added export mode 32
  ;IHS/SD/SDR - 2.6*18 - HEAT242924 - Added screen when export mode is 33 so only 4 DXs can be selected for the coord. DX.
+ ;IHS/SD/SDR - 2.6*21 - HEAT168435 - Added code to add/edit modifiers for 23 multiple (pharmacy)
  ;
 DX ;EP for selecting Corresponding Diagnosis
  I '+$O(^ABMDCLM(DUZ(2),ABMP("CDFN"),17,"C","")) W !!,"There are no Diagnosis entered to select from." Q
@@ -92,11 +88,13 @@ MOD2 ;EP for editing Modifiers
  S ABMZ("CHARGE")=+$P($$ONE^ABMFEAPI(ABMP("FEE"),ABMZ("CAT"),ABMZIEN,ABMP("VDT")),U)  ;abm*2.6*2 3PMS10003A
  S ABMZ("MODFEE")=$P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),ABMZ("SUB"),$P(ABMZ(ABMX("Y")),U,2),0)),U,+$P(ABMZ("CHRG"),".",2))
  S ABMX("MC")=ABMZ("CHARGE")
+MOD3 ;EP  ;abm*2.6*21 IHS/SD/SDR HEAT168435  added line tag
  S DIE="^ABMDCLM(DUZ(2),"_ABMP("CDFN")_","_ABMZ("SUB")_",",DA=$P(ABMZ(ABMX("Y")),U,2)
  S ABMX("M")=$S($P(ABMZ("MOD"),U,4):3,1:1)
  F ABMX("I")=1:1:ABMX("M") D
  .S DR=$S(ABMX("I")=1:+ABMZ("MOD"),ABMX("I")=2:$P(ABMZ("MOD"),U,3),1:$P(ABMZ("MOD"),U,4))
  .S ABMX("M",ABMX("I"))=$P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),ABMZ("SUB"),$P(ABMZ(ABMX("Y")),U,2),$S(+DR<.13:0,1:1))),U,$S($E(DR,$L(+DR))>4:$E(DR,$L(+DR)),1:$E(DR,2,3)))
+ .I ABMZ("SUB")=23 S ABMX("M",ABMX("I"))=$P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),ABMZ("SUB"),$P(ABMZ(ABMX("Y")),U,2),2)),U,$E(DR,$L(+DR))+2)  ;abm*2.6*21 IHS/SD/SDR HEAT168435
  F ABMX("I")=1:1:ABMX("M") D  Q:$D(DUOUT)!(ABMX("I")=ABMX("M"))  I X="",$G(ABMX("M",ABMX("I")+1))="" Q
  .S ABMX("S")=$S(ABMX("I")=1:"1st",ABMX("I")=2:"2nd",1:"3rd")
  .;S DR=$S(ABMX("I")=1:+ABMZ("MOD"),ABMX("I")=2:$P(ABMZ("MOD"),U,3),1:$P(ABMZ("MOD"),U,4))_"Select "_$S($P(ABMZ("MOD"),U,4):ABMX("S")_" ",1:"")_"MODIFIER: "  ;abm*2.6*3 NOHEAT

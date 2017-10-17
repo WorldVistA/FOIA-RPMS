@@ -1,5 +1,5 @@
 ABMDRCHK ; IHS/ASDST/DMJ - Report Utility to Check Parms ;  
- ;;2.6;IHS Third Party Billing;**1,9,10,14**;NOV 12, 2009;Build 238
+ ;;2.6;IHS Third Party Billing;**1,9,10,14,21**;NOV 12, 2009;Build 379
  ;Original;TMD;10/17/95 12:45 PM
  ;
  ; IHS/SD/SDR - v2.5 p8 - Added code to check cancelled claim file
@@ -13,6 +13,10 @@ ABMDRCHK ; IHS/ASDST/DMJ - Report Utility to Check Parms ;
  ;IHS/SD/SDR - 2.6*14 - ICD10 009 - Updated so reports will check for ICD-10 codes
  ;IHS/SD/SDR - 2.6*14 - Updated DX^ABMCVAPI to be numeric
  ;IHS/SD/SDR - 2.6*14 - HEAT165197 (CR3109) - Updated check for DX range to use $$NUM
+ ;IHS/SD/SDR - 2.6*21 - HEAT184442 - Made change for programming error <UNDEF>DX+22^ABMDRCHK.  Occurs when user selects BOTH
+ ;   but doesn't enter any ICD10 codes, just hits return.
+ ;IHS/SD/SDR - 2.6*21 - HEAT186137 - Fixed check for pending claims report if a specific visit type is selected.
+ ;IHS/SD/SDR - 2.6*21 - VMBP RQMT_96 - Updated checked to look at new insurer type field
  ;
 BILL ;EP for checking Bill File data parameters
  Q:'$D(^ABMDBILL(DUZ(2),ABM,0))!('$D(^(1)))
@@ -45,7 +49,8 @@ BILL ;EP for checking Bill File data parameters
  I $G(ABMY("PTYP"))=1,$P($G(^AUPNPAT(ABM("P"),11)),U,12)="I" Q
  I $D(ABMY("INS")),ABMY("INS")'=ABM("I") Q
  ;I $D(ABMY("TYP")) Q:ABMY("TYP")'[$P($G(^AUTNINS(ABM("I"),2)),U)  ;abm*2.6*10 HEAT73780
- I $D(ABMY("TYP")) Q:ABMY("TYP")'[$$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,ABM("I"),".211","I"),1,"I")  ;abm*2.6*10 HEAT73780
+ ;I $D(ABMY("TYP")) Q:ABMY("TYP")'[$$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,ABM("I"),".211","I"),1,"I")  ;abm*2.6*10 HEAT73780  ;abm*2.6*21 IHS/SD/SDR VMBP RQMT_96
+ I $D(ABMY("TYP")) Q:("^"_ABMY("TYP")_"^")'[("^"_$$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,ABM("I"),".211","I"),1,"I")_"^")  ;abm*2.6*10 HEAT73780  ;abm*2.6*21 IHS/SD/SDR VMBP RQMT_96
  I $D(ABMY("CLIN")),'$D(ABMY("CLIN",+$P(^ABMDBILL(DUZ(2),ABM,0),"^",10))) Q
  I $D(ABMY("VTYP")),'$D(ABMY("VTYP",+$P(^ABMDBILL(DUZ(2),ABM,0),"^",7))) Q
  K ABM("QUIT")
@@ -78,7 +83,8 @@ CLM ;EP for checking Claim file data parameters
  I $G(ABMY("PTYP"))=2,$P($G(^AUPNPAT(ABM("P"),11)),U,12)'="I" Q
  I $G(ABMY("PTYP"))=1,$P($G(^AUPNPAT(ABM("P"),11)),U,12)="I" Q
  ;I $D(ABMY("TYP")) Q:ABMY("TYP")'[$P($G(^AUTNINS(ABM("I"),2)),U)  ;abm*2.6*10 HEAT73780
- I $D(ABMY("TYP")) Q:ABMY("TYP")'[$$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,ABM("I"),".211","I"),1,"I")  ;abm*2.6*10 HEAT73780
+ ;I $D(ABMY("TYP")) Q:ABMY("TYP")'[$$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,ABM("I"),".211","I"),1,"I")  ;abm*2.6*10 HEAT73780  ;abm*2.6*21 IHS/SD/SDR VMBP RQMT_96
+ I $D(ABMY("TYP")) Q:ABMY("TYP")'[("^"_$$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,ABM("I"),".211","I"),1,"I")_"^")  ;abm*2.6*10 HEAT73780  ;abm*2.6*21 IHS/SD/SDR VMBP RQMT_96
  I $D(ABMY("DT")),$G(ABMY("DT"))'="X",ABM("D")<ABMY("DT",1)!(ABM("D")>ABMY("DT",2)) Q
  I $D(ABMY("CLIN")),'$D(ABMY("CLIN",+$P(^ABMDCLM(DUZ(2),ABM,0),"^",6))) Q
  I $D(ABMY("VTYP")),'$D(ABMY("VTYP",+$P(^ABMDCLM(DUZ(2),ABM,0),"^",7))) Q
@@ -130,6 +136,7 @@ DX ;EP
  .I (ABMDXTYP=0) D
  ..I (ABM("DX",0)'>ABMY("DX",2)),(ABM("DX",0)'<ABMY("DX",1)) S ABM("DX","HIT")=1
  .I (ABMDXTYP=1) D
+ ..I '$D(ABMY("DX",3)) Q  ;stop here if no data at ABMY("DX",3)  ;abm*2.6*21 IHS/SD/SDR HEAT184442
  ..I (ABM("DX",0)'>ABMY("DX",4)),(ABM("DX",0)'<ABMY("DX",3)) S ABM("DX","HIT")=1
  .;end new code ICD10 009 and CR3108
  Q
@@ -197,7 +204,8 @@ INCOM(ABM,ABMTEMP,ABMYTEMP) ;EP - determine parameters for claims with pending s
  S ABMTEMP("CLINIC")=$P(ABMREC0,U,6)
  I ABMTEMP("CLINIC")'="",$D(ABMY("CLIN")) Q:'$D(ABMY("CLIN",ABMTEMP("CLINIC")))
  S ABMTEMP("VISIT TYPE")=$P(ABMREC0,U,7)
- I ABMTEMP("VISIT TYPE"),$D(ABMY("VTYP")) Q:'$D(ABMY("CLIN",ABMTEMP("VISIT TYPE")))
+ ;I ABMTEMP("VISIT TYPE"),$D(ABMY("VTYP")) Q:'$D(ABMY("CLIN",ABMTEMP("VISIT TYPE")))  ;abm*2.6*21 IHS/SD/SDR HEAT186137
+ I ABMTEMP("VISIT TYPE"),$D(ABMY("VTYP")) Q:'$D(ABMY("VTYP",ABMTEMP("VISIT TYPE")))  ;abm*2.6*21 IHS/SD/SDR HEAT186137
  S ABMTEMP("ACTIVE INSURER")=$P(ABMREC0,U,8)
  I $G(ABMY("INS"))'="" Q:ABMY("INS")'=ABMTEMP("ACTIVE INSURER")
  ;I ABMTEMP("ACTIVE INSURER")'="" S ABMTEMP("BILLING ENTITY")=$P($G(^AUTNINS(ABMTEMP("ACTIVE INSURER"),2)),U)  ;abm*2.6*10 HEAT73780

@@ -1,5 +1,5 @@
 OSEHRA ZGO Export: DMS LETTER INSERTS
-12-JUN-2017 17:08:06 ZWR
+17-OCT-2017 09:11:39 ZWR
 ^BDMLETI(0)="DMS LETTER INSERTS^9003202.4I^30^30"
 ^BDMLETI(1,0)="FIRST NAME^1"
 ^BDMLETI(1,1)="S Z=$P($G(^DPT(DFN,0)),U),Z=$P($P(Z,"","",2),"" "")"
@@ -107,7 +107,7 @@ OSEHRA ZGO Export: DMS LETTER INSERTS
 ^BDMLETI(14,2,2,0)="diabetes to help prevent pneumonia - a Booster is often given at age 65 "
 ^BDMLETI(14,2,3,0)="if it has been more than 5 years since your last pneumonia vaccination."
 ^BDMLETI(14,3,0)="^^1^1^3100201^"
-^BDMLETI(14,3,1,0)="This item will display the Pneumovax education text."
+^BDMLETI(14,3,1,0)="This item will display the Pneumococcal education text."
 ^BDMLETI(15,0)="TETANUS EDUCATION^15^1"
 ^BDMLETI(15,1)="S Y=$O(^BDMLETI(""B"",""TETANUS EDUCATION"",0)) D EDUCP^BDMLET"
 ^BDMLETI(15,2,0)="^^4^4^3100201^"
@@ -188,7 +188,7 @@ OSEHRA ZGO Export: DMS LETTER INSERTS
 ^BDMLETI(22,2,3,0)="recommendations for maximizing health & wellness with diabetes."
 ^BDMLETI(22,3,0)="^9003202.43^1^1^3131120^^"
 ^BDMLETI(22,3,1,0)="This item will display the Nutrition education text in your letter."
-^BDMLETI(23,0)="EXERCISE EDUCATION^23^1"
+^BDMLETI(23,0)="PHYSICAL ACTIVITY EDUCATION^23^1"
 ^BDMLETI(23,1)="S Y=$O(^BDMLETI(""B"",""EXERCISE EDUCATION"",0)) D EDUCP^BDMLET"
 ^BDMLETI(23,2,0)="^^3^3^3100201^"
 ^BDMLETI(23,2,1,0)="Physical activity doesn't have to be extreme to be effective.  Ask your "
@@ -278,7 +278,6 @@ OSEHRA ZGO Export: DMS LETTER INSERTS
 ^BDMLETI("B","EDUCATE",9)=""
 ^BDMLETI("B","EGFR",30)=""
 ^BDMLETI("B","EKG",28)=""
-^BDMLETI("B","EXERCISE EDUCATION",23)=""
 ^BDMLETI("B","EYE EXAM EDUCATION",11)=""
 ^BDMLETI("B","FIRST",1,1)="1"
 ^BDMLETI("B","FIRST NAME",1)=""
@@ -293,6 +292,7 @@ OSEHRA ZGO Export: DMS LETTER INSERTS
 ^BDMLETI("B","LAST NAME",2)=""
 ^BDMLETI("B","LIPID PANEL EDUCATION",20)=""
 ^BDMLETI("B","NUTRITION EDUCATION",22)=""
+^BDMLETI("B","PHYSICAL ACTIVITY EDUCATION",23)=""
 ^BDMLETI("B","PNEUMO EDUCATION",14)=""
 ^BDMLETI("B","PPD EDUCATION",16,1)="1"
 ^BDMLETI("B","PRIMARY CARE PROVIDER",4)=""

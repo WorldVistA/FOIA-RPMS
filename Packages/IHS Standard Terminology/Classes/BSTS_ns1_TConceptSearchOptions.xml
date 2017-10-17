@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:35">
+<Class name="BSTS.ns1.TConceptSearchOptions">
+<Description>
+Created from: http://VDENMIHSDEVD01:8082/soap/DtsQueryDaoWS?wsdl</Description>
+<CompileAfter>BSTS.ns1.TItemStatus</CompileAfter>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject,%XML.Adaptor</Super>
+<TimeChanged>63616,48123.885695</TimeChanged>
+<TimeCreated>63616,48123.835594</TimeCreated>
+
+<Parameter name="ELEMENTQUALIFIED">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="NAMESPACE">
+<Default>http://apelon.com/dtsserver/types</Default>
+</Parameter>
+
+<Parameter name="XMLNAME">
+<Default>TConceptSearchOptions</Default>
+</Parameter>
+
+<Parameter name="XMLSEQUENCE">
+<Default>1</Default>
+</Parameter>
+
+<Property name="attributeSetDescriptor">
+<Type>BSTS.ns1.TConceptAttributeSetDescriptor</Type>
+<Parameter name="XMLNAME" value="attributeSetDescriptor"/>
+</Property>
+
+<Property name="snapshotDate">
+<Type>%TimeStamp</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="snapshotDate"/>
+</Property>
+
+<Property name="firstResult">
+<Type>%xsd.int</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="firstResult"/>
+</Property>
+
+<Property name="limit">
+<Type>%xsd.int</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="limit"/>
+</Property>
+
+<Property name="subsetSearch">
+<Type>%Boolean</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="subsetSearch"/>
+</Property>
+
+<Property name="contentId">
+<Type>%xsd.int</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="contentId"/>
+</Property>
+
+<Property name="status">
+<Type>BSTS.ns1.TItemStatus</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="status"/>
+</Property>
+
+<Property name="ALLCONTENT">
+<Type>%xsd.int</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="ALL_CONTENT"/>
+<Parameter name="XMLPROJECTION" value="ATTRIBUTE"/>
+</Property>
+
+<Property name="DEFAULTLIMIT">
+<Type>%xsd.int</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="DEFAULT_LIMIT"/>
+<Parameter name="XMLPROJECTION" value="ATTRIBUTE"/>
+</Property>
+</Class>
+</Export>

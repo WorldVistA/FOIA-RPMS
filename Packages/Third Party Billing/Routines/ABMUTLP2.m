@@ -1,6 +1,9 @@
-ABMUTLP2 ; IHS/ASDST/DMJ - PAYER UTILITIES ;      
- ;;2.6;IHS 3P BILLING SYSTEM;**10,11**;NOV 12, 2009;Build 300
+ABMUTLP2 ; IHS/SD/SDR - PAYER UTILITIES ;      
+ ;;2.6;IHS 3P BILLING SYSTEM;**10,11,21**;NOV 12, 2009;Build 379
  ;abm*2.6*10 - split from ABMUTLP
+ ;IHS/SD/AML - 2.6*21 HEAT178693 - Made change for electronic VA billing
+ ;IHS/SD/SDR - 2.6*21 HEAT107645 - Made change to put MC (Medicaid) or CI (Private) for Kidscare.
+ ;
 SOP ;EP - source of pay (claim filing indicator)
  S ABMTYP=$P($G(^AUTNINS(+ABMP("INS",ABMI),2)),U,11)
  I ABMTYP D  Q
@@ -20,9 +23,12 @@ SOP ;EP - source of pay (claim filing indicator)
  I ABMTYP="C" S ABMP("SOP",ABMI)="CH"
  I ABMTYP="F" S ABMP("SOP",ABMI)="ZZ"
  I ABMTYP="I"!(ABMTYP="MD") S ABMP("SOP",ABMI)="OF"
- I ABMTYP="K" S ABMP("SOP",ABMI)="MC"
+ ;I ABMTYP="K" S ABMP("SOP",ABMI)="MC"  ;abm*2.6*21 IHS/SD/SDR HEAT107645
+ I ABMTYP="K",($$GET1^DIQ(9999999.18,+ABMP("INS",ABMI),".38","I")="P") S ABMP("SOP",ABMI)="CI"  ;abm*2.6*21 IHS/SD/SDR HEAT107645
+ I ABMTYP="K",($$GET1^DIQ(9999999.18,+ABMP("INS",ABMI),".38","I")'="P") S ABMP("SOP",ABMI)="MC"  ;abm*2.6*21 IHS/SD/SDR HEAT107645
  I ABMTYP="MH" S ABMP("SOP",ABMI)="16"
  ;end new code HEAT69121
+ I ABMTYP="V" S ABMP("SOP",ABMI)="VA"  ;abm*2.6*21 IHS/SD/AML 8/21/14 - HEAT178693
  I $$BCBS1^ABMERUTL(+ABMP("INS",ABMI)) D
  .S ABMP("SOP",ABMI)="BL"
  ;I ABMP("SOP",ABMI)="MA",(ABMP("VTYP")=999!($P($G(^ABMDPARM(DUZ(2),1,5)),U,3)="C00900"))!((ABMP("BTYP")=831)&(ABMP("EXP")=22)) D  ;abm*2.6*11 HEAT96809

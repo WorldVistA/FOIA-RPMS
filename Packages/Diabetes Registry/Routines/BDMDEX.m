@@ -1,0 +1,9 @@
+BDMDEX ; IHS/CMI/LAB -CREATED BY ^ATXSTX ON DEC 19, 2016 ;
+ ;;2.0;DIABETES MANAGEMENT SYSTEM;**10**;JUN 14, 2007;Build 12
+ ;
+ ; See referenced routines to see taxonomies being loaded.
+ ;
+START ;
+ D ^BDMDEXA ;   DM AUDIT EYE EXAM CPTS
+ D ^BDMDEXB ;   DM AUDIT DENTAL EXAM CPTS
+ Q

@@ -1,5 +1,5 @@
 BGP7EL1P ; IHS/CMI/LAB - print ind 01 Jul 2010 7:55 PM ;
- ;;17.0;IHS CLINICAL REPORTING;;AUG 30, 2016;Build 16
+ ;;17.1;IHS CLINICAL REPORTING;;MAY 10, 2017;Build 29
  ;
 I1AGE ;EP
  S BGPHD1="ACTIVE CLINICAL PTS 65+ w/ no hospice",BGPHD2="Active Clinical Pts 65+",BGPHD3=" w/ no hospice"

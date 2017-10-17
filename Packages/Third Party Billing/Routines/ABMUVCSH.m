@@ -1,12 +1,12 @@
 ABMUVCSH ; IHS/SD/SDR - 3PB/UFMS View Cashiering Session Option   
- ;;2.6;IHS 3P BILLING SYSTEM;**11**;NOV 12, 2009;Build 133
+ ;;2.6;IHS 3P BILLING SYSTEM;**11,21**;NOV 12, 2009;Build 379
  ; New routine - v2.5 p12 SDD item 4.9.2.2
- ;
- ; IHS/SD/SDR - v2.5 p13 - NO IM
+ ;IHS/SD/SDR - 2.6*21 - HEAT121470 - Updated to display all open, all closed, but only the limit of transmitted sessions
  ;
  ; View Cashiering Session
 EP ;EP
  D HEADER("OPEN")
+ S ABMSESSL="O"  ;abm*2.6*21 IHS/SD/SDR HEAT121470
  D FINDAOPN^ABMUCUTL
  S ABMTRIBL=$P($G(^ABMDPARM(DUZ(2),1,4)),U,14)
  I '$D(ABMO) W !?5,"There are NO open sessions at this time"
@@ -34,6 +34,7 @@ EP ;EP
  .S ABMBAD=0
  .I Y="B"!(Y="b") S Y=$S($P($G(^ABMDPARM(DUZ(2),1,4)),U,14)=0:"CR",1:"CT")
  .S ABMSESSL=Y
+ .I ABMSESSL="C" S ABMFLG="CLOSED"  ;abm*2.6*21 IHS/SD/SDR HEAT121470
  .F I=1:1:$L(Y) I ABMSESSL'[$E(Y,I) D  Q
  ..W !!,"<<BAD ENTRY>> ",Y
  ..S ABMBAD=1
@@ -74,7 +75,8 @@ VIEWLIST ;EP
  ..I '$D(^XUSEC("ABMDZ UFMS SUPERVISOR",DUZ)),(ABMSDUZ'=DUZ) K ABMO(ABMS,ABMSDUZ) Q
  ..S ABMSDT=0
  ..F  S ABMSDT=$O(ABMO(ABMS,ABMSDUZ,ABMSDT)) Q:+ABMSDT=0  D
- ...Q:ABMSDT<ABMDLIMT
+ ...;Q:ABMSDT<ABMDLIMT  ;abm*2.6*21 IHS/SD/SDR HEAT121470
+ ...I "^O^C^"'[("^"_ABMSESSL_"^") Q:ABMSDT<ABMDLIMT  ;abm*2.6*21 IHS/SD/SDR HEAT121470
  ...I $G(ABMSESSL)'="",(ABMSESSL'[$P($G(ABMO(ABMS,ABMSDUZ,ABMSDT)),U)) Q  ;status selected and not part of selection
  ...S ABMSCNT=ABMSCNT+1
  ...W !,ABMSCNT_"."

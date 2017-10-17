@@ -1,5 +1,5 @@
 APCM25N ;IHS/CMI/LAB - MU PATIENT LIST;
- ;;1.0;MU PERFORMANCE REPORTS;**7**;MAR 26, 2012;Build 15
+ ;;1.0;MU PERFORMANCE REPORTS;**7,9**;MAR 26, 2012;Build 25
  ;
  ;
  ;
@@ -59,6 +59,7 @@ RT ;
 TP ;
  S APCMRPTP=""
 MUYEAR ;
+ K APCMVDT,APCMPER,APCMEDUD
  K DIR S DIR(0)="D^::EP"
  W !!,"Enter the Calendar Year for which the EH is demonstrating Meaningful"
  S DIR("A")="Use.  Use a 4 digit year, e.g. 2015"
@@ -70,6 +71,7 @@ MUYEAR ;
  I Y'="3150000",Y'="3160000",Y'="3170000" W !!,"You can only enter 2015, 2016 or 2017" G MUYEAR
  I $E(Y,4,7)'="0000" W !!,"Please enter a year only!",! G MUYEAR
  S APCMPER=APCMVDT
+ I $E(APCMPER,1,3)=317 S APCMEDUD=3171231  ;IHS/CMI/LAB - PATCH 9 06/06/2017
  S APCMLD=$E(APCMPER,1,3)_"0101",APCMHD=$E(APCMPER,1,3)_"1231"   ;LOW AND HIGH DATES ALLOWED BELOW
  ;I APCMPER="3150000" S APCMLD=$E(APCMPER,1,3)-1_"1001",APCMHD=$E(APCMPER,1,3)_"1231"
  ;
@@ -115,7 +117,13 @@ SUM ;display summary of this report
  W !,$$CTR("SUMMARY OF MODIFIED STAGE 2-MEANINGFUL USE REPORT TO BE GENERATED")
  W !!,"The date ranges for this report are:"
  W !?5,"Report Period: ",?31,$$FMTE^XLFDT(APCMBD)," to ",?31,$$FMTE^XLFDT(APCMED)
- W !!,"Hospital: ",$P(^DIC(4,APCMFAC,0),U,1)
+ I $E(APCMPER,1,3)="317",($$HAS^APCM25ET("S2.019.H")!($$HAS^APCM25ET("S2.025.H"))!($$HAS^APCM25ET("S2.021.H"))) D    ;IHS/CMI/LAB - PATCH 9 06/06/2017
+ .S C=0
+ .W !!,"Please note: the date range is ",$$FMTE^XLFDT(APCMBD)," to ",$$FMTE^XLFDT(APCMEDUD)," for ",!
+ .I $$HAS^APCM25ET("S2.019.H") W ?5,"Patient Education",!
+ .I $$HAS^APCM25ET("S2.025.H") W ?5,"Patient Electronic Access",!
+ .I $$HAS^APCM25ET("S2.021.H") W ?5,"Summary of Care (HIE)",!
+ W !,"Hospital: ",$P(^DIC(4,APCMFAC,0),U,1)
  D PT^APCM25SL
  I APCMROT="" G DEMO
 ZIS ;call to XBDBQUE

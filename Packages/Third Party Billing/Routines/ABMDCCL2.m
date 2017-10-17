@@ -1,9 +1,11 @@
 ABMDCCL2 ; IHS/ASDST/DMJ - Cancelled claims-132 Width ;
- ;;2.6;IHS 3P BILLING SYSTEM;;NOV 12, 2009
+ ;;2.6;IHS 3P BILLING SYSTEM;**21**;NOV 12, 2009;Build 379
  ;Original;TMD;
  ;
- ;IHS/SD/SDR - v2.5 p10 - IM20215
- ;  HRN not printing on report
+ ;IHS/SD/SDR - v2.5 p10 - IM20215 - HRN not printing on report
+ ;
+ ;IHS/SD/SDR 2.6*21 HEAT140244 Once the original issue was fixed so this would print, it became obvious that the visit type
+ ;  description and the reason were running into each other.  Fixed it so they had space between them.
  ;
 PRINT ;EP for printing data
  W:$D(ABM("PRINT",16)) @ABM("PRINT",16) S ABM("PG")=0 D HDB
@@ -26,8 +28,10 @@ PRINT ;EP for printing data
  .W ?73,$P(ABM("TXT"),U,5)  ;claim number
  .W ?81,$$SDT^ABMDUTL($P($G(^ABMCCLMS(DUZ(2),$P(ABM("TXT"),U,5),0)),U,2))  ;visit date
  .I ABMY("SORT")="VT" W:+$P(ABM("PDFN"),U,10) ?92,$E($P(^DIC(40.7,$P(^ABMCCLMS(DUZ(2),$P(ABM("TXT"),U,5),0),U,6),0),U),1,18)  ;clinic
- .E  W ?92,$P(^ABMDVTYP($P(^ABMCCLMS(DUZ(2),$P(ABM("TXT"),U,5),0),U,7),0),U)  ;visit
- .W ?102,$E($P($G(^ABMCCLMR($P($G(^ABMCCLMS(DUZ(2),$P(ABM("TXT"),U,5),1)),U,8),0)),U),1,30)  ;reason
+ .;E  W ?92,$P(^ABMDVTYP($P(^ABMCCLMS(DUZ(2),$P(ABM("TXT"),U,5),0),U,7),0),U)  ;visit  ;abm*2.6*21 IHS/SD/SDR HEAT140244
+ .E  W ?92,$E($P(^ABMDVTYP($P(^ABMCCLMS(DUZ(2),$P(ABM("TXT"),U,5),0),U,7),0),U),1,15)  ;visit  ;abm*2.6*21 IHS/SD/SDR HEAT140244
+ .;W ?102,$E($P($G(^ABMCCLMR($P($G(^ABMCCLMS(DUZ(2),$P(ABM("TXT"),U,5),1)),U,8),0)),U),1,30)  ;reason  ;abm*2.6*21 IHS/SD/SDR HEAT140244
+ .W ?108,$E($P($G(^ABMCCLMR($P($G(^ABMCCLMS(DUZ(2),$P(ABM("TXT"),U,5),1)),U,8),0)),U),1,23)  ;reason  ;abm*2.6*21 IHS/SD/SDR HEAT140244
  .S ABM("CNT1")=ABM("CNT1")+1,ABM("CNT2")=ABM("CNT2")+1,ABM("CNT")=ABM("CNT")+1,ABM("TOT")=ABM("TOT")+ABM("T")
  .S ABM("TOT1")=ABM("TOT1")+ABM("T"),ABM("TOT2")=ABM("TOT2")+ABM("T")
  D SUB

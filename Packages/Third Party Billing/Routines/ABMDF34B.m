@@ -1,5 +1,5 @@
 ABMDF34B ; IHS/SD/SDR - ADA 2012 Dental Export -part 3 ;    
- ;;2.6;IHS Third Party Billing;**11,13**;NOV 12, 2009;Build 213
+ ;;2.6;IHS Third Party Billing;**11,13,21**;NOV 12, 2009;Build 379
  ;IHS/SD/SDR - 2.6*13 - VMBP RQMT_95 - Updated to put VA STATION NUMBER in box 2.
  ;
 INS ;Ins Info

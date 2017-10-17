@@ -1,5 +1,5 @@
-ABMDE2E ; IHS/ASDST/DMJ - DSD/DMJ - Check visit for elig ;     
- ;;2.6;IHS 3P BILLING SYSTEM;**8**;NOV 12, 2009
+ABMDE2E ; IHS/SD/SDR - DSD/DMJ - Check visit for elig ;     
+ ;;2.6;IHS 3P BILLING SYSTEM;**8,10,21**;NOV 12, 2009;Build 379
  ;
  ; IHS/ASDS/SDH - 06/08/01 - V2.4 Patch 9 - NOIS QDA-0399-130023
  ;     Modified to update Mode of Export in Insurer has changed.
@@ -28,6 +28,10 @@ ABMDE2E ; IHS/ASDST/DMJ - DSD/DMJ - Check visit for elig ;
  ; IHS/SD/SDR - v2.5 p10 - IM20320
  ;   Added check to MERGECK to see if manually added insurer; if so,
  ;   don't delete
+ ;
+ ;IHS/SD/SDR - 2.6*21 - HEAT137034 - Fixed code for DISPLAY UNBILLABLE INSURER site parameter. The check wasn't being
+ ;  done correctly so unbillable insurers were displaying all the time instead of when specified by parameter.
+ ;IHS/SD/SDR - 2.6*21 - VMBP - RQMT_90 - Added code for 'V' insurer type.
  ;
  ; *********************************************************************
  ;
@@ -67,7 +71,8 @@ HITCHK ;HIT CHECK
  ..I '$P(^ABMDCLM(DUZ(2),ABMP("CDFN"),13,I,0),U) D  Q
  ...K ^ABMDCLM(DUZ(2),ABMP("CDFN"),13,I,0)
  ..S ABM("INS")=$P(^ABMDCLM(DUZ(2),ABMP("CDFN"),13,I,0),U)
- ..S ABM("ITYPE")=$P($G(^AUTNINS(ABM("INS"),2)),U)
+ ..;S ABM("ITYPE")=$P($G(^AUTNINS(ABM("INS"),2)),U)  ;abm*2.6*10 HEAT73780
+ ..S ABM("ITYPE")=$$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,ABM("INS"),".211","I"),1,"I")  ;abm*2.6*10 HEAT73780
  ..I ABM("ITYPE")="D"!(ABM("ITYPE")="K") D DCFX^ABMDEFIP(ABMP("CDFN"),I)
  ..D HITCHK2
  ;end new code
@@ -133,8 +138,9 @@ MERGECK ;mark entries unbillable that aren't in eligibility array
  Q
  ; *********************************************************************
 ADDCHK ; EP
+ I (ABM("PRI")>96)&'$D(^ABMDPARM(DUZ(2),1,6,ABM("INS")))&(+$O(^ABMDCLM(DUZ(2),ABMP("CDFN"),13,"B",ABM("INS"),0))=0) Q  ;abm*2.6*21 IHS/SD/SDR HEAT137034
  I '$D(^ABMDCLM(DUZ(2),ABMP("CDFN"),13,"B",ABM("INS"))) D  Q
- .I ABM("PRI")>96,'$D(^ABMDPARM(DUZ(2),1,6,ABM("INS"))) Q
+ .;I ABM("PRI")>96,'$D(^ABMDPARM(DUZ(2),1,6,ABM("INS"))) Q  ;abm*2.6*21 IHS/SD/SDR HEAT137034
  .D ADD
  .D COVCHK
  I $P(ABML(ABM("PRI"),ABM("INS")),"^",3)="P" D
@@ -144,7 +150,8 @@ ADDCHK ; EP
  .F  S I=$O(^ABMDCLM(DUZ(2),ABMP("CDFN"),13,I)) Q:'I  D
  ..Q:$P(^ABMDCLM(DUZ(2),ABMP("CDFN"),13,I,0),U)'=ABM("INS")
  ..I $P(^ABMDCLM(DUZ(2),ABMP("CDFN"),13,I,0),"^",8)=$P(ABML(ABM("PRI"),ABM("INS")),"^",2) K ABM("ADD")
- I $G(ABM("ADD")),ABM("PRI")<97 D  Q
+ ;I $G(ABM("ADD")),ABM("PRI")<97 D  Q  ;abm*2.6*21 IHS/SD/SDR HEAT137034
+ I $G(ABM("ADD"))&((ABM("PRI")<97)!((ABM("PRI")>96)&($D(^ABMDPARM(DUZ(2),1,6,ABM("INS")))))) D  Q  ;if priority is <97 or if priority is greater than 96 and display unbillable insurer  ;abm*2.6*21 IHS/SD/SDR HEAT137034
  .D ADD
  .D COVCHK
  S DA(1)=ABMP("CDFN")
@@ -202,6 +209,10 @@ ADD ;EP - Entry Pont for adding Elig Info to Claim
  .S DIC("DR")=DIC("DR")_";.07////"_$P(ABML(ABM("PRI"),ABM("INS")),U,2)
  I $P(ABML(ABM("PRI"),ABM("INS")),U,7)="M" D
  .S DIC("DR")=DIC("DR")_";.09////Y"
+ ;start new abm*2.6*21 IHS/SD/SDR VMBP RQMT_90
+ I $P(ABML(ABM("PRI"),ABM("INS")),U,3)="V" D
+ .S DIC("DR")=DIC("DR")_";.013////"_$P(ABML(ABM("PRI"),ABM("INS")),U,2)
+ ;end new abm*2.6*21 IHS/SD/SDR VMBP RQMT_90
  K DD,DO
  D FILE^DICN
  S (DA,ABM("XIEN"))=+Y

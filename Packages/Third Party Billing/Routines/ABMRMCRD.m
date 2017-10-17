@@ -1,5 +1,8 @@
 ABMRMCRD ;IHS/SD/SDR - MEDICARE PART D REPORT ;    
- ;;2.6;IHS 3P BILLING SYSTEM;;NOV 12, 2009
+ ;;2.6;IHS 3P BILLING SYSTEM;**10,21**;NOV 12, 2009;Build 379
+ ;
+ ;IHS/SD/SDR - 2.6*21 - HEAT119339 - fix <UNDEF>RAILROAD+9^ABMRMCRD if user typed '^' at
+ ;   exclude inactive/deceased pt prompt
  ;;
  ;; ABMILIST(insurer IEN)=insurer type--list of insurers for report
  ;; ABMINAME(insurer name,insurer IEN)=""--by name for display alphabetically
@@ -20,6 +23,7 @@ ABMRMCRD ;IHS/SD/SDR - MEDICARE PART D REPORT ;
  D ELIGDT  ;get list for what date?
  Q:$D(DUOUT)!$D(DIROUT)!$D(DIRUT)!$D(DTOUT)
  D INACT  ;include inactive/deceased pts?
+ Q:$D(DUOUT)!$D(DIROUT)!$D(DIRUT)!$D(DTOUT)  ;abm*2.6*21 IHS/SD/SDR HEAT119339
  D DETAILQ  ;detail?
  Q:$D(DUOUT)!$D(DIROUT)!$D(DIRUT)!$D(DTOUT)
  D ^%ZIS Q:POP
@@ -46,10 +50,13 @@ GETINS ;loop thru insurers and get ones with MD
  S ABMINS=0
  F  S ABMINS=$O(^AUTNINS(ABMINS)) Q:+ABMINS=0  D
  .I $E($P($G(^AUTNINS(ABMINS,0)),U),1,2)="D-" D
- ..S ABMILIST(ABMINS)=$P($G(^AUTNINS(ABMINS,2)),U)
+ ..;S ABMILIST(ABMINS)=$P($G(^AUTNINS(ABMINS,2)),U)  ;abm*2.6*10 HEAT73780
+ ..S ABMILIST(ABMINS)=$$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,ABMINS,".211","I"),1,"I")  ;abm*2.6*10 HEAT73780
  ..S ABMINAME($P($G(^AUTNINS(ABMINS,0)),U),ABMINS)=""
- .I $P($G(^AUTNINS(ABMINS,2)),U)="MD" D
- ..S ABMILIST(ABMINS)=$P($G(^AUTNINS(ABMINS,2)),U)
+ .;I $P($G(^AUTNINS(ABMINS,2)),U)="MD" D  ;abm*2.6*10 HEAT73780
+ .I $$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,ABMINS,".211","I"),1,"I")="MD" D  ;abm*2.6*10 HEAT73780
+ ..;S ABMILIST(ABMINS)=$P($G(^AUTNINS(ABMINS,2)),U)  ;abm*2.6*10 HEAT73780
+ ..S ABMILIST(ABMINS)=$$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,ABMINS,".211","I"),1,"I")  ;abm*2.6*10 HEAT73780
  ..S ABMINAME($P($G(^AUTNINS(ABMINS,0)),U),ABMINS)=""
  Q
  ;
@@ -87,11 +94,13 @@ GETMORE ;do they want more PI insurers?
  ..K X,Y,DIC,DR
  ..S DIC="^AUTNINS("
  ..S DIC(0)="AEMQ"
- ..S DIC("S")="I $P(^AUTNINS(Y,2),U)=""P"""  ;PIs only!
+ ..;S DIC("S")="I $P(^AUTNINS(Y,2),U)=""P"""  ;PIs only!  ;abm*2.6*10 HEAT73780
+ ..S DIC("S")="I $$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,Y,"".211"",""I""),1,""I"")=""P"""  ;PIs only!  ;abm*2.6*10 HEAT73780
  ..D ^DIC
  ..I Y>0 D
  ...W $P(Y,U,2)
- ...S ABMILIST(+Y)=$P($G(^AUTNINS(+Y,2)),U)
+ ...;S ABMILIST(+Y)=$P($G(^AUTNINS(+Y,2)),U)  ;abm*2.6*10 HEAT73780
+ ...S ABMILIST(+Y)=$$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,+Y,".211","I"),1,"I")  ;abm*2.6*10 HEAT73780
  ...S ABMINAME($P(Y,U,2),+Y)=""
  Q
  ;

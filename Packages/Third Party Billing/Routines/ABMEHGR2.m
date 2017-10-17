@@ -1,26 +1,24 @@
 ABMEHGR2 ; IHS/ASDST/DMJ - GET ANCILLARY SVCS REVENUE CODE INFO ;     
- ;;2.6;IHS 3P BILLING SYSTEM;**6,8,9,10,11,19**;NOV 12, 2009;Build 300
+ ;;2.6;IHS 3P BILLING SYSTEM;**6,8,9,10,11,19,21**;NOV 12, 2009;Build 379
  ;Original;DMJ;03/20/96 9:07 AM
  ;
- ; IHS/SD/SDR - V2.5 P2 - 5/9/02 - NOIS HQW-0302-100190
- ;     Modified to display 2nd and 3rd modifiers and units
- ; IHS/SD/SDR - v2.5 p5 - 5/18/04 - Modified to put POS and TOS by line item
- ; IHS/SD/EFG - V2.5 P8 - IM16385 - Calculate line total when more than 1 unit for 837D and 837P
- ; IHS/SD/SDR - v2.5 p8 - task 6 - Added code for new ambulance multiple 47
- ; IHS/SD/SDR - v2.5 p9 - task 1 - Use new service line provider multiple
- ; IHS/SD/SDR - v2.5 p9 - split routine for size
- ; IHS/SD/SDR - v2.5 p10 - IM20395 - Split lines bundled by Rev code
- ; IHS/SD/SDR - v2.5 p10 - IM19843
- ;   Added code for SERVICE TO DATE/TIME
- ;   NOTE: Removed old code due to routine size
+ ; IHS/SD/SDR 2.5 P2 - 5/9/02 - NOIS HQW-0302-100190 Modified to display 2nd and 3rd modifiers and units
+ ; IHS/SD/SDR 2.5 p5 - 5/18/04 - Modified to put POS and TOS by line item
+ ; IHS/SD/EFG 2.5 P8 - IM16385 - Calculate line total when more than 1 unit for 837D and 837P
+ ; IHS/SD/SDR 2.5 p8 - task 6 - Added code for new ambulance multiple 47
+ ; IHS/SD/SDR 2.5 p9 - task 1 - Use new service line provider multiple
+ ; IHS/SD/SDR 2.5 p9 - split routine for size
+ ; IHS/SD/SDR 2.5 p10 - IM20395 - Split lines bundled by Rev code
+ ; IHS/SD/SDR 2.5 p10 - IM19843 Added code for SERVICE TO DATE/TIME,  NOTE: Removed old code due to routine size
  ;
- ; IHS/SD/SDR - v2.6 CSV
- ; IHS/SD/SDR -abm*2.6*6 - 5010 - added date written to array for 23
- ; IHS/SD/SDR - abm*2.6*6 - 5010 - added line item control number
- ; IHS/SD/SDR - abm*2.6*6 - HEAT28973 - if 55 modifier present use '1' as the units to calculate charges
- ;IHS/SD/SDR - 2.6*19 - HEAT180453 - Added code to include AREA OF ORAL CAVITY in ABMRV array for dental.
- ;IHS/SD/SDR - 2.6*19 - HEAT173117 - Correction to CPT Narrative for 23 multiple.
- ;
+ ;IHS/SD/SDR 2.6 CSV
+ ;IHS/SD/SDR 2.6*6 - 5010 - added date written to array for 23
+ ;IHS/SD/SDR 2.6*6 - 5010 - added line item control number
+ ;IHS/SD/SDR 2.6*6 - HEAT28973 - if 55 modifier present use '1' as the units to calculate charges
+ ;IHS/SD/SDR 2.6*19 - HEAT180453 - Added code to include AREA OF ORAL CAVITY in ABMRV array for dental.
+ ;IHS/SD/SDR 2.6*19 - HEAT173117 - Correction to CPT Narrative for 23 multiple.
+ ;IHS/SD/SDR 2.6*21 HEAT151848  Added code to make DTP*471 print for Date Written whether the RX is the ptr or freetext field.
+ ;IHS/SD/SDR 2.6*21 -HEAT168435 - Added code for pharmacy (23 mult) modifiers.
  ; *********************************************************************
  ;
  ; ABMRV(SECTION,#) piece 1=revenue code, 2=CPT code, 3=modifier 
@@ -75,6 +73,8 @@ ABMEHGR2 ; IHS/ASDST/DMJ - GET ANCILLARY SVCS REVENUE CODE INFO ;
  .S $P(ABMRV(23,DA,ABMLCNT),U)=ABM(2)  ;revenue code IEN
  .;S $P(ABMRV(23,DA,ABMLCNT),U,2)=$S(ABM(29):$P($$CPT^ABMCVAPI(ABM(29),ABMP("VDT")),U,2),1:0)  ;CPT  abm*2.6*8 HEAT35661  ;abm*2.6*9 HEAT63888
  .S $P(ABMRV(23,DA,ABMLCNT),U,2)=$S(ABM(29):$P($$CPT^ABMCVAPI(ABM(29),ABMP("VDT")),U,2),ABMP("EXP")=32:"J3490",1:0)  ;CPT  abm*2.6*8 HEAT35661  ;abm*2.6*9 HEAT63888
+ .S $P(ABMRV(23,DA,ABMLCNT),U,3)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),23,DA,2)),U,3)  ;modifier  ;abm*2.6*21 IHS/SD/SDR HEAT168435
+ .S $P(ABMRV(23,DA,ABMLCNT),U,4)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),23,DA,2)),U,4)  ;2nd modifier  ;abm*2.6*21 IHS/SD/SDR HEAT168435
  .S $P(ABMRV(23,DA,ABMLCNT),U,5)=ABM(3)  ;units
  .S ABM(7)=ABM(3)*ABM(4)+ABM(5)  ;units * units cost + dispense fee
  .S ABM(7)=$J(ABM(7),1,2)
@@ -82,6 +82,7 @@ ABMEHGR2 ; IHS/ASDST/DMJ - GET ANCILLARY SVCS REVENUE CODE INFO ;
  .;S $P(ABMRV(23,DA,ABMLCNT),U,9)=$P($G(^PSDRUG(ABM(1),2)),U,4)_" "_$P($G(^(0)),U)  ;NDC generic name  ;abm*2.6*11
  .I ABM(24)'="" S $P(ABMRV(23,DA,ABMLCNT),U,9)=ABM(24)_" "_$P($G(^PSDRUG(ABM(1),0)),U)  ;NDC generic name  ;abm*2.6*11
  .I ABM(24)="" S $P(ABMRV(23,DA,ABMLCNT),U,9)=$P($G(^PSDRUG(ABM(1),2)),U,4)_" "_$P($G(^PSDRUG(ABM(1),0)),U)  ;NDC generic name  ;abm*2.6*11
+ .S $P(ABMRV(23,DA,ABMLCNT),U,12)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),23,DA,2)),U,5)  ;3rd modifier  ;abm*2.6*21 IHS/SD/SDR HEAT168435
  .;S $P(ABMRV(23,DA,ABMLCNT),U,13)=$S(ABM(6)'="":ABM(6),1:ABM(22))  ;prescription  ;abm*2.6*9 HEAT63888
  .;S $P(ABMRV(23,DA,ABMLCNT),U,13)=$S($G(ABM(6))'="":ABM(6),$G(ABM(22))'="":$$GET1^DIQ(52,ABM(22),".01","E"),1:"")  ;prescription  ;abm*2.6*9 HEAT63888  ;abm*2.6*10 HEAT78446
  .S $P(ABMRV(23,DA,ABMLCNT),U,28)=$S($G(ABM(6))'="":ABM(6),$G(ABM(22))'="":$$GET1^DIQ(52,ABM(22),".01","E"),1:"")  ;prescription  ;abm*2.6*9 HEAT63888  ;abm*2.6*10 HEAT78446
@@ -103,6 +104,7 @@ ABMEHGR2 ; IHS/ASDST/DMJ - GET ANCILLARY SVCS REVENUE CODE INFO ;
  .S $P(ABMRV(23,DA,ABMLCNT),U,11)=ABM(13)  ;corresponding dx
  .S $P(ABMRV(23,DA,ABMLCNT),U,38)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),23,DA,2)),U)  ;abm*2.6*6 5010 line item control number
  .;end new code HEAT35661
+ .S $P(ABMRV(23,DA,ABMLCNT),U,32)=ABM(25)  ;date written  ;abm*2.6*6 5010  ;abm*2.6*21 IHS/SD/SDR HEAT151848
  .S $P(ABMRV(23,DA,ABMLCNT),U,39)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),23,DA,3)),U,2)  ;abm*2.6*9 NARR  ;abm*2.6*19 IHS/SD/SDR HEAT173117
  .Q:'$G(ABMDA)
  .S $P(ABMRV(23,DA,ABMLCNT),U,14)=ABM(52,ABMDA,8,"E")  ;days of supply
@@ -115,7 +117,7 @@ ABMEHGR2 ; IHS/ASDST/DMJ - GET ANCILLARY SVCS REVENUE CODE INFO ;
  .S $P(ABMRV(23,DA,ABMLCNT),U,11)=ABM(13)  ;corresponding dx
  .;S $P(ABMRV(23,DA,ABMLCNT),U,27)=$S($G(ABM(28))'="":ABM(28),1:ABM(5))  ;service date to  ;abm*2.6*10 HEAT70933
  .S $P(ABMRV(23,DA,ABMLCNT),U,27)=$S($G(ABM(28))'="":ABM(28),1:ABM(14))  ;service date to  ;abm*2.6*10 HEAT70933
- .S $P(ABMRV(23,DA,ABMLCNT),U,32)=ABM(25)  ;date written  ;abm*2.6*6 5010
+ .;S $P(ABMRV(23,DA,ABMLCNT),U,32)=ABM(25)  ;date written  ;abm*2.6*6 5010  ;abm*2.6*21 IHS/SD/SDR HEAT151848
  .S $P(ABMRV(23,DA,ABMLCNT),U,38)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),23,DA,2)),U)  ;abm*2.6*6 5010 line item control number
  .;S $P(ABMRV(23,DA,ABMLCNT),U,39)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),23,DA,2)),U,2)  ;abm*2.6*9 NARR  ;abm*2.6*19 IHS/SD/SDR HEAT173117
  Q

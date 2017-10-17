@@ -1,0 +1,101 @@
+BLRMIIBL ; IHS/MSC/MKK - MIcro Interim report by Location ; 15-Apr-2016 15:41 ; MKK
+ ;;5.2;LAB SERVICE;**1039**;NOV 01, 1997;Build 38
+ ;
+EEP ; Ersatz EP
+ D EEP^BLRGMENU
+ Q
+ ;
+ ;
+EP ; EP
+PEP ; EP
+ NEW (DILOCKTM,DISYS,DT,DTIME,DUZ,IO,IOBS,IOF,IOM,ION,IOS,IOSL,IOST,IOT,IOXY,U,XPARSYS,XQXFLG)
+ ;
+ S HEADER(1)="Micro Interim Report by Location"
+ D HEADERDT^BLRGMENU
+ ;
+ D ^XBFMK
+ S DIR(0)="PO^44:EMZ"
+ D ^DIR
+ I +$G(DIRUT)!(+Y<1) D BADSTUFF^BLRUTIL7("No/Invalid Entry.")  Q
+ ;
+ S ORDLOC=Y
+ S ORDLOCA=$$GET1^DIQ(44,+ORDLOC,1) ; Abbreviation
+ ;
+ S HEADER(2)="Location:"_$P(ORDLOC,U,2)
+ ;
+ D HEADERDT^BLRGMENU
+ D B^LRU
+ I $G(LRSDT)<1!($G(LRLDT)<1) D BADSTUFF^BLRUTIL7("Invalid Date Range.")  Q
+ ;
+ S HEADER(3)=$$CJ^XLFSTR("Date Range: "_$$FMTE^XLFDT(LRSDT,"5DZ")_" thru "_$$FMTE^XLFDT(LRLDT,"5DZ"),IOM)
+ ;
+ K ^TMP("BLRMIIBL",$J)
+ ;
+ W !!,?4,"Compiling Data"
+ ;
+ D LDATACOM
+ ;
+ W !!,?4,"Compilation Complete."
+ W !!,?9,CNTLRAS," MI Accessions analyzed."
+ W !!,?14,CNT," MI Accessions with ",$P(ORDLOC,U,2)," Ward.",!!
+ ;
+ D ^XBFMK
+ S DIR(0)="YO"
+ S DIR("A")="Produce Report (Y/N)"
+ D ^DIR
+ I +$G(DIRUT)!(+Y<1) D  Q
+ . D BADSTUFF^BLRUTIL7("No/Invalid Entry.")
+ . K ^TMP("BLRMIIBL",$J)
+ ;
+ D ^%ZIS
+ U IO
+ D LDATARPT
+ D ^%ZISC
+ ;
+ D PRESSKEY^BLRGMENU(9)
+ K ^TMP("BLRMIIBL",$J)
+ Q
+ ;
+LDATACOM ; EP - Compile from the Lab Data file
+ S LRDFN=.9999999,(CNT,CNTLRAS)=0
+ F  S LRDFN=$O(^LR(LRDFN))  Q:LRDFN<1  D
+ . S LRIDT=0
+ . F  S LRIDT=$O(^LR(LRDFN,"MI",LRIDT))  Q:LRIDT<1  D
+ .. S CNTLRAS=CNTLRAS+1
+ .. I (CNTLRAS#100)=0  W "."  W:$X>74 !,?4    ; "Warm fuzzy"
+ .. ;
+ .. S DTSPMTKN=+$P($$GET1^DIQ(63.05,LRIDT_","_LRDFN,.01,"I"),".")    ; Date Specimen Taken
+ .. Q:DTSPMTKN<LRSDT!(DTSPMTKN>LRLDT)
+ .. ;
+ .. S LRDIEN=LRIDT_","_LRDFN
+ .. ;
+ .. S RPTDTAPP=+$$GET1^DIQ(63.05,LRDIEN,11,"I")    ; BACT RPT DATE APPROVED
+ .. Q:RPTDTAPP<1
+ .. ;
+ .. S WARD=$$GET1^DIQ(63.05,LRDIEN,.08)
+ .. Q:WARD'=ORDLOCA
+ .. ;
+ .. S ^TMP("BLRMIIBL",$J,RPTDTAPP,LRDFN,LRIDT)=""
+ .. S CNT=CNT+1
+ Q
+ ;
+LDATARPT ; EP  - Report from Lab Data compilation
+ S RPTDTAPP="A",QFLG="NO",(LRFOOT,LRSTOP)=0
+ F  S RPTDTAPP=$O(^TMP("BLRMIIBL",$J,RPTDTAPP),-1)  Q:RPTDTAPP<1!(QFLG="Q")!(LRSTOP)  D
+ . S LRDFN=0
+ . F  S LRDFN=$O(^TMP("BLRMIIBL",$J,RPTDTAPP,LRDFN))  Q:LRDFN<1!(QFLG="Q")!(LRSTOP)  D
+ .. S LRIDT=0
+ .. F  S LRIDT=$O(^TMP("BLRMIIBL",$J,RPTDTAPP,LRDFN,LRIDT))  Q:LRIDT<1!(QFLG="Q")!(LRSTOP)  D
+ ... D LDMIRPT(LRDFN,LRIDT,.LRSTOP)
+ Q
+ ;
+LDMIRPT(LRDFN,LRIDT,LRSTOP) ; EP - Setup & Call Interim Report Routines
+ NEW (DILOCKTM,DISYS,DT,DTIME,DUZ,IO,IOBS,IOF,IOM,ION,IOS,IOSL,IOST,IOT,IOXY,LRDFN,LRIDT,LRSTOP,U,XPARSYS,XQXFLG)
+ S LRSS="MI"
+ ;
+ D PT^LRX
+ S (LRFOOT,LRSTOP)=0
+ S (LRONESPC,LRONETST)=""
+ W @IOF
+ D MI^LRRP2
+ Q

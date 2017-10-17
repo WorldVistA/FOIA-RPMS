@@ -1,5 +1,5 @@
 LRBEECPT ;VA/DALOI/JAH - Edit CPT associated with CIDC; 3/29/05
- ;;5.2;LAB SERVICE;**1031**;NOV 1, 1997
+ ;;5.2;LAB SERVICE;**1031**;NOV 1, 1997;Build 188
  ;
  ;;VA LR Patche(s): 291,315
  ;

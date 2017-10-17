@@ -1,5 +1,5 @@
 OSEHRA ZGO Export: SECURITY KEY
-12-JUN-2017 17:10:02 ZWR
+17-OCT-2017 09:15:47 ZWR
 ^DIC(19.1,0)="SECURITY KEY^19.1^1122^917"
 ^DIC(19.1,0,"DD")="#"
 ^DIC(19.1,0,"DEL")="#"
@@ -2589,7 +2589,7 @@ OSEHRA ZGO Export: SECURITY KEY
 ^DIC(19.1,885,1,1,0)="This security key should only be assigned to those persons who will have "
 ^DIC(19.1,885,1,2,0)="the ability to manage the iCare system.  It SHOULD NOT be given to the "
 ^DIC(19.1,885,1,3,0)="general user population."
-^DIC(19.1,886,0)="BQIZCMED^iCare Case Managment Editor^^n"
+^DIC(19.1,886,0)="BQIZCMED^iCare Case Management Editor^^n"
 ^DIC(19.1,886,1,0)="^19.11^3^3^3081015^^^"
 ^DIC(19.1,886,1,1,0)="This key should be assigned to those users of the iCare system who may "
 ^DIC(19.1,886,1,2,0)="edit care management data.  This includes editing existing RPMS register "
@@ -4380,7 +4380,7 @@ OSEHRA ZGO Export: SECURITY KEY
 ^DIC(19.1,"E","FULL ACCESS TO THIS MODULE",449)=""
 ^DIC(19.1,"E","GENERIC RETRIEVAL TOOL ACCESS",1063)=""
 ^DIC(19.1,"E","GROUP NOTES ACCESS",1044)=""
-^DIC(19.1,"E","ICARE CASE MANAGMENT EDITOR",886)=""
+^DIC(19.1,"E","ICARE CASE MANAGEMENT EDITOR",886)=""
 ^DIC(19.1,"E","ICARE DESIG PROVIDER EDITOR",1120)=""
 ^DIC(19.1,"E","ICARE EMPLOYEE HEALTH USER",1065)=""
 ^DIC(19.1,"E","ICARE MANAGER",885)=""

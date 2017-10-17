@@ -1,10 +1,12 @@
-ABME5L14 ; IHS/ASDST/DMJ - Header 
- ;;2.6;IHS 3P BILLING SYSTEM;**6,8,9**;NOV 12, 2009
+ABME5L14 ; IHS/SD/SDR - Header 
+ ;;2.6;IHS 3P BILLING SYSTEM;**6,8,9,14,21**;NOV 12, 2009;Build 379
  ;Header Segments
+ ;IHS/SD/SDR - 2.6*14 - HEAT70826 - Modified to remove 2310B loop based on SGTM entry
+ ;IHS/SD/SDR - 2.6*21 - HEAT70826 - Change made in p14 was incomplete.  P21 fixes it up.
  ;
 EP ;START HERE
  N ABM
- D GETPRV^ABMEEPRV             ; Build Claim Level Provider array
+ D GETPRV^ABMEEPRV   ;Build Claim Level Provider array
  ;
  ; Loop 2310A - Referring Physician Name
  S ABMLOOP="2310A"
@@ -25,6 +27,15 @@ EP ;START HERE
  ; Loop 2310B - Rendering Physician Name
  S ABMLOOP="2310B"
  I $D(ABMP("PRV","R"))!($D(ABMP("PRV","A"))) D
+ .;I $D(^ABMNINS(ABMP("LDFN"),ABMP("INS"),2.5,"ASEND",ABMP("EXP"),"2310B","N"))=1 Q  ;abm*2.6*14 HEAT70826  ;abm*2.6*21 IHS/SD/SDR HEAT70826
+ .;start new abm*2.6*21 IHS/SD/SDR HEAT70826
+ .S ABMOFLG=0
+ .I $D(^ABMNINS(ABMP("LDFN"),ABMP("INS"),2.5,"ASEND",ABMP("EXP"),"2310B","00","0","N"))>0 D
+ ..S ABMO=0
+ ..F  S ABMO=$O(^ABMNINS(ABMP("LDFN"),ABMP("INS"),2.5,"ASEND",ABMP("EXP"),"2310B","00","0","N",ABMO)) Q:'ABMO  D
+ ...I $P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),2.5,ABMO,0)),U,6)=""!($P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),2.5,ABMO,0)),U,6)=ABMP("VTYP")) S ABMOFLG=1
+ .Q:ABMOFLG=1
+ .;end new abm*2.6*21 IHS/SD/SDR HEAT70826
  .S ABM("PRV")=$S($D(ABMP("PRV","R")):$O(ABMP("PRV","R",0)),1:$O(ABMP("PRV","A",0)))
  .D EP^ABME5NM1("82")
  .D WR^ABMUTL8("NM1")

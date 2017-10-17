@@ -1,10 +1,11 @@
-ABMDTIN1 ; IHS/ASDST/DMJ - Maintenance of INSURER FILE part 2 ;   
- ;;2.6;IHS Third Party Billing;**1,6,8,9,10,11,13,14**;NOV 12, 2009;Build 238
+ABMDTIN1 ; IHS/SD/SDR - Maintenance of INSURER FILE part 2 ;   
+ ;;2.6;IHS Third Party Billing;**1,6,8,9,10,11,13,14,21**;NOV 12, 2009;Build 379
  ;IHS/SD/SDR-2.6*1-FIXPMS10028 - prompt for UB04 FL38
  ;IHS/SD/SDR-2.6*6-5010 - added code for BHT06
  ;IHS/SD/SDR-2.6*9-HEAT46087 - Added parameter chk for 4 vs 8 DXs
  ;IHS/SD/SDR-2.6*13 -Added chk for new exp mode 35
  ;IHS/SD/SDR-2.6*14-Changed dt from 10/1/14 to 10/1/15
+ ;IHS/SD/SDR 2.6*21 HEAT198159 - Resent routine to get block 28 question added for exp mode 35
  ; *****************
  W ! K DIC
  S X="`"_ABM("DFN"),DIC="^ABMNINS(DUZ(2),",DIC(0)="LX" D ^DIC Q:+Y<0
@@ -31,32 +32,7 @@ ABMDTIN1 ; IHS/ASDST/DMJ - Maintenance of INSURER FILE part 2 ;
  .D ^DIE
  ;D PROV2^ABMDTIN2  ;abm*2.6*6 5010
 DISP ;DISPLAY VISIT TYPE TABLE
- D VHDR
- S DA=0 F  S DA=$O(^ABMNINS(DUZ(2),ABM("DFN"),1,DA)) Q:'DA  S ABM(0)=^(DA,0) D
- .I $Y+4>IOSL D
- ..S DIR(0)="E" D ^DIR K DIR
- ..D VHDR
- .W !?1,DA,?7,$E($P($G(^ABMDVTYP(DA,0)),U),1,17)
- .I $P(ABM(0),U,7)="N" W ?27,"***** (UNBILLABLE) *****" Q
- .I $D(^ABMNINS(DUZ(2),ABM("DFN"),1,DA,12,0)) D
- ..S ABMMVTD=""
- ..F  S ABMMVTD=$O(^ABMNINS(DUZ(2),ABM("DFN"),1,DA,12,"B",ABMMVTD),-1) Q:ABMMVTD=""!($G(ABMVFLG)=1)  D
- ...S ABMVTI=""
- ...F  S ABMVTI=$O(^ABMNINS(DUZ(2),ABM("DFN"),1,DA,12,"B",ABMMVTD,ABMVTI)) Q:ABMVTI=""!($G(ABMVFLG)=1)  D
- ....I $P($G(^ABMNINS(DUZ(2),ABM("DFN"),1,DA,12,ABMVTI,0)),U,2)'="",$P($G(^ABMNINS(DUZ(2),ABM("DFN"),1,DA,12,ABMVTI,0)),U,2)<DT Q
- ....S ABMVFLG=1
- ....W ?27,"** Replace with: "
- ....W:$P($G(^ABMNINS(DUZ(2),ABM("DFN"),1,DA,12,ABMVTI,0)),U,3)'="" $P($G(^AUTNINS($P($G(^ABMNINS(DUZ(2),ABM("DFN"),1,DA,12,ABMVTI,0)),U,3),0)),U)
- ....W " **"
- .I $G(ABMVFLG)=1 K ABMVTI,ABMMVTD,ABMVFLG Q
- .S ABM("X")=$S($P(ABM(0),U,4):$P($G(^ABMDEXP($P(ABM(0),U,4),0)),U),DA=111:"UB-92",1:"HCFA-1500")
- .W ?26,$J("",9-$L(ABM("X"))\2)_ABM("X")
- .W ?40,$S($P(ABM(0),U,6)="Y":"YES",DA=999:"N/A",1:"NO"),?46,$P(ABM(0),U,5)
- .S ABM(1)=0 F ABM("I")=1:1 S ABM(1)=$O(^ABMNINS(DUZ(2),ABM("DFN"),1,DA,11,ABM(1))) Q:'ABM(1)  S ABM(10)=^(ABM(1),0) D
- ..W:ABM("I")>1 !
- ..W ?50,$$SDT^ABMDUTL(ABM(10))
- ..I $P(ABM(10),U,3)]"" W ?61,$$SDT^ABMDUTL($P(ABM(10),"^",3))
- ..W ?72,$J($P(ABM(10),U,2),7,2)
+ D DISP^ABMDTIN2
 DIC ;LOOK-UP WITH LAYGO
  W !
  S DA(1)=ABM("DFN")
@@ -134,7 +110,8 @@ DIC2 S DA=ABM("VTYP")
  ;I ("^3^14^22^27^32^"[("^"_($P($G(^ABMNINS(DUZ(2),ABM("DFN"),1,ABM("VTYP"),0)),U,4))_"^")) D  ;abm*2.6*13 export mode 35
  I ("^3^14^22^27^32^35^"[("^"_($P($G(^ABMNINS(DUZ(2),ABM("DFN"),1,ABM("VTYP"),0)),U,4))_"^")) D  ;abm*2.6*13 export mode 35
  .S DR=".15Block 24K..........:"
- .I $P($G(^ABMNINS(DUZ(2),ABM("DFN"),1,ABM("VTYP"),0)),U,4)=27 S DR=DR_";118Block 28...........:"
+ .;I $P($G(^ABMNINS(DUZ(2),ABM("DFN"),1,ABM("VTYP"),0)),U,4)=27 S DR=DR_";118Block 28...........:"  ;abm*2.6*13 export mode 35  ;abm*2.6*21 IHS/SD/SDR HEAT198159
+ .I "^27^35^"[("^"_$P($G(^ABMNINS(DUZ(2),ABM("DFN"),1,ABM("VTYP"),0)),U,4)_"^") S DR=DR_";118Block 28...........:"  ;abm*2.6*13 export mode 35  ;abm*2.6*21 IHS/SD/SDR HEAT198159
  .S DR=DR_";.17Block 29...........:;.2Block 33 PIN#......:"
  ;end new HEAT72503
  ;start new abm*2.6*11 HEAT66367

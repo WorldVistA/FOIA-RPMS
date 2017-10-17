@@ -1,5 +1,5 @@
 ABMDRSL2 ; IHS/ASDST/DMJ - Selective Report Parameters-PART 3 ;
- ;;2.6;IHS 3P BILLING SYSTEM;**14**;NOV 12, 2009;Build 238
+ ;;2.6;IHS 3P BILLING SYSTEM;**14,21**;NOV 12, 2009;Build 379
  ;Original;TMD;
  ;
  ; IHS/SD/SDR - v2.5 p8 - task 12
@@ -9,6 +9,9 @@ ABMDRSL2 ; IHS/ASDST/DMJ - Selective Report Parameters-PART 3 ;
  ; IHS/SD/SDR - v2.6 CSV
  ;IHS/SD/SDR - 2.6*14 - ICD10 009 - Updated reports to look for ICD10 codes
  ;IHS/SD/SDR - 2.6*14 - HEAT165197 (CR3109) - Added code for $$NUM to validate alphanumeric values
+ ;IHS/SD/SDR - 2.6*21 - HEAT140244 - Made change so extended report will print for cancelled claims report
+ ;IHS/SD/SDR - 2.6*21 - HEAT214020 - Updated prompts for ICD-9 codes to actually say ICD-9, not just ICD
+ ;IHS/SD/SDR - 2.6*21 - HEAT241429 - Added prompt for PRINTER vs COMMA-DELIMITED
  ;
 PTYP ;EP
  K DIR
@@ -33,7 +36,8 @@ RTYP ;EP
  S ABM("RTYP")=Y
  S ABM("RTYP","NM")=Y(0)
  K ABM(132)
- I $D(ABM("REASON")),(Y=2) S (Y,ABM("RTYP"))=3
+ ;I $D(ABM("REASON")),(Y=2) S (Y,ABM("RTYP"))=3 ;abm*2.6*21 IHS/SD/SDR HEAT140244
+ I $D(ABM("REASON")),$G(ABM("REASON"))="PEND",(Y=2) S (Y,ABM("RTYP"))=3 ;abm*2.6*21 IHS/SD/SDR HEAT140244
  I Y=2 S ABM(132)="" Q
  I Y>2,+$G(ABMP("TYP"))'=0 S ABM(132)=""
  Q
@@ -62,7 +66,8 @@ DX ;EP
 DLOW ;
  S DIR(0)="PO^80:QEAM"
  I $D(^DIC(9.8,"B","ICDEX")) S DIR("S")="I $P($$DX^ABMCVAPI(+Y,""""),U,20)=1"  ;abm*2.6*14 ICD10 009 and update API call
- S DIR("A")="Low ICD Code"
+ ;S DIR("A")="Low ICD Code"  ;abm*2.6*21 IHS/SD/SDR HEAT214020
+ S DIR("A")="Low ICD-9 Code"  ;abm*2.6*21 IHS/SD/SDR HEAT214020
  D ^DIR
  K DIR
  Q:$D(DIRUT)
@@ -74,7 +79,8 @@ DLOW ;
 DHI ;
  S DIR(0)="PO^80:QEAM"
  I $D(^DIC(9.8,"B","ICDEX")) S DIR("S")="I $P($$DX^ABMCVAPI(Y,""""),U,20)=1"  ;abm*2.6*14 ICD10 009 and update API call
- S DIR("A")="High ICD Code"
+ ;S DIR("A")="High ICD Code"  ;abm*2.6*21 IHS/SD/SDR HEAT214020
+ S DIR("A")="High ICD-9 Code"  ;abm*2.6*21 IHS/SD/SDR HEAT214020
  D ^DIR
  K DIR
  G DX:$D(DIRUT)
@@ -153,3 +159,32 @@ PHI ;
  S ABMY("PX",2)=$P($$CPT^ABMCVAPI(+Y,""),U,2)  ;CSV-c
  I ABMY("PX",1)>ABMY("PX",2) W !!,*7,"INPUT ERROR: Low CPT Code is Greater than than the High, TRY AGAIN!",!! G PX
  Q
+ ;
+ ;start new abm*2.6*21 IHS/SD/SDR HEAT241429
+RFOR ;EP
+ K DIR
+ S DIR(0)="SO^1:Printer;2:Comma-Delimited (for Excel Importing)"
+ S DIR("A")="Select TYPE of Output"
+ D ^DIR
+ K DIR
+ Q:$D(DIRUT)
+ S ABM("RFOR")=Y
+ S ABM("RFOR","NM")=Y(0)
+ I ABM("RFOR")=1 Q  ;stop here if printer
+ ;ask path and filename
+ K DIR
+ S DIR(0)="F"
+ S DIR("A")="Path"
+ D ^DIR
+ K DIR
+ Q:$D(DIRUT)
+ S ABM("RPATH")=Y
+ K DIR
+ S DIR(0)="F"
+ S DIR("A")="Filename"
+ D ^DIR
+ K DIR
+ Q:$D(DIRUT)
+ S ABM("RFN")=Y
+ Q
+ ;end new abm*2.6*21 IHS/SD/SDR HEAT241429

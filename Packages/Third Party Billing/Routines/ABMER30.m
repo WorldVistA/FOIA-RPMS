@@ -1,15 +1,14 @@
-ABMER30 ; IHS/ASDST/DMJ - UB92 EMC RECORD 30 (Third Party Payor) ;     
- ;;2.6;IHS 3P BILLING SYSTEM;;NOV 12, 2009
+ABMER30 ; IHS/SD/SDR - UB92 EMC RECORD 30 (Third Party Payor) ;     
+ ;;2.6;IHS 3P BILLING SYSTEM;**14,21**;NOV 12, 2009;Build 379
  ;Original;DMJ;01/22/96 10:43 AM
  ;
  ; IHS/ASDS/LSL - 06/05/00 - V2.4 Patch 1 - NOIS NDA-0500-100042
  ;     Modify to not subtract ABMP("PAYED") to gain total
  ;
- ; IHS/SD/SDR - v2.5 p10 - IM19557
- ;   Correct due from patient
+ ; IHS/SD/SDR - v2.5 p10 - IM19557 - Correct due from patient
+ ; IHS/SD/SDR - v2.5 p11 - IM24315 - Made change to check new parameter for UB relationship code
  ;
- ; IHS/SD/SDR - v2.5 p11 - IM24315
- ;   Made change to check new parameter for UB relationship code
+ ;IHS/SD/SDR - 2.6*21 - HEAT123457 - Updated 61044 check from 'equals' to 'contains'
  ;
 START ;START HERE
  K ABMREC(30),ABMREC(31),ABME,ABM,ABMP("PAYED")
@@ -30,7 +29,8 @@ LOOP ;FIRST LOOP
  .D LOOP2               ; Get data
  .D S90^ABMERUTL        ; Add 1 to record type counts (electronic)
  .D ^ABMER31            ; Get insured's data
- .I $$RCID^ABMERUTL(ABME("INS"))=61044 S ABME("S#")=99
+ .;I $$RCID^ABMERUTL(ABME("INS"))=61044 S ABME("S#")=99  ;abm*2.6*21 IHS/SD/SDR HEAT123457
+ .I $$RCID^ABMERUTL(ABME("INS"))["61044" S ABME("S#")=99  ;abm*2.6*21 IHS/SD/SDR HEAT123457
  Q
  ;
 LOOP2 ;LOOP HERE

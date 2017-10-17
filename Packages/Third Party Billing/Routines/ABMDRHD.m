@@ -1,5 +1,5 @@
-ABMDRHD ; IHS/ASDST/DMJ - Report Header Generator ; 
- ;;2.6;IHS Third Party Billing;**1,3,4,11,14**;NOV 12, 2009;Build 238
+ABMDRHD ; IHS/SD/SDR - Report Header Generator ; 
+ ;;2.6;IHS Third Party Billing;**1,3,4,11,14,21**;NOV 12, 2009;Build 379
  ;Original;TMD;03/25/96 11:34 AM
  ;
  ;IHS/SD/SDR - v2.5 p8 - Added code for cancellation dates
@@ -8,21 +8,42 @@ ABMDRHD ; IHS/ASDST/DMJ - Report Header Generator ;
  ;IHS/SD/SDR - abm*2.6*4 - NO HEAT - Fixed header for closed/exported dates
  ;IHS/SD/SDR - 2.6*14 - ICD10 009 - Updated to print ICD10 header
  ;IHS/SD/SDR - 2.6*14 - HEAT165197 (CR3109) - Updated DX tag to display codes using new variables
+ ;IHS/SD/SDR - 2.6*21 - HEAT184442 - Adeed ICD-10 to header when ICD-10 Diagnosis Range is selected; wasn't clear before when only
+ ;   DIAGNOSIS RANGE was displayed.  Also updated header so if they select BOTH but don't enter anything for ICD-9, it won't print the
+ ;   'and' and will only print the ICD-10 range selected.
+ ;IHS/SD/SDR - 2.6*21 - VMBP RQMT_96 - Added code for all new insurer types.
  ;
 HD ;EP for setting Report Header
  S ABM("LVL")=0,ABM("CONJ")="for ",ABM("TXT")="ALL BILLING SOURCES"
  I $D(ABMY("INS")) S ABM("TXT")=$P(^AUTNINS(ABMY("INS"),0),U) G LOC
  I $D(ABMY("PAT")) S ABM("TXT")=$P(^DPT(ABMY("PAT"),0),U) G LOC
  I $D(ABMY("TYP")) D
- .I ABMY("TYP")="R" S ABM("TXT")="MEDICARE" Q
- .I ABMY("TYP")="D" S ABM("TXT")="MEDICAID" Q
- .I ABMY("TYP")="W" S ABM("TXT")="WORKMEN'S COMP" Q
+ .;start old abm*2.6*21 IHS/SD/SDR VMBP RQMT_96
+ .;I ABMY("TYP")="R" S ABM("TXT")="MEDICARE" Q
+ .;I ABMY("TYP")="D" S ABM("TXT")="MEDICAID" Q
+ .;I ABMY("TYP")="W" S ABM("TXT")="WORKMEN'S COMP" Q
+ .;I ABMY("TYP")["W" S ABM("TXT")="PRIVATE+WORKMEN'S COMP" Q
+ .;I ABMY("TYP")["P" S ABM("TXT")="PRIVATE INSURANCE" Q
+ .;I ABMY("TYP")="N" S ABM("TXT")="NON-BENEFICIARY PATIENTS" Q
+ .;I ABMY("TYP")="I" S ABM("TXT")="BENEFICIARY PATIENTS" Q
+ .;I ABMY("TYP")="K" S ABM("TXT")="CHIP" Q
+ .;I ABMY("TYP")="V" S ABM("TXT")="VETERANS ADMINISTRATION" Q  ;abm*2.6*11 VMBP RQMT_96
+ .;end old start new abm*2.6*21 IHS/SD/SDR VMBP RQMT_96
+ .I ABMY("TYP")["^R^" S ABM("TXT")="MEDICARE" Q
+ .I ABMY("TYP")="^D^" S ABM("TXT")="MEDICAID" Q
+ .I ABMY("TYP")="^W^" S ABM("TXT")="WORKMEN'S COMP" Q
  .I ABMY("TYP")["W" S ABM("TXT")="PRIVATE+WORKMEN'S COMP" Q
  .I ABMY("TYP")["P" S ABM("TXT")="PRIVATE INSURANCE" Q
- .I ABMY("TYP")="N" S ABM("TXT")="NON-BENEFICIARY PATIENTS" Q
- .I ABMY("TYP")="I" S ABM("TXT")="BENEFICIARY PATIENTS" Q
- .I ABMY("TYP")="K" S ABM("TXT")="CHIP" Q
- .I ABMY("TYP")="V" S ABM("TXT")="VETERANS ADMINISTRATION" Q  ;abm*2.6*11 insurer type
+ .I ABMY("TYP")="^N^" S ABM("TXT")="NON-BENEFICIARY PATIENTS" Q
+ .I ABMY("TYP")="^I^" S ABM("TXT")="BENEFICIARY PATIENTS" Q
+ .I ABMY("TYP")="^K^" S ABM("TXT")="CHIP" Q
+ .I ABMY("TYP")="^V^" S ABM("TXT")="VETERANS ADMINISTRATION" Q
+ .I ABMY("TYP")="^FPL^" S ABM("TXT")="FPL 133 PERCENT" Q
+ .I ABMY("TYP")="^SEP^" S ABM("TXT")="STATE EXCHANGE PLAN" Q
+ .I ABMY("TYP")="^T^" S ABM("TXT")="3P LIABILITY" Q
+ .I ABMY("TYP")="^MH^" S ABM("TXT")="MEDICARE HMO" Q
+ .I ABMY("TYP")="^TSI^" S ABM("TXT")="TRIBAL SELF INSURED" Q
+ .;end new abm*2.6*21 IHS/SD/SDR VMBP RQMT_96
  .S ABM("TXT")="UNSPECIFIED"
  ;
 LOC ;EP
@@ -41,12 +62,14 @@ DX I '$D(ABMY("DX")) G PX
  ;S ABM("CONJ")="from ",ABM("TXT")=ABMY("DX",1) D CHK
  ;S ABM("CONJ")="to ",ABM("TXT")=ABMY("DX",2) D CHK
  ;end old code start new code ICD10 009 and HEAT165197 (CR3109)
- S ABM("CONJ")="with ",ABM("TXT")=$S($G(ABMY("DXANS"))=9:"ICD-9 ",$D(ABMY("DXANS"))=10:"ICD-10 ",1:"")_"DIAGNOSIS RANGE" D CHK
+ ;S ABM("CONJ")="with ",ABM("TXT")=$S($G(ABMY("DXANS"))=9:"ICD-9 ",$D(ABMY("DXANS"))=10:"ICD-10 ",1:"")_"DIAGNOSIS RANGE" D CHK  ;abm*2.6*21 IHS/SD/SDR HEAT184442
+ S ABM("CONJ")="with ",ABM("TXT")=$S($G(ABMY("DXANS"))=9:"ICD-9 ",$G(ABMY("DXANS"))=10:"ICD-10 ",1:"")_"DIAGNOSIS RANGE" D CHK  ;abm*2.6*21 IHS/SD/SDR HEAT184442 - corrected to make ICD-10 print in header
  I $D(ABMY("DX",1)) D
  .S ABM("CONJ")=$S($G(ABMY("DXANS"))="B":"ICD-9s ",1:"from "),ABM("TXT")=ABM("DX",1) D CHK
  .S ABM("CONJ")="to ",ABM("TXT")=ABM("DX",2) D CHK
  I $D(ABMY("DX",3)) D
- .S ABM("CONJ")=$S($G(ABMY("DXANS"))="B":"and ICD-10s ",1:"from "),ABM("TXT")=ABM("DX",3) D CHK
+ .;S ABM("CONJ")=$S($G(ABMY("DXANS"))="B":"and ICD-10s ",1:"from "),ABM("TXT")=ABM("DX",3) D CHK  ;abm*2.6*21 IHS/SD/SDR HEAT184442
+ .S ABM("CONJ")=$S(($G(ABMY("DXANS"))="B"&($D(ABM("DX",1)))):"and ",1:"ICD-10s from "),ABM("TXT")=ABM("DX",3) D CHK  ;abm*2.6*21 IHS/SD/SDR HEAT184442 - remove 'and' if no ICD-9 range selected
  .S ABM("CONJ")="to ",ABM("TXT")=ABM("DX",4) D CHK
  ;end new code ICD10 009 and HEAT165197 (CR3109)
 PX I '$D(ABMY("PX")) G XIT

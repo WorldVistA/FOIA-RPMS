@@ -1,8 +1,17 @@
-ABMDF28Z ; IHS/ASDST/DMJ - PRINT UB-04 ;  
- ;;2.6;IHS 3P BILLING SYSTEM;**3,8,9,10,11,14,16**;NOV 12, 2009;Build 268
+ABMDF28Z ; IHS/SD/SDR - PRINT UB-04 ;  
+ ;;2.6;IHS 3P BILLING SYSTEM;**3,8,9,10,11,14,16,21**;NOV 12, 2009;Build 379
  ;IHS/SD/SDR-2.6*3-POA changes-removed insurer type "R" check
  ;IHS/SD/SDR-2.6*14-ICD10 002F-Updated ICD indicator on form to 9 or 0
  ;IHS/SD/SDR-2.6*16-HEAT236243-Moved dt for box 74 so there is space between PX code and date.
+ ;IHS/SD/SDR 2.6*21 Split routine to ABMDF28T due to size.
+ ;IHS/SD/SDR-2.6*21 HEAT97615 - Remove ID qualifier and ID from box 76 if Medicare is active and tribal
+ ;IHS/SD/SDR-2.6*21 HEAT123457 - changed 61044 references from 'equals' to 'contains'
+ ;IHS/SD/SDR-2.6*21 HEAT128931 - FL64 wasn't printing when insurer uses plan name
+ ;IHS/SD/SDR-2.6*21 HEAT162190 - Print taxnomoy in 81 for Montana DPHHS.
+ ;IHS/SD/SDR-2.6*21 HEAT189659 - Print taxonomy in 81 for SD Medicaid.
+ ;IHS/SD/SDR-2.6*21 HEAT217449-Moved box 76 one char left.  Was only printing 7 of 8 chars of prov id.
+ ; self-insured has already been billed.
+ ;IHS/SD/SDR-2.6*21 -VMBP - Updated p11 changes to include Serena ref#s. Moved VA Station Number to correct field on form.
  ;
 45 ; ABMPAID = Primary + Secondary + Tertiary + Prepaid
  ; ABMPBAL = Gross amount - ABM("PAID")
@@ -29,7 +38,7 @@ ABMDF28Z ; IHS/ASDST/DMJ - PRINT UB-04 ;
  ..I $P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),7)),U,26)'="" S ABMDE=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),7)),U,26)_"^29^20" Q
  ..I $P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),4)),U,8)'="" S ABMDE=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),4)),U,8)_"^29^20"
  .;end new HEAT86014
- .I ($P($G(ABMP("INS",I)),U,2)="V")&($P($G(^ABMDPARM(ABMP("LDFN"),1,3)),U,12)'="") S ABMDE=$P($G(^ABMDPARM(ABMP("LDFN"),1,3)),U,12)_"^29^20"  ;abm*2.6*11 VMBP
+ .;I ($P($G(ABMP("INS",I)),U,2)="V")&($P($G(^ABMDPARM(ABMP("LDFN"),1,3)),U,12)'="") S ABMDE=$P($G(^ABMDPARM(ABMP("LDFN"),1,3)),U,12)_"^29^20"  ;abm*2.6*11 VMBP RQMT_94  ;abm*2.6*21 IHS/SD/SDR VMBP
  .D WRT^ABMDF28W  ;FL #60
  .S ABMDE=$E(ABMREC(30,I),97,110)_"^49^14"  ;Insured Group Name
  .D WRT^ABMDF28W  ;FL #61
@@ -45,9 +54,11 @@ ABMDF28Z ; IHS/ASDST/DMJ - PRINT UB-04 ;
  .W !
  .Q:'$D(ABMREC(30,I))
  .S ABMDE=ABMR(40,(10*I)+40)_"^^30"  ;Pro Auth #
+ .I (($P($G(ABMP("INS",I)),U,2)="V")!(ABMREC(30,I)["VMBP"))&($P($G(^ABMDPARM(ABMP("LDFN"),1,3)),U,12)'="") S ABMDE=$P($G(^ABMDPARM(ABMP("LDFN"),1,3)),U,12)_"^^30"  ;abm*2.6*11 VMBP RQMT_94  ;abm*2.6*21 IHS/SD/SDR VMBP
  .D WRT^ABMDF28W   ;FL #63
  .;Document Control Number for active ins
- .I $E(ABMREC(30,I),54,78)=$$FMT^ABMERUTL($P($G(^AUTNINS(ABMP("INS"),0)),U),25) D
+ .;I $E(ABMREC(30,I),54,78)=$$FMT^ABMERUTL($P($G(^AUTNINS(ABMP("INS"),0)),U),25) D  ;abm*2.6*21 IHS/SD/SDR HEAT128931
+ .I +$G(ABMP("INS",I))=ABMP("INS") D  ;abm*2.6*21 IHS/SD/SDR HEAT128931
  ..S ABMDE=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),4)),U,9)_"^30^26"
  ..D WRT^ABMDF28W  ;FL #64
  .S ABMDE=$E(ABMREC(31,I),87,110)_"^57^20"  ;Employer name
@@ -56,170 +67,18 @@ ABMDF28Z ; IHS/ASDST/DMJ - PRINT UB-04 ;
  .S ABMDE=$P(ABMTMPDE," ",1)
  .N J
 55 ;
- W !
- N I
- F I=40:10:120 D
- .D @(I_"^ABMER70A")
- N I
- F I=250,260,290,300 D
- .D @(I_"^ABMER70")
- S ABMDE=ABMR(70,40)_"^1^7"  ;Principle DX
- D WRT^ABMDF28W  ;FL #67
- ;I ABMP("ITYPE")="R" D
- S ABMDE=$S(ABMR(70,40,"POA")'=1:$G(ABMR(70,40,"POA")),1:"")_"^8^1"
- D WRT^ABMDF28W  ;FL #67 POA
- S ABMDE=ABMR(70,50)_"^9^7"  ;Other DX 1
- D WRT^ABMDF28W  ;FL #67a
- ;I ABMP("ITYPE")="R" D
- S ABMDE=$S(ABMR(70,50,"POA")'=1:$G(ABMR(70,50,"POA")),1:"")_"^16^1"
- D WRT^ABMDF28W  ;FL #67 POA
- S ABMDE=ABMR(70,60)_"^17^7"  ;Other DX 2
- D WRT^ABMDF28W  ;FL #67b
- ;I ABMP("ITYPE")="R" D
- S ABMDE=$S(ABMR(70,60,"POA")'=1:$G(ABMR(70,60,"POA")),1:"")_"^24^1"
- D WRT^ABMDF28W  ;FL #67 POA
- S ABMDE=ABMR(70,70)_"^25^7"  ;Other DX 3
- D WRT^ABMDF28W  ;FL #67c
- ;I ABMP("ITYPE")="R" D
- S ABMDE=$S(ABMR(70,70,"POA")'=1:$G(ABMR(70,70,"POA")),1:"")_"^32^1"
- D WRT^ABMDF28W  ;FL #67 POA
- S ABMDE=ABMR(70,80)_"^33^7"  ;Other DX 4
- D WRT^ABMDF28W  ;FL #67d
- ;I ABMP("ITYPE")="R" D
- S ABMDE=$S(ABMR(70,80,"POA")'=1:$G(ABMR(70,80,"POA")),1:"")_"^40^1"
- D WRT^ABMDF28W  ;FL #67 POA
- S ABMDE=ABMR(70,90)_"^41^7"  ;Other DX 5
- D WRT^ABMDF28W  ;FL #67e
- ;I ABMP("ITYPE")="R" D
- S ABMDE=$S(ABMR(70,90,"POA")'=1:$G(ABMR(70,90,"POA")),1:"")_"^48^1"
- D WRT^ABMDF28W  ;FL #67 POA
- S ABMDE=ABMR(70,100)_"^49^7"  ;Other DX 6
- D WRT^ABMDF28W  ;FL #67f
- ;I ABMP("ITYPE")="R" D
- S ABMDE=$S(ABMR(70,100,"POA")'=1:$G(ABMR(70,100,"POA")),1:"")_"^56^1"
- D WRT^ABMDF28W  ;FL #67 POA
- S ABMDE=ABMR(70,110)_"^57^7"  ;Other DX 7
- D WRT^ABMDF28W  ;FL #67g
- ;I ABMP("ITYPE")="R" D
- S ABMDE=$S(ABMR(70,110,"POA")'=1:$G(ABMR(70,110,"POA")),1:"")_"^64^1"
- D WRT^ABMDF28W  ;FL #67 POA
- S ABMDE=ABMR(70,120)_"^65^7"  ;Other DX 8
- D WRT^ABMDF28W  ;FL #67h
- ;I ABMP("ITYPE")="R" D
- S ABMDE=$S(ABMR(70,120,"POA")'=1:$G(ABMR(70,120,"POA")),1:"")_"^72^1"
- D WRT^ABMDF28W  ;FL #67 POA
- F I=130:10:200 D
- .D @(I_"^ABMER70A")
- W !
- ;S ABMDE="9^^1"  ;DX Version Qualifier-always 9  ;abm*2.6*14 ICD10 002F
- S ABMDE=$S(+$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),0)),U,21)=10:"0",1:"9")_"^^1"  ;DX Version Qualifier -9 for ICD9; 0 for ICD10  ;abm*2.6*14 ICD10 002F
- D WRT^ABMDF28W  ;FL #66
- S ABMDE=ABMR(70,130)_"^1^7"  ;Other DX 9
- D WRT^ABMDF28W  ;FL #67i
- ;I ABMP("ITYPE")="R" D
- S ABMDE=$S(ABMR(70,130,"POA")'=1:$G(ABMR(70,130,"POA")),1:"")_"^8^1"
- D WRT^ABMDF28W  ;FL #67 POA
- S ABMDE=ABMR(70,140)_"^9^7"  ;Other DX 10
- D WRT^ABMDF28W   ;FL #67j
- ;I ABMP("ITYPE")="R" D
- S ABMDE=$S(ABMR(70,140,"POA")'=1:$G(ABMR(70,140,"POA")),1:"")_"^16^1"
- D WRT^ABMDF28W  ;FL #67 POA
- S ABMDE=ABMR(70,150)_"^17^7"  ;Other DX 11
- D WRT^ABMDF28W   ;FL #67k
- ;I ABMP("ITYPE")="R" D
- S ABMDE=$S(ABMR(70,150,"POA")'=1:$G(ABMR(70,150,"POA")),1:"")_"^24^1"
- D WRT^ABMDF28W  ; FL #67 POA
- S ABMDE=ABMR(70,160)_"^25^7"  ;Other DX 12
- D WRT^ABMDF28W  ;FL #67l
- ;I ABMP("ITYPE")="R" D
- S ABMDE=$S(ABMR(70,160,"POA")'=1:$G(ABMR(70,160,"POA")),1:"")_"^32^1"
- D WRT^ABMDF28W  ; FL #67 POA
- S ABMDE=ABMR(70,170)_"^33^7"  ;Other DX 13
- D WRT^ABMDF28W  ;FL #67m
- ;I ABMP("ITYPE")="R" D
- S ABMDE=$S(ABMR(70,170,"POA")'=1:$G(ABMR(70,170,"POA")),1:"")_"^40^1"
- D WRT^ABMDF28W  ; FL #67 POA
- S ABMDE=ABMR(70,180)_"^41^7"  ;Other DX 14
- D WRT^ABMDF28W  ;FL #67n
- ;I ABMP("ITYPE")="R" D
- S ABMDE=$S(ABMR(70,180,"POA")'=1:$G(ABMR(70,180,"POA")),1:"")_"^48^1"
- D WRT^ABMDF28W  ; FL #67 POA
- S ABMDE=ABMR(70,190)_"^49^7"  ;Other DX 15
- D WRT^ABMDF28W  ;FL #67o
- ;I ABMP("ITYPE")="R" D
- S ABMDE=$S(ABMR(70,190,"POA")'=1:$G(ABMR(70,190,"POA")),1:"")_"^56^1"
- D WRT^ABMDF28W  ; FL #67 POA
- S ABMDE=ABMR(70,200)_"^57^7" ;Other DX 16
- D WRT^ABMDF28W  ;FL #67p
- ;I ABMP("ITYPE")="R" D
- S ABMDE=$S(ABMR(70,200,"POA")'=1:$G(ABMR(70,200,"POA")),1:"")_"^64^1"
- D WRT^ABMDF28W  ; FL #67 POA
- W !
- ;
- S ABMDE=ABMR(70,250)_"^4^7" ;Admitting DX
- D WRT^ABMDF28W  ;FL #69
- S ABMDE=ABMR(70,250)_"^17^7"  ;Pt Reason Dx
- D WRT^ABMDF28W  ;FL #70
- ;
- S ABMDE=ABMR(70,260)_"^48^7"  ;Ext. cause of injury (1)
- D WRT^ABMDF28W  ;FL #72
- ;I ABMP("ITYPE")="R" D
- S ABMDE=$S(ABMR(70,260,"POA")'=1:$G(ABMR(70,260,"POA")),1:"")_"^55^1"
- D WRT^ABMDF28W  ;FL #67 POA
- S ABMDE=ABMR(70,290)_"^56^7" ;Ext. cause of injury (2)
- D WRT^ABMDF28W  ;FL #72
- ;I ABMP("ITYPE")="R" D
- S ABMDE=$S(ABMR(70,290,"POA")'=1:$G(ABMR(70,290,"POA")),1:"")_"^63^1"
- D WRT^ABMDF28W  ;FL #67 POA
- S ABMDE=ABMR(70,300)_"^64^7"  ;Ext. cause of injury (3)
- D WRT^ABMDF28W  ;FL #72
- ;I ABMP("ITYPE")="R" D
- S ABMDE=$S(ABMR(70,300,"POA")'=1:$G(ABMR(70,300,"POA")),1:"")_"^71^1"
- D WRT^ABMDF28W  ;FL #67 POA
+ D 55^ABMDF28T  ;abm*2.6*20 IHS/SD/SDR split routine
  ;
 56 ;
- W !
- D PROV^ABMDF28W
- ;Attending Provider
- I $$RCID^ABMERUTL(ABMP("INS"))'=61044 D
- .I $P(ABM("PRV",1),U,4)'="" D
- ..S ABMDE=$P($P(ABM("PRV",1),U,4),"#",2)_"^59^10"  ;NPI
- ..D WRT^ABMDF28W  ;FL #76
- .S ABMDE=$P($P(ABM("PRV",1),U,3),"#")_"^71^2"  ;ID qualifier
- .I DUZ("2")=1157 S ABMDE="^71^2"  ;IHS/SD/AML 12/7/2011 HEAT46786 - Remove ID Qualifier
- .D WRT^ABMDF28W  ;FL #76
- .S ABMDE=$P($P(ABM("PRV",1),U,3),"#",2)_"^73^9"  ;ID
- .I DUZ("2")=1157 S ABMDE="^73^9"  ;IHS/SD/AML 12/7/2011 HEAT46786 - Remove ID
- .D WRT^ABMDF28W  ;FL #76
+ D 56^ABMDF28T  ;abm*2.6*20 IHS/SD/SDR split routine
 57 ;
- W !
- N I
- F I=130:10:240,270 D
- .D @(I_"^ABMER70")
- I $P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),1,ABMP("VTYP"),1)),U,9)'="N" D
- .;S ABMDE=$TR(ABMR(70,130),".")_"^1^7"  ;Principle Procedure code  ;abm*2.6*16 IHS/SD/SDR HEAT236243
- .S ABMDE=$TR(ABMR(70,130),".")_"^0^7"  ;Principle Procedure code  ;abm*2.6*16 IHS/SD/SDR HEAT236243
- .D WRT^ABMDF28W   ;FL #74
- .S ABMDE=ABMR(70,140)_"^8^6"  ;Principle Procedure date
- .D WRT^ABMDF28W   ;FL #74a
- .S ABMDE=$TR(ABMR(70,150),".")_"^15^7" ;Other Procedure code - 1
- .D WRT^ABMDF28W  ;FL #74b
- .S ABMDE=ABMR(70,160)_"^23^6" ;Other Procedure date - 1
- .D WRT^ABMDF28W  ;FL #74c
- .S ABMDE=$TR(ABMR(70,170),".")_"^30^7"  ;Other Procedure code - 2
- .D WRT^ABMDF28W  ;FL #74d
- .S ABMDE=ABMR(70,180)_"^38^6"  ;Other Procedure date - 2
- .D WRT^ABMDF28W  ;FL #74e
- I $$RCID^ABMERUTL(ABMP("INS"))'=61044 D
- .S ABMDE=$P($P(ABM("PRV",1),U),",")_"^53^15"  ;Attending provider name
- .D WRT^ABMDF28W  ; FL #76
- .S ABMDE=$P($P(ABM("PRV",1),U),",",2)_"^70^11"  ;Attending provider name
- .D WRT^ABMDF28W  ; FL #76
+ D 57^ABMDF28T  ;abm*2.6*20 IHS/SD/SDR split routine
 58 ;
  ; Secondary Provider License #
  W !
  ;Operating provider
- I $$RCID^ABMERUTL(ABMP("INS"))'=61044 D
+ ;I $$RCID^ABMERUTL(ABMP("INS"))'=61044 D  ;abm*2.6*21 IHS/SD/SDR HEAT123457
+ I $$RCID^ABMERUTL(ABMP("INS"))'["61044" D  ;abm*2.6*21 IHS/SD/SDR HEAT123457
  .I $D(ABM("PRV",2)) D
  ..I $P(ABM("PRV",2),U,4)'="" D
  ...S ABMDE=$P($P($G(ABM("PRV",2)),U,4),"#",2)_"^59^10"  ;NPI
@@ -229,8 +88,9 @@ ABMDF28Z ; IHS/ASDST/DMJ - PRINT UB-04 ;
  ..S ABMDE=$P($P(ABM("PRV",2),U,3),"#",2)_"^73^9"  ;ID
  ..D WRT^ABMDF28W  ;FL #77
  ;Operating provider-attending if Medical
- I $$RCID^ABMERUTL(ABMP("INS"))=61044 D
- .I $D(ABM("PRV",1)) D
+ ;I $$RCID^ABMERUTL(ABMP("INS"))=61044 D  ;abm*2.6*21 IHS/SD/SDR HEAT123457
+ I $$RCID^ABMERUTL(ABMP("INS"))["61044" D  ;abm*2.6*21 IHS/SD/SDR HEAT123457
+ .I $D(ABM("PRV",1)) D  ;attending
  ..I $P(ABM("PRV",1),U,4)'="" D
  ...S ABMDE=$P($P($G(ABM("PRV",1)),U,4),"#",2)_"^59^10"  ;NPI
  ...D WRT^ABMDF28W  ;FL #77
@@ -238,6 +98,16 @@ ABMDF28Z ; IHS/ASDST/DMJ - PRINT UB-04 ;
  ..D WRT^ABMDF28W  ;FL #77
  ..S ABMDE=$P($P(ABM("PRV",1),U,3),"#",2)_"^73^9"  ;ID
  ..D WRT^ABMDF28W  ;FL #77
+ .;start new abm*2.6*21 IHS/SD/SDR HEAT240744
+ .I '$D(ABM("PRV",1)) D  ;no attending; check for rendering if dialysis billing
+ ..I $P($G(^ABMDVTYP(ABMP("VTYP"),0)),U)'["DIALYSIS" Q
+ ..I +$O(^ABMDBILL(DUZ(2),ABMP("BDFN"),41,"C","R",0))'=0 D  ;there's a rendering
+ ...S ABMPRV=+$O(^ABMDBILL(DUZ(2),ABMP("BDFN"),41,"C","R",0))
+ ...S ABMPRV=$P(^ABMDBILL(DUZ(2),ABMP("BDFN"),41,ABMPRV,0),U)
+ ...I $P($$NPI^XUSNPI("Individual_ID",ABMPRV),U)>0 D
+ ....S ABMDE=$P($$NPI^XUSNPI("Individual_ID",ABMPRV),U)_"^59^10"
+ ....D WRT^ABMDF28W  ;FL #77
+ .;end new abm*2.6*21 IHS/SD/SDR HEAT240744
 59 ;
  W !
  ;S ABMDE=ABMR(70,190)_"^2^7"  ;Other Procedure code - 3  ;abm*2.6*16 IHS/SD/SDR HEAT236243
@@ -259,7 +129,8 @@ ABMDF28Z ; IHS/ASDST/DMJ - PRINT UB-04 ;
  S ABMDE=ABMR(70,240)_"^38^6"   ;Other Procedure date - 5  ;abm*2.6*16 IHS/SD/SDR HEAT236243
  D WRT^ABMDF28W  ;FL #81j
  ;Operating Provider name
- I $$RCID^ABMERUTL(ABMP("INS"))'=61044 D
+ ;I $$RCID^ABMERUTL(ABMP("INS"))'=61044 D  ;abm*2.6*21 IHS/SD/SDR HEAT123457
+ I $$RCID^ABMERUTL(ABMP("INS"))'["61044" D  ;abm*2.6*21 IHS/SD/SDR HEAT123457
  .S ABMDE=$P($P($G(ABM("PRV",2)),U),",")_"^53^15"
  .D WRT^ABMDF28W  ;FL #77
  .S ABMDE=$P($P($G(ABM("PRV",2)),U),",",2)_"^70^11"
@@ -267,12 +138,14 @@ ABMDF28Z ; IHS/ASDST/DMJ - PRINT UB-04 ;
 60 ;
  W !
  S ABMDE=$G(^ABMDBILL(DUZ(2),ABMP("BDFN"),61,1,0))_"^^19"  ; remarks line 1
- I (ABMP("ITYPE")="V")&($P($G(^ABMDPARM(ABMP("LDFN"),1,3)),U,13)'="") S ABMDE=$P($G(^ABMDPARM(ABMP("LDFN"),1,3)),U,13)_"^^19"  ;abm*2.6*11 VMBP
+ ;I (ABMP("ITYPE")="V")&($P($G(^ABMDPARM(ABMP("LDFN"),1,3)),U,13)'="") S ABMDE=$P($G(^ABMDPARM(ABMP("LDFN"),1,3)),U,13)_"^^19"  ;abm*2.6*11 VMBP RQMT_94  ;abm*2.6*21 IHS/SD/SDR VMBP
+ I ((ABMP("ITYPE")="V")!($$GET1^DIQ(9999999.18,ABMP("INS"),".01","E")["VMBP"))&($P($G(^ABMDPARM(ABMP("LDFN"),1,3)),U,13)'="") S ABMDE=$P($G(^ABMDPARM(ABMP("LDFN"),1,3)),U,13)_"^^19"  ;abm*2.6*11 VMBP RQMT_94  ;abm*2.6*21 IHS/SD/SDR VMBP
  D WRT^ABMDF28W  ;FL #80
  ;
  ;If NM Medicaid add Taxonomy and qualifier
  ;I ($P($G(^AUTNINS(ABMP("INS"),0)),U)="NEW MEXICO MEDICAID")!($P($G(^AUTNINS(ABMP("INS"),0)),U)="MEDICAID EXEMPT") D  ;abm*2.6*8 NOHEAT - ADD TAX FOR IA MCD ONLY
- I ($P($G(^AUTNINS(ABMP("INS"),0)),U)="NEW MEXICO MEDICAID")!($P($G(^AUTNINS(ABMP("INS"),0)),U)="MEDICAID EXEMPT")!($P($G(^AUTNINS(ABMP("INS"),0)),U)="IOWA MEDICAID") D  ;abm*2.6*8 NOHEAT - ADD TAX FOR IA MCD ONLY
+ ;I ($P($G(^AUTNINS(ABMP("INS"),0)),U)="NEW MEXICO MEDICAID")!($P($G(^AUTNINS(ABMP("INS"),0)),U)="MEDICAID EXEMPT")!($P($G(^AUTNINS(ABMP("INS"),0)),U)="IOWA MEDICAID") D  ;abm*2.6*8 NOHEAT - ADD TAX FOR IA MCD ONLY  ;abm*2.6*21 IHS/SD/SDR HEAT189659
+ I "^NEW MEXICO MEDICAID^MEDICAID EXEMPT^IOWA MEDICAID^SOUTH DAKOTA MEDICAID^MONTANA DPHHS^"[("^"_$P($G(^AUTNINS(ABMP("INS"),0)),U)_"^") D  ;abm*2.6*8 NOHEAT - ADD TAX FOR IA MCD ONLY  ;abm*2.6*21 IHS/SD/SDR HEAT189659, HEAT162190
  .S ABMNLOC=$S($P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),1,ABMP("VTYP"),1)),U,8)'="":$P(^ABMNINS(ABMP("LDFN"),ABMP("INS"),1,ABMP("VTYP"),1),U,8),$P($G(^ABMDPARM(ABMP("LDFN"),1,2)),U,12)'="":$P(^(2),U,12),1:ABMP("LDFN"))  ;abm*2.6*10 HEAT82967
  .;S ABMDE="B3"_$$PTAX^ABMUTLF(ABMP("LDFN"))  ;taxonomy - form locator #81D  ;abm*2.6*10 IHS/SD/AML 9/18/12 -  HEAT82967
  .S ABMDE="B3"_$$PTAX^ABMUTLF(ABMNLOC) ;taxonomy - form locator #81D ;abm*2.6*10 IHS/SD/AML 9/18/12 - HEAT82967
@@ -286,7 +159,8 @@ ABMDF28Z ; IHS/ASDST/DMJ - PRINT UB-04 ;
  ;abm*2.6*10 IHS/SD/AML 9/11/12 HEAT83791 End changes
  ;
  ;Other provider (1)
- I $$RCID^ABMERUTL(ABMP("INS"))'=61044 D
+ ;I $$RCID^ABMERUTL(ABMP("INS"))'=61044 D  ;abm*2.6*21 IHS/SD/SDR HEAT123457
+ I $$RCID^ABMERUTL(ABMP("INS"))'["61044" D  ;abm*2.6*21 IHS/SD/SDR HEAT123457
  .I $D(ABM("PRV",3)) D
  ..I $P(ABM("PRV",3),U,4)'="" D
  ...S ABMDE=$P($P($G(ABM("PRV",3)),U,4),"#")_"^55^2"  ;NPI qualifier
@@ -312,7 +186,8 @@ ABMDF28Z ; IHS/ASDST/DMJ - PRINT UB-04 ;
  ;abm*2.6*10 IHS/SD/AML 9/11/12 - END HEAT83791 - Winnebago claim form modifications
  ;
  ;Other Provider name (1)
- I $$RCID^ABMERUTL(ABMP("INS"))'=61044 D
+ ;I $$RCID^ABMERUTL(ABMP("INS"))'=61044 D  ;abm*2.6*21 IHS/SD/SDR HEAT123457
+ I $$RCID^ABMERUTL(ABMP("INS"))'["61044" D  ;abm*2.6*21 IHS/SD/SDR HEAT123457
  .S ABMDE=$P($P($G(ABM("PRV",3)),U),",")_"^53^15"
  .D WRT^ABMDF28W  ;FL #78
  .S ABMDE=$P($P($G(ABM("PRV",3)),U),",",2)_"^70^11"
@@ -323,7 +198,8 @@ ABMDF28Z ; IHS/ASDST/DMJ - PRINT UB-04 ;
  D WRT^ABMDF28W  ;FL #80
  ;
  ;Other provider (2)
- I $$RCID^ABMERUTL(ABMP("INS"))'=61044 D
+ ;I $$RCID^ABMERUTL(ABMP("INS"))'=61044 D  ;abm*2.6*21 IHS/SD/SDR HEAT123457
+ I $$RCID^ABMERUTL(ABMP("INS"))'["61044" D  ;abm*2.6*21 IHS/SD/SDR HEAT123457
  .I $D(ABM("PRV",4)) D
  ..I $P(ABM("PRV",4),U,4)'="" D
  ...S ABMDE=$P($P($G(ABM("PRV",4)),U,4),"#")_"^54^2"  ;NPI qualifier
@@ -340,7 +216,8 @@ ABMDF28Z ; IHS/ASDST/DMJ - PRINT UB-04 ;
  D WRT^ABMDF28W                      ; FL #80
  ;
  ;Other Provider name (2)
- I $$RCID^ABMERUTL(ABMP("INS"))'=61044 D
+ ;I $$RCID^ABMERUTL(ABMP("INS"))'=61044 D  ;abm*2.6*21 IHS/SD/SDR HEAT123457
+ I $$RCID^ABMERUTL(ABMP("INS"))'["61044" D  ;abm*2.6*21 IHS/SD/SDR HEAT123457
  .S ABMDE=$P($P($G(ABM("PRV",4)),U),",")_"^53^15"
  .D WRT^ABMDF28W                      ; FL #79
  .S ABMDE=$P($P($G(ABM("PRV",4)),U),",",2)_"^69^11"

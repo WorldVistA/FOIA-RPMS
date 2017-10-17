@@ -1,5 +1,5 @@
 BDMS9B1 ; IHS/CMI/LAB - DIABETIC CARE SUMMARY SUPPLEMENT 12 Jan 2011 12:27 PM ; [ 12 Jan 2011 12:27 PM ]
- ;;2.0;DIABETES MANAGEMENT SYSTEM;**3,4,5,6,7,8,9**;JUN 14, 2007;Build 78
+ ;;2.0;DIABETES MANAGEMENT SYSTEM;**3,4,5,6,7,8,9,10**;JUN 14, 2007;Build 12
  ;
  Q:'$G(APCHSPAT)
  S BDMSPAT=APCHSPAT
@@ -48,7 +48,13 @@ EP21 ;
  Q
 DATE(D) ;EP
  I D="" Q ""
+ I 'D Q $$DATE1(D)
  Q $E(D,4,5)_"/"_$E(D,6,7)_"/"_(1700+$E(D,1,3))
+DATE1(D) ;
+ NEW %,%DT,X,Y
+ S %="",%DT="P",X=D D ^%DT
+ I Y=-1 Q ""
+ Q $$DATE(Y)
 SETARRAY ;set up array containing dm care summary
  ;CHECK TO SEE IF START1^APCLDF EXISTS
  S BDMJOB=$J,BDMBTH=$H
@@ -65,19 +71,22 @@ SETARRAY ;set up array containing dm care summary
  D GETHWB(BDMSDFN)
  S X="BMI: "_BDMX("BMI"),$E(X,12)="Last Height:  "_$$STRIP^XLFSTR($J(BDMX("HT"),5,2)," ")_$S(BDMX("HT")]"":" inches",1:""),$E(X,40)=BDMX("HTD") D S(X,1)
  S X="",$E(X,12)="Last Weight:  "_$S(BDMX("WT")]"":BDMX("WT")\1,1:"")_$S(BDMX("WT")]"":" lbs",1:""),$E(X,40)=BDMX("WTD") D S(X)
- S BDMTOBC="",BDMTOBS=$$TOBACCO^BDMDD1T(BDMSDFN,$$DOB^AUPNPAT(BDMSDFN),DT)
+ S BDMTOBC="",BDMTOBS=$$TOBACCO^BDMDE1T(BDMSDFN,$$DOB^AUPNPAT(BDMSDFN),DT)
  I BDMTOBS]"" S X="Tobacco Use:  "_$P($P($G(BDMTOBS),U,2),"  ",2,99) D S(X,1)
  I BDMTOBS="" S X="Tobacco Use:  NOT DOCUMENTED" D S(X,1)
  ;I $G(BDMTOBC)]"" S X="              "_$P(BDMTOBC,U,1) D S(X)
  ;COUNSELED?
  S X="",$E(X,15)="Counseled in the past year?  " D
  .I $E(BDMTOBS),$E(BDMTOBS)'=1 S X=X_"N/A" Q
- .S Y=$$CESS^BDMDD11(BDMSDFN,$$FMADD^XLFDT(DT,-365),DT)
+ .S Y=$$CESS^BDMDE11(BDMSDFN,$$FMADD^XLFDT(DT,-365),DT)
  .I $E(Y)=1 S X=X_$P(Y,"  ",2,999) Q
  .I $E(Y)=2 S X=X_"No" Q
  D S(X)
+ S X=$$ENDS^BDMDE1T(BDMSDFN,$$DOB^AUPNPAT(BDMSDFN),DT)
+ D S("Last Screened for Electronic Nicotine Delivery System (ENDS) use:"_$S($P(X,U,1)=2:" Never",1:""))
+ I $P(X,U,1)=1 D S("              "_$P(X,U,3))
  S X="HTN Diagnosed:  "_$$HTN(BDMSDFN) D S(X,1)
- S X="CVD Diagnosed:  "_$P($$CVD^BDMDD12(BDMSDFN,DT),"  ",2,999) D S(X)
+ S X="CVD Diagnosed:  "_$P($$CVD^BDMDE12(BDMSDFN,DT),"  ",2,999) D S(X)
  S B=$$BP(BDMSDFN)
  S X="Last 3 BP:      "_$P($G(BDMX(1)),U,2),$E(X,26)=$$DATE($P($G(BDMX(1)),U)) D S(X)
  S X="(non ER)" I $D(BDMX(2)) S $E(X,17)=$P(BDMX(2),U,2),$E(X,26)=$$DATE($P(BDMX(2),U)) D S(X)
@@ -97,7 +106,7 @@ SETARRAY ;set up array containing dm care summary
  ;statin
  S X=""
  S BDMSBEG=$$FMADD^XLFDT(DT,-180)
- S Y=$$STATIN^BDMDD16(BDMSDFN,BDMSBEG,DT)
+ S Y=$$STATIN^BDMDE16(BDMSDFN,BDMSBEG,DT)
  S X="Statin prescribed (in past 6 months):"
  I $E(Y)=2 S $E(X,50)=$P(Y,"  ",2,99) D S(X)
  I $E(Y)=1 D S(X) S X="   "_$P(Y,"  ",2,99) D S(X)
@@ -107,13 +116,13 @@ M12 ;
  ;determine date range
  S BDMSBEG=$$FMADD^XLFDT(DT,-365)
  S X="Exams (in past 12 months):" D S(X,1)
- S X="   Foot:",$E(X,13)=$P($$DFE^BDMDD17(BDMSDFN,BDMSBEG,DT,"H"),"  ",2,99) D S(X)
- S X="   Eye:",$E(X,13)=$P($$EYE^BDMDD17(BDMSDFN,BDMSBEG,DT,"H"),"  ",2,99) D S(X)
- S X="   Dental:",$E(X,13)=$P($$DENTAL^BDMDD17(BDMSDFN,BDMSBEG,DT,"H"),"  ",2,99) D S(X)
+ S X="   Foot:",$E(X,13)=$P($$DFE^BDMDE17(BDMSDFN,BDMSBEG,DT,"H"),"  ",2,99) D S(X)
+ S X="   Eye:",$E(X,13)=$P($$EYE^BDMDE17(BDMSDFN,BDMSBEG,DT,"H"),"  ",2,99) D S(X)
+ S X="   Dental:",$E(X,13)=$P($$DENTAL^BDMDE17(BDMSDFN,BDMSBEG,DT,"H"),"  ",2,99) D S(X)
  K BDMSTEX,BDMSDAT,BDMX
- S BDMDEPP=$$DEPDX^BDMDD12(BDMSDFN,$$FMADD^XLFDT(DT,-365),DT)
+ S BDMDEPP=$$DEPDX^BDMDE12(BDMSDFN,$$FMADD^XLFDT(DT,-365),DT)
  S BDMDEPP=$P(BDMDEPP,"  ",2,99)
- S BDMDEPS=$$DEPSCR^BDMDD12(BDMSDFN,$$FMADD^XLFDT(DT,-365),DT)
+ S BDMDEPS=$$DEPSCR^BDMDE12(BDMSDFN,$$FMADD^XLFDT(DT,-365),DT)
  S BDMDEPS=$P(BDMDEPS,"  ",2,99)
  S X="Depression: Active Problem: "_BDMDEPP D S(X,1)
  S X="",$E(X,13)="If no, screened in past year:  "_$S($E(BDMDEPP,1)="N":BDMDEPS,1:"") D S(X)

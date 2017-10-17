@@ -1,5 +1,5 @@
 BQIDCAH1 ;PRXM/HC/ALA-Ad Hoc Search continued ; 01 Aug 2007  11:27 AM
- ;;2.3;ICARE MANAGEMENT SYSTEM;**3,4**;Apr 18, 2012;Build 66
+ ;;2.6;ICARE MANAGEMENT SYSTEM;;Jul 07, 2017;Build 72
  Q
  ;
 ACHK(IEN) ;EP - Age check
@@ -209,12 +209,13 @@ RANGE(VAL,ENT,RTYP) ; EP - Load relative from and through dates when RANGE, LRAN
  ; Input:
  ;   VAL - Range value - e.g. last week
  ;   ENT - Entry in file 90506
+ ;   RTYP - Relative timeframe variable name
  ;
  Q:$G(VAL)=""
  Q:$G(ENT)=""
  N RNGIEN,CHOICE
  S RNGIEN=$O(^BQI(90506,ENT,3,"B",RTYP,""))
- I RNGIEN D
+ I RNGIEN D  Q
  . S CHOICE=$O(^BQI(90506,ENT,3,RNGIEN,3,"B",VAL,""))
  . I CHOICE D  Q
  .. N DA,IENS,EXEC
@@ -233,9 +234,19 @@ RANGE(VAL,ENT,RTYP) ; EP - Load relative from and through dates when RANGE, LRAN
  ... S RTHRU=$$DATE^BQIUL1($P(^BQI(90506.9,TN,0),U,4))
  .. S EXEC=$P(^BQI(90506.9,TN,0),U,5) I EXEC="" Q
  .. X EXEC
+ ;
+ S TN=""
+ F  S TN=$O(^BQI(90506.9,"B",VAL,TN)) Q:TN=""  D
+ . I '$D(^BQI(90506.9,TN,1,"B",RTYP)) Q
+ . S EXEC=$P(^BQI(90506.9,TN,0),U,5)
+ . I EXEC'="" X EXEC
+ . I ENT="IPC" Q
+ . I $P(^BQI(90506.9,TN,0),U,4)'="" D
+ .. S RFROM=$$DATE^BQIUL1($P(^BQI(90506.9,TN,0),U,3))
+ .. S RTHRU=$$DATE^BQIUL1($P(^BQI(90506.9,TN,0),U,4))
  Q
  ;
-CUR(RTY) ; Current Range for week
+CUR(RTY) ;EP Range for a week
  ; RTY = 'L' is Last, 'T' is This, and 'N' is Next
  NEW CDOW
  S CDOW=$$DOW^XLFDT(DT,1)
@@ -250,7 +261,7 @@ CUR(RTY) ; Current Range for week
  . S RTHRU=$$FMADD^XLFDT(RFROM,6)
  Q
  ;
-MON(RTY) ; Current range for month
+MON(RTY) ;EP Range for a month
  NEW BQMON,CYR,PYR,NYR,BQDTE,EDAY
  ; RTY = 'L' is Last, 'T' is This, and 'N' is Next
  S BQMON=$E(DT,4,5),CYR=$E(DT,1,3),PYR=CYR-1,NYR=CYR+1
@@ -260,23 +271,64 @@ MON(RTY) ; Current range for month
  I RTY="N" D
  . S RFROM=@($P(BQDTE,U,4))_$P(BQDTE,U,3)_"01"
  . S EDAY="31^"_($$LEAP^XLFDT2(CYR)+28)_"^31^30^31^30^31^31^30^31^30^31"
- . S RTHRU=@($P(BQDTE,U,4))_$P(BQDTE,U,3)_$P(EDAY,U,+$P(BQDTE,U,1))
+ . S RTHRU=@($P(BQDTE,U,4))_$P(BQDTE,U,3)_$P(EDAY,U,+$P(BQDTE,U,3))
  I RTY="L" D
  . S RFROM=@($P(BQDTE,U,6))_$P(BQDTE,U,5)_"01"
  . S EDAY="31^"_($$LEAP^XLFDT2(CYR)+28)_"^31^30^31^30^31^31^30^31^30^31"
- . S RTHRU=@($P(BQDTE,U,6))_$P(BQDTE,U,5)_$P(EDAY,U,+$P(BQDTE,U,1))
+ . S RTHRU=@($P(BQDTE,U,6))_$P(BQDTE,U,5)_$P(EDAY,U,+$P(BQDTE,U,5))
  I RTY="T" D
  . S RFROM=@($P(BQDTE,U,2))_$P(BQDTE,U,1)_"01"
  . S EDAY="31^"_($$LEAP^XLFDT2(CYR)+28)_"^31^30^31^30^31^31^30^31^30^31"
  . S RTHRU=@($P(BQDTE,U,2))_$P(BQDTE,U,1)_$P(EDAY,U,+$P(BQDTE,U,1))
  Q
  ;
-YR(RTY) ; Current range for year
+IMON ;EP
+ NEW CMON,CT,NUM
+ S CMON=$O(^BQIPROV("AD",""),-1),CT=1
+ S RTHRU=CMON
+ S NUM=$P(VAL,"Last ",2),NUM=$P(NUM," Months",1)
+ S FMON=CMON F N=CT:1:NUM S FMON=$O(^BQIPROV("AD",FMON),-1) Q:FMON=""  S RFROM=FMON
+ Q
+ ;
+IWEEK ;EP
+ NEW CT,NUM
+ S NUM=$P(VAL,"Last ",2),NUM=$P(NUM," Weeks",1)
+ Q
+ ;
+YR(RTY) ;EP Range for a year
  NEW CYR,PYR,NYR
  S CYR=$E(DT,1,3),PYR=CYR-1,NYR=CYR+1
  I RTY="L" S RFROM=PYR_"0101",RTHRU=PYR_"1231"
  I RTY="T" S RFROM=CYR_"0101",RTHRU=CYR_"1231"
  I RTY="N" S RFROM=NYR_"0101",RTHRU=NYR_"1231"
+ I ENT="IPC" S RFROM=$E(RFROM,1,5)_"00",RTHRU=$E(RTHRU,1,5)_"00"
+ Q
+ ;
+GQTR(NUM) ;EP Range for a GPRA quarter
+ NEW CYR,PYR
+ S CYR=$E(DT,1,3),PYR=CYR-1
+ I NUM=1 S RFROM=PYR_"0701",RTHRU=PYR_"0930"
+ I NUM=2 S RFROM=PYR_"1001",RTHRU=PYR_"1231"
+ I NUM=3 S RFROM=CYR_"0101",RTHRU=CYR_"0331"
+ I NUM=4 S RFROM=CYR_"0401",RTHRU=CYR_"0630"
+ Q
+ ;
+CQTR(NUM) ;EP Range for a Calendar quarter
+ NEW CYR,PYR,NYR
+ S CYR=$E(DT,1,3)
+ I NUM=1 S RFROM=CYR_"0101",RTHRU=CYR_"0331"
+ I NUM=2 S RFROM=CYR_"0401",RTHRU=CYR_"0630"
+ I NUM=3 S RFROM=CYR_"0701",RTHRU=CYR_"0930"
+ I NUM=4 S RFROM=CYR_"1001",RTHRU=CYR_"1231"
+ Q
+ ;
+FQTR(NUM) ;EP Range for a Fiscal quarter
+ NEW CYR,PYR
+ S CYR=$E(DT,1,3),PYR=CYR-1
+ I NUM=1 S RFROM=PYR_"1001",RTHRU=PYR_"1231"
+ I NUM=2 S RFROM=CYR_"0101",RTHRU=CYR_"0331"
+ I NUM=3 S RFROM=CYR_"0401",RTHRU=CYR_"0630"
+ I NUM=4 S RFROM=CYR_"0701",RTHRU=CYR_"0930"
  Q
  ;
 MQ ;

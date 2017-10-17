@@ -1,5 +1,5 @@
 BDMEDMU3 ; IHS/CMI/LAB - prompt for refusal value ; 27 Jan 2011  2:41 PM
- ;;2.0;DIABETES MANAGEMENT SYSTEM;**7,8**;JUN 14, 2007;Build 53
+ ;;2.0;DIABETES MANAGEMENT SYSTEM;**7,8,10**;JUN 14, 2007;Build 12
  ;
  ;
 HEPB(Y) ;EP
@@ -16,6 +16,7 @@ HEPB(Y) ;EP
  I $P(^AUTTIMM(Y,0),U,3)=110 Q 1
  I $P(^AUTTIMM(Y,0),U,3)=132 Q 1
  I $P(^AUTTIMM(Y,0),U,3)=146 Q 1
+ I $$VAL^XBDIQ1(9999999.14,+Y,.09)="HEPB" Q 1
  Q 0
 FLU(Y) ;EP
  I $G(Y)="" Q 0
@@ -52,6 +53,12 @@ PN(Y) ;EP
  S Z=$P(^AUTTIMM(Y,0),U,3)
  I Z=33 Q 1
  I Z=109 Q 1
+ I '$O(^ATXAX("B","BGP PNEUMO IZ CVX CODES",0)) Q 0
+ NEW Z
+ S Z=$O(^ATXAX("B","BGP PNEUMO IZ CVX CODES",0))
+ NEW C
+ S C=$P(^AUTTIMM(Y,0),U,3)
+ I $D(^ATXAX(Z,21,"B",C)) Q 1
  Q 0
 TD(Y) ;EP
  I $G(Y)="" Q 0

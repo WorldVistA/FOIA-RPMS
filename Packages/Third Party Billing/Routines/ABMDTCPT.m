@@ -1,5 +1,6 @@
 ABMDTCPT ; IHS/ASDST/DMJ - Table Maintenance of CPT CODES ; 
- ;;2.6;IHS Third Party Billing System;**3**;NOV 12, 2009
+ ;;2.6;IHS Third Party Billing System;**3,21**;NOV 12, 2009;Build 379
+ ;IHS/SD/SDR - 2.6*21 HEAT266454 - Added option back into TPB so users can add/edit/delete revenue code only.  No editing should be done to CPT codes themselves.
  ;
 ENT K ABM
  ;K DIR S DIR(0)="SO^1:EDIT EXISTING CPT CODE;2:ADD NEW CPT CODE",DIR("A")="Select DESIRED ACTION",DIR("B")=1 D ^DIR K DIR G XIT:'Y!$D(DIRUT),ADD:Y=2  ;abm*2.6*3 NOHEAT

@@ -1,5 +1,5 @@
-BLRKIDS2 ; IHS/OIT/MKK - IHS Lab KIDS utilities, part 2 ; 27-Apr-2015 06:30 ; MKK
- ;;5.2;LR;**1035**;Nov 1, 1997;Build 5
+BLRKIDS2 ; IHS/OIT/MKK - IHS Lab KIDS utilities, part 2 ; 20-May-2016 07:03 ; MKK
+ ;;5.2;LR;**1035,1039**;Nov 1, 1997;Build 38
  ;
 EEP ; EP - Ersatz EP
  D EEP^BLRGMENU
@@ -409,18 +409,21 @@ ADDOPTS(TOMENU,OPTION,SYNONYM,TAB) ; EP - Add new OPTION to TOMENU with SYNONYM 
  Q:$$DEONARDY(TOMENU,OPTION,SYNONYM)
  ;
  ; Add it
- S TAB=$J(" ",$G(TAB,5))
+ ; S TAB=$J(" ",$G(TAB,5))
+ S TAB=$G(TAB,$J("",5))      ; IHS/MSC/MKK - LR*5.2*1039
  S X="Adding '"_OPTION_"' option"
  S:$D(SYNONYM) X=X_" with "_SYNONYM_" synonym"
  S X=X_" to "_TOMENU_"."
  D BMES^XPDUTL(X)
  S X=$$ADD^XPDMENU(TOMENU,OPTION,SYNONYM)
- D:X=1 BMES^XPDUTL(TAB_"'"_OPTION_"' added to "_TOMENU_". OK.")
+ ; D:X=1 BMES^XPDUTL(TAB_"'"_OPTION_"' added to "_TOMENU_". OK.")
+ D:X=1 MES^XPDUTL(TAB_"'"_OPTION_"' added to "_TOMENU_". OK.")  ; IHS/MSC/MKK - LR*5.2*1039
  I X'=1 D
- . D BMES^XPDUTL(TAB_"Error in adding '"_OPTION_"' option to "_TOMENU_".")
+ . ; D BMES^XPDUTL(TAB_"Error in adding '"_OPTION_"' option to "_TOMENU_".")
+ . D MES^XPDUTL(TAB_"Error in adding '"_OPTION_"' option to "_TOMENU_".")      ; IHS/MSC/MKK - LR*5.2*1039
  . D MES^XPDUTL(TAB_TAB_"Error Message: "_$$UP^XLFSTR($P(X,"^",2)))
  ;
- D MES^XPDUTL("")
+ ; D MES^XPDUTL("")     ; IHS/MSC/MKK - LR*5.2*1039
  Q
  ;
 DEONARDY(TOMENU,OPTION,SYNONYM) ; EP - Checks Options
@@ -431,10 +434,14 @@ DEONARDY(TOMENU,OPTION,SYNONYM) ; EP - Checks Options
  NEW OPTIEN,SYNIEN,TOIEN
  S TOIEN=$$LKOPT^XPDMENU(TOMENU)
  Q:TOIEN<1 1       ; Return 1 if TOMENU doesn't exist
+ ;
  S OPTIEN=$$LKOPT^XPDMENU(OPTION)
  Q:OPTIEN<1 1      ; Return 1 if OPTION doesn't exist
+ ;
  S SYNIEN=+$O(^DIC(19,TOIEN,10,"C",$G(SYNONYM),0))
- Q $S($G(^DIC(19,TOIEN,10,SYNIEN,0))=OPTIEN:1,1:0)
+ ; Q $S($G(^DIC(19,TOIEN,10,SYNIEN,0))=OPTIEN:1,1:0)
+ ; Return 1 if SYNONYM already on option
+ Q $S(+$G(^DIC(19,TOIEN,10,SYNIEN,0))=OPTIEN:1,1:0)   ; IHS/MSC/MKK - LR*5.2*1039
  ;
  ;
 INACTOPT(SEED,OUTMSG,EXCPTION) ; EP - Inactivate/Activate options.

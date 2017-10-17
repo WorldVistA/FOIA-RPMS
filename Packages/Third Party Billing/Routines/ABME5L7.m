@@ -1,6 +1,7 @@
 ABME5L7 ; IHS/ASDST/DMJ - Header 
- ;;2.6;IHS 3P BILLING SYSTEM;**6,8,9**;NOV 12, 2009
+ ;;2.6;IHS 3P BILLING SYSTEM;**6,8,9,10,21**;NOV 12, 2009;Build 379
  ;Header Segments
+ ;IHS/SD/SDR - 2.6*21 - HEAT70826 - Modified to remove 2310B loop based on SGTM entry
  ;
 EP ;START HERE
  N ABM
@@ -24,7 +25,8 @@ EP ;START HERE
  ..;D WR^ABMUTL8("REF")
  .I ABMNPIU'="N" D
  ..I ABMRCID="FHC&AFFILIATES"!($P($G(^AUTNINS(ABMP("INS"),0)),U)="NORTH DAKOTA MEDICAID") D
- ...D EP^ABME5REF("LU",9999999.06,ABMP("LDFN"))
+ ...;D EP^ABME5REF("LU",9999999.06,ABMP("LDFN"))  ;abm*2.6*10 IHS/SD/AML 3/30/12 Change for ND MCD NOHEAT
+ ...D EP^ABME5REF("G2",9999999.06,ABMP("LDFN"))  ;abm*2.6*10 IHS/SD/AML 3/30/12 Change for ND MCD NOHEAT
  ...D WR^ABMUTL8("REF")
  ..E  D EP^ABME5REF(ABMP("RTYPE"),200,ABM("PRV")),WR^ABMUTL8("REF")
  K ABMLOOP
@@ -33,15 +35,25 @@ EP ;START HERE
  S ABMLOOP="2310B"
  I $D(ABMP("PRV","O")) D
  .Q:$$RCID^ABMUTLP(ABMP("INS"))=731476619
+ .;start new abm*2.6*21 IHS/SD/SDR HEAT70826
+ .S ABMOFLG=0
+ .I $D(^ABMNINS(ABMP("LDFN"),ABMP("INS"),2.5,"ASEND",ABMP("EXP"),"2310B","00","0","N"))>0 D
+ ..S ABMO=0
+ ..F  S ABMO=$O(^ABMNINS(ABMP("LDFN"),ABMP("INS"),2.5,"ASEND",ABMP("EXP"),"2310B","00","0","N",ABMO)) Q:'ABMO  D
+ ...I $P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),2.5,ABMO,0)),U,6)=""!($P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),2.5,ABMO,0)),U,6)=ABMP("VTYP")) S ABMOFLG=1
+ .Q:ABMOFLG=1
+ .;end new abm*2.6*21 IHS/SD/SDR HEAT70826
  .S ABM("PRV")=$O(ABMP("PRV","O",0))
  .D EP^ABME5NM1("72")
  .D WR^ABMUTL8("NM1")
- .I ABMNPIU="N" D
- ..;D EP^ABME5REF("EI",9999999.06,DUZ(2))  ;abm*2.6*9 HEAT57488 IHS/SD/AML - Removed "EI" qualifier as not allowed in 5010 
- ..;Q:(ABMNPIU="N")&(ABMP("EXP")=21)&(($P($G(^AUTNINS(ABMP("INS"),0)),U)="OKLAHOMA MEDICAID")!($P($G(^AUTNINS(ABMP("INS"),0)),U)["OK MEDICAID"))  ;Remove REF, OK Medicaid only  ;abm*2.6*8 5010
- ..Q:(ABMNPIU="N")&(ABMP("EXP")=31)&(($P($G(^AUTNINS(ABMP("INS"),0)),U)="OKLAHOMA MEDICAID")!($P($G(^AUTNINS(ABMP("INS"),0)),U)["OK MEDICAID"))  ;Remove REF, OK Medicaid only  ;abm*2.6*8 5010
- ..Q:((ABMRCID="99999")!(ABMRCID="AHCCCS866004791"))  ;AZ Medicaid
- ..;D WR^ABMUTL8("REF")  ;abm*2.6*9 HEAT57488 IHS/SD/AML 1/20/2012
+ .;start old code abm*2.6*10 IHS/SD/AML NOHEAT remove EI if NPI ONLY
+ .;I ABMNPIU="N" D 
+ .;.;D EP^ABME5REF("EI",9999999.06,DUZ(2))  ;abm*2.6*9 HEAT57488 IHS/SD/AML - Removed "EI" qualifier as not allowed in 5010 
+ .;.;Q:(ABMNPIU="N")&(ABMP("EXP")=21)&(($P($G(^AUTNINS(ABMP("INS"),0)),U)="OKLAHOMA MEDICAID")!($P($G(^AUTNINS(ABMP("INS"),0)),U)["OK MEDICAID"))  ;Remove REF, OK Medicaid only  ;abm*2.6*8 5010
+ .;.Q:(ABMNPIU="N")&(ABMP("EXP")=31)&(($P($G(^AUTNINS(ABMP("INS"),0)),U)="OKLAHOMA MEDICAID")!($P($G(^AUTNINS(ABMP("INS"),0)),U)["OK MEDICAID"))  ;Remove REF, OK Medicaid only  ;abm*2.6*8 5010
+ .;.Q:((ABMRCID="99999")!(ABMRCID="AHCCCS866004791"))  ;AZ Medicaid
+ .;.;D WR^ABMUTL8("REF")  ;abm*2.6*9 HEAT57488 IHS/SD/AML 1/20/2012
+ .;end old code abm*2.6*10 NO HEAT
  .I ABMNPIU'="N" D
  ..I ABMRCID="FHC&AFFILIATES" D
  ...D EP^ABME5REF("LU",9999999.06,ABMP("LDFN"))
@@ -87,7 +99,9 @@ EP ;START HERE
  S ABMLOOP="2310F"
  I $D(ABMP("PRV","F")) D
  .S ABM("PRV")=$O(ABMP("PRV","F",0))
- .I $O(ABMP("PRV","A",0))=$O(ABMP("PRV","F",0)) Q  ;don't write if Attending=Referring
+ .I $O(ABMP("PRV","A",0))=$O(ABMP("PRV","F",0)) Q  ;don't write if Attending=Referring (from page 3)
+ .;don't write if attending NPI equals NPI entered on page 3 for referring
+ .I (+$O(ABMP("PRV","A",0))'=0),(+$O(ABMP("PRV","F",0))=0)&($D(ABMP("PRV","F"))),$P($$NPI^XUSNPI("Individual_ID",$O(ABMP("PRV","A",0))),U)=$P(ABMP("PRV","F",$O(ABMP("PRV","F",""))),U,3) Q  ;abm*2.6*10 HEAT67469
  .D EP^ABME5NM1("DN")
  .D WR^ABMUTL8("NM1")
  .I ABMNPIU'="N" D

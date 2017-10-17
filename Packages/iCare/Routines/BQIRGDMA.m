@@ -1,5 +1,5 @@
 BQIRGDMA ;VNGT/HS/ALA-Set up Diabetes Audit fields ; 17 Feb 2016  2:46 PM
- ;;2.5;ICARE MANAGEMENT SYSTEM;;May 24, 2016;Build 27
+ ;;2.6;ICARE MANAGEMENT SYSTEM;;Jul 07, 2017;Build 72
  ;
 EN ;EP - Update Diabetes Audit when new one comes in
  NEW PRVY,DMN,YR,NYRN,NYR,BQIGDA,BQIN1,BQIN2,DVY
@@ -53,7 +53,7 @@ AU ; Update Dm Audit in 90506.5
  . S ORD=$P(^BDMDMTX(NYRN,11,BDMN,0),"^",3)
  . I ORD="" D
  .. F I=1:1:12 S TEXT=$P($T(THER+I),";;",2) Q:TEXT=""  D
- ... S TBDMN=$O(^BDMDMTX(NYRN,11,"B","DM THERAPY","")) I TBDMN="" Q
+ ... S TBDMN=$O(^BDMDMTX(NYRN,11,"B","DM THERAPY","")) I TBDMN="" S TBDMN=$O(^BDMDMTX(NYRN,11,"B","DIABETES THERAPY","")) I TBDMN="" Q
  ... I CODE=TEXT S ORD=$P(^BDMDMTX(NYRN,11,TBDMN,0),"^",3)
  . S TEXT=$P(BDMDATA,U,1)
  . I CODE="DM_TBTEST" S TEXT="TB Test Done"

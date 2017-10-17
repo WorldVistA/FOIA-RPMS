@@ -1,5 +1,5 @@
 BQINIGHT ;PRXM/HC/ALA-Nightly Background Job ; 05 Jan 2006  1:31 PM
- ;;2.5;ICARE MANAGEMENT SYSTEM;**1**;May 24, 2016;Build 17
+ ;;2.6;ICARE MANAGEMENT SYSTEM;;Jul 07, 2017;Build 72
  ;
  ;
 EN ;EP - Entry point
@@ -14,6 +14,7 @@ EN ;EP - Entry point
  D ARM^BQINIGH2
  D IMM^BQINIGH2
  D PRN^BQINIGH2
+ D PED^BQINIGH2
  D HCV^BQINIGH2
  D DMA^BQINIGH2
  ;D CQ^BQIMUMON("")
@@ -238,7 +239,7 @@ CRS ;EP - Find all GPRA indicators
  . NEW DA,DIK
  . S DA=DFN,DIK="^BQIPAT(" D IX1^DIK
  ;
- K ^XTMP("BGP15TAX",$J)
+ K ^XTMP("BGP15TAX",$J),^XTMP("BGPSNOMEDSUBSET",$J)
  ;
  ; Compile Main view data
  D COMP^BQIGPRA5
@@ -280,6 +281,8 @@ REM ;EP - Find any new reminders
  ; Check for DUZ
  D DZ^BQITASK1
  ;
+ ; Check for Appointments
+ D APT^BQIRMIZ
  ; Reset Reminders
  NEW BKDFN
  S BKDFN=0,ERRCNT=0

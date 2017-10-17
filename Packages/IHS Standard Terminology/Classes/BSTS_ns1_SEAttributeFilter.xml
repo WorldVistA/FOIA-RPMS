@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:35">
+<Class name="BSTS.ns1.SEAttributeFilter">
+<Description>
+Created from: http://VDENMIHSDEVD01:8082/soap/DtsQueryDaoWS?wsdl</Description>
+<CompileAfter>BSTS.ns1.SEFilterOperator,BSTS.ns1.SESearchAttribute,BSTS.ns1.TItemStatus</CompileAfter>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>BSTS.ns1.SESearchFilter</Super>
+<TimeChanged>63616,48122.886772</TimeChanged>
+<TimeCreated>63616,48122.871441</TimeCreated>
+
+<Parameter name="ELEMENTQUALIFIED">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="NAMESPACE">
+<Default>http://apelon.com/dtsserver/types</Default>
+</Parameter>
+
+<Parameter name="XMLNAME">
+<Default>SEAttributeFilter</Default>
+</Parameter>
+
+<Parameter name="XMLSEQUENCE">
+<Default>1</Default>
+</Parameter>
+
+<Property name="attribute">
+<Type>BSTS.ns1.SESearchAttribute</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="attribute"/>
+</Property>
+
+<Property name="type">
+<Type>BSTS.ns1.SEKbType</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="type"/>
+</Property>
+
+<Property name="operator">
+<Type>BSTS.ns1.SEFilterOperator</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="operator"/>
+</Property>
+
+<Property name="value">
+<Type>%String</Type>
+<Parameter name="MAXLEN"/>
+<Parameter name="XMLNAME" value="value"/>
+</Property>
+
+<Property name="valueNamespaceId">
+<Type>%xsd.int</Type>
+<Parameter name="XMLNAME" value="valueNamespaceId"/>
+</Property>
+
+<Property name="valueNamespaceName">
+<Type>%String</Type>
+<Parameter name="MAXLEN"/>
+<Parameter name="XMLNAME" value="valueNamespaceName"/>
+</Property>
+
+<Property name="valueStatus">
+<Type>BSTS.ns1.TItemStatus</Type>
+<Parameter name="XMLNAME" value="valueStatus"/>
+</Property>
+</Class>
+</Export>

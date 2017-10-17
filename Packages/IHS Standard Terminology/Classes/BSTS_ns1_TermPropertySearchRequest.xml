@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:35">
+<Class name="BSTS.ns1.TermPropertySearchRequest">
+<Description>
+</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject,%XML.Adaptor</Super>
+<TimeChanged>63616,48125.105541</TimeChanged>
+<TimeCreated>63616,48125.101857</TimeCreated>
+
+<Parameter name="ELEMENTQUALIFIED">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="NAMESPACE">
+<Default>http://apelon.com/dtsserver/types</Default>
+</Parameter>
+
+<Parameter name="XMLNAME">
+<Default>TermPropertySearchRequest</Default>
+</Parameter>
+
+<Parameter name="XMLSEQUENCE">
+<Default>1</Default>
+</Parameter>
+
+<Property name="type">
+<Type>BSTS.ns1.TPropertyType</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="type"/>
+</Property>
+
+<Property name="pattern">
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="MAXLEN"/>
+<Parameter name="XMLNAME" value="pattern"/>
+</Property>
+
+<Property name="options">
+<Type>BSTS.ns1.TTermSearchOptions</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="options"/>
+</Property>
+</Class>
+</Export>

@@ -1,5 +1,5 @@
-BLRUTIL3 ;IHS/OIT/MKK - MISC IHS LAB UTILITIES (Cont) ; 22-Oct-2013 09:22 ; MKK
- ;;5.2;IHS LABORATORY;**1025,1027,1030,1031,1033**;NOV 01, 1997
+BLRUTIL3 ;IHS/OIT/MKK - MISC IHS LAB UTILITIES (Cont) ; 04-Apr-2016 14:28 ; MKK
+ ;;5.2;IHS LABORATORY;**1025,1027,1030,1031,1033,1039**;NOV 01, 1997;Build 38
  ;
  Q
  ;
@@ -165,8 +165,6 @@ REVBLINK(STR) ; EP - Print string in Bold, Blinking, Reverse Video
  ; BLRBUL=2 SENDS BLRTXLOGERR BULLETIN
  ; BLRBUL=3 SENDS BLRTXLOG AND BLRTXLOGERR BULLETIN
 BULTNS ; EP - Send PCC Bulletin
- D ENTRYAUD^BLRUTIL("BULTNS^BLRUTIL3 0.0")
- ;
  Q:BLRPCC["Lab deleted test"      ; If Lab Deleted Test, don't send message.
  ;
  I "13"[BLRBUL D BULTX("BLRTXLOG")  Q:BLRBUL=1
@@ -174,8 +172,6 @@ BULTNS ; EP - Send PCC Bulletin
  Q
  ;
 BULTX(BULLETIN)     ; EP - SEND BULLETIN IF PCC ERROR IN FILING
- D ENTRYAUD^BLRUTIL("BULTX^BLRUTIL3 0.0")
- ;
  K XMB                  ; Initialize array
  S Y=""                 ; Initialize variable
  ;
@@ -195,8 +191,6 @@ BULTX(BULLETIN)     ; EP - SEND BULLETIN IF PCC ERROR IN FILING
  ; S BLRDUZ=DUZ,DUZ=.5 D ^XMB S DUZ=BLRDUZ
  S XMDUZ="Lab to PCC Link Processor"
  D ^XMB
- ;
- D ENTRYAUD^BLRUTIL("EXIT BULTX^BLRUTIL3","APCDALVR","XMB")
  ;
  ; Clean up
  K XMB
@@ -221,7 +215,6 @@ BULTXSET ; EP
  S LABTIEN=+$P($G(^BLRTXLOG(BLRLOGDA,0)),"^",6)
  S XMB(6)=$P($G(^LAB(60,LABTIEN,0)),"^",1)       ; Lab Test
  ;
- D ENTRYAUD^BLRUTIL("BULTXSET^BLRUTIL3 9.0","XMB")
  Q
  ;
  ; Set bulletin parameters from variables
@@ -240,7 +233,6 @@ BLTXNSET ; EP
  S XMB(5)=$G(BLRACCN)                            ; Accession Number
  S XMB(6)=$P($G(^LAB(60,+$G(BLRTEST),0)),"^",1)  ; Test Description
  ;
- D ENTRYAUD^BLRUTIL("BLTXNSET^BLRUTIL3 9.0","XMB")
  Q
  ;
  ; Get Reference Range for a Test for File 63
@@ -420,12 +412,21 @@ SENDMAIL(MAILMSG,MAILARRY,FROMWHOM,NOUSER) ; EP
  I $G(XMMG)'=""!(XMZ="NOT OKAY") D
  . NEW SUBSCRPT,ARRAY
  . S SUBSCRPT="MailMan Message Failure^"_+$H_"^"_$J
- . S ^XTEMP(SUBSCRPT,0)=$$FMADD^XLFDT($$DT^XLFDT,90)_"^"_$$DT^XLFDT_"^"_"Lab Package MailMan Message."
- . S ^XTEMP(SUBSCRPT,1)="MailMan Message was not sent."
- . S ^XTEMP(SUBSCRPT,2)="  Message that should have been sent follows:"
+ . ; S ^XTEMP(SUBSCRPT,0)=$$FMADD^XLFDT($$DT^XLFDT,90)_"^"_$$DT^XLFDT_"^"_"Lab Package MailMan Message."
+ . ; S ^XTEMP(SUBSCRPT,1)="MailMan Message was not sent."
+ . ; S ^XTEMP(SUBSCRPT,2)="  Message that should have been sent follows:"
+ . ; S ARRAY=0
+ . ; F  S ARRAY=$O(MAILARRY(ARRAY))  Q:ARRAY<1  D
+ .. ; S ^XTEMP(SUBSCRPT,(ARRAY+3))="     "_$G(MAILARRY(ARRAY))
+ . ;
+ . ; ----- BEGIN IHS/MSC/MKK - LR*5.2*1039 - Use ^XTMP not ^XTEMP, per SAC
+ . S ^XTMP(SUBSCRPT,0)=$$FMADD^XLFDT($$DT^XLFDT,90)_"^"_$$DT^XLFDT_"^"_"Lab Package MailMan Message."
+ . S ^XTMP(SUBSCRPT,1)="MailMan Message was not sent."
+ . S ^XTMP(SUBSCRPT,2)="  Message that should have been sent follows:"
  . S ARRAY=0
  . F  S ARRAY=$O(MAILARRY(ARRAY))  Q:ARRAY<1  D
- .. S ^XTEMP(SUBSCRPT,(ARRAY+3))="     "_$G(MAILARRY(ARRAY))
+ .. S ^XTMP(SUBSCRPT,(ARRAY+2))="     "_$G(MAILARRY(ARRAY))
+ . ; ----- END IHS/MSC/MKK - LR*5.2*1039
  ;
  K X,XMDUZ,XMSUB,XMTEXT,XMY,XMZ,Y   ; Cleanup
  Q

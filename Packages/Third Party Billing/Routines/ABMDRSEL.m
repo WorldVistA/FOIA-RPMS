@@ -1,13 +1,16 @@
 ABMDRSEL ; IHS/ASDST/DMJ - Selective Report Parameters ;
- ;;2.6;IHS 3P BILLING SYSTEM;**3,4,14**;NOV 12, 2009;Build 238
+ ;;2.6;IHS 3P BILLING SYSTEM;**3,4,14,21**;NOV 12, 2009;Build 379
  ;Original;TMD;07/14/95 12:23 PM
  ;
- ; IHS/SD/SDR - v2.5 p8 - Added code for cancelling official
- ; IHS/SD/SDR,TPB - v2.5 p8 - Added code for pending status (12)
- ; IHS/SD/SDR - v2.5 p10 - IM20566 - Fix for <UNDEF>PRINT+13^ABMDRST1
- ; IHS/SD/SDR - abm*2.6*4 - NO HEAT - Fixed closed/exported dates
+ ;IHS/SD/SDR - v2.5 p8 - Added code for cancelling official
+ ;IHS/SD/SDR,TPB - v2.5 p8 - Added code for pending status (12)
+ ;IHS/SD/SDR - v2.5 p10 - IM20566 - Fix for <UNDEF>PRINT+13^ABMDRST1
+ ;
+ ;IHS/SD/SDR - 2.6*4 - NO HEAT - Fixed closed/exported dates
  ;IHS/SD/SDR - 2.6*14 - ICD10 009 - Added code for ICD-10 prompts
  ;IHS/SD/SDR 2.6*14 - HEAT165197 (CR3109) - Made it so a range of alphanumeric codes can be selected.
+ ;IHS/SD/SDR - 2.6*21 - HEAT186137 - Fixed pending report so user can select all visit types and still pick specific reasons
+ ;IHS/SD/SDR - 2.6*21 - HEAT241429 - Added code to not ask ELIGIBILITY STATUS
  ;
  K DIC,DIR,ABMY
  S U="^"
@@ -61,13 +64,17 @@ LOOP ;
  I $D(ABMY("DX",3)) W !?3,"- Diagnosis (ICD-10) Code from: ",ABM("DX",3),"  to: ",ABM("DX",4),"  (",$S($D(ABMY("DX10","ALL")):"Check All Diagnosis",1:"Primary Diagnosis Only"),")"  ;abm*2.6*14 ICD10 009 and HEAT165197 (CR3109)
  I $D(ABMY("PX")) W !?3,"- CPT Range from.....: ",ABMY("PX",1),"  to: ",ABMY("PX",2)
  I $G(ABM("RTYP")) W !?3,"- Report Type........: ",ABM("RTYP","NM")
+ I $G(ABM("RFOR")) W !?3,"- Output Type........: ",ABM("RFOR","NM")  ;abm*2.6*21 IHS/SD/SDR HEAT241429
+ I (+$G(ABM("RFOR"))=2) W !,?7,"Write file to ",ABM("RPATH")_ABM("RFN")  ;abm*2.6*21 IHS/SD/SDR HEAT241429
  ;
 PARM ;
  ; Choose additional exclusion parameters
  K DIR
  S DIR(0)="SO^1:LOCATION;2:BILLING ENTITY;3:DATE RANGE;4:"
  S DIR(0)=DIR(0)_$S($D(ABM("CANC")):"CANCELLING OFFICIAL",$D(ABM("CLOS")):"CLOSING OFFICIAL",($G(ABM("STA"))'="")&($G(ABM("STA"))'="P"):"CLAIM STATUS",$G(ABM("STA"))="P":"STATUS UPDATER",1:"APPROVING OFFICIAL")
- S DIR(0)=DIR(0)_";5:PROVIDER;6:ELIGIBILITY STATUS"
+ ;S DIR(0)=DIR(0)_";5:PROVIDER;6:ELIGIBILITY STATUS"  ;abm*2.6*21 IHS/SD/SDR HEAT241429
+ S DIR(0)=DIR(0)_";5:PROVIDER"_$S($D(ABM("NOSTAT")):"",1:";6:ELIGIBILITY STATUS")  ;abm*2.6*21 IHS/SD/SDR HEAT241429
+ S DIR(0)=DIR(0)_$S($D(ABM("RFOR")):";6:OUTPUT TYPE",1:"")  ;abm*2.6*21 IHS/SD/SDR HEAT241429
  I '$D(ABM("NODX")) S DIR(0)=DIR(0)_";7:DIAGNOSIS RANGE;8:CPT RANGE"
  I $G(ABM("RTYP")) S DIR(0)=DIR(0)_";"_$S($D(ABM("NODX")):7,1:9)_":REPORT TYPE"
  S DIR("A")="Select ONE or MORE of the above EXCLUSION PARAMETERS"
@@ -76,6 +83,7 @@ PARM ;
  K DIR
  G XIT:$D(DIRUT)!$D(DIROUT)
  I Y<6 D @($S(Y=1:"LOC",Y=2:"TYP",Y=3:"DT",$G(ABM("STA"))="P"&(Y=4):"INC",Y=5:"PRV",$D(ABM("CANC")):"CANC",$D(ABM("CLOS")):"CLOS",$D(ABM("STA")):"STATUS",1:"APPR")_"^ABMDRSL1") G LOOP  ;Closed
+ I Y=6&($D(ABM("RFOR"))) D RFOR^ABMDRSL2  G LOOP  ;abm*2.6*21 IHS/SD/SDR HEAT241429
  I Y=6 D PTYP^ABMDRSL2 G LOOP
  I '$D(ABM("NODX")) D @($S(Y=7:"DX",Y=8:"PX",1:"RTYP")_"^ABMDRSL2") G LOOP
  D RTYP^ABMDRSL2 G LOOP
@@ -102,7 +110,8 @@ XIT ;
  I '$D(DIROUT)&('$D(DIRUT)) D
  .S ABMY("SORT")=Y
  .I ABMY("SORT")="C" D CLIN,REASON:$D(ABM("REASON")) Q
- .D VTYP,REASON:$D(ABM("REASON"))&($D(ABMY("VTYP")))
+ .;D VTYP,REASON:$D(ABM("REASON"))&($D(ABMY("VTYP")))  ;abm*2.6*21 IHS/SD/SDR HEAT186137
+ .I ABMY("SORT")="V" D VTYP,REASON:$D(ABM("REASON"))  ;abm*2.6*21 IHS/SD/SDR HEAT186137
  .Q
  ;
 XIT2 ;

@@ -1,5 +1,5 @@
 BQIPTDMG ;VNGT/HS/ALA-iCare Demographics RPCs ; 14 Jan 2009  12:47 PM
- ;;2.1;ICARE MANAGEMENT SYSTEM;;Feb 07, 2011
+ ;;2.6;ICARE MANAGEMENT SYSTEM;;Jul 07, 2017;Build 72
  ;
  ;
 GET(DATA,DFN) ; EP -- BQI PATIENT EDIT DATA
@@ -82,6 +82,15 @@ ETHN(DFN,FLD) ; EP - Patient's Ethnicity
  . S VAL=$$GET1^DIQ(2.06,IENS,FLD,"I")_$C(28)_$$GET1^DIQ(2.06,IENS,FLD,"E")
  Q VAL
  ;
+ET(DFN) ; EP - List of patient's ethinicities
+ NEW BN,VAL
+ S BN=0,VAL=""
+ F  S BN=$O(^DPT(DFN,.06,BN)) Q:'BN  D
+ . NEW DA,IENS
+ . S DA(1)=DFN,DA=BN,IENS=$$IENS^DILF(.DA)
+ . S VAL=VAL_$$GET1^DIQ(2.06,IENS,.01,"E")_$C(10)_$C(13)
+ Q $$TKO^BQIUL1(VAL,$C(10)_$C(13))
+ ;
 RCE(DFN,FLD) ; EP - Patient's Race
  NEW BN,VAL
  S BN=0,VAL=""
@@ -90,3 +99,12 @@ RCE(DFN,FLD) ; EP - Patient's Race
  . S DA(1)=DFN,DA=BN,IENS=$$IENS^DILF(.DA)
  . S VAL=$$GET1^DIQ(2.02,IENS,FLD,"I")_$C(28)_$$GET1^DIQ(2.02,IENS,FLD,"E")
  Q VAL
+ ;
+RC(DFN) ; EP - List of patient's race(s)
+ NEW BN,VAL
+ S BN=0,VAL=""
+ F  S BN=$O(^DPT(DFN,.02,BN)) Q:'BN  D
+ . NEW DA,IENS
+ . S DA(1)=DFN,DA=BN,IENS=$$IENS^DILF(.DA)
+ . S VAL=VAL_$$GET1^DIQ(2.02,IENS,.01,"E")_$C(10)_$C(13)
+ Q $$TKO^BQIUL1(VAL,$C(10)_$C(13))

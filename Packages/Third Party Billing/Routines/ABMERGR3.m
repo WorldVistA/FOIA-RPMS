@@ -1,19 +1,18 @@
-ABMERGR3 ; IHS/ASDST/DMJ - GET ANCILLARY SVCS REVENUE CODE INFO ; 
- ;;2.6;IHS Third Party Billing;**1,3,6,8,9**;NOV 12, 2009
+ABMERGR3 ; IHS/SD/SDR - GET ANCILLARY SVCS REVENUE CODE INFO ; 
+ ;;2.6;IHS Third Party Billing;**1,3,6,8,9,14,21**;NOV 12, 2009;Build 379
  ;Original;DMJ;03/20/96 9:07 AM
  ;
- ; IHS/SD/SDR - v2.5 p9 - split routine for size
- ; IHS/SD/SDR - v2.5 p10 - IM20395
- ;   Split out lines bundled by Rev code
- ; IHS/SD/SDR - v2.5 p10 - IM21539
- ;   Made anes amt just use base charge
- ; IHS/SD/SDR - v2.5 p12 - IM24093
- ;   Put description in array if J-code
+ ;IHS/SD/SDR - v2.5 p9 - split routine for size
+ ;IHS/SD/SDR - v2.5 p10 - IM20395 - Split out lines bundled by Rev code
+ ;IHS/SD/SDR - v2.5 p10 - IM21539 - Made anes amt just use base charge
+ ;IHS/SD/SDR - v2.5 p12 - IM24093 - Put description in array if J-code
  ;
- ; IHS/SD/SDR - v2.6 CSV
- ; IHS/SD/SDR - abm*2.6*1 - HEAT6566 - Populate anes based on MCR/non-MCR
- ; IHS/SD/SDR - abm*2.6*3 - HEAT12742 - Correction to MCR/non-MCR; removed all HEAT6566 changes
- ; IHS/SD/SDR - abm2.6*6 - 5010 - added 5010 prompts to 43 multiple
+ ;IHS/SD/SDR - v2.6 CSV
+ ;IHS/SD/SDR - 2.6*1 - HEAT6566 - Populate anes based on MCR/non-MCR
+ ;IHS/SD/SDR - 2.6*3 - HEAT12742 - Correction to MCR/non-MCR; removed all HEAT6566 changes
+ ;IHS/SD/SDR - 2.6*6 - 5010 - added 5010 prompts to 43 multiple
+ ;IHS/SD/SDR - 2.6*21 - HEAT106899 - Get operating and rendering provider for 43 mult.
+ ;IHS/SD/SDR - 2.6*21 - HEAT120880 Added code for SERVICE DATE TO in ABMRV array for all multiples.
  ;
 37 ;EP - Laboratory
  S DA=0
@@ -31,6 +30,7 @@ ABMERGR3 ; IHS/ASDST/DMJ - GET ANCILLARY SVCS REVENUE CODE INFO ;
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,8)=ABM(4)  ;Unit Charge
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,10)=ABM(5)  ;Date/Time
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,12)=ABM(8)  ;3rd Modifier
+ .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,27)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),37,DA,0)),U,12)  ;abm*2.6*21 IHS/SD/SDR HEAT120880
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,38)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),37,DA,2)),U)  ;abm*2.6*8 5010 line item control number
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,39)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),37,DA,2)),U,2)  ;abm*2.6*9 NARR
  Q
@@ -53,6 +53,7 @@ ABMERGR3 ; IHS/ASDST/DMJ - GET ANCILLARY SVCS REVENUE CODE INFO ;
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,10)=ABM(5)  ;Date/time of service
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,12)=ABM(19)  ;3rd Modifier
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,18)=ABM(11)  ;Other Provider
+ .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,27)=ABM(5)  ;abm*2.6*21 IHS/SD/SDR HEAT120880
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,38)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),39,DA,2)),U)  ;abm*2.6*8 5010 line item control number
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,39)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),39,DA,2)),U,2)  ;abm*2.6*9 NARR
  Q
@@ -84,6 +85,15 @@ ABMERGR3 ; IHS/ASDST/DMJ - GET ANCILLARY SVCS REVENUE CODE INFO ;
  .;end new code 5010
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,38)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),43,DA,2)),U)  ;abm*2.6*8 5010 line item control number
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,39)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),43,DA,2)),U,2)  ;abm*2.6*9 NARR
+ .;start new abm*2.6*21 IHS/SD/SDR HEAT106899
+ .I $D(^ABMDBILL(DUZ(2),ABMP("BDFN"),43,DA,"P","C","O")) D
+ ..S ABMPIEN=$O(^ABMDBILL(DUZ(2),ABMP("BDFN"),43,DA,"P","C","O",0))
+ ..S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,16)=$P(^ABMDBILL(DUZ(2),ABMP("BDFN"),43,DA,"P",ABMPIEN,0),U)
+ .I $D(^ABMDBILL(DUZ(2),ABMP("BDFN"),43,DA,"P","C","R")) D
+ ..S ABMPIEN=$O(^ABMDBILL(DUZ(2),ABMP("BDFN"),43,DA,"P","C","R",0))
+ ..S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,18)=$P(^ABMDBILL(DUZ(2),ABMP("BDFN"),43,DA,"P",ABMPIEN,0),U)
+ .;end new abm*2.6*21 IHS/SD/SDR HEAT106899
+ .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,27)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),43,DA,0)),U,12)  ;abm*2.6*21 IHS/SD/SDR HEAT120880
  Q
 45 ;EP - Supplies
  S DA=0
@@ -100,6 +110,7 @@ ABMERGR3 ; IHS/ASDST/DMJ - GET ANCILLARY SVCS REVENUE CODE INFO ;
  .S $P(ABMRV(ABM(5),ABM(7),ABMLCNT),U,6)=(ABM(3)*ABM(4))  ;charges
  .S $P(ABMRV(ABM(5),ABM(7),ABMLCNT),U,10)=ABM(2)
  .S $P(ABMRV(ABM(5),ABM(7),ABMLCNT),U,8)=ABM(4)
+ .S $P(ABMRV(+ABM(5),ABM(7),ABMLCNT),U,27)=ABM(2)  ;abm*2.6*21 IHS/SD/SDR HEAT120880
  .S $P(ABMRV(ABM(5),ABM(7),ABMLCNT),U,38)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),45,DA,2)),U)  ;abm*2.6*8 5010 line item control number
  .S $P(ABMRV(ABM(5),ABM(7),ABMLCNT),U,39)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),45,DA,2)),U,2)  ;abm*2.6*9 NARR
  Q
@@ -119,6 +130,7 @@ ABMERGR3 ; IHS/ASDST/DMJ - GET ANCILLARY SVCS REVENUE CODE INFO ;
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,8)=ABM(4)  ;Unit Charge
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,10)=ABM(7)  ;date/time
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,12)=ABM(9)  ;3rd Modifier
+ .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,27)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),47,DA,0)),U,12)  ;abm*2.6*21 IHS/SD/SDR HEAT120880
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,38)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),47,DA,2)),U)  ;abm*2.6*8 5010 line item control number
  .S $P(ABMRV(+ABM(2),ABM(1),ABMLCNT),U,39)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),47,DA,2)),U,2)  ;abm*2.6*9 NARR
  Q

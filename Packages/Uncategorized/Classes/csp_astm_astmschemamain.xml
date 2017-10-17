@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:35">
+<Class name="csp.astm.astmschemamain">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>CSPX.AutoPageCSP</Super>
+<TimeChanged>61501,53312.097974</TimeChanged>
+<TimeCreated>61501,53312.083089</TimeCreated>
+<GeneratedBy>/csp/goldb/ASTM/ASTMSchemaMain.csp</GeneratedBy>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body onload=""onLoadBody();"">"
+	Write !,"<table border=""0"" class=""LayoutMain"" width=""100%"" cellpadding=""0"" cellspacing=""0"">"
+	Do ..WriteTitlePane("@Ensemble:ASTMManagerSchemas@Ensemble ASTM Schemas")
+	Write !,"</table>"
+	Write !,!,"<div class=""Text1"">"
+	Write "ASTM categories / schema versions are displayed below:"
+	Write "</div>"
+	Write !,!,"<table border=1 cellpadding=4 cellspacing=0><tr>",!
+	Write !,"<tr><th>Category</th><th>Base</th><th colspan=5>Links</th></tr>",!
+	Write !
+	#Include EnsEDIASTM
+	Set cat="" For { Set cat=$o($$$vaSchemaGbl(cat)) Quit:cat=""
+	Set sorted("="_cat)=""
+	}
+	Set sortcat="" For { Set sortcat=$o(sorted(sortcat)) Quit:sortcat=""
+	set cat=$e(sortcat,2,99999)
+	set base=$get($$$vaSchemaGbl(cat,"base"))
+	&html<<tr>>
+	&html<<td valign=top><b>#(cat)#</b></td>>
+	&html<<td valign=top><i>&nbsp;#(base)#&nbsp;</i></td>>
+	&html<<td><a href='#(..Link("ASTMSchemaList.csp?ELEMENT=DS&CATEGORY="_cat))#'>Document Structures / <i>DocTypes</i></a></td>>
+	&html<<td><a href='#(..Link("ASTMSchemaList.csp?ELEMENT=SS&CATEGORY="_cat))#'>Segment Structures</a></td>>
+	&html<<td><a href='#(..Link("ASTMSchemaList.csp?ELEMENT=CS&CATEGORY="_cat))#'>Component Structures</a></td>>
+	&html<<td><a href='#(..Link("ASTMSchemaList.csp?ELEMENT=CT&CATEGORY="_cat))#'>Code Tables</a></td>>
+	&html<</tr>>
+	}
+	Write !,!,"</table>",!
+	Write "<form name=""theForm"" action=""ASTMSchemaMain.csp"" method=get>"
+	Write !,..InsertHiddenFields("ASTMSchemaMain.csp"),!
+	Write !,"	"
+	Write "<input type=""hidden"" name=""SUBMIT_OPERATION"" value="""">"
+	Write !,"	<table class=""AutoForm"" cellpadding=4><tr>",!
+	Write "		<td>",!
+	Write "		</td><td align=center>",!
+	Write " 			"
+	Write "<input type=""button"" name=""BTN_Import"" value=""Import From File"" onclick=""btnImport();"">"
+	Write "&nbsp;",!
+	Write "		</td><td>",!
+	Write " 			"
+	Write "<input TYPE=""file"" NAME=""FILE"" VALUE="""" SIZE=""30"">"
+	Write !,"		</td>",!
+	Write "	</tr><tr>",!
+	Write "		<td rowspan=2>Choose Category<br>"
+	Write "<select name=""CATEGORY"">"
+	Write !,"		"
+	&html<<option value=""></option>>
+	Set sortcat="" For { Set sortcat=$o(sorted(sortcat)) Quit:sortcat=""
+	set cat=$e(sortcat,2,99999)
+	&html<<option value="#(cat)#">#(cat)#</option>>
+	}
+	Write !,"		"
+	Write "</select>"
+	Write "</td>",!
+	Write "		<td align=center>",!
+	Write "			"
+	Write "<input type=""button"" name=""BTN_Export"" value=""Export To File"" onclick=""btnExport();"">"
+	Write "&nbsp;",!
+	Write "		</td><td>",!
+	Write "			"
+	Write "<input TYPE=""text"" NAME=""OUTFILE"" VALUE="""" SIZE=""30"">"
+	Write !,"    	</td>",!
+	Write "	</tr><tr>",!
+	Write "		<td align=center>",!
+	Write "			"
+	Write "<input type=""button"" name=""BTN_Remove"" value=""Remove Category"" onclick=""btnRemove();"">"
+	Write !,"		</td><td>",!
+	Write "		</td>",!
+	Write "    </tr></table>	",!
+	Write "</form>"
+	Write !,!,"</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<title>Ensemble ASTM Schemas</title>",!
+	Write "<link rel=""stylesheet"" type=""text/css"" href=""/csp/sys/csputils.css"" title=""Standard Style""/>"
+	Write !,"<style>"
+	Write !,"/* apply some uniformity to buttons */",!
+	Write "select, input {",!
+	Write "	width: 20.0em;",!
+	Write "}",!
+	Write "</style>"
+	Write !,!
+	#Include EnsEDIASTM
+	Set SubmitOperation=$G(%request.Data("SUBMIT_OPERATION",1))
+	Set:""=SubmitOperation SubmitOperation=$G(%session.Data("SUBMIT_OPERATION"))
+	Kill %session.Data("SUBMIT_OPERATION")
+	Set Filename="", (tSCImport,tSCExport)=$$$OK
+	If "Import"=SubmitOperation {
+	Set Filename=$G(%request.Data("FILE",1))
+	If ""=Filename||'##class(%File).Exists(Filename) {
+	Set tSCImport=$$$ERROR($$$EnsErrGeneral,"Unable to open file '"_Filename_"'")
+	}
+	If ""'=Filename&&$$$ISOK(tSCImport) {
+	Set tSCImport=##class(EnsLib.EDI.ASTM.SchemaXML).Import(Filename,.tCatImported)
+	}
+	} ElseIf "Export"=SubmitOperation {
+	Set OutFilename=$G(%request.Data("OUTFILE",1))
+	Set OutCategory=$G(%request.Data("CATEGORY",1))
+	Set:""'=(OutFilename_OutCategory) tSCExport=$System.OBJ.Export(OutCategory_".ASTM",OutFilename,"-d")
+	} ElseIf "Remove"=SubmitOperation {
+	Set OutCategory=$G(%request.Data("CATEGORY",1))
+	Set tKilled=$D($$$vaSchemaGbl(OutCategory))
+	Kill:""'=OutCategory $$$vaSchemaGbl(OutCategory),$$$vaSchemaDescGbl(OutCategory)
+	}
+	Write !,!
+	If '(($$$ISERR(tSCImport))) Goto %csp00001 ;{
+	Write !,"<script language=""javascript"">"
+	Write !,"function onLoadBody()",!
+	Write "{",!
+	Write "	alert(""Error importing from file '"_($ZCVT(Filename,"O","JS"))_"': "_($ZCVT($$$StatusDisplayString(tSCImport),"O","JS"))_""");",!
+	Write "}",!
+	Write "</script>"
+	Write !
+	Goto %csp00002 ;}
+%csp00001	If '(($$$ISERR(tSCExport))) Goto %csp00003 ;{
+	Write !,"<script language=""javascript"">"
+	Write !,"function onLoadBody()",!
+	Write "{",!
+	Write "	alert(""Error exporting category '"_($ZCVT(OutCategory,"O","JS"))_"' to file '"_($ZCVT(Filename,"O","JS"))_"': "_($ZCVT($$$StatusDisplayString(tSCExport),"O","JS"))_""");",!
+	Write "}",!
+	Write "</script>"
+	Write !
+	Goto %csp00002 ;}
+%csp00003	If '((("Import"=SubmitOperation)&&(""'=Filename))) Goto %csp00004 ;{
+	Write !,"<script language=""javascript"">"
+	Write !,"function onLoadBody()",!
+	Write "{",!
+	Write "	alert(""Imported schema category "_($ZCVT(tCatImported,"O","JS"))_" from file '"_($ZCVT(Filename,"O","JS"))_"'"");",!
+	Write "}",!
+	Write "</script>"
+	Write !
+	Goto %csp00002 ;}
+%csp00004	If '((("Export"=SubmitOperation)&&(""'=(OutFilename_OutCategory)))) Goto %csp00005 ;{
+	Write !,"<script language=""javascript"">"
+	Write !,"function onLoadBody()",!
+	Write "{",!
+	Write "	alert(""Exported schema category '"_($ZCVT(OutCategory,"O","JS"))_"' to file '"_($ZCVT(OutFilename,"O","JS"))_"'"");",!
+	Write "}",!
+	Write "</script>"
+	Write !
+	Goto %csp00002 ;}
+%csp00005	If '((("Remove"=SubmitOperation)&&(""'=OutCategory)&&tKilled)) Goto %csp00006 ;{
+	Write !,"<script language=""javascript"">"
+	Write !,"function onLoadBody()",!
+	Write "{",!
+	Write "	alert(""Removed schema category '"_($ZCVT(OutCategory,"O","JS"))_"'"");",!
+	Write "}",!
+	Write "</script>"
+	Write !
+	Goto %csp00002 ;}
+%csp00006	;{
+	Write !,"<script language=""javascript"">"
+	Write !,"function onLoadBody()",!
+	Write "{",!
+	Write "}",!
+	Write "</script>"
+	Write !
+%csp00002	;}
+	Write !,!,"<script language=""javascript"">"
+	Write !,!,"function btnRemove()",!
+	Write "{",!
+	Write "	var form = self.document.theForm;",!
+	Write "	if (form.CATEGORY.value == '') {",!
+	Write "		alert(""Please select a Category"");",!
+	Write "		return false;",!
+	Write "	}",!
+	Write "	var a = (confirm('Remove Category '+form.CATEGORY.value+' ?'));",!
+	Write "	if (!a) {",!
+	Write "		return false;",!
+	Write "	}",!
+	Write "	form.FILE.value = """";",!
+	Write "	form.OUTFILE.value = """";",!
+	Write "	setSessionOperation(""Remove"");",!
+	Write "	//form.SUBMIT_OPERATION.value = ""Remove"";",!
+	Write "	form.submit();",!
+	Write "	return true;",!
+	Write "}",!
+	Write !,"function btnExport()",!
+	Write "{",!
+	Write "	var form = self.document.theForm;",!
+	Write "	if (form.CATEGORY.value == '') {",!
+	Write "		alert(""Please select a Category"");",!
+	Write "		return false;",!
+	Write "	}",!
+	Write "	if (form.OUTFILE.value == '') {",!
+	Write "		alert(""Please specify a filename"");",!
+	Write "		return false;",!
+	Write "	}",!
+	Write "	form.FILE.value = """";",!
+	Write "	setSessionOperation(""Export"");",!
+	Write "	//form.SUBMIT_OPERATION.value = ""Export"";",!
+	Write "	form.submit();",!
+	Write "	return true;",!
+	Write "}",!
+	Write !,"function getFileCat()",!
+	Write "{",!
+	Write "	var x = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild("EnsLib.EDI.ASTM.SchemaXML.GetImportCategory:csp.astm.astmschemamain"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',self.document.theForm.FILE.value);",!
+	Write "	return x; ",!
+	Write "}",!
+	Write !,"function setSessionOperation(OperationName)",!
+	Write "{",!
+	Write "	var x = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild("csp.astm.astmschemamain.SetSessionSubmitOperation"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',OperationName)",!
+	Write "	return x; ",!
+	Write "}",!
+	Write !,"</script>"
+	Write !
+	#Include EnsEDIASTM
+	Write "<script language=""javascript"">",!
+	&html<
+	function btnImport()
+	{>
+	Write "    var catList = new Array();",!
+	Set cat="" For { Set cat=$o($$$vaSchemaGbl(cat)) Quit:cat=""
+	Write "    catList['"_cat_"'] = 1;",!
+	}
+	&html<
+	var form = self.document.theForm;
+	if (form.FILE.value == '') {
+	alert("Please specify a filename");
+	return false;
+	}
+	var fileCat = getFileCat();
+	if ((fileCat != '') && (catList[fileCat] != null)) {
+	var a = (confirm('Overwrite Category '+fileCat+' by loading from file '+form.FILE.value+' ?'));
+	if (!a) {
+	return false;
+	}
+	}
+	form.CATEGORY.value = "";
+	setSessionOperation("Import");
+	//form.SUBMIT_OPERATION.value = "Import";
+	form.submit();
+	return true;
+	}>
+	Write "<"_$C(47)_"script>",!
+	Write !,(..HyperEventHead(0,0))
+	Write !,!,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !
+	Do ..OnPageBODY()
+	Write !,!,!,!,"</html>"
+]]></Implementation>
+</Method>
+
+<Method name="SetSessionSubmitOperation">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>pOperationName</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set %session.Data("SUBMIT_OPERATION")=pOperationName
+ 	Quit 1
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>C:\InterSystems\Ensemble\CSP\goldb\ASTM\ASTMSchemaMain.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/goldb/ASTM/ASTMSchemaMain.csp</Default>
+</Parameter>
+
+<Parameter name="DOMAIN">
+<Default>Ensemble</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>61286,9120</Default>
+</Parameter>
+
+<Parameter name="PAGENAME">
+<Default>ASTM Schemas</Default>
+</Parameter>
+
+<Parameter name="PARENTPAGE">
+<Default>../UtilEnsEDIMain.csp</Default>
+</Parameter>
+</Class>
+</Export>

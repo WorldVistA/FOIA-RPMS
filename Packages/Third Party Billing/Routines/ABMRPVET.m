@@ -1,6 +1,8 @@
 ABMRPVET ; IHS/SD/SDR - Vet w/Visit in Date Range Listing ;
- ;;2.6;IHS 3P BILLING SYSTEM;**12**;NOV 12, 2009;Build 133
+ ;;2.6;IHS 3P BILLING SYSTEM;**12,21**;NOV 12, 2009;Build 379
  ;Original;SDR;
+ ;IHS/SD/SDR - 2.6*21 - HEAT134720 - added total by visit location and how many registered patients for each
+ ;   visit location
  ;
  K ABM,ABMY
  S ABM("RTYP","NM")="Vets with Visits Report"
@@ -47,6 +49,14 @@ DATA ;EP
  ..S ^TMP($J,"ABM-VET",ABMPT)=+$G(^TMP($J,"ABM-VET",ABMPT))+1  ;visit count
  ..S ABMNAME=$$GET1^DIQ(2,ABMPT,".01","E")
  ..S ^TMP($J,"ABM-VET","S",ABMNAME)=ABMPT
+ ..;start new abm*2.6*21 IHS/SD/SDR HEAT134720
+ ..S ABMVLOC=$$GET1^DIQ(9000010,ABMVIEN,".06","I")
+ ..S ^TMP($J,"ABM-VET","VTOT",ABMVLOC)=+$G(^TMP($J,"ABM-VET","VTOT",ABMVLOC))+1  ;count visits by site
+ ..Q:+$G(^TMP($J,"ABM-VET","UNQ PTS",ABMVLOC,ABMPT))=1  ;pt already counted for visit location
+ ..Q:'$D(^AUPNPAT(ABMPT,41,ABMVLOC))  ;skip if pt isn't registered at location
+ ..S ^TMP($J,"ABM-VET","UPTOT",ABMVLOC)=+$G(^TMP($J,"ABM-VET","UPTOT",ABMVLOC))+1  ;count how many unique registered pts
+ ..S ^TMP($J,"ABM-VET","UNQ PTS",ABMVLOC,ABMPT)=1  ;track unique pts
+ ;end new abm*2.6*21 IHS/SD/SDR HEAT134720
  Q
 PRINT ;
  D HDR
@@ -60,6 +70,14 @@ PRINT ;
  .S ABMSSN=$$GET1^DIQ(2,ABMPT,".09")
  .S ABMHRN=$P($G(^AUPNPAT(ABMPT,41,DUZ(2),0)),U,2)
  .W !,ABMN,?40,ABMHRN,?48,ABMDOB,?59,ABMSSN,?76,ABMVCNT
+ ;start new abm*2.6*21 IHS/SD/SDR HEAT134720
+ W !
+ S ABMVLOC=0
+ F  S ABMVLOC=$O(^TMP($J,"ABM-VET","VTOT",ABMVLOC)) Q:'ABMVLOC  D
+ .W !?5,$$GET1^DIQ(9999999.06,ABMVLOC,".02","E"),?20,+$G(^TMP($J,"ABM-VET","VTOT",ABMVLOC))_" "_$S(+$G(^TMP($J,"ABM-VET","VTOT",ABMVLOC))=1:"visit",1:"visits")
+ .W ?35,+$G(^TMP($J,"ABM-VET","UPTOT",ABMVLOC))_" registered"
+ K ^TMP($J,"ABM-VET")
+ ;end new abm*2.6*21 IHS/SD/SDR HEAT134720
  Q
 HDR ;EP
  I +$G(ABM("PG"))'=0,$E(IOST)="C" S DIR(0)="E" D ^DIR K DIR Q:(IOST["C")&($G(Y)<0)!($D(DIRUT)!$D(DIROUT)!$D(DTOUT)!$D(DUOUT))

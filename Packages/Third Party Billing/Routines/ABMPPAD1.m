@@ -1,11 +1,12 @@
 ABMPPAD1 ; IHS/SD/SDR - Prior Payments/Adjustments page (CE); 
- ;;2.6;IHS 3P BILLING SYSTEM;**6,8**;NOV 12, 2009;Build 133
+ ;;2.6;IHS 3P BILLING SYSTEM;**6,8,21**;NOV 12, 2009;Build 379
  ;
  ; IHS/SD/SDR - v2.5 p12 - IM25430
  ;   Made correction for <SUBSCR>EDIT2+3^ABMPPAD1
  ;
- ; IHS/SD/SDR - v2.5 p13 - NO IM
- ; IHS/SD/SDR - abm*2.6*6 - 5010 - added export mode 32
+ ;IHS/SD/SDR - v2.5 p13 - NO IM
+ ;IHS/SD/SDR - abm*2.6*6 - 5010 - added export mode 32
+ ;IHS/SD/SDR - 2.6*21 - HEAT176726 - ABMILST wasn't always define when trying to edit an entry; added to code to create array if it wasn't already defined.
  ;
  Q
 DISPCK ;EP
@@ -61,8 +62,19 @@ EDIT ;EP
  S ABMIIEN=$O(ABMPL(+Y,0))
  I $P(ABMPL(+Y,ABMIIEN),U,2)="I"!($P(ABMPL(+Y,ABMIIEN),U,2)="P") W !,"Cannot add/edit the active/pending insurer!" H 2 S ABMEFLG=1 Q
  W !,"Ok, let's edit ",$P($G(^AUTNINS(ABMIIEN,0)),U),!
- ;start new code abm*2.6*6 5010
+ ;start new abm*2.6*6 5010
  D ^XBFMK
+ ;start new abm*2.6*21 IHS/SD/SDR HEAT176726
+ I +$O(ABMILST(ABMIIEN,0))=0 D
+ .F  S ABMBSTA=$O(^ABMDBILL(DUZ(2),"AS",ABMP("CDFN"),ABMBSTA)) Q:ABMBSTA=""  D
+ ..Q:ABMBSTA="X"
+ ..S ABMBFIEN=0
+ ..F  S ABMBFIEN=$O(^ABMDBILL(DUZ(2),"AS",ABMP("CDFN"),ABMBSTA,ABMBFIEN)) Q:+ABMBFIEN=0  D
+ ...S ABMBNUM=$P($G(^ABMDBILL(DUZ(2),ABMBFIEN,0)),U)
+ ....S ABMLN=+$G(ABMLN)+1
+ ....S ABMBINS=$P($G(^ABMDBILL(DUZ(2),ABMBFIEN,0)),U,8)
+ ....S ABMILST(ABMBINS,ABMBFIEN)=""
+ ;end new abm*2.6*21 IHS/SD/SDR HEAT176726
  S DA(1)=$O(ABMILST(ABMIIEN,0))
  S DIE="^ABMDBILL(DUZ(2),"_DA(1)_",13,"
  S DA=ABMIIEN

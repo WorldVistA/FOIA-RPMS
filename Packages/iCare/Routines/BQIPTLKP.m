@@ -1,5 +1,5 @@
 BQIPTLKP ;PRXM/HC/ALA-Patient Lookup ; 29 Oct 2005  6:51 PM
- ;;2.1;ICARE MANAGEMENT SYSTEM;;Feb 07, 2011
+ ;;2.5;ICARE MANAGEMENT SYSTEM;**2**;May 24, 2016;Build 14
  ;
  Q
  ;
@@ -27,6 +27,7 @@ FND(DATA,TEXT,TYPE) ; EP -- BQI LOOKUP PATIENTS
  ; FileMan date, then this is probably a date of birth search
  I $L(TEXT),$L(TEXT)<7,TEXT'?6AP S TYPE="H"
  I TEXT?1A.AN S TYPE=""
+ I $L(TEXT)=5,TEXT?1A4N S TYPE="S4"
  I $$DATE^BQIUL1(TEXT)'="",$L(TEXT)>6 S TEXT=$$DATE^BQIUL1(TEXT),TYPE="D"
  ; If user enter spaces after comma, strip extraneous spaces
  S TEXT=$$REMDBL^XLFNAME1(TEXT," ")
@@ -53,6 +54,10 @@ FND(DATA,TEXT,TYPE) ; EP -- BQI LOOKUP PATIENTS
  I TYPE="S" D
  . S FILE=2,FIELD=.09,XREF="SSN",FLAGS="P",NUMB="*"
  . ;S SCREEN=$S(+DUZ(2):"I '$P($G(^AUPNPAT(Y,41,DUZ(2),0)),U,3)",1:"")
+ . D LKUP
+ ;
+ I TYPE="S4" D
+ . S FILE=2,FIELD=.09,XREF="BS5",FLAGS="P",NUMB="*"
  . D LKUP
  ;
  ;  if the type is 'D', lookup only in the date of birth cross-reference
@@ -87,7 +92,7 @@ FND(DATA,TEXT,TYPE) ; EP -- BQI LOOKUP PATIENTS
  . ; Are we displaying an alias?
  . ; If there's no match on the patient's name and it isn't an alias it's a bad cross reference
  . ; If this is an alias it should sort after name matches (add one million to counter)
- . I TYPE'="H",TEXT?1A.E,$E(NAME,1,$L(TEXT))'=TEXT S ALIAS=$$ALIAS(DFN,TEXT) I 'ALIAS Q
+ . I TYPE'="H",TYPE'="S4",TEXT?1A.E,$E(NAME,1,$L(TEXT))'=TEXT S ALIAS=$$ALIAS(DFN,TEXT) I 'ALIAS Q
  . S II=II+1,NODE=$S(ALIAS:1000000+II,1:II)
  . S @DATA@(NODE)=DFN_"^"_NAME_"^"_HRN_"^"_SSN_"^"_DOB_"^"_DOD_"^"_ALFLG_"^"_SENS_$C(30)
  ;

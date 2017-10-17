@@ -1,5 +1,5 @@
 BIUTL2 ;IHS/CMI/MWR - UTIL: ZIS, PATH, ERRCODE; MAY 10, 2010
- ;;8.5;IMMUNIZATION;**8**;MAR 15,2014
+ ;;8.5;IMMUNIZATION;**14**;AUG 01,2017
  ;;* MICHAEL REMILLARD, DDS * CIMARRON MEDICAL INFORMATICS, FOR IHS *
  ;;  UTILITY: ZIS, ERROR CODE, VACCINE NAME & GROUP,
  ;;           MAX SERIES#, LOT DFLT, CASE MGR DFLT, VIS DATE DFLT.
@@ -7,6 +7,7 @@ BIUTL2 ;IHS/CMI/MWR - UTIL: ZIS, PATH, ERRCODE; MAY 10, 2010
  ;;           to a site and user's DUZ(2) does not match the site.  LOTDEF+19
  ;;  PATCH 7: Changes to accommodate new TCH Forecaster   HL7TX+16
  ;;  PATCH 8: Changes to accommodate new TCH Forecaster   HL7TX+16, MINAGE+6
+ ;;  PATCH 14: Update notes.   RISKP+0
  ;
  ;
  ;----------
@@ -165,7 +166,6 @@ HL7TX(BICVX,BIGRP) ;EP
  ;     1 - BICVX  (req) CVX Code for this vaccine.
  ;     2 - BIGRP  (opt) If BIGRP=1, return Vaccine Group IEN for this CVX.
  ;
- ;
  I '$G(BICVX) S BICVX=999
  I '$D(^AUTTIMM("C",BICVX)) S BICVX=999
  N BIVIEN S BIVIEN=$O(^AUTTIMM("C",BICVX,0))
@@ -194,17 +194,6 @@ VCOMPS(IEN) ;EP v8.0
  N X S X=$P(^AUTTIMM(IEN,0),"^",21,26)
  S X=$TR(X,"^",";")
  Q X
- ;
- ;
- ;----------
-VMAX(IEN) ;EP
- ;---> Return the Maximum Dose# for a Vaccine.
- ;---> Parameters:
- ;     1 - IEN  (req) IEN of Vaccine.
- ;
- Q:'$G(IEN) ""
- Q:'$D(^AUTTIMM(IEN,0)) ""
- Q $P(^AUTTIMM(IEN,0),"^",5)
  ;
  ;
  ;----------
@@ -280,14 +269,18 @@ INPTCHK(BIDUZ2) ;EP
  Q $P($G(^BISITE(+$G(BIDUZ2),0)),U,23)
  ;
  ;
+ ;********** PATCH 14, v8.5, AUG 01,2017, IHS/CMI/MWR
+ ;---> Update notes below.
  ;----------
 RISKP(BIDUZ2) ;EP - Risk Factor check (and smoking).
- ;---> Risk Parameter: Return 0 if disabled, 1 if enabled,
- ;---> 3 to include smoking in pneumo.
+ ;---> Risk Parameter: 0 - None, 1 - Pneumo for High Risk history,
+ ;--->  2 - Hep B for Diabetes Mellitus, 3 - Hep A and Hep B for CLD/Hep C
+ ;--->  9 - adds Smoking Factors.
  ;---> Parameters:
  ;     1 - BIDUZ2 (req) User's DUZ(2)
  ;
  Q +$P($G(^BISITE(+$G(BIDUZ2),0)),U,19)
+ ;**********
  ;
  ;
  ;----------
@@ -394,7 +387,7 @@ RULES(DUZ2) ;EP
  ;
  ;
  ;----------
-VALIDRUL(DUZ2) ;EP - Return 0 if not a valid choice of Immserve Rules.
+VALIDRUL(DUZ2) ;EP
  ;---> Return whether current Immserve Site Parameter is a valid choice.
  ;---> Return 0 is NOT a valid choice; otherwise return the numeric choice.
  ;---> Parameters:
@@ -495,3 +488,12 @@ DUZCHECK() ;EP
  S:'$G(BIDUZ2) BIDUZ2=$G(DUZ(2))
  I '$G(BIDUZ2) D ERRCD^BIUTL2(105,,1) Q 1
  Q 0
+ ;
+ ;
+VMAX(IEN) ;EP  ;MWRZZZ REMOVE?
+ ;---> Return the Maximum Dose# for a Vaccine.
+ ;---> Parameters:
+ ;     1 - IEN  (req) IEN of Vaccine.
+ ;
+ Q ""
+ Q $P(^AUTTIMM(IEN,0),"^",5)

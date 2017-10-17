@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:34">
+<Class name="BPHR.PMQueryServiceHttpsSoap11Endpoint">
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%SOAP.WebClient</Super>
+<TimeChanged>64097,55803.302934</TimeChanged>
+<TimeCreated>64097,55803.247481</TimeCreated>
+
+<Method name="queryRequest">
+<Final>1</Final>
+<FormalSpec>request:BPHR.ax21.PMRequest</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>BPHR.ax21.PMQueryResponse</ReturnType>
+<WebMethod>1</WebMethod>
+<SoapBindingStyle>document</SoapBindingStyle>
+<SoapBodyUse>literal</SoapBodyUse>
+<Implementation><![CDATA[ Quit ..WebMethod("queryRequest").Invoke($this,"urn:queryRequest",.request)
+]]></Implementation>
+</Method>
+
+<Parameter name="ATTRIBUTEQUALIFIED">
+<Description>
+Non-default attributeFormQualified for types XML namespace.</Description>
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="ELEMENTQUALIFIED">
+<Description>
+Non-default elementFormQualified for types XML namespace.</Description>
+<Default>0</Default>
+</Parameter>
+
+<Parameter name="LOCATION">
+<Description>
+This is the URL used to access the web service.</Description>
+<Default>https://phr1rpms.d1.na.ihs.gov:5081/axis2/services/PMQueryService.PMQueryServiceHttpsSoap11Endpoint/</Default>
+</Parameter>
+
+<Parameter name="NAMESPACE">
+<Description>
+This is the namespace used by the Service</Description>
+<Default>http://ws.pm.phr</Default>
+</Parameter>
+
+<Parameter name="OUTPUTTYPEATTRIBUTE">
+<Description>
+Use xsi:type attribute for literal types.</Description>
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="SECURITYIN">
+<Description>
+Determines handling of Security header.</Description>
+<Default>ALLOW</Default>
+</Parameter>
+
+<Parameter name="SERVICENAME">
+<Description>
+This is the name of the Service</Description>
+<Default>PMQueryService</Default>
+</Parameter>
+
+<Parameter name="SOAPVERSION">
+<Description>
+This is the SOAP version supported by the service.</Description>
+<Default>1.1</Default>
+</Parameter>
+
+<Parameter name="TYPENAMESPACE">
+<Description>
+This is the namespace used for types by the Service</Description>
+<Default>http://www.ihs.hhs.gov/phr/xsd</Default>
+</Parameter>
+
+<XData name="parameters">
+<Data><![CDATA[
+<parameters xmlns="http://www.intersystems.com/configuration" xmlns:cfg="http://www.intersystems.com/configuration">
+  <method name="queryRequest">
+    <request>
+      <Action>urn:queryRequest</Action>
+    </request>
+    <response>
+      <Action>urn:queryRequestResponse</Action>
+    </response>
+  </method>
+</parameters>
+]]></Data>
+</XData>
+</Class>
+</Export>

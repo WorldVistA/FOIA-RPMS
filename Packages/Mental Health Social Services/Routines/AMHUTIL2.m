@@ -1,10 +1,11 @@
 AMHUTIL2 ; IHS/CMI/LAB - provider functions ;
- ;;4.0;IHS BEHAVIORAL HEALTH;**1,4,5**;JUN 02, 2010;Build 18
+ ;;4.0;IHS BEHAVIORAL HEALTH;**1,4,5,8**;JUN 02, 2010;Build 7
  ;
 PNPV(N,AMHDA) ;PEP - OUTPUT TX PROVIDER NARRATIVE
  S AMHDA=$G(AMHDA)
  S N=$G(N)
  I N="" Q ""
+ Q $$SNOMED^AUPNVUTL(N)
  NEW R,D
  S (R,D)=""
  I AMHDA S R=$P($G(^AMHRPRO(AMHDA,0)),U,3)
@@ -22,6 +23,15 @@ EHR ;
  S SDIT=$P($$DESC^BSTSAPI(SDI_"^^1"),U,2)
  I SDIT="" Q $$GET1^DIQ(9002012.2,D,.02)_" | "_$P(N,"|",1)  ;not snomed text??  somebody stored a bad descriptive id return "* | " per Susan
  Q SDIT_" | "_$P(N,"|",1)
+HL(H) ;EP  - called to return internal of file 44 for hospital location based on program H
+ I $G(H)="" Q ""
+ I '$D(^AMHSITE(DUZ(2))) Q ""  ;NO SITE ENTRY
+ NEW I
+ I H="M" S I=$$VALI^XBDIQ1(9002013,DUZ(2),1812) I I Q $S($D(^SC(I,0)):I,1:"")
+ I H="S" S I=$$VALI^XBDIQ1(9002013,DUZ(2),1813) I I Q $S($D(^SC(I,0)):I,1:"")
+ I H="C" S I=$$VALI^XBDIQ1(9002013,DUZ(2),1814) I I Q $S($D(^SC(I,0)):I,1:"")
+ I H="O" S I=$$VALI^XBDIQ1(9002013,DUZ(2),1815) I I Q $S($D(^SC(I,0)):I,1:"")
+ Q ""
 CS(I) ;EP - called to determine coding system of ien I
  ;are the icd10 routines in place?, if so, use them
  I $T(ICDDX^ICDEX)]"" Q $P($$ICDDX^ICDEX(I),U,20)  ;return 1 or 30

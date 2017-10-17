@@ -1,8 +1,9 @@
-LROE ;DALOI/CJS/FHS - LAB ORDER ENTRY AND ACCESSION ; 17-Dec-2015 15:37 ; MKK
- ;;5.2;LAB SERVICE;**1003,100,121,1006,201,1013,221,1018,1021,263,1027,286,360,1031,423,1034,1035,1036,1038**;NOV 01, 1997;Build 6
+LROE ;DALOI/CJS/FHS-LAB ORDER ENTRY AND ACCESSION ;8/11/97
+ ;;5.2;LAB SERVICE;**1003,100,121,1006,201,1013,221,1018,1021,263,1027,286,360,1031,423,1034,1035,1036,1038,432,1039**;NOV 01, 1997;Build 32
+ ;;5.2;LAB SERVICE;**100,121,201,221,263,286,360,423,432**;Sep 27, 1994;Build 2
+ ;
  K LRORIFN,LRNATURE,LREND,LRORDRR
  S LRLWC="WC"
- S:$G(BLROPT)=""!($G(BLROPT(0))'=$P(XQY0,U)) BLROPT="ACCWARD",BLROPT(0)=$P(XQY0,U)  ;IHS/OIRM TUC/AAB 2/1/97
  D ^LRPARAM
  I $G(LREND) S LREND=0 Q
 L5 ;
@@ -37,7 +38,7 @@ NEXT ;from LROE1
  I LRNONE=2,LRCHK<1 W !,"The order has already been partially accessioned." H 1
  I LRNONE=2,LRCHK>0 W !,"The order has already been accessioned." H 1 G NEXT
  I LRNONE=1 W !,"No order exists with that number." H 1 G NEXT
- I '$$GOT(LRORD,LRODT) G NEXT ;W !!,"All tests for this order have been cancelled.",!,"Are you sure you want to accession it" S %=1 D YN^DICN I %'=1 G NEXT
+ I '$$GOT(LRORD,LRODT) G NEXT ;W !!,"All tests for this order have been canceled.",!,"Are you sure you want to accession it" S %=1 D YN^DICN I %'=1 G NEXT
  K DIR S DIR("A")="Is this the correct order",DIR(0)="Y"
  S DIR("B")="Yes"
  D ^DIR K DIR
@@ -51,9 +52,7 @@ NEXT ;from LROE1
  S LRTIM=+LRCDT
  ;S:'$P(^LRO(69,LRODT,1,LRSN,0),U,8) $P(^(0),U,8)=LRTIM
  S LRUN=$P(LRCDT,U,2) K LRCDT,LRSN
-MORE ; EP
- D ENTRYAUD^BLRUTIL("MORE^LROE 0.0")
- I M9>1 K DIR S DIR("A")="Do you have the entire order",DIR(0)="Y" D ^DIR K DIR S:Y=1 M9=0
+MORE I M9>1 K DIR S DIR("A")="Do you have the entire order",DIR(0)="Y" D ^DIR K DIR S:Y=1 M9=0
  I $D(DIRUT) D UNL69 G NEXT
  S YYYLRORD=LRORD                                ; IHS/OIT/MKK - LR*5.2*1030
  S (LRODT,LRSND)=0
@@ -68,9 +67,12 @@ MORE ; EP
  G NEXT
  ;
  ;
-LROE2 ; EP
- D ENTRYAUD^BLRUTIL("LROE2^LROE 0.0")
- I $D(^LRO(69,LRODT,1,DA,1)),$P(^(1),U,4)="C" S LRNONE=2,LRCHK=LRCHK+1
+LROE2 ;
+ I '$D(^LRO(69,LRODT,1,DA,0)) Q
+ I $D(^LRO(69,LRODT,1,DA,1)) D
+ . I $P(^LRO(69,LRODT,1,DA,1),U,4)="C" S LRNONE=2,LRCHK=LRCHK+1 Q
+ . I $P(^LRO(69,LRODT,1,DA,0),U,4)="LC",$P(^LRO(69,LRODT,1,DA,1),U,4)="" S LRNONE=2,LRCHK=LRCHK+1
+ ;
  K LRSN
  S (LRSN,LRSN(DA))=+DA
  I '$D(^LRO(69,LRODT,1,LRSN,0)) Q
@@ -141,8 +143,6 @@ TIME ;from LROE1, LRORD1
  I $E($G(X))'["N",$G(X)'["U",$G(X)'["@" W !!,?4,"Need Time also."  G TIME
  ; ----- END IHS/MSC/MKK - LR*5.2*1038
  ;
- D ENTRYAUD^BLRUTIL("TIME^LROE 3.0")
- ;
  W:X["?" !!,"You may enter ""T@U"" or just ""U"", for Today at Unknown time",!!
  I X["@U",$P(X,"@U",2)="" S X=$P(X,"@U",1) D ^%DT G TIME:Y<1 S LRCDT=+Y_"^1" Q
  S:X="U" LRCDT=DT_"^1"
@@ -185,6 +185,7 @@ UNL69 ;
  L -^LRO(69,"C",+$G(LRORD))
  Q
  ;
+ ;
  ;----- BEGIN IHS MODIFICATIONS LR*5.2*1021
 BLRRL ;EP - cmi/anch/maw 8/4/2004 added to check for shipping manifest and print
  ;cmi/anch/maw REF LAB
@@ -201,7 +202,7 @@ BLRRL ;EP - cmi/anch/maw 8/4/2004 added to check for shipping manifest and print
  . Q:'$D(^BLRRLO(OI,3,0))  ;not accessioned yet
  . ;W !,"Printing Shipping Manifests for Reference Lab..."  ;1036 moved to BLRRLEVN
  . ;D PRT^BLRSHPM
- . D SHIPMAN^BLRRLEVN(LRORD,0)  ;ihs/cmi/maw 12/17/2014 p1034 store and forward changes
+ . D SHIPMAN^BLRRLEVN(LRORD,0,0)  ;ihs/cmi/maw 12/17/2014 p1034 store and forward changes
  K BLRINS,BLRASFLG,BLRDXS  ;p1035
  Q
  ;----- END IHS MODIFICATIONS cmi/anch/maw end REF LAB LR*5.2*1021

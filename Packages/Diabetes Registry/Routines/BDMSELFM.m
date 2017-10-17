@@ -1,5 +1,5 @@
 BDMSELFM ; IHS/CMI/LAB - print Self Monitoring Pts for dm patients ;
- ;;2.0;DIABETES MANAGEMENT SYSTEM;**3,4,8**;JUN 14, 2007;Build 53
+ ;;2.0;DIABETES MANAGEMENT SYSTEM;**3,4,8,10**;JUN 14, 2007;Build 12
  ;SELF MONITORING REPORT
  ;
  ;This routine will go through the any selected Register
@@ -233,7 +233,7 @@ GUIEP ;EP - called from taskman ;Visiual DMS Entry Point
  S X=0,C=0 F  S X=$O(^TMP($J,"BDMSELFM",X)) Q:'X  D
  . N BDMGDATA
  . S BDMGDATA=^TMP($J,"BDMSELFM",X)
- . I BDMGDATA="ZZZZZZZ" S BDMGDATA=$C(12)
+ . ;I BDMGDATA="ZZZZZZZ" S BDMGDATA=$C(12)
  . S ^BDMGUI(BDMIEN,11,X,0)=BDMGDATA
  . S C=C+1
  S ^BDMGUI(BDMIEN,11,0)="^^"_C_"^"_C_"^"_DT_"^"

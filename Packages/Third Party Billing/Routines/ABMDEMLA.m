@@ -1,18 +1,23 @@
 ABMDEMLA ; IHS/ASDST/DMJ - Edit Utility - FOR MULTIPLES PART 2 ;  
- ;;2.6;IHS 3P BILLING SYSTEM;**4,9,11,14**;NOV 12, 2009;Build 238
+ ;;2.6;IHS 3P BILLING SYSTEM;**4,9,11,14,21**;NOV 12, 2009;Build 379
  ;
  ; IHS/ASDS/LSL - 04/26/01 - V2.4 Patch 9 - NOIS BXX-0401-150085
  ;     Allow resequencing of DX when list contains more than 30 characters.
  ;
  ;IHS/SD/SDR - 2.6*14 - ICD10 002F - Added code to populate new .06 field, ICD Indicator
  ;IHS/SD/SDR - 2.6*14 - HEAT163742 - Fixed issue with sequencing when 'garbage' is entered
+ ;IHS/SD/SDR - 2.6*21 - HEAT197150 - If there were 10+ DXs on a claim it wouldn't sequence them.  It was expecting
+ ;  there to only be 1-digit sequence numbers in the validation check of the data entered.
+ ;IHS/SD/SDR - 2.6*21 - HEAT220530 - Made change to longer list of billing sequence can be entered; changed from 40 to 55
+ ;  chars in DIR call.
  ;
  ; *********************************************************************
  ;
 S1 ; Sequence Multiple
  K DIR S DIR("B")=1 F ABMX=2:1:ABMZ("NUM") Q:ABMX>ABMZ("NUM")  S DIR("B")=DIR("B")_","_ABMX
  I DIR("B")=1 G XIT
- S DIR(0)="FO^1:40"
+ ;S DIR(0)="FO^1:40"  ;abm*2.6*21 IHS/SD/SDR HEAT220530
+ S DIR(0)="FO^1:55"  ;abm*2.6*21 IHS/SD/SDR HEAT220530
  S DIR("A")="Enter the desired billing sequence"
  S DIR("?")="Enter the billing sequence, separated by commas"
  S DIR("A",1)=" "
@@ -32,7 +37,8 @@ S2 ;
  S ABMCHKFG=0
  F ABMX=1:1:$L(Y) D
  .S ABMXTEST=$E(Y,ABMX)
- .I '((ABMXTEST=",")!(($A(ABMXTEST)>48)&($A(ABMXTEST)<58))) S ABMCHKFG=1
+ .;I '((ABMXTEST=",")!(($A(ABMXTEST)>48)&($A(ABMXTEST)<58))) S ABMCHKFG=1  ;abm*2.6*21 IHS/SD/SDR HEAT197150
+ .I '((ABMXTEST=",")!(+ABMXTEST=ABMXTEST)) S ABMCHKFG=1  ;abm*2.6*21 IHS/SD/SDR HEAT197150
  I ABMCHKFG=1 D  G S1
  .W !!,"Non-numeric data entered during sequencing.  Separate using commas."
  .W !,"Please try again"

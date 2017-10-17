@@ -1,22 +1,19 @@
-ABMDLCK2 ; IHS/ASDST/DMJ - check visit for elig - PART 2 ;   
- ;;2.6;IHS Third Party Billing System;**2**;NOV 12, 2009
+ABMDLCK2 ; IHS/SD/SDR - check visit for elig - PART 2 ; 15 Sep 2016  8:58 AM
+ ;;2.6;IHS Third Party Billing System;**2,21**;NOV 12, 2009;Build 379
  ;;;IHS/PIMC/JLG  1/16/02
  ;Original;TMD;
  ;
  ; IHS/ASDS/LSL - 03/28/2001 - V2.4 Patch 9 - NOIS XAA-0301-200051
- ;     Allow claims to generate properly for KIDSCARE for AHCCCS.
- ;     Also allow KIDSCARE plan name on Medicaid INS regardless of
- ;     use of plan name field.
- ;
+ ;   Allow claims to generate properly for KIDSCARE for AHCCCS.  Also allow KIDSCARE plan name on
+ ;   Medicaid INS regardless of use of plan name field.
  ; IHS/ASDS/LSL - 06/27/2001 - V2.4 Patch 9 - NOIS HQW-0798-100082
- ;     Modified to expand No Eligibility Found. Reasons 39, 36, 40,
- ;     and 37 can be found in this routine.
- ;
+ ;     Modified to expand No Eligibility Found. Reasons 39, 36, 40, and 37 can be found in this routine.
  ; IHS/ASDS/LSL - 11/26/2001 - V2.4 Patch 10 - NOIS BXX-1101-150084
  ;     Resolve <UNDEF>53+8^ABMDLCK2
  ;
- ; IHS/SD/SDR - v2.5 p8 - IM13854
- ;   <UNDEF>43+2^ABMDLCK2 during A/R rollback
+ ; IHS/SD/SDR - v2.5 p8 - IM13854 - <UNDEF>43+2^ABMDLCK2 during A/R rollback
+ ;
+ ;IHS/SD/SDR - 2.6*21 - VMBP - Added code for VAMB Eligible file changes.
  ;
  ; *********************************************************************
 4 ;EP - Medicaid Elig Chk
@@ -94,7 +91,10 @@ ABMDLCK2 ; IHS/ASDST/DMJ - check visit for elig - PART 2 ;
  ;
 5 ; Private Ins chk
  S ABM("PRI")=$S(ABM("EMPLOYED")=5:3,ABM("EMPLOYED")=1:1,1:2)
- S ABM("TYP")="P"
+ I ABM("VACHK")=1 S ABM("PRI")=5  ;abm*2.6*21 IHS/SD/SDR VMBP RQMT_90
+ S ABM("TYP")="P"  ;abm*2.6*21 IHS/SD/SDR VMBP RQMT_90
+ ;S:(ABM("VACHK")=0) ABM("TYP")="P"  ;abm*2.6*21 IHS/SD/SDR VMBP RQMT_90
+ ;S:(ABM("VACHK")=1) ABM("TYP")="V"  ;abm*2.6*21 IHS/SD/SDR VMBP RQMT_90
  Q:'$D(^AUPNPRVT(DFN))
  S ABM("MDFN")=0
  F  S ABM("MDFN")=$O(^AUPNPRVT(DFN,11,ABM("MDFN"))) Q:'ABM("MDFN")  D 53
@@ -107,13 +107,17 @@ ABMDLCK2 ; IHS/ASDST/DMJ - check visit for elig - PART 2 ;
  ; 40 ; POV is accident related; but insurer is not
  S ABM("REC")=^AUPNPRVT(DFN,11,ABM("MDFN"),0)
  S ABM("INS")=$P(ABM("REC"),U)
+ I (ABM("VACHK")=0),($$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,+ABM("INS"),".211","I"),1,"I")="V") Q  ;abm*2.6*21 IHS/SD/SDR VMBP RQMT_90
+ I (ABM("VACHK")=1),($$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,+ABM("INS"),".211","I"),1,"I")'="V") Q  ;abm*2.6*21 IHS/SD/SDR VMBP RQMT_90
  I 'ACCDENT,$$ACCREL^ABMDLCK(ABM("MDFN")) D  ;Q:ABMVDFN
  .S ABM("XIT")=1
  .S $P(ABML(99,ABM("INS")),U,6)=40
  D PRIO
  I $P(ABM("REC"),U,6)>$P(ABMVDT,".",1) D  Q
  .S $P(ABML(99,ABM("INS")),U,2)=ABM("MDFN")
- .S $P(ABML(99,ABM("INS")),U,3)="P"
+ .S $P(ABML(99,ABM("INS")),U,3)="P"  ;abm*2.6*21 IHS/SD/SDR VMBP RQMT_90
+ .;S:(ABM("VACHK")=0) $P(ABML(99,ABM("INS")),U,3)="P"  ;abm*2.6*21 IHS/SD/SDR VMBP RQMT_90
+ .;S:(ABM("VACHK")=1) $P(ABML(99,ABM("INS")),U,3)="V"  ;abm*2.6*21 IHS/SD/SDR VMBP RQMT_90
  .S $P(ABML(99,ABM("INS")),U,6)=37
  I $P(ABM("REC"),U,7)]"",$P(ABM("REC"),U,7)<$P(ABMVDT,".",1) D  Q
  .S $P(ABML(99,ABM("INS")),U,2)=ABM("MDFN")
@@ -135,7 +139,8 @@ ABMDLCK2 ; IHS/ASDST/DMJ - check visit for elig - PART 2 ;
  ;
 6 ; Non-beneficiary Patient
  K ABM("XIT")
- S ABM("PRI")=5
+ ;S ABM("PRI")=5  ;abm*2.6*21 IHS/SD/SDR VMBP RQMT_90
+ S ABM("PRI")=6  ;abm*2.6*21 IHS/SD/SDR VMBP RQMT_90
  S ABM("TYP")="N"
  D PRIO
  S ABM("INS")=$O(^AUTNINS("B","NON-BENEFICIARY PATIENT",""))
@@ -159,7 +164,8 @@ ABMDLCK2 ; IHS/ASDST/DMJ - check visit for elig - PART 2 ;
  ;If bill all inpats check for visit type
  Q:ABMBBENP=2&$D(SERVCAT)&("HID"'[$G(SERVCAT))
  Q:ABMBBENP=2&$D(ABMP("VTYP"))&($G(ABMP("VTYP"))'=111)
- S ABM("PRI")=6
+ ;S ABM("PRI")=6  ;abm*2.6*21 IHS/SD/SDR VMBP RQMT_90
+ S ABM("PRI")=7  ;abm*2.6*21 IHS/SD/SDR VMBP RQMT_90
  S ABM("TYP")="I"
  D PRIO
  S ABM("INS")=$O(^AUTNINS("B","BENEFICIARY PATIENT (INDIAN)",""))

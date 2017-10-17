@@ -1,5 +1,5 @@
 BQINIGH2 ;VNGT/HS/ALA-Continuation of the nightly job ; 19 Feb 2010  2:02 PM
- ;;2.5;ICARE MANAGEMENT SYSTEM;**1**;May 24, 2016;Build 17
+ ;;2.6;ICARE MANAGEMENT SYSTEM;;Jul 07, 2017;Build 72
  ;
 NGHT ;EP - Nightly Update of panels
  NEW DA
@@ -17,59 +17,33 @@ NGHT ;EP - Nightly Update of panels
  S USR=""
  F  S USR=$O(^BQICARE("AC","N",USR)) Q:'USR  D
  . ; Check for terminated users
- . I ($P($G(^VA(200,USR,0)),U,11)'=""),(+$P($G(^VA(200,USR,0)),U,11)<DT)!($P($G(^VA(200,USR,0)),U,13)'="") D FIX Q
+ . NEW TRMDT,TFL
+ . S TRMDT=+$P($G(^VA(200,USR,0)),U,11)
+ . I TRMDT S TFL=0 D  Q:TFL
+ .. I TRMDT>DT Q
+ .. I TRMDT'>DT D FIX S TFL=1
+ . ;I ($P($G(^VA(200,USR,0)),U,11)'=""),(+$P($G(^VA(200,USR,0)),U,11)<DT)!($P($G(^VA(200,USR,0)),U,13)'="") D FIX Q
  . ; Check for DISUSER (user has not signed on in a while)
  . I $P($G(^VA(200,USR,0)),U,7)=1 D  Q
- .. NEW LOGIN
- .. S LOGIN=$P($G(^BQICARE(USR,0)),U,6)
+ .. NEW LOGIN,GUI
+ .. S LOGIN=$P($G(^BQICARE(USR,0)),U,6),GUI=$P(^(0),U,17)
+ .. I GUI'=$P(^BQI(90508,1,0),U,8) D FIX Q
  .. I LOGIN="" D FIX Q
  .. I ($E(DT,1,3)-$E(LOGIN,1,3)>0) D FIX Q
- . S PNL=""
- . F  S PNL=$O(^BQICARE("AC","N",USR,PNL)) Q:'PNL  D
- .. ; Lock panel to be repopulated
- .. S LOCK=$$LCK^BQIPLRF(USR,PNL)
- .. ; If not able to lock panel, clear status, send notification and go to next one
- .. I 'LOCK D  Q
- ... D STA^BQIPLRF(USR,PNL)
- ... D NNOTF^BQIPLRF(USR,PNL)
- .. ;
- .. ; Check if locked panel has panel filters
- .. NEW PLSUCC,SUBJECT,LOCK,POWNR,PPLIEN
- .. S PLSUCC=$$CPFL^BQIPLUTL(USR,PNL)
- .. ; If panel contains panel filters and were not successful in being locked,
- .. ;  clear status, send notification and go to next panel in list
- .. I 'PLSUCC D  Q
- ... D STA^BQIPLRF(USR,PNL)
- ... D ULK^BQIPLRF(USR,PNL)
- ... S SUBJECT="Unable to lock panel(s) that are filters for panel: "_$P(^BQICARE(USR,1,PNL,0),U,1)
- ... S LOCK="0^"_$P(PLSUCC,U,2),POWNR=$P(PLSUCC,U,4),PPLIEN=$P(PLSUCC,U,5)
- ... I $P(PLSUCC,U,3)'="" S BMXSEC=$P(PLSUCC,U,3),SUBJECT=""
- ... D NNOTF^BQIPLRF(USR,PNL,SUBJECT)
- .. ;
- .. ; Check if panel is a panel filter
- .. S PLIDEN=USR_$C(26)_$P(^BQICARE(USR,1,PNL,0),"^",1)
- .. I $D(^BQICARE("AD",PLIDEN)) D  Q:LFLG
- ... S LFLG=0 D PFILL^BQIPLUTL(USR,PNL,PLIDEN)
- ... ; If not able to lock any of the owning panels, unlock owning panel, clear status, unlock panel and quit
- ... I LFLG D PFILU^BQIPLUTL(USR,PNL,PLIDEN),STA^BQIPLRF(USR,PNL),ULK^BQIPLRF(USR,PNL)
- .. ; Set status to currently running
- .. D STA^BQIPLRF(USR,PNL,1)
  ;
- K PLIDEN,^XTMP("BQISYTSK")
  D ORD^BQIPLPU
- NEW ORD
+ NEW ORD,LKSUCC
  S ORD=""
  F  S ORD=$O(^BQICARE("AF",ORD)) Q:ORD=""  D
  . S USR=""
  . F  S USR=$O(^BQICARE("AF",ORD,USR)) Q:USR=""  D
- .. ; Check for terminated users
- .. ;I ($P($G(^VA(200,USR,0)),U,11)'=""),(+$P($G(^VA(200,USR,0)),U,11)<DT)!($P($G(^VA(200,USR,0)),U,13)'="") Q
  .. S PNL=""
  .. F  S PNL=$O(^BQICARE("AF",ORD,USR,PNL)) Q:'PNL  D
- ... ;  For each panel, check current status, if not currently running, quit
- ... S CSTA=+$$CSTA^BQIPLRF(USR,PNL) I 'CSTA Q
+ ... ;  For each panel, check current status, if currently running, quit
+ ... S CSTA=+$$CSTA^BQIPLRF(USR,PNL) I CSTA Q
  ... ; Check what tasks are running
  ... ;D ^BQISYTSK
+ ... S LKSUCC=0 D LOC(USR,PNL) I 'LKSUCC Q
  ... ; repopulate
  ... D POP^BQIPLPP("",USR,PNL,"",USR)
  ... ; Reset description
@@ -107,6 +81,38 @@ FIX ; Fix panels
  . S IENS=$$IENS^DILF(.DA)
  . S BQIUPD(90505.01,IENS,.06)="@"
  D FILE^DIE("","BQIUPD","ERROR")
+ Q
+ ;
+LOC(USR,PNL) ;EP
+ K PLIDEN
+ S LOCK=$$LCK^BQIPLRF(USR,PNL)
+ ; If not able to lock panel, clear status, send notification and go to next one
+ I 'LOCK D  Q
+ . D STA^BQIPLRF(USR,PNL)
+ . D NNOTF^BQIPLRF(USR,PNL)
+ . ;
+ . ; Check if locked panel has panel filters
+ . NEW PLSUCC,SUBJECT,LOCK,POWNR,PPLIEN
+ . S PLSUCC=$$CPFL^BQIPLUTL(USR,PNL)
+ . ; If panel contains panel filters and were not successful in being locked,
+ . ;  clear status, send notification and go to next panel in list
+ . I 'PLSUCC D  Q
+ .. D STA^BQIPLRF(USR,PNL)
+ .. D ULK^BQIPLRF(USR,PNL)
+ .. S SUBJECT="Unable to lock panel(s) that are filters for panel: "_$P(^BQICARE(USR,1,PNL,0),U,1)
+ .. S LOCK="0^"_$P(PLSUCC,U,2),POWNR=$P(PLSUCC,U,4),PPLIEN=$P(PLSUCC,U,5)
+ .. I $P(PLSUCC,U,3)'="" S BMXSEC=$P(PLSUCC,U,3),SUBJECT=""
+ .. D NNOTF^BQIPLRF(USR,PNL,SUBJECT)
+ . ;
+ . ; Check if panel is a panel filter
+ . S PLIDEN=USR_$C(26)_$P(^BQICARE(USR,1,PNL,0),"^",1)
+ . I $D(^BQICARE("AD",PLIDEN)) D  Q:LFLG
+ .. S LFLG=0 D PFILL^BQIPLUTL(USR,PNL,PLIDEN)
+ .. ; If not able to lock any of the owning panels, unlock owning panel, clear status, unlock panel and quit
+ .. I LFLG D PFILU^BQIPLUTL(USR,PNL,PLIDEN),STA^BQIPLRF(USR,PNL),ULK^BQIPLRF(USR,PNL)
+ . ; Set status to currently running
+ . D STA^BQIPLRF(USR,PNL,1)
+ S LKSUCC=1
  Q
  ;
 CMA ;EP - Do Community Alerts
@@ -190,6 +196,13 @@ PRN ;EP - Set up Prenatal lab tests
  D LBT^BQIRGPG
  Q
  ;
+PED ;EP - Set up Pediatric lab tests
+ NEW TN
+ S TN=$O(^ATXLAB("B","BQI PEDIATRIC LAB TESTS","")) I TN="" Q
+ I $O(^ATXLAB(TN,21,0))="" Q
+ D LBT^BQIRGPD
+ Q
+ ;
 HCV ;EP - Set up HCV lab tests
  NEW TN1,TN2
  S TN1=$O(^ATXLAB("B","BQI HCV OTHER LAB TESTS",""))
@@ -265,6 +278,10 @@ TBL ; Set up other tables
  ;
  ; Set up Divisions
  I '$D(^XTMP("BQISYDIV")) D FND^BQISYDIV
+ ;
+ ; Set up POVs AND Snomeds
+ D JBB^BQINIGH3("POV")
+ D JBB^BQINIGH3("SNO")
  Q
  ;
 PRF ;EP - Communication Preference

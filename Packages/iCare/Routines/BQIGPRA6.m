@@ -1,5 +1,5 @@
 BQIGPRA6 ;GDIT/HS/ALA-Update all patients for selected measures ; 26 Sep 2012  9:59 AM
- ;;2.4;ICARE MANAGEMENT SYSTEM;;Apr 01, 2015;Build 41
+ ;;2.5;ICARE MANAGEMENT SYSTEM;**2**;May 24, 2016;Build 14
  ;
  Q
  ;
@@ -77,7 +77,7 @@ FND ;EP
  ;
  D @("BQI^"_BQIROU_"(DFN,.BQIGREF)")
  ;
- K ^XTMP("BGP15TAX",$J)
+ K ^XTMP("BGP15TAX",$J),^XTMP("BGPSNOMEDSUBSET",$J)
  ;
  ;  if the patient doesn't already exist in the iCare Patient file, quit
  I $G(^BQIPAT(DFN,0))="" Q

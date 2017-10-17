@@ -1,19 +1,21 @@
 ABMDVST4 ; IHS/ASDST/DMJ - PCC Visit Stuff - PART 5 (HOSPITALIZATION) ; 
- ;;2.6;IHS Third Party Billing System;**2,4**;NOV 12, 2009
+ ;;2.6;IHS Third Party Billing System;**2,4,21**;NOV 12, 2009;Build 379
  ;Original;TMD;03/26/96 12:32 PM
  ;
- ; IHS/SD/SDR v2.5 p5 - 5/17/2004 - Modified to put default for
- ;    admission source/admission type/discharge status if outpatient
- ; IHS/SD/SDR v2.5 p6 - 7/12/04 - IM14030 - Fix so discharge status will
- ;      default correctly
- ; IHS/SD/SDR - v2.5 p8 - task 6 - Added code to get patient weight from V Measurement file
- ; IHS/SD/SDR - v2.5 p9 - IM13294 - Admission/Discharge hour populated for outpatient visits
- ; IHS/SD/SDR - v2.5 p10 - IM19717/IM20374 - Removed "CLEAN" of 27 multiple
- ; IHS/SD/SDR - v2.5 p10 - IM21006 - Added code to increment discharge
- ;   hour by 1 for NC Medicaid for Outpt visits
- ; IHS/SD/SDR - v2.5 p10 - IM21382 - Made Service Category R act like A
- ; IHS/SD/SDR - abm*2.6*2 - 3PMS10003A - modified to call ABMFEAPI
- ; IHS/SD/SDR - abm*2.6*4 - HEAT15806 - fix for admit date/time missing; caused by ABMFEAPI change
+ ;IHS/SD/SDR v2.5 p5 - 5/17/2004 - Modified to put default for
+ ;   admission source/admission type/discharge status if outpatient
+ ;IHS/SD/SDR v2.5 p6 - 7/12/04 - IM14030 - Fix so discharge status will
+ ;     default correctly
+ ;IHS/SD/SDR - v2.5 p8 - task 6 - Added code to get patient weight from V Measurement file
+ ;IHS/SD/SDR - v2.5 p9 - IM13294 - Admission/Discharge hour populated for outpatient visits
+ ;IHS/SD/SDR - v2.5 p10 - IM19717/IM20374 - Removed "CLEAN" of 27 multiple
+ ;IHS/SD/SDR - v2.5 p10 - IM21006 - Added code to increment discharge
+ ;  hour by 1 for NC Medicaid for Outpt visits
+ ;IHS/SD/SDR - v2.5 p10 - IM21382 - Made Service Category R act like A
+ ;
+ ;IHS/SD/SDR - 2.6*2 - 3PMS10003A - modified to call ABMFEAPI
+ ;IHS/SD/SDR - 2.6*4 - HEAT15806 - fix for admit date/time missing; caused by ABMFEAPI change
+ ;IHS/SD/SDR - 2.6*21 - HEAT161981 - Made change to lookup discharge status as '01' not as '1'
  ;
  ;ABMP("DDT") is the discharge date from the V HOSPITALIZATION FILE
  ;ABMP("HDATE") is the most recent hospitalizaiton date evaluated by
@@ -58,7 +60,8 @@ HOSP ;
  .S ABMI(0)=^AUPNVINP(ABMDA,0)
  .;ABMI("ATYPE") is 3P code
  .;ABMI("DSTAT") discharge status
- .S ABMI("ATYPE")=2,ABMI("DSTAT")=1,ABMI("ASRC")=2
+ .;S ABMI("ATYPE")=2,ABMI("DSTAT")=1,ABMI("ASRC")=2  ;abm*2.6*21 IHS/SD/SDR HEAT161981
+ .S ABMI("ATYPE")=2,ABMI("DSTAT")="01",ABMI("ASRC")=2  ;abm*2.6*21 IHS/SD/SDR HEAT161981
  .I $P(ABMI(0),U,4)]"",$P($G(^DIC(45.7,$P(ABMI(0),U,4),9999999)),U)="07" S ABMI("ATYPE")=4
  .;2 is transfer, 4-7 is death, 1 & 3 are discharge, 
  .I $P(ABMI(0),U,6)]"",$D(^DIC(42.2,$P(ABMI(0),U,6),9999999)) S ABMI("DSTAT")=$S($P(^(9999999),U)=2:2,$P(^(9999999),U)>3&($P(^(9999999),U)<8):20,1:1)

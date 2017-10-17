@@ -1,5 +1,5 @@
-BLRPST ;IHS/HQT/MJL - Show processor status ;JUL 06, 2010 3:14 PM
- ;;5.2;IHS LABORATORY;**1011,1025,1027,1030,1031**;NOV 01, 1997
+BLRPST ;IHS/HQT/MJL - Show processor status ; 04-Apr-2016 14:28 ; MKK
+ ;;5.2;IHS LABORATORY;**1011,1025,1027,1030,1031,1039**;NOV 01, 1997;Build 38
  ;
 EP ; EP
  NEW DATETIME        ; IHS/OIT/MKK - LR*5.2*1030
@@ -130,7 +130,6 @@ DSP ;
  S BLRF=$S($G(BLR)="^":1,1:BLRCNT=(DTIME\5))
  ; ----- END IHS/MSC/MKK - LR*5.2*1031
  ;
- D:$G(SNAPSHOT) ENTRYAUD^BLRUTIL("EXIT ^BLRTNB")
  Q
  ;
 INIT ; EP
@@ -214,12 +213,21 @@ SNDALERT(ALERTMSG) ; EP - Send alert to LMI group AND User
  ; Alert not sent successfully.  Try to store it.
  NEW SUBSCRPT
  S SUBSCRPT="BLRPST Alert^"_+$H_"^"_$J
- S ^XTEMP(SUBSCRPT,0)=$$FMADD^XLFDT($$DT^XLFDT,90)_"^"_$$DT^XLFDT_"^"_"PCC Linker shut down Alert."
- S ^XTEMP(SUBSCRPT,1)="PCC Linker Alert was not sent."
- S ^XTEMP(SUBSCRPT,2)="  Message that should have been sent follows:"
- S ^XTEMP(SUBSCRPT,3)="     "_ALERTMSG
- S ^XTEMP(SUBSCRPT,4)="  ALERT Error Message Follows:"
- S ^XTEMP(SUBSCRPT,5)="     "_XQALERR
+ ; S ^XTEMP(SUBSCRPT,0)=$$FMADD^XLFDT($$DT^XLFDT,90)_"^"_$$DT^XLFDT_"^"_"PCC Linker shut down Alert."
+ ; S ^XTEMP(SUBSCRPT,1)="PCC Linker Alert was not sent."
+ ; S ^XTEMP(SUBSCRPT,2)="  Message that should have been sent follows:"
+ ; S ^XTEMP(SUBSCRPT,3)="     "_ALERTMSG
+ ; S ^XTEMP(SUBSCRPT,4)="  ALERT Error Message Follows:"
+ ; S ^XTEMP(SUBSCRPT,5)="     "_XQALERR
+ ;
+ ; ----- BEGIN IHS/MSC/MKK - LR*5.2*1039 - Use ^XTMP not ^XTEMP per SAC
+ S ^XTMP(SUBSCRPT,0)=$$FMADD^XLFDT($$DT^XLFDT,90)_"^"_$$DT^XLFDT_"^"_"PCC Linker shut down Alert."
+ S ^XTMP(SUBSCRPT,1)="PCC Linker Alert was not sent."
+ S ^XTMP(SUBSCRPT,2)="  Message that should have been sent follows:"
+ S ^XTMP(SUBSCRPT,3)="     "_ALERTMSG
+ S ^XTMP(SUBSCRPT,4)="  ALERT Error Message Follows:"
+ S ^XTMP(SUBSCRPT,5)="     "_XQALERR
+ ; ----- END IHS/MSC/MKK - LR*5.2*1039
  Q
  ;
 NINLMI(CHKDUZ) ; EP -- Check to see if DUZ is NOT part of LMI Mail Group

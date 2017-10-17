@@ -1,5 +1,5 @@
 BQIRMPL ;PRXM/HC/ALA-Reminders By Panel ; 20 Feb 2007  4:04 PM
- ;;2.3;ICARE MANAGEMENT SYSTEM;**3,4**;Apr 18, 2012;Build 66
+ ;;2.5;ICARE MANAGEMENT SYSTEM;**2**;May 24, 2016;Build 14
  ;
  Q
  ;
@@ -202,7 +202,11 @@ RMVL ;  Reminder value
  S RIEN=$O(^BQIPAT(DFN,40,"B",STVW,"")) I RIEN="" S VAL="1/1/0001 12:01:00 AM" Q
  S RDATA=$G(^BQIPAT(DFN,40,RIEN,0))
  S CT=0
- I $P(STVW,"_",1)="EHR",$P(RDATA,U,3)="N/A"!($P(RDATA,U,3)="DONE") S VAL="1/1/0001 12:01:00 AM" Q
+ ; if a particular reminder is completed with DONE or RESOLVED, then Not Applicable (N/A)
+ I $P(STVW,"_",1)="EHR" S EQFL=0 D  Q:EQFL
+ . I $P(RDATA,U,3)="N/A" S VAL="1/1/0001 12:01:00 AM",EQFL=1 Q
+ . I $P(RDATA,U,3)="DONE" S VAL="1/1/0001 12:01:00 AM",EQFL=1 Q
+ . I $P(RDATA,U,3)="RESOLVED" S VAL="1/1/0001 12:01:00 AM",EQFL=1 Q
  F I=2:1:4 S:$P(RDATA,U,I)'=""&($P(RDATA,U,I)'="N/A") CT=CT+1
  S HDR="T00030"_STVW
  I CT=0 S VAL="1/1/0001 12:01:00 AM" Q

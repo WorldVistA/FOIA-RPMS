@@ -1,0 +1,289 @@
+BLRMPRL2 ; IHS/MSC/MKK - BLR Map Reference Lab Codes to Lab Test File - version 2 ; 01-Jun-2016 13:35 ; MKK
+ ;;5.2;LR;**1039**;NOV 01, 1997;Build 38
+ ;
+EEP ; Ersatz EP
+ D EEP^BLRGMENU
+ Q
+ ;
+ ; Cloned from BLRMPRL
+ ;
+ ; This routine will allow a user to map BLR Reference Lab (#9009026) file tests
+ ; to LABORATORY TEST (#60) file tests
+ ;
+EP ; EP 
+PEP ; PEP
+ NEW (DILOCKTM,DISYS,DT,DTIME,DUZ,IO,IOBS,IOF,IOM,ION,IOS,IOSL,IOST,IOT,IOXY,U,XPARSYS,XQXFLG)
+ ;
+ D SETBLRVS
+ ;
+ D ADDTMENU^BLRGMENU("MAPTESTS^BLRMPRL2","Map Reference Lab Tests")
+ D ADDTMENU^BLRGMENU("MAPRPT^BLRMPRL2","Mapped Tests Report")
+ D ADDTMENU^BLRGMENU("UMAPRPT^BLRMPRL2","Non-Mapped Tests Report")
+ ;
+ D MENUDRVR^BLRGMENU("RPMS Lab","Reference Lab Mapping")
+ Q
+ ;
+MAPTESTS ; EP - main routine driver
+ NEW (DILOCKTM,DISYS,DT,DTIME,DUZ,IO,IOBS,IOF,IOM,ION,IOS,IOSL,IOST,IOT,IOXY,U,XPARSYS,XQXFLG)
+ ;
+ D SETBLRVS("MAPTESTS")
+ S HEADER(1)="BLR Reference Lab File (#9009026)"
+ S HEADER(2)="Mapping File 9009026 Tests to File 60 Tests"
+ ;
+ F  Q:$$ASK(.BLRRL)="Q"  D
+ . S MAPPED=0
+ . K HEADER(3)
+ . S HEADER(3)=$$CJ^XLFSTR("Reference Lab: "_$$GET1^DIQ(9009026,BLRRL,.01),IOM)
+ . D ORR(BLRRL)
+ . I MAPPED D
+ .. D HEADERDT^BLRGMENU
+ .. W !!,?4,MAPPED," 9009026 Test",$S(MAPPED=1:"",1:"s")," Mapped."
+ .. D PRESSKEY^BLRGMENU(9)
+ . K HEADER(3)
+ ;
+ Q
+ ;
+ ;
+ASK(BLRRL) ;-- Ask which Reference Lab to map
+ D HEADERDT^BLRGMENU
+ ;
+ ; Get the Reference Labs in the BLR REFERENCE LAB file and create DIR array
+ D ^XBFMK
+ S TAB=$J("",5),TAB2=TAB_TAB
+ S DIR("L")=""
+ S DIR("L",1)=TAB_"Reference Labs in BLR REFERENCE LAB (#9009026) File:"
+ S DIR("L",2)=""
+ S LINE=2
+ S RLD0=.9999999,CNT=0,SELSTR="SO^"
+ F  S RLD0=$O(^BLRRL(RLD0))  Q:RLD0<1  D
+ . S CNT=CNT+1
+ . S RLIEN(CNT)=RLD0
+ . S REFLABN=$$GET1^DIQ(9009026,RLD0,.01)
+ . S SELSTR=SELSTR_CNT_":"_$P(REFLABN," ")_";"
+ . S LINE=LINE+1
+ . S DIR("L",LINE)=TAB2_$J(CNT,2)_")  "_REFLABN
+ ;
+ S SELSTR=$E(SELSTR,1,$L(SELSTR)-1)      ; Remove trailing semi-colon
+ ;
+ S DIR("A")=TAB_"Select Reference Lab"
+ S DIR(0)=SELSTR
+ D ^DIR
+ ;
+ I +$G(DIRUT)!(+$G(Y)<1) Q "Q"
+ ;
+ S BLRRL=RLIEN(Y)
+ Q "OK"
+ ;
+ORR(RL) ; EP - ask and map Reference Lab test(s)
+ S ONGO="YES"
+ F  Q:ONGO="NO"  D
+ . D HEADERDT^BLRGMENU
+ . D ^XBFMK
+ . K BLROR
+ . S DIC="^BLRRL("_BLRRL_",1,",DA(1)=RL,DIC(0)="AELMQZ"
+ . S DIC("A")="Select Reference Lab (#9009026) File's Test to Map: "
+ . D ^DIC
+ . I Y<0 S ONGO="NO"  Q
+ . ;
+ . W !
+ . ;
+ . S BLROR=+Y
+ . ; S DIE=DIC,DA=BLROR,DR=".01:10"  ;added edit of .01 at DKR request 2/3/2006 3/24/2006 added field 10
+ . S DIE=DIC,DA=BLROR,DR=".02:10"   ; Do NOT allow editing of .01 field
+ . D ^DIE
+ . S MAPPED=MAPPED+1
+ Q
+ ;
+ ;
+MAPRPT ; EP - Mapped Tests' Report
+ NEW (DILOCKTM,DISYS,DT,DTIME,DUZ,IO,IOBS,IOF,IOM,ION,IOS,IOSL,IOST,IOT,IOXY,U,XPARSYS,XQXFLG)
+ ;
+ Q:$$MAPRPTI()="Q"
+ ;
+ F  S TESTNAME=$O(^BLRRL(BLRRL,1,"B",TESTNAME))  Q:TESTNAME=""!(QFLG="Q")  D
+ . S RLD1=0
+ . F  S RLD1=$O(^BLRRL(BLRRL,1,"B",TESTNAME,RLD1))  Q:RLD1<1!(QFLG="Q")  D MAPRPTL
+ ;
+ W !!,?4,CNT," Tests",!!
+ D ^%ZISC
+ ;
+ D PRESSKEY^BLRGMENU(9)
+ Q
+ ;
+MAPRPTI() ; EP - Initialization
+ D SETBLRVS("MAPRPT")
+ S HEADER(1)="BLR Reference Lab File (#9009026)"
+ ;
+ Q:$$ASK(.BLRRL)="Q" "Q"
+ ;
+ D HEADERDT^BLRGMENU
+ D HEADONE^BLRGMENU(.HDRONE)
+ ;
+ S HEADER(2)="Reference Lab: "_$$GET1^DIQ(9009026,BLRRL,.01)
+ S HEADER(3)=$$CJ^XLFSTR("Mapped Tests",IOM)
+ D HEADERDT^BLRGMENU
+ ;
+ D ^%ZIS
+ Q:POP $$BADSTUFQ^BLRUTIL7("Quit or Invalid Device Entered.")
+ U IO
+ ;
+ S HEADER(4)=" "
+ S HEADER(5)=$$COLHEAD^BLRGMENU("File 9009026",22)
+ S $E(HEADER(5),25)=$$COLHEAD^BLRGMENU("File 60",32)
+ S $E(HEADER(5),60)="Order"
+ S $E(HEADER(5),70)="Result"
+ S HEADER(6)="Test Name"
+ S $E(HEADER(6),25)="IEN"
+ S $E(HEADER(6),35)="Description"
+ S $E(HEADER(6),60)="Code"
+ S $E(HEADER(6),70)="Code"
+ ;
+ S MAXLINES=IOSL-4,LINES=MAXLINES+10
+ S (CNT,PG)=0
+ S QFLG="NO"
+ ;
+ S TESTNAME=""
+ Q "OK"
+ ;
+MAPRPTL ; EP - Line of Data
+ Q:$$MAPRPTB()="Q"
+ ;
+ I LINES>MAXLINES D HEADERPG^BLRGMENU(.PG,.QFLG,HDRONE)  Q:QFLG="Q"
+ ;
+ W $E(TESTNAME,1,22)
+ W ?24,F60IEN
+ W ?34,F60DESC
+ W ?59,ORDCODE
+ W ?69,RESULTC
+ W !
+ S LINES=LINES+1
+ S CNT=CNT+1
+ Q
+ ;
+MAPRPTB() ; EP - Break out data
+ S RLD1IEN=RLD1_","_BLRRL
+ S F60IEN=$$GET1^DIQ(9009026.01,RLD1IEN,.02,"I")
+ Q:+F60IEN<1 "Q"
+ ;
+ S F60DESC=$E($$GET1^DIQ(9009026.01,RLD1IEN,.02),1,22)
+ ;
+ S ORDCODE=$$GET1^DIQ(9009026.01,RLD1IEN,.03)
+ S RESULTC=$$GET1^DIQ(9009026.01,RLD1IEN,.04)
+ Q "OK"
+ ;
+UMAPRPT ; EP - Un-Mapped Tests' Report
+ NEW (DILOCKTM,DISYS,DT,DTIME,DUZ,IO,IOBS,IOF,IOM,ION,IOS,IOSL,IOST,IOT,IOXY,U,XPARSYS,XQXFLG)
+ ;
+ Q:$$UMAPRPTI()="Q"
+ ;
+ F  S TESTNAME=$O(^BLRRL(BLRRL,1,"B",TESTNAME))  Q:TESTNAME=""!(QFLG="Q")  D
+ . S RLD1=0
+ . F  S RLD1=$O(^BLRRL(BLRRL,1,"B",TESTNAME,RLD1))  Q:RLD1<1!(QFLG="Q")  D UMAPRPTL
+ ;
+ W !!,?4,CNT," Tests",!!
+ D ^%ZISC
+ ;
+ D PRESSKEY^BLRGMENU(9)
+ Q
+ ;
+UMAPRPTI() ; EP - Initialization
+ D SETBLRVS("UMAPRPT")
+ S HEADER(1)="BLR Reference Lab File (#9009026)"
+ ;
+ Q:$$ASK(.BLRRL)="Q" "Q"
+ ;
+ D HEADERDT^BLRGMENU
+ D HEADONE^BLRGMENU(.HDRONE)
+ ;
+ S HEADER(2)="Reference Lab: "_$$GET1^DIQ(9009026,BLRRL,.01)
+ S HEADER(3)=$$CJ^XLFSTR("Non-Mapped Tests",IOM)
+ D HEADERDT^BLRGMENU
+ ;
+ D ^%ZIS
+ Q:POP $$BADSTUFQ^BLRUTIL7("Quit or Invalid Device Entered.")
+ U IO
+ ;
+ S HEADER(4)=" "
+ S $E(HEADER(5),60)="Order"
+ S $E(HEADER(5),70)="Result"
+ S HEADER(6)="File 9009026 Test Name"
+ S $E(HEADER(6),60)="Code"
+ S $E(HEADER(6),70)="Code"
+ ;
+ S MAXLINES=IOSL-4,LINES=MAXLINES+10
+ S (CNT,PG)=0
+ S QFLG="NO"
+ ;
+ S TESTNAME=""
+ Q "OK"
+ ;
+UMAPRPTL ; EP - Line of Data
+ Q:$$UMAPRPTB()="Q"
+ ;
+ I LINES>MAXLINES D HEADERPG^BLRGMENU(.PG,.QFLG,HDRONE)  Q:QFLG="Q"
+ ;
+ W $S($L($TR(TESTNAME," ")):$E(TESTNAME,1,22),1:"<"_RLD1_">")
+ W ?59,ORDCODE
+ W ?69,RESULTC
+ W !
+ S LINES=LINES+1
+ S CNT=CNT+1
+ Q
+ ;
+UMAPRPTB() ; EP - Break out data
+ S RLD1IEN=RLD1_","_BLRRL
+ Q:+$$GET1^DIQ(9009026.01,RLD1IEN,.02,"I") "Q"
+ ;
+ S ORDCODE=$$GET1^DIQ(9009026.01,RLD1IEN,.03)
+ S RESULTC=$$GET1^DIQ(9009026.01,RLD1IEN,.04)
+ Q "OK"
+ ;
+ ;
+ ; ============================= UTILITIES =============================
+ ;
+JUSTNEW ; EP - Generic RPMS EXCLUSIVE NEW
+ NEW (DILOCKTM,DISYS,DT,DTIME,DUZ,IO,IOBS,IOF,IOM,ION,IOS,IOSL,IOST,IOT,IOXY,U,XPARSYS,XQXFLG)
+ ;
+ Q
+ ;
+SETBLRVS(TWO) ; EP - Set the BLRVERN variable(s)
+ K BLRVERN,BLRVERN2
+ ;
+ S BLRVERN=$P($P($T(+1),";")," ")
+ S:$L($G(TWO)) BLRVERN2=$G(TWO)
+ Q
+ ;
+TESTASK ; EP - Test the ASK function
+ NEW (DILOCKTM,DISYS,DT,DTIME,DUZ,IO,IOBS,IOF,IOM,ION,IOS,IOSL,IOST,IOT,IOXY,U,XPARSYS,XQXFLG)
+ ;
+ D SETBLRVS
+ S HEADER(1)="BLR Reference Lab (#9009026)"
+ S HEADER(2)="Mapping File 9009026 Tests to File 60 Tests"
+ ;
+ Q:$$ASK(.BLRRL)="Q"
+ ;
+ W !!,?4,"BLRRL:",BLRRL,!
+ W ?9,$$GET1^DIQ(9009026,BLRRL,.01),!!
+ ;
+ Q
+ ;
+TFIELDS ; EP - Test asking fields
+ NEW (DILOCKTM,DISYS,DT,DTIME,DUZ,IO,IOBS,IOF,IOM,ION,IOS,IOSL,IOST,IOT,IOXY,U,XPARSYS,XQXFLG)
+ ;
+ D ^XBFMK
+ S DIR(0)="PO^60:EMZ"
+ D ^DIR
+ I +$G(DIRUT)!(+Y<1) Q
+ ;
+ K FDA,ERRS
+ S FDA(9009026.01,"1,1,",.02)=+Y
+ D UPDATE^DIE("S","FDA",,"ERRS")
+ ;
+ D ^XBFMK
+ ; Use Quest as the Ref Lab
+ S (BLRRL,BLROR,RL)=1
+ S DIC="^BLRRL("_BLRRL_",1,",DA(1)=RL,DIC(0)="AELMQZ"
+ S DIE=DIC,DA=BLROR,DR=".03:10"   ; Do NOT allow editing of .01 field
+ D ^DIE
+ S MAPPED=MAPPED+1
+ Q

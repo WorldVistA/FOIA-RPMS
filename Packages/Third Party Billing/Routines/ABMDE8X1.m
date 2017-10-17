@@ -1,14 +1,16 @@
 ABMDE8X1 ; IHS/ASDST/DMJ - Page 8 - ERROR CHECKS-CONT ;
- ;;2.6;IHS 3P BILLING SYSTEM;**8,9,13,14**;NOV 12, 2009;Build 238
- ;IHS/SD/SDR - v2.5 p8 - task 6 - Added code for page 8K error checks; also added to page 8H error checks for ambulance billing
- ;IHS/SD/SDR - v2.5 p9 - task 1 - Added code to check for provider address
- ;IHS/SD/SDR - v2.5 p10 - IM20394 - Added code for new error 217
- ;IHS/SD/SDR - v2.5 p11 - NPI - Added code for NPI errors 220 and 221
+ ;;2.6;IHS 3P BILLING SYSTEM;**8,9,13,14,21**;NOV 12, 2009;Build 379
+ ;IHS/SD/SDR- v2.5 p8 task 6 - Added code for page 8K error checks; also added to page 8H error checks for ambulance billing
+ ;IHS/SD/SDR- v2.5 p9 task 1 - Added code to check for provider address
+ ;IHS/SD/SDR- v2.5 p10 IM20394 - Added code for new error 217
+ ;IHS/SD/SDR- v2.5 p11 NPI - Added code for NPI errors 220 and 221
  ;
- ;IHS/SD/SDR - v2.6 CSV
- ;IHS/SD/SDR - 2.6*13 - Added check for new export mode 35
- ;IHS/SD/SDR - 2.6*14 - ICD10 008 - Added warning if service lines cross over ICD10 EFFECTIVE DATE
- ;IHS/SD/SDR - 2.6*14 HEAT163747 - Updated error 217 so it only displays one for ea service line, no matter how many coor dx are present
+ ;IHS/SD/SDR- v2.6 CSV
+ ;IHS/SD/SDR- 2.6*13 Added check for new export mode 35
+ ;IHS/SD/SDR- 2.6*14 ICD10 008 - Added warning if service lines cross over ICD10 EFFECTIVE DATE
+ ;IHS/SD/SDR- 2.6*14 HEAT163747 - Updated error 217 so it only displays one for ea service line, no matter how many coor dx are present
+ ;IHS/SD/SDR- 2.6*21 HEAT135540 - Added error 200 so it will display if there is a 90 modifier but
+ ;  the referring CLIA is blank.
  ;
 E1 ;EP - Entry Point Page 8E error checks cont
  S ABMX("X0")=^ABMDCLM(DUZ(2),ABMP("CDFN"),37,ABMX,0)
@@ -21,6 +23,11 @@ E1 ;EP - Entry Point Page 8E error checks cont
  .I $P(ABMX("X0"),U,2)="" S ABME(121)=""
  I (^ABMDEXP(ABMMODE(5),0)["HCFA")!(^ABMDEXP(ABMMODE(5),0)["CMS") D
  .I $P(ABMX("X0"),"^",9)="" S ABME(122)=""
+ .;start new abm*2.6*21 IHS/SD/SDR HEAT135540
+ .I $P(ABMX("X0"),U,6,8)["90",$P(ABMX("X0"),U,14)="" D
+ ..I $G(ABME(200))'="" S ABME(200)=$G(ABME(200))_","_ABMX("I")
+ ..I $G(ABME(200))="" S ABME(200)=ABMX("I")
+ .;end new abm*2.6*21 IHS/SD/SDR HEAT135540
  .S ABMCODXS=$P(ABMX("X0"),U,9)
  .I ABMCODXS'="" D
  ..F ABMJ=1:1 S ABMCODX=$P(ABMCODXS,",",ABMJ) Q:+$G(ABMCODX)=0  D

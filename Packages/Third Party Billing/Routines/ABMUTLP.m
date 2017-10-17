@@ -1,9 +1,10 @@
 ABMUTLP ; IHS/ASDST/DMJ - PAYER UTILITIES ;      
- ;;2.6;IHS 3P BILLING SYSTEM;**3,6,8,9,10,11,19**;NOV 12, 2009;Build 300
+ ;;2.6;IHS 3P BILLING SYSTEM;**3,6,8,9,10,11,19,21**;NOV 12, 2009;Build 379
  ;abm*2.6*10 split into ABMUTLP2 due to routine size
- ;IHS/SD/SDR-2.6*19 -HEAT136922 -made changes for relationship code for grandchildren, nephew, niece
- ;IHS/SD/SDR-2.6*19 -HEAT168248 -Made changes to merge same SARs into one entry, not one for each A/R trans.
-SET(X,ABMDUZ2) ; EP - set up standard vars
+ ;IHS/SD/SDR 2.6*19 HEAT136922 -made changes for relationship code for grandchildren, nephew, niece
+ ;IHS/SD/SDR 2.6*19 HEAT168248 -Made changes to merge same SARs into one entry, not one for each A/R trans.
+ ;IHS/SD/SDR 2.6*21 HEAT107645 - SBR - made change to check if insurer type K should be mcd or prvt and pull appropriate data
+SET(X,ABMDUZ2) ; EP set up standard vars
  ;x=bill ien
  ;abmduz2=duz(2)
  S:'$G(ABMDUZ2) ABMDUZ2=DUZ(2)
@@ -115,7 +116,13 @@ SBR(X,ABMDUZ2) ;PEP - subscriber
  .S ABMINS=ABMP("INS",ABMI)
  .I ($P(ABMINS,U)=ABMP("INS")!($P(ABMINS,U,11)=ABMP("INS"))) S ABMPSQ=ABMI
  .D SOP
- .I $P(ABMINS,U,2)="D"!($P(ABMINS,U,2)="K") D MCD  Q
+ .;I $P(ABMINS,U,2)="D"!($P(ABMINS,U,2)="K") D MCD  Q  ;abm*2.6*21 IHS/SD/SDR HEAT107645
+ .;start new abm*2.6*21 IHS/SD/SDR HEAT107645
+ .I $P(ABMINS,U,2)="D" D MCD  Q
+ .I $P(ABMINS,U,2)="K" D  Q
+ ..I $$GET1^DIQ(9999999.18,+ABMINS,".38","I")="M" D MCD
+ ..I $$GET1^DIQ(9999999.18,+ABMINS,".38","I")="P" D PRVT
+ .;end new abm*2.6*21 IHS/SD/SDR HEAT107645
  .I $P(ABMINS,U,2)="R" D MCR  Q
  .D PRVT
  I '$G(ABMPSQ) S ABMPSQ=0
@@ -143,6 +150,7 @@ MCD ;mcd
  I 'ABMP("PH",ABMI) D  Q
  .S ABMSBR(ABMI)=2_"-"_ABMP("PDFN")
  .S ABMP("PNUM",ABMI)=$P($G(^AUPNMCD(ABMCDNUM,0)),U,3)
+ .S ABMP("SNUM",ABMI)=$P($G(^AUPNMCD(ABMCDNUM,0)),U,3)
  .S ABMP("REL",ABMI)=18
  I '$D(^AUPN3PPH(ABMP("PH",ABMI),0)) D  Q
  .S ABMSBR(ABMI)=2_"-"_ABMP("PDFN")
@@ -163,7 +171,7 @@ PRVT ;private
  S ABMP("REL",ABMI)=+$P($G(^AUPNPRVT(ABMP("PDFN"),11,+ABMIEN,0)),U,5)
  ;S ABMP("REL",ABMI)=$P($G(^AUTTRLSH(+ABMP("REL",ABMI),0)),U,5)  ;abm*2.6*19 IHS/SD/SDR HEAT136922
  ;start new abm*2.6*19 IHS/SD/SDR HEAT136922
- I "^STEPSON^STEPDAUGHTER^GRANDCHILD^CHILD^DAUGHTER^SON^NEPHEW^NIECE^STEP CHILD^NIECE/NEPHEW^GRANDDAUGHTER^GRANDSON^"[("^"_$P($G(^AUTTRLSH(+ABMP("REL",ABMI),0)),U)_"^") S ABMP("REL",ABMI)=19
+ I "^STEPSON^STEPDAUGHTER^GRANDCHILD^CHILD^DAUGHTER^SON^NEPHEW^NIECE^STEP CHILD^NIECE/NEPHEW^GRANDDAUGHTER^GRANDSON^DAUGHTER-IN-LAW^"[("^"_$P($G(^AUTTRLSH(+ABMP("REL",ABMI),0)),U)_"^") S ABMP("REL",ABMI)=19
  E  S ABMP("REL",ABMI)=$P($G(^AUTTRLSH(+ABMP("REL",ABMI),0)),U,5)
  ;end new abm*2.6*19 HEAT136922
  S ABMSBR(ABMI)=3_"-"_ABMP("PH",ABMI)

@@ -1,6 +1,8 @@
 ABME5CLM ; IHS/ASDST/DMJ - 837 CLM Segment 
- ;;2.6;IHS Third Party Billing System;**6,8,9,10,11**;NOV 12, 2009;Build 133
+ ;;2.6;IHS Third Party Billing System;**6,8,9,10,11,21**;NOV 12, 2009;Build 379
  ;Health Claim
+ ;IHS/SD/SDR - 2.6*21 - HEAT183995 - Made Delayed Reason Code stop printing leading zero.
+ ;IHS/SD/SDR 2.6*21 HEAT302468 Added line back in to send ORIGINAL BILL AMOUNT if billing the non-primary insurer
  ;
 START ;EP - START HERE
  K ABMREC("CLM"),ABMR("CLM")
@@ -23,7 +25,8 @@ LOOP ;LOOP HERE
  Q
 30 ;CLM02 - Monetary Amount
  S ABMR("CLM",30)=$P(ABMB2,U)  ;bill amount  ;abm*2.6*11 COB billing
- ;I ABMPSQ'=1,(+$P(ABMB2,U,7)'=0) S ABMR("CLM",30)=$P(ABMB2,U,7)  ;abm*2.6*10 HEAT62019
+ ;abm*2.6*21 IHS/SD/SDR HEAT302468 Added below line back in; original bill amount should be send for secondary billing
+ I ABMPSQ'=1,(+$P(ABMB2,U,7)'=0) S ABMR("CLM",30)=$P(ABMB2,U,7)  ;abm*2.6*10 HEAT62019
  ;I ABMPSQ'=1,(+$P(ABMB2,U,3)'=0) S ABMR("CLM",30)=$P(ABMB2,U,3)  ;abm*2.6*10 HEAT62019  ;abm*2.6*11 COB billing
  ;I ABMPSQ'=1,(+$P(ABMB2,U,7)>+$P(ABMB2,U,3)) S ABMR("CLM",30)=+$P(ABMB2,U,7)  ;abm*2.6*10 HEAT61340  ;abm*2.6*11 COB billing
  ;removed below line; was sending wrong amount
@@ -119,5 +122,6 @@ LOOP ;LOOP HERE
 210 ;CLM20 - Delay Reason Code
  S ABMR("CLM",210)=""
  S ABMDRC=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),9)),"^",16)
- I ABMDRC'="" S ABMR("CLM",210)=$P($G(^ABMDCODE(ABMDRC,0)),"^")
+ ;I ABMDRC'="" S ABMR("CLM",210)=$P($G(^ABMDCODE(ABMDRC,0)),"^")  ;abm*2.6*21 IHS/SD/SDR HEAT183995
+ I ABMDRC'="" S ABMR("CLM",210)=+$P($G(^ABMDCODE(ABMDRC,0)),"^")  ;abm*2.6*21 IHS/SD/SDR HEAT183995
  Q

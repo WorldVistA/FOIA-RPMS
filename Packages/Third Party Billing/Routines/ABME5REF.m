@@ -1,6 +1,7 @@
 ABME5REF ; IHS/ASDST/DMJ - 837 REF Segment 
- ;;2.6;IHS Third Party Billing;**6,8,9,10,11**;NOV 12, 2009;Build 133
+ ;;2.6;IHS Third Party Billing;**6,8,9,10,11,21**;NOV 12, 2009;Build 379
  ;other payer provider info
+ ;IHS/SD/SDR - 2.6*21 - HEAT119570 - Made change so either Property/Casualty Claim number or Case number will print in file
  ;
 EP(X,Y,Z) ;EP
  ;x=entity identifier code from nm1
@@ -45,7 +46,10 @@ LOOP ;LOOP HERE
  I ABMEIC="G4" S ABMR("REF",30)=$P(ABMB5,"^",8)
  I ABMEIC="9F" S ABMR("REF",30)=$P(ABMB5,"^",11)
  I ABMEIC="G1" S ABMR("REF",30)=$P(ABMB5,"^",12)
- I ABMEIC="Y4" S ABMR("REF",30)=$P(ABMB7,U,13)
+ ;I ABMEIC="Y4" S ABMR("REF",30)=$P(ABMB7,U,13)  ;abm*2.6*21 IHS/SD/SDR HEAT119570
+ I ABMEIC="Y4" D  ;abm*2.6*21 IHS/SD/SDR HEAT119570
+ .S ABMR("REF",30)=$P(ABMB7,U,13)  ;abm*2.6*21 IHS/SD/SDR HEAT119570
+ .S:ABMR("REF",30)="" ABMR("REF",30)=$P(ABMB4,U,8)  ;abm*2.6*21 IHS/SD/SDR HEAT119570
  ;I ABMEIC="XZ" S ABMR("REF",30)=$P(ABMRV(ABMI,ABMJ,ABMK),U,2)  ;abm*2.6*9 HEAT63888
  ;I ABMEIC="XZ" S ABMR("REF",30)=$P(ABMRV(ABMI,ABMJ,ABMK),U,13)  ;abm*2.6*9 HEAT63888  ;abm*2.6*10 HEAT78446
  I ABMEIC="XZ" S ABMR("REF",30)=$P(ABMRV(ABMI,ABMJ,ABMK),U,28)  ;abm*2.6*10 HEAT78446

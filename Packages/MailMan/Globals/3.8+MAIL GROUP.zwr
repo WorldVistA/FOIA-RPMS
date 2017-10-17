@@ -1,6 +1,6 @@
 OSEHRA ZGO Export: MAIL GROUP
-12-JUN-2017 17:17:19 ZWR
-^XMB(3.8,0)="MAIL GROUP^3.8^163^153"
+17-OCT-2017 09:32:36 ZWR
+^XMB(3.8,0)="MAIL GROUP^3.8^164^154"
 ^XMB(3.8,2,0)="PHARM MGR^PU^^^^^1"
 ^XMB(3.8,2,1,0)="^3.81P^^0"
 ^XMB(3.8,2,3)=""
@@ -330,7 +330,7 @@ OSEHRA ZGO Export: MAIL GROUP
 ^XMB(3.8,90,2,0)="^3.801^1^1^3030411^^^^"
 ^XMB(3.8,90,2,1,0)="This mail group is for the Radiology Performance Indicator Summary report."
 ^XMB(3.8,90,3)=""
-^XMB(3.8,91,0)="LMI^PU^^21^3160401^^1"
+^XMB(3.8,91,0)="LMI^PU^^22^3170222^^1"
 ^XMB(3.8,91,1,0)="^3.81P^1^1"
 ^XMB(3.8,91,1,1,0)="1"
 ^XMB(3.8,91,1,"B",1,1)=""
@@ -732,6 +732,11 @@ OSEHRA ZGO Export: MAIL GROUP
 ^XMB(3.8,163,2,0)="^^1^1^3160106"
 ^XMB(3.8,163,2,1,0)="This mail group is to receive updated Person Class messages from the Master Person Class file from Forum account."
 ^XMB(3.8,163,3)=".5"
+^XMB(3.8,164,0)="LAB HIGH URGENCY NOTIFICATION^PU^y^^^0^"
+^XMB(3.8,164,2,0)="^^2^2^3160825^"
+^XMB(3.8,164,2,1,0)="Mail Group to receieve notifications of EHR EMERGENCY ROOM orders or "
+^XMB(3.8,164,2,2,0)="EHR orders that have STAT or ASAP urgencies."
+^XMB(3.8,164,3)="1"
 ^XMB(3.8,"AB",.5,16,1)=""
 ^XMB(3.8,"AB",1,16,2)=""
 ^XMB(3.8,"AB",1,36,1)=""
@@ -959,6 +964,7 @@ OSEHRA ZGO Export: MAIL GROUP
 ^XMB(3.8,"B","IHD SEND",155)=""
 ^XMB(3.8,"B","KMP-CAPMAN",54)=""
 ^XMB(3.8,"B","KMPS-SAGG",55)=""
+^XMB(3.8,"B","LAB HIGH URGENCY NOTIFICATION",164)=""
 ^XMB(3.8,"B","LAB MESSAGING",36)=""
 ^XMB(3.8,"B","LAB PCC LINK",22)=""
 ^XMB(3.8,"B","LAB REPORT",33)=""

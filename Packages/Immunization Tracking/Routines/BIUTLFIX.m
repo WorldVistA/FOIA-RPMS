@@ -1,10 +1,111 @@
-BIUTLFIX ;IHS/CMI/MWR - UTIL: FIX STUFF.; MAY 10, 2010
- ;;8.5;IMMUNIZATION;**5**;JUL 01,2013
+BIUTLFIX ;IHS/CMI/MWR - UTIL: FIX STUFF.; AUG 10, 2010
+ ;;8.5;IMMUNIZATION;**14**;AUG 01,2017
  ;;* MICHAEL REMILLARD, DDS * CIMARRON MEDICAL INFORMATICS, FOR IHS *
  ;;  UTILITY: FIXES: LISTMAN HIDDEN MENUS.
  ;;  PATCH 1: UPDATE VACCINE TABLE: ADD "INFLUENZA, 1203" CVX=123
  ;;  PATCH 5: Back-populate SNOMED Codes to all Contraindications.  SNOMED+0
+ ;;  PATCH 14: Update NOTE at BUILD+5 and date at BUILD+29
+ ;;            New rtn BITN3 to accommodate larger Vaccine Table  BUILD+81
  ;
+ ;
+ ;----------
+BUILD ;EP
+ ;---> STEPS TO ADD NEW VACCINE TO VACCINE TABLE/IMMUNIZATION FILE:
+ ;
+ ;---> 1) Use Fileman to add new vaccine to the BI IMMUNIZATION TABLE
+ ;--->    HL7/CVX STANDARD File #9002084.94.
+ ;--->    NOTE: ^BITN nodes must have a 1 node (e.g., ^BITN(IEN,1)),
+ ;--->        easily done by populating the FULL NAME 1.14 field per CDC.
+ ;
+ ;---> 2) Execute line listed below to update ^BITN routine.
+ ;--->         (At programmer prompt, D BUILD^BIUTLFIX ZR  X BIX0.)
+ ;
+ ;---> 3) Load BITN2 into an editor and trim the entire BITN routine
+ ;--->         that gets tacked onto the end of BITN2 during compilation.
+ ;
+ ;---> 4) Restandardize the Vaccine Table D RESTAND^BIRESTD().
+ ;--->                        (Or under Manager Menu do MGR-->RES.)
+ ;
+ ;---> Build routine ^BITN.
+ ;---> Not called by any option or User action.  Used by package
+ ;---> programmer to create routine BITN, which in turn is used
+ ;---> to build ^BITN global during installation.
+ ;---> To use: At programmer prompt, D BUILD^BIUTLFIX ZR  X BIX0.
+ ;
+ D SETVARS^BIUTL5
+ K BIXDT S BIXDT=$$TXDT^BIUTL5(DT)
+ S BIX0="N I F I=1:1 Q:'$D(@(""BIX""_I))  X @(""BIX""_I)"
+ ;
+ ;---> build first routine for nodes <200.
+ S BIX1="ZI ""BITN ;IHS/CMI/MWR - BUILD ^BITN GLOBAL."""
+ S BIX2="ZI "" ;;8.5;IMMUNIZATION;**14**;AUG 01,2017"""
+ S BIX3="ZI "" ;;* MICHAEL REMILLARD, DDS"
+ S BIX3=BIX3_" * CIMARRON MEDICAL INFORMATICS, FOR IHS *"""
+ S BIX4="ZI "" ;;  UTILITY: BUILD STANDARD ^BITN GLOBAL."""
+ S BIX5="ZI "" ;"","" ;"","" ;----------"",""START ;EP"""
+ S BIX6="ZI "" D KGBL^BIUTL8(""""^BITN"""")"""
+ S BIX7="ZI "" S ^BITN(0)=""""BI IMMUNIZATION TABLE HL7 STANDARD"
+ S BIX7=BIX7_"^9002084.94I"""""""
+ ;
+ S BIX8="ZI "" N I,X,Y,Z"""
+ S BIX9="ZI "" F I=1:2 S X=$T(@""""TABLE""""+I) Q:X'["""";;""""  D"""
+ S BIX10="ZI "" .S Y=$P(X,"""";;"""",2),Z=$P(X,"""";;"""",3)"""
+ S BIX11="ZI "" .S ^BITN(Y,0)=Z""  ZI "" .S X=$T(@""""TABLE""""+(I+1))"
+ S BIX11=BIX11_",Z=$P(X,"""";;"""",3),^BITN(Y,1)=Z"","" ;"""
+ ;
+ ;---> Next node for future inserts.
+ S BIX12=""
+ ;
+ S BIX13="ZI "" F I=1:2 S X=$T(@""""TABLE""""+I^BITN2) Q:X'["""";;""""  D"""
+ S BIX14="ZI "" .S Y=$P(X,"""";;"""",2),Z=$P(X,"""";;"""",3)"""
+ S BIX15="ZI "" .S ^BITN(Y,0)=Z""  ZI "" .S X=$T(@""""TABLE""""+(I+1)^BITN2)"
+ S BIX15=BIX15_",Z=$P(X,"""";;"""",3),^BITN(Y,1)=Z"","" ;"""
+ ;
+ S BIX16="ZI "" F I=1:2 S X=$T(@""""TABLE""""+I^BITN3) Q:X'["""";;""""  D"""
+ S BIX17="ZI "" .S Y=$P(X,"""";;"""",2),Z=$P(X,"""";;"""",3)"""
+ S BIX18="ZI "" .S ^BITN(Y,0)=Z""  ZI "" .S X=$T(@""""TABLE""""+(I+1)^BITN3)"
+ S BIX18=BIX18_",Z=$P(X,"""";;"""",3),^BITN(Y,1)=Z"","" ;"""
+ ;
+ S BIX19="ZI "" N DIK S DIK=""""^BITN("""" D IXALL^DIK"""
+ S BIX20="ZI "" Q"","" ;"","" ;"","" ;----------"",""TABLE ; EP"""
+ S BIX21="N N S N=0 F  S N=$O(^BITN(N)) Q:'N  Q:(N>189)  "
+ ;S BIX18="N N S N=0 F  S N=$O(^AUTTIMM(N)) Q:'N  "
+ S BIX21=BIX21_"ZI "" ;;""_N_"";;""_^BITN(N,0)"
+ S BIX21=BIX21_" ZI "" ;;""_N_""a;;""_^BITN(N,1)"
+ S BIX22="ZS BITN ZR  "
+ ;
+ ;---> Now build second routine for nodes >189.
+ S BIX23="ZI ""BITN2 ;IHS/CMI/MWR - BUILD ^BITN GLOBAL SECOND PART."""
+ S BIX24="ZI "" ;;8.5;IMMUNIZATION;**14**;AUG 01,2017"""
+ S BIX25="ZI "" ;;* MICHAEL REMILLARD, DDS"
+ S BIX25=BIX25_" * CIMARRON MEDICAL INFORMATICS, FOR IHS *"""
+ S BIX26="ZI "" ;;  UTILITY: BUILD STANDARD ^BITN GLOBAL."""
+ S BIX27="ZI "" ;"","" ;"","" ;----------"",""TABLE ; EP"""
+ ;S BIX25="N N S N=199 F  S N=$O(^BITN(N)) Q:'N  "
+ S BIX28="N N S N=189 F  S N=$O(^BITN(N)) Q:'N  Q:(N>259)  "
+ S BIX28=BIX28_"ZI "" ;;""_N_"";;""_^BITN(N,0)"
+ S BIX28=BIX28_" ZI "" ;;""_N_""a;;""_^BITN(N,1)"
+ S BIX29="ZI "" Q"""
+ ;S BIX27="ZS BITN2"
+ ;S BIX28="W !,""DONE.  Load and trim BITN2"""
+ S BIX30="ZS BITN2 ZR  "
+ ;
+ ;********** PATCH 14, v8.5, AUG 01,2017, IHS/CMI/MWR
+ ;---> New rtn BITN3 to accommodate larger Vaccine Table.
+ ;---> Now build third routine for nodes >260.
+ S BIX31="ZI ""BITN3 ;IHS/CMI/MWR - BUILD ^BITN GLOBAL THIRD PART."""
+ S BIX32="ZI "" ;;8.5;IMMUNIZATION;**14**;AUG 01,2017"""
+ S BIX33="ZI "" ;;* MICHAEL REMILLARD, DDS"
+ S BIX33=BIX33_" * CIMARRON MEDICAL INFORMATICS, FOR IHS *"""
+ S BIX34="ZI "" ;;  UTILITY: BUILD STANDARD ^BITN GLOBAL."""
+ S BIX35="ZI "" ;"","" ;"","" ;----------"",""TABLE ; EP"""
+ S BIX36="N N S N=259 F  S N=$O(^BITN(N)) Q:'N  "
+ S BIX36=BIX36_"ZI "" ;;""_N_"";;""_^BITN(N,0)"
+ S BIX36=BIX36_" ZI "" ;;""_N_""a;;""_^BITN(N,1)"
+ S BIX37="ZI "" Q"""
+ S BIX38="ZS BITN3 ZR  "
+ S BIX39="W !,""DONE.  Load and trim BITN2 and BITN3"""
+ Q
  ;
  ;
  ;********** PATCH 5, v8.5, JUL 01,2013, IHS/CMI/MWR
@@ -114,81 +215,6 @@ ACTIVE ;EP
  ;
  ;
  ;----------
-BUILD ;EP
- ;---> STEPS TO ADD NEW VACCINE TO VACCINE TABLE/IMMUNIZATION FILE:
- ;
- ;---> 1) Use Fileman to add new vaccine to the BI IMMUNIZATION TABLE
- ;--->    HL7/CVX STANDARD File #9002084.94.
- ;
- ;---> 2) Execute line listed below to update ^BITN routine.
- ;--->         (At programmer prompt, D BUILD^BIUTLFIX ZR  X BIX0.)
- ;
- ;---> 3) Load BITN2 into an editor and trim the entire BITN routine
- ;--->         that gets tacked onto the end of BITN2 during compilation.
- ;
- ;---> 4) Restandardize the Vaccine Table D RESTAND^BIRESTD().
- ;--->                        (Or under Manager Menu do MGR-->RES.)
- ;
- ;---> Build routine ^BITN.
- ;---> Not called by any option or User action.  Used by package
- ;---> programmer to create routine BITN, which in turn is used
- ;---> to build ^BITN global during installation.
- ;---> To use: At programmer prompt, D BUILD^BIUTLFIX ZR  X BIX0.
- ;
- D SETVARS^BIUTL5
- K BIXDT S BIXDT=$$TXDT^BIUTL5(DT)
- S BIX0="N I F I=1:1 Q:'$D(@(""BIX""_I))  X @(""BIX""_I)"
- ;
- ;---> build first routine for nodes <200.
- S BIX1="ZI ""BITN ;IHS/CMI/MWR - BUILD ^BITN GLOBAL."""
- S BIX2="ZI "" ;;8.5;IMMUNIZATION;;""_BIXDT"
- S BIX3="ZI "" ;;* MICHAEL REMILLARD, DDS"
- S BIX3=BIX3_" * CIMARRON MEDICAL INFORMATICS, FOR IHS *"""
- S BIX4="ZI "" ;;  UTILITY: BUILD STANDARD ^BITN GLOBAL."""
- S BIX5="ZI "" ;"","" ;"","" ;----------"",""START ;EP"""
- S BIX6="ZI "" D KGBL^BIUTL8(""""^BITN"""")"""
- S BIX7="ZI "" S ^BITN(0)=""""BI IMMUNIZATION TABLE HL7 STANDARD"
- S BIX7=BIX7_"^9002084.94I"""""""
- ;
- S BIX8="ZI "" N I,X,Y,Z"""
- S BIX9="ZI "" F I=1:2 S X=$T(@""""TABLE""""+I) Q:X'["""";;""""  D"""
- S BIX10="ZI "" .S Y=$P(X,"""";;"""",2),Z=$P(X,"""";;"""",3)"""
- S BIX11="ZI "" .S ^BITN(Y,0)=Z""  ZI "" .S X=$T(@""""TABLE""""+(I+1))"
- S BIX11=BIX11_",Z=$P(X,"""";;"""",3),^BITN(Y,1)=Z"","" ;"""
- ;
- ;---> Next node for future inserts.
- S BIX12=""
- ;
- S BIX13="ZI "" F I=1:2 S X=$T(@""""TABLE""""+I^BITN2) Q:X'["""";;""""  D"""
- S BIX14="ZI "" .S Y=$P(X,"""";;"""",2),Z=$P(X,"""";;"""",3)"""
- S BIX15="ZI "" .S ^BITN(Y,0)=Z""  ZI "" .S X=$T(@""""TABLE""""+(I+1)^BITN2)"
- S BIX15=BIX15_",Z=$P(X,"""";;"""",3),^BITN(Y,1)=Z"","" ;"""
- ;
- S BIX16="ZI "" N DIK S DIK=""""^BITN("""" D IXALL^DIK"""
- S BIX17="ZI "" Q"","" ;"","" ;"","" ;----------"",""TABLE ; EP"""
- S BIX18="N N S N=0 F  S N=$O(^BITN(N)) Q:'N  Q:(N>199)  "
- ;S BIX18="N N S N=0 F  S N=$O(^AUTTIMM(N)) Q:'N  "
- S BIX18=BIX18_"ZI "" ;;""_N_"";;""_^BITN(N,0)"
- S BIX18=BIX18_" ZI "" ;;""_N_""a;;""_^BITN(N,1)"
- S BIX19="ZS BITN ZR  "
- ;
- ;---> Now build second routine for nodes >199.
- S BIX20="ZI ""BITN2 ;IHS/CMI/MWR - BUILD ^BITN GLOBAL SECOND HALF."""
- S BIX21="ZI "" ;;8.5;IMMUNIZATION;;""_BIXDT"
- S BIX22="ZI "" ;;* MICHAEL REMILLARD, DDS"
- S BIX22=BIX22_" * CIMARRON MEDICAL INFORMATICS, FOR IHS *"""
- S BIX23="ZI "" ;;  UTILITY: BUILD STANDARD ^BITN GLOBAL."""
- S BIX24="ZI "" ;"","" ;"","" ;----------"",""TABLE ; EP"""
- S BIX25="N N S N=199 F  S N=$O(^BITN(N)) Q:'N  "
- S BIX25=BIX25_"ZI "" ;;""_N_"";;""_^BITN(N,0)"
- S BIX25=BIX25_" ZI "" ;;""_N_""a;;""_^BITN(N,1)"
- S BIX26="ZI "" Q"""
- S BIX27="ZS BITN2"
- S BIX28="W !,""DONE.  Load and trim BITN2"""
- Q
- ;
- ;
- ;----------
 CHGPTR(BICHG) ;EP
  ;---> Change all records with one vaccine pointer to a different one.
  ;---> Parameters:
@@ -291,4 +317,38 @@ LOTNUM ;EP
  .;---> Inactivate this Lot Number.
  .S $P(^AUTTIML(N,0),"^",3)=1
  W !!,"All Lot Numbers have been Inactivated.",!
+ Q
+ ;
+ ;
+RELCONT ;EP
+ ;---> Update Flu Related Contraindications.
+ ;
+ D ^XBKVAR
+ N N,Y S N=0
+ ;---> Flu CVX Codes, related contraindications.
+ S Y="15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185"
+ F  S N=$O(^BITN(N)) Q:'N  D
+ .;---> Quit if this is not in the FLU Vaccine Group.
+ .Q:($P(^BITN(N,0),U,9)'=10)
+ .W !!,$P(^BITN(N,0),U,3),"   ",$P(^BITN(N,0),U,12)
+ .S $P(^BITN(N,0),U,12)=Y
+ ;
+ Q
+ ;
+ ;
+ ;----------
+NULLACT ;EP
+ ;---> Activate all Lot Numbers that have a Status=null.
+ ;---> Call by postinit for Imm v8.5.
+ ;
+ D ^XBKVAR
+ W !!?5,"Checking Lot Numbers for null Status..."
+ N M,N S M=0,N=0
+ F  S N=$O(^AUTTIML(N)) Q:'N  D
+ .Q:'$D(^AUTTIML(N,0))
+ .;---> Quit if this lot number has a Status .
+ .Q:($P(^AUTTIML(N,0),"^",3)'="")
+ .;---> Okay, Status must be null, so set it to Active.
+ .S $P(^AUTTIML(N,0),"^",3)=0,M=M+1
+ W !!?5,"Done.  ",M," Lot Numbers have been fixed." D DIRZ^BIUTL3()
  Q

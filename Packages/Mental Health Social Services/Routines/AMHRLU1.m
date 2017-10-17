@@ -1,5 +1,5 @@
 AMHRLU1 ; IHS/CMI/LAB - GEN RET UTIL ;
- ;;4.0;IHS BEHAVIORAL HEALTH;;MAY 14, 2010
+ ;;4.0;IHS BEHAVIORAL HEALTH;**8**;JUN 02, 2010;Build 7
  ;
  ;
 MCR ;display all current medicare data
@@ -56,3 +56,33 @@ PI ;
  .Q
 PIX ;
  Q
+RACESCR ;
+ NEW Y,Z
+ K Z
+ D LIST^DIC(2.02,","_DFN_",","@;.01E","P",,,,,,,"Z")
+ S Y=0 F  S Y=$O(Z("DILIST",Y)) Q:Y=""  S X($P(Z("DILIST",Y,0),U,1))=""
+ Q
+RACEPRT ;
+ NEW Z,Y
+ D LIST^DIC(2.02,","_DFN_",","@;.01E","P",,,,,,,"Z")
+ S Y=0 F  S Y=$O(Z("DILIST",Y)) Q:Y=""  D
+ .;S AMHPCNT=AMHPCNT+1
+ .S X($P(Z("DILIST",Y,0),U,1))=""
+ .S AMHPCNT=AMHPCNT+1,AMHPRNM(AMHPCNT)=$P(Z("DILIST",Y,0),U,2)
+ .S AMHPRNM(AMHPCNT,"I")=$P(Z("DILIST",Y,0),U,1)
+ .Q
+ Q
+ETHN(P,F) ;EP
+ I '$G(P) Q ""
+ I $G(F)="" S F="E"
+ I '$D(^DPT(P,0)) Q ""
+ NEW Z,E,I
+ S (E,I)=""
+ S Z=0 F  S Z=$O(^DPT(P,.06,Z)) Q:Z'=+Z!(E]"")  D
+ .S I=$P($G(^DPT(P,.06,Z,0)),U,1)
+ .Q:I=""
+ .S E=$P($G(^DIC(10.2,I,0)),U,1)
+ .Q
+ I F="E" Q E
+ I F="I" Q I
+ Q ""

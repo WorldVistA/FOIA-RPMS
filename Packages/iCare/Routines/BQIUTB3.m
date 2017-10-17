@@ -1,5 +1,5 @@
 BQIUTB3 ;VNGT/HS/ALA-Taxonomy table ; 20 Feb 2013  7:50 AM
- ;;2.4;ICARE MANAGEMENT SYSTEM;**2**;Apr 01, 2015;Build 10
+ ;;2.6;ICARE MANAGEMENT SYSTEM;;Jul 07, 2017;Build 72
  ;
  Q
  ;
@@ -82,6 +82,7 @@ LABR(DATA) ;EP - Lab Tests and results
  . I $G(^LAB(60,LN,0))="" Q
  . S TYP=$P(^LAB(60,LN,0),"^",12),VALUE="",TYPE="",LTYP=""
  . I TYP'="" D LTY(TYP)
+ . I $O(^LAB(60,LN,2,0))'="" S LTYP="P",TYPE="PANEL"
  . S II=II+1,@DATA@(II)=LN_U_$P(^LAB(60,LN,0),U,1)_$S(TYPE="":"",1:" ("_LTYP_")")_U_TYPE_U_VALUE_$C(30)
  S II=II+1,@DATA@(II)=$C(31)
  Q
@@ -116,14 +117,44 @@ CPT(DATA) ; EP - CPT
  S II=II+1,@DATA@(II)=$C(31)
  Q
  ;
+EXM(DATA) ;EP - Exams
+ NEW MN
+ K @DATA
+ S II=0,MN=""
+ S @DATA@(II)="T00010IEN^T00060"_$C(30)
+ F  S MN=$O(^AUPNVXAM("B",MN)) Q:MN=""  D
+ . I $G(^AUTTEXAM(MN,0))="" Q
+ . S II=II+1,@DATA@(II)=MN_U_$P(^AUTTEXAM(MN,0),U,1)_$C(30)
+ S II=II+1,@DATA@(II)=$C(31)
+ Q
+ ;
 DXN(DATA) ;EP - Diagnoses
- NEW DN
+ NEW DN,VALUE
  S II=0,DN=0
  S @DATA@(II)="T00010IEN^T00030"_$C(30)
- F  S DN=$O(^AUPNVPOV("B",DN)) Q:DN=""  D
- . I $G(^ICD9(DN,0))="" Q
- . I $$VERSION^XPDUTL("AICD")>3.51 S II=II+1,@DATA@(II)=DN_U_$$VST^ICDCODE(DN,"",80)_" ["_$$CODEC^ICDCODE(DN,80)_"]"_$C(30) Q
- . S II=II+1,@DATA@(II)=DN_U_$P(^ICD9(DN,0),U,3)_" ["_$P(^ICD9(DN,0),U,1)_"]"_$C(30)
+ F  S DN=$O(^XTMP("BQIPOV",DN)) Q:'DN  D
+ . S VALUE=^XTMP("BQIPOV",DN)
+ . S II=II+1,@DATA@(II)=$P(VALUE,U,1)_U_$P(VALUE,U,2)_" ["_$P(VALUE,U,3)_"] ("_$P(VALUE,U,4)_")"_$C(30) Q
+ S II=II+1,@DATA@(II)=$C(31)
+ Q
+ ;
+TPOV(DATA,NUM) ;EP - Top # of POVs
+ NEW NM,DN,VALUE,CT
+ S II=0,NM="",CT=0
+ F  S NM=$O(^XTMP("BQIPOV","Z",NM),-1) Q:NM=""  D  Q:CT>NUM
+ . S DN="" F  S DN=$O(^XTMP("BQIPOV","Z",NM,DN)) Q:DN=""  D
+ .. S VALUE=^XTMP("BQIPOV","Z",NM,DN)
+ .. S II=II+1,@DATA@(II)=DN_U_$P(VALUE,U,1)_" ["_$P(VALUE,U,2)_"]"_$C(30),CT=CT+1
+ Q
+ ;
+POVS(DATA) ;EP - Snomed IDs for POV
+ NEW DN,SN
+ K @DATA
+ S II=0,DN=0
+ S @DATA@(II)="T00100IEN^T00245"_$C(30)
+ F  S DN=$O(^AUPNVPOV("ASCI",DN)) Q:DN=""  D
+ . S SN=$O(^BSTS(9002318.4,"C",36,DN,""))
+ . S II=II+1,@DATA@(II)=DN_U_$G(^BSTS(9002318.4,SN,1))_" ["_DN_"]"_$C(30)
  S II=II+1,@DATA@(II)=$C(31)
  Q
  ;
@@ -134,8 +165,18 @@ PROB(DATA) ; EP - Problems
  S @DATA@(II)="T00010IEN^T00030"_$C(30)
  F  S DN=$O(^AUPNPROB("B",DN)) Q:DN=""  D
  . I $G(^ICD9(DN,0))="" Q
- . I $$VERSION^XPDUTL("AICD")>3.51 S II=II+1,@DATA@(II)=DN_U_$$VST^ICDCODE(DN,"",80)_" ["_$$CODEC^ICDCODE(DN,80)_"]"_$C(30) Q
- . S II=II+1,@DATA@(II)=DN_U_$P(^ICD9(DN,0),U,3)_" ["_$P(^ICD9(DN,0),U,1)_"]"_$C(30)
+ . S II=II+1,@DATA@(II)=DN_U_$$VST^ICDCODE(DN,"",80)_" ["_$$CODEC^ICDCODE(DN,80)_"]"_$C(30) Q
+ S II=II+1,@DATA@(II)=$C(31)
+ Q
+ ;
+PROBS(DATA) ;EP - Snomed IDs for Problems
+ NEW DN,SN
+ K @DATA
+ S II=0,DN=0
+ S @DATA@(II)="T00100IEN^T00245"_$C(30)
+ F  S DN=$O(^AUPNPROB("ASCT",DN)) Q:DN=""  D
+ . S SN=$O(^BSTS(9002318.4,"C",36,DN,""))
+ . S II=II+1,@DATA@(II)=DN_U_$G(^BSTS(9002318.4,SN,1))_" ["_DN_"]"_$C(30)
  S II=II+1,@DATA@(II)=$C(31)
  Q
  ;

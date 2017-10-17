@@ -1,5 +1,5 @@
 BQIRGPG ;GDIT/HS/ALA-Pregnancy Care Mgmt ; 17 Jul 2013  7:49 AM
- ;;2.5;ICARE MANAGEMENT SYSTEM;**1**;May 24, 2016;Build 17
+ ;;2.6;ICARE MANAGEMENT SYSTEM;;Jul 07, 2017;Build 72
  ;
 CURR(DFN) ;EP - Currently marked as pregnant
  NEW RESULT
@@ -7,10 +7,18 @@ CURR(DFN) ;EP - Currently marked as pregnant
  I $$GET1^DIQ(9000017,DFN_",",1101,"E")'="" S RESULT=$$GET1^DIQ(9000017,DFN_",",1101,"E")
  Q RESULT
  ;
-EDD(DFN) ;EP - Estimated Date of Delivery
+EDD(DFN) ;EP - Definitive Date of Delivery
  NEW RES,ARRAY,PI,PDATA,EDD
  S RES="",PDATA=$G(^AUPNREP(DFN,13))
- F PI=2,5,8,11,14 D
+ S PI=11
+ I $P(PDATA,U,PI)'="" S EDD=$P(PDATA,U,PI)
+ I $G(EDD)'="" S RES=$$FMTE^BQIUL1(EDD)
+ Q RES
+ ;
+EEDD(DFN) ; EP - Estimated Date of Delivery
+ NEW RES,ARRAY,PI,PDATA,EDD
+ S RES="",PDATA=$G(^AUPNREP(DFN,13))
+ F PI=2,5,8,14 D
  . I $P(PDATA,U,PI)'="" S ARRAY($P(PDATA,U,PI))=PI
  S EDD=$O(ARRAY(""),-1) I EDD'="" S RES=$$FMTE^BQIUL1(EDD)
  Q RES

@@ -1,6 +1,7 @@
 ABMDF27B ; IHS/ASDST/DMJ - Set HCFA1500 (08/05) Print Array PART 2 ;   
- ;;2.6;IHS 3P BILLING SYSTEM;**4,10,11**;NOV 12, 2009;Build 133
+ ;;2.6;IHS 3P BILLING SYSTEM;**4,10,11,21**;NOV 12, 2009;Build 379
  ; IHS/SD/SDR - abm*2.6*4 - HEAT12115 - Moved box 23 over 2 to allow for "extra" dx codes
+ ;IHS/SD/SDR - 2.6*21 - VMBP - Updated p11 changes to include Serena ref#s
  ;
  ; *********************************************************************
 BNODES S ABM("B5")=$G(^ABMDBILL(DUZ(2),ABMP("BDFN"),5)),ABM("B6")=$G(^(6)),ABM("B7")=$G(^(7)),ABM("B8")=$G(^(8)),ABM("B9")=$G(^(9)),ABM("B10")=$G(^(10))
@@ -24,7 +25,8 @@ BNODES S ABM("B5")=$G(^ABMDBILL(DUZ(2),ABMP("BDFN"),5)),ABM("B6")=$G(^(6)),ABM("
  .I $P($G(^ABMNINS(DUZ(2),ABMP("INS"),1,ABMP("VTYP"),1)),U,6)="I" D
  ..S $P(ABMF(33),U,3)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),9)),U,22)
  ;
- I (ABMP("ITYPE")="V")&($P($G(^ABMDPARM(ABMP("LDFN"),1,3)),U,12)'="") S $P(ABMF(33),U,5)=$P($G(^ABMDPARM(ABMP("LDFN"),1,3)),U,12)  ;abm*2.6*11 VMBP
+ ;I (ABMP("ITYPE")="V")&($P($G(^ABMDPARM(ABMP("LDFN"),1,3)),U,12)'="") S $P(ABMF(33),U,5)=$P($G(^ABMDPARM(ABMP("LDFN"),1,3)),U,12)  ;abm*2.6*11 VMBP RQMT_108  ;abm*2.6*14 VMBP change
+ I ((ABMP("ITYPE")="V")!($$GET1^DIQ(9999999.18,ABMP("INS"),".01","E")["VMBP"))&($P($G(^ABMDPARM(ABMP("LDFN"),1,3)),U,12)'="") S $P(ABMF(33),U,5)=$P($G(^ABMDPARM(ABMP("LDFN"),1,3)),U,12)  ;abm*2.6*11 VMBP RQMT_108  ;abm*2.6*14 VMBP change
  ;
 EMPL I $P(ABM("B9"),U)]"" S $P(ABMF(13),U,2)="X"
  E  S $P(ABMF(13),U,3)="X" G ACCD
@@ -47,7 +49,8 @@ BLK19 ;
  S ABMBLK19=ABMBLK19_" "_$S($P(ABM("B9"),U,15)="Y":"HOSPICE EMP. PROV",1:"")
  S ABMBLK19=ABMBLK19_" "_$P(ABM("B10"),U,1)
  S $P(ABMF(29),U)=$E(ABMBLK19,1,48)
- I (ABMP("ITYPE")="V")&($P($G(^ABMDPARM(ABMP("LDFN"),1,3)),U,13)'="") S $P(ABMF(29),U)=$P($G(^ABMDPARM(ABMP("LDFN"),1,3)),U,13)  ;abm*2.6*11 VMBP
+ I (ABMP("ITYPE")="V")&($P($G(^ABMDPARM(ABMP("LDFN"),1,3)),U,13)'="") S $P(ABMF(29),U)=$P($G(^ABMDPARM(ABMP("LDFN"),1,3)),U,13)  ;abm*2.6*11 VMBP VMBP RQMT_108
+ I ((ABMP("ITYPE")="V")!($$GET1^DIQ(9999999.18,ABMP("INS"),".01","E")["VMBP"))&($P($G(^ABMDPARM(ABMP("LDFN"),1,3)),U,13)'="") S $P(ABMF(29),U)=$P($G(^ABMDPARM(ABMP("LDFN"),1,3)),U,13)  ;abm*2.6*11 VMBP RQMT_108  ;abm*2.6*14 VMBP
  K ABMBLK19
 LAB I '$P(ABM("B8"),U) S $P(ABMF(29),U,3)="X"
  E  S $P(ABMF(29),U,2)="X",$P(ABMF(29),U,4)=$P(ABM("B8"),U)

@@ -1,5 +1,5 @@
 BQIUTIL ;VNGT/HS/ALA-Utility Program ; 10 Nov 2008  9:53 AM
- ;;2.1;ICARE MANAGEMENT SYSTEM;;Feb 07, 2011
+ ;;2.6;ICARE MANAGEMENT SYSTEM;;Jul 07, 2017;Build 72
  ;
 MREC(PTDFN,FREF,ITEM) ;EP 
  ; Find the most recent value for a specified item
@@ -40,3 +40,21 @@ MREC(PTDFN,FREF,ITEM) ;EP
  ... S QFL=1,$P(RESULT,U,1)=1,$P(RESULT,U,3)=@TEMP@(VSDTM,VISIT,IEN)
  K @TEMP
  Q RESULT
+ ;
+OLOC() ;EP - Default Outside Location
+ NEW LCN,ULOC,ULCN,OLOC
+ S OLOC=""
+ S LCN=$O(^XTV(8989.51,"B","BEHOENCX OTHER LOCATION","")) I LCN="" Q OLOC
+ S ULOC=$G(DUZ(2)) I ULOC="" Q OLOC
+ S ULCN=$O(^XTV(8989.5,"AC",LCN,ULOC_";DIC(4,",""))
+ I ULCN'="" D
+ . S OLOC=^XTV(8989.5,"AC",LCN,ULOC_";DIC(4,",ULCN)
+ . S OLOC=OLOC_$C(29)_$P(^DIC(4,OLOC,0),"^",1)
+ Q OLOC
+ ;
+CLOC() ; EP - Current Default Location
+ NEW ULOC,LOC
+ S LOC=""
+ S ULOC=$G(DUZ(2)) I ULOC="" Q LOC
+ S LOC=ULOC_$C(29)_$P(^DIC(4,ULOC,0),"^",1)
+ Q LOC

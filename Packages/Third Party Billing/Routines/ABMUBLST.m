@@ -1,6 +1,7 @@
 ABMUBLST ; IHS/SD/SDR - 3PB/UFMS Bills not export report   
- ;;2.6;IHS 3P BILLING SYSTEM;**4**;NOV 12, 2009
+ ;;2.6;IHS 3P BILLING SYSTEM;**4,10,21**;NOV 12, 2009;Build 379
  ; New routine - v2.6 p4
+ ;IHS/SD/SDR - 2.6*21 - HEAT169752 - Added code so user can decide if they want to exclude I and T insurer types from report
  ;
 DT ;
  W !!," ============ Entry of APPROVAL DATE Range =============",!
@@ -19,6 +20,19 @@ DT ;
  S ABMY("DT",2)=Y
  I ABMY("DT",1)>ABMY("DT",2) W !!,*7,"INPUT ERROR: Start Date is Greater than than the End Date, TRY AGAIN!",!! G DT
  I ABMY("DT",1)<3081001 W !!,*7,"INPUT ERROR: Start Date must be on or before 10/01/2008, TRY AGAIN!",!! G DT
+ ;start new abm*2.6*21 IHS/SD/SDR HEAT169752
+EXCLUDE ;EP
+ W !
+ S DIR("A",2)="Insurer Types I (Indian Patient) and T (3P Liability) don't go to UFMS"
+ S DIR("A")="Exclude these Insurer Types from report as well"
+ S DIR(0)="Y"
+ S DIR("B")="YES"
+ D ^DIR
+ Q:$D(DIRUT)!$D(DTOUT)!$D(DUOUT)!$D(DIROUT)
+ I Y=1 S ABMY("ITYPEXC")=1
+ K DIR
+ W !
+ ;end new abm*2.6*21 IHS/SD/SDR HEAT169752
 SEL ;
  ; Select device
  S DIR(0)="F"
@@ -80,8 +94,13 @@ GETDATA ;
  ..Q:(ABMP("ADT")<ABMY("DT",1))
  ..Q:(ABMP("ADT")>ABMY("DT",2))
  ..Q:($D(^ABMDBILL(ABMDUZ2,ABMP("BDFN"),69,0)))
+ ..;start new abm*2.6*21 IHS/SD/SDR HEAT169752
+ ..S ABMITYP=$P($G(^ABMDBILL(ABMDUZ2,ABMP("BDFN"),2)),U,2)
+ ..I +$G(ABMY("ITYPEXC"))=1&("^I^T^"[("^"_ABMITYP_"^")) Q
+ ..;end new abm*2.6*21 IHS/SD/SDR HEAT169752
  ..S $P(^TMP($J,"ABMUBLST",ABMDUZ2,ABMP("BDFN")),U)=$P($G(^ABMDBILL(ABMDUZ2,ABMP("BDFN"),2)),U,2)
- ..S $P(^TMP($J,"ABMUBLST",ABMDUZ2,ABMP("BDFN")),U,2)=$P($G(^AUTNINS($P($G(^ABMDBILL(ABMDUZ2,ABMP("BDFN"),0)),U,8),2)),U)
+ ..;S $P(^TMP($J,"ABMUBLST",ABMDUZ2,ABMP("BDFN")),U,2)=$P($G(^AUTNINS($P($G(^ABMDBILL(ABMDUZ2,ABMP("BDFN"),0)),U,8),2)),U)  ;abm*2.6*10 HEAT73780
+ ..S $P(^TMP($J,"ABMUBLST",ABMDUZ2,ABMP("BDFN")),U,2)=$$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,$P($G(^ABMDBILL(ABMDUZ2,ABMP("BDFN"),0)),U,8),".211","I"),1,"I")  ;abm*2.6*10 HEAT73780
  ..S $P(^TMP($J,"ABMUBLST",ABMDUZ2,ABMP("BDFN")),U,3)=$P($G(^AUTNINS($P($G(^ABMDBILL(ABMDUZ2,ABMP("BDFN"),0)),U,8),0)),U)
  ..S $P(^TMP($J,"ABMUBLST",ABMDUZ2,ABMP("BDFN")),U,6)=$J($FN($P($G(^ABMDBILL(ABMDUZ2,ABMP("BDFN"),2)),U),",",2),10)
  ..S $P(^TMP($J,"ABMUBLST",ABMDUZ2,ABMP("BDFN")),U,7)=$$CDT^ABMDUTL($P($G(^ABMDBILL(ABMDUZ2,ABMP("BDFN"),1)),U,5))
@@ -93,7 +112,8 @@ GETDATA ;
  ..S $P(^TMP($J,"ABMUBLST",ABMDUZ2,ABMP("BDFN")),U,8)=ABMBILL
  ..S $P(^TMP($J,"ABMUBLST",ABMDUZ2,ABMP("BDFN")),U,9)=$P($G(^VA(200,$P($G(^ABMDBILL(ABMDUZ2,ABMP("BDFN"),1)),U,4),0)),U)
  ..S $P(^TMP($J,"ABMUBLST",ABMDUZ2,ABMP("BDFN")),U,10)=ABMDUZ2
- ..S ABMITYP=$S($P($G(^ABMDBILL(ABMDUZ2,ABMP("BDFN"),2)),U,2)'="":$P($G(^ABMDBILL(ABMDUZ2,ABMP("BDFN"),2)),U,2),1:$P($G(^AUTNINS($P($G(^ABMDBILL(ABMDUZ2,ABMP("BDFN"),0)),U,8),2)),U))
+ ..;S ABMITYP=$S($P($G(^ABMDBILL(ABMDUZ2,ABMP("BDFN"),2)),U,2)'="":$P($G(^ABMDBILL(ABMDUZ2,ABMP("BDFN"),2)),U,2),1:$P($G(^AUTNINS($P($G(^ABMDBILL(ABMDUZ2,ABMP("BDFN"),0)),U,8),2)),U))  ;abm*2.6*10 HEAT73780
+ ..S ABMITYP=$S($P($G(^ABMDBILL(ABMDUZ2,ABMP("BDFN"),2)),U,2)'="":$P($G(^ABMDBILL(ABMDUZ2,ABMP("BDFN"),2)),U,2),1:$$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,$P($G(^ABMDBILL(ABMDUZ2,ABMP("BDFN"),0)),U,8),".211","I"),1,"I"))  ;abm*2.6*10 73780
  ..S $P(^TMP($J,"ABMUBLST",ABMDUZ2,ABMP("BDFN")),U,11)=$P($T(@ABMITYP^ABMUVBCH),";;",2)
  ..S $P(^TMP($J,"ABMUBLST",ABMDUZ2,ABMP("BDFN")),U,12)=$P($G(^AUTTLOC($P($G(^ABMDBILL(ABMDUZ2,ABMP("BDFN"),0)),U,3),0)),U,2)
  ..S ABMP("UFMS")=+$O(^ABMDBILL(ABMDUZ2,ABMP("BDFN"),69,99),-1)

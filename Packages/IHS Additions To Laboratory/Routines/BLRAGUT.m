@@ -1,5 +1,5 @@
-BLRAGUT ; IHS/MSC/SAT - LABORATORY ACCESSION GUI RPC UTILITIES ;
- ;;5.2;IHS LABORATORY;**1031**;NOV 01, 1997;Build 185
+BLRAGUT ; IHS/MSC/SAT - LABORATORY ACCESSION GUI RPC UTILITIES ; 22-Oct-2015 07:58 ; MKK
+ ;;5.2;IHS LABORATORY;**1031,1037,1039**;NOV 01, 1997;Build 38
  ;
  ; UTILITIES  (BGOUTL)
  ;   GACE    = get accession number external for given test
@@ -50,6 +50,9 @@ CVTDATE(X) ; EP
 ERR(BLRERR) ; EP - Error processing
  ; BLRERR = Error text OR error code
  ; BLRI   = pointer into return global array
+ ;
+ D FORCEIT^BLRUTIL7("ERR^BLRAGUT")
+ ;
  I +BLRERR S BLRERR=BLRERR+134234112 ;vbObjectError
  S BLRI=BLRI+1
  S ^TMP("BLRAG",$J,BLRI)=BLRERR_$C(30)
@@ -58,11 +61,20 @@ ERR(BLRERR) ; EP - Error processing
  Q
  ;
 ERROR ; EP
- D ENTRYAUD^BLRUTIL("ERROR^BLRAGUT 0.0")  ; Store RPMS Error data
- NEW ERRORMSG
- S ERRORMSG="$"_"Z"_"E=""ERROR^BLRAGUT"""  ; BYPASS SAC Checker
- S @ERRORMSG  D ^%ZTER
- D ERR("RPMS Error")
+ ; D ENTRYAUD^BLRUTIL("ERROR^BLRAGUT 0.0")  ; Store RPMS Error data
+ ; NEW ERRORMSG
+ ; S ERRORMSG="$"_"Z"_"E=""ERROR^BLRAGUT"""  ; BYPASS SAC Checker
+ ; S @ERRORMSG  D ^%ZTER
+ ;
+ ; ----- BEGIN IHS/MSC/MKK - LR*5.2*1037
+ NEW ERRSCFL,ERRCODE,LASTGLOR
+ S ERRCODE=$$EC^%ZOSV        ; Error Code
+ S ERRLGLO=$$LGR^%ZOSV       ; Last Global accessed
+ ; D FORCEIT^BLRUTIL7("ERROR^BLRAGUT 0.0")
+ ; ----- END IHS/MSC/MKK - LR*5.2*1037
+ ;
+ ; D ERR("RPMS Error")
+ D ERR("RPMS Error: "_ERRCODE)    ; IHS/MSC/MKK - LR*5.2*1039
  Q
  ;
 FILL(PADS,CHAR=" ") ; EP

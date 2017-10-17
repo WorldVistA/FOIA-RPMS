@@ -1,5 +1,5 @@
 BQITASK3 ;GDIT/HS/ALA-Weekly Update Tasks ; 03 Aug 2007  1:45 PM
- ;;2.5;ICARE MANAGEMENT SYSTEM;;May 24, 2016;Build 27
+ ;;2.6;ICARE MANAGEMENT SYSTEM;;Jul 07, 2017;Build 72
  ;
 EN ;EP - Entry point
  NEW UID,TTASK
@@ -72,7 +72,8 @@ CMGT ; EP - BQI UPDATE CARE MGMT
  .. ; If patient has no active HRNs, quit
  .. I '$$HRN^BQIUL1(DFN) Q
  .. ; If patient has no visit in past 3 years
- .. I '$$VTHR^BQIUL1(DFN) Q
+ .. ;I '$$VTHR^BQIUL1(DFN) Q
+ .. I SOURCE="Pediatric",$$AGE^BQIAGE(DFN,"")>21 Q
  .. D PAT^BQIRGASP(DFN,SRC)
  K BDMDMRG,BDMJOB,BDMBTH,CYR,CIEN,PGTHR,PGRF,BDMRBD,BDMADAT,BDMTYPE,BDMRED,BMDBDAT,BDMPD
  ;

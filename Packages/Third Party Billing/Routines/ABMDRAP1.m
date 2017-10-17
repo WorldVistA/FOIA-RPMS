@@ -1,6 +1,7 @@
 ABMDRAP1 ; IHS/ASDST/DMJ - Approved Bills Summary Report ;
- ;;2.6;IHS 3P BILLING SYSTEM;;NOV 12, 2009
+ ;;2.6;IHS 3P BILLING SYSTEM;**21**;NOV 12, 2009;Build 379
  ;Original;TMD;
+ ;IHS/SD/SDR - 2.6*21 - HEAT166818 - Fix for programming error <UNDEFINED>PRINT+7^ABMDRAP1
  ;
 COMPUTE ;EP - Entry Point for setting up data
  K ABMP("APP")
@@ -24,6 +25,7 @@ PRINT ;EP for printing data
  .I $Y>(IOSL-7) D HD Q:$D(DTOUT)!$D(DUOUT)!$D(DIROUT)
  .S $P(ABM("TOT"),U)=$P(ABM("TOT"),U)+ABMP("APP",ABM("F"))
  .S $P(ABM("TOT"),U,2)=$P(ABM("TOT"),U,2)+$P(ABMP("APP",ABM("F")),U,3)
+ .I $G(^ABMDEXP(ABM("F"),0))="" Q  ;abm*2.6*21 IHS/SD/SDR HEAT166818
  .W !?3,$S(ABMP("VAR")=2:$P(^AUTNINS(ABM("F"),0),U),1:$P(^ABMDEXP(ABM("F"),0),U))
  .W ?35,$J($FN($P(ABMP("APP",ABM("F")),U),",",0),4)
  .W ?45,$J($FN($P(ABMP("APP",ABM("F")),U,2)\+ABMP("APP",ABM("F")),",",0),5)

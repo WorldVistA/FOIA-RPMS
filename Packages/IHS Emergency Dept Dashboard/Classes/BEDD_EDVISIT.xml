@@ -1,0 +1,1415 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:34">
+<Class name="BEDD.EDVISIT">
+<Description>
+BEDD.EDVISIT CLASS - MAIN STORAGE FOR DASHBOARD PATIENT DATA</Description>
+<Super>%Persistent</Super>
+<TimeChanged>64293,33180.398589</TimeChanged>
+<TimeCreated>61957,69798.389068</TimeCreated>
+
+<Property name="AMERVSIT">
+<Description>
+Property Section</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="AdmPrv">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {AdmPrv}=##class(BEDD.EDVISIT).GetAdmPrv({AMERVSIT},{PtDFN}) </SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="AdmPrvN">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {AdmPrvN}=##class(BEDD.EDVISIT).GetProvN({AdmPrv}) </SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="AdPvDtm">
+<Type>%Date</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {AdPvDtm}=##class(BEDD.EDVISIT).GetAdPvDtm({AMERVSIT},{PtDFN})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="DecAdmDt">
+<Type>%String</Type>
+</Property>
+
+<Property name="NewDecAdmit">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {NewDecAdmit} = ##class(BEDD.EDVISIT).GetDecAdmit({ID},{DecAdmDt})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="PrmNurse">
+<Type>%String</Type>
+</Property>
+
+<Property name="ArrMode">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {ArrMode}=##class(BEDD.EDVISIT).GetAM({PtDFN},{AMERVSIT})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="AsgCln">
+<Type>%String</Type>
+</Property>
+
+<Property name="AsgNrs">
+<Type>%String</Type>
+</Property>
+
+<Property name="AsgNrsN">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {AsgNrsN}=##class(BEDD.EDVISIT).GetProvN({AsgNrs}) </SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="AsgPrv">
+<Type>%String</Type>
+</Property>
+
+<Property name="AsgPrvN">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {AsgPrvN}=##class(BEDD.EDVISIT).GetProvN({AsgPrv}) </SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="Clinic">
+<Type>%String</Type>
+</Property>
+
+<Property name="CodeBlue">
+<Type>%String</Type>
+</Property>
+
+<Property name="Disposition">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {Disposition}=##class(BEDD.EDVISIT).GetDisp({AMERVSIT})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="DispN">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {DispN}=##class(BEDD.EDVISIT).GetDispN({Disposition})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="DCDt">
+<Type>%Date</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {DCDt}=##class(BEDD.EDVISIT).GetDCDt({AMERVSIT})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="DCDtTm">
+<Type>%Date</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {DCDtTm}=##class(BEDD.EDVISIT).GetDCDtTm({AMERVSIT})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="DCTm">
+<Type>%Time</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {DCTm}=##class(BEDD.EDVISIT).GetDCTm({AMERVSIT})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="PtDCDT">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {PtDCDT}=##class(BEDD.EDVISIT).CmbDt({DCDt},{DCTm})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="DCDtH">
+<Type>%String</Type>
+</Property>
+
+<Property name="DCTmH">
+<Type>%String</Type>
+</Property>
+
+<Property name="DCNrs">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {DCNrs}=##class(BEDD.EDVISIT).GetDCN({AMERVSIT},{ID})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="DCNrsH">
+<Type>%String</Type>
+</Property>
+
+<Property name="DCNrsN">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {DCNrsN}=##class(BEDD.EDVISIT).GetProvN({DCNrs}) </SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="DCPrv">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {DCPrv}=##class(BEDD.EDVISIT).GetDCP({AMERVSIT}) </SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="DCPrvN">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {DCPrvN}=##class(BEDD.EDVISIT).GetProvN({DCPrv}) </SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="DCPrvH">
+<Type>%String</Type>
+</Property>
+
+<Property name="DCDPrvH">
+<Type>%String</Type>
+</Property>
+
+<Property name="DCDPrvHN">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {DCDPrvHN}=##class(BEDD.EDVISIT).GetProvN({DCDPrvH}) </SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="DCDispH">
+<Type>%String</Type>
+</Property>
+
+<Property name="DCDocH">
+<Type>%Integer</Type>
+</Property>
+
+<Property name="DCDocHSDt">
+<Type>%Date</Type>
+</Property>
+
+<Property name="DCDocHSTm">
+<Type>%Time</Type>
+</Property>
+
+<Property name="DCDocHEDt">
+<Type>%Date</Type>
+</Property>
+
+<Property name="DCDocHETm">
+<Type>%Time</Type>
+</Property>
+
+<Property name="DCInstH">
+<Type>%String</Type>
+</Property>
+
+<Property name="DCInstHN">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {DCInstHN}=##class(BEDD.EDVISIT).GetInstN({DCInstH}) </SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="DCTrgH">
+<Type>%String</Type>
+</Property>
+
+<Property name="DCStat">
+<Type>%String</Type>
+</Property>
+
+<Property name="DCStatN">
+<Type>%String</Type>
+</Property>
+
+<Property name="DCTrns">
+<Type>%String</Type>
+</Property>
+
+<Property name="DCTrnsN">
+<Type>%String</Type>
+</Property>
+
+<Property name="DCMode">
+<Type>%String</Type>
+</Property>
+
+<Property name="DCModeN">
+<Type>%String</Type>
+</Property>
+
+<Property name="DCFlag">
+<Type>%Integer</Type>
+</Property>
+
+<Property name="FinA">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {FinA}=##class(BEDD.EDVISIT).GetFinA({AMERVSIT})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="EDConsult">
+<Description>
+YES OR NO </Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="EDProcedure">
+<Description>
+YES OR NO </Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="EDTrans">
+<Description>
+YES OR NO </Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="EDDx">
+<Type>%String</Type>
+</Property>
+
+<Property name="PrimDxH">
+<Type>%String</Type>
+</Property>
+
+<Property name="PrimDx">
+<Type>%String</Type>
+</Property>
+
+<Property name="PrimDxNarr">
+</Property>
+
+<Property name="PrimDxN">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {PrimDxN}=##class(BEDD.EDVISIT).GetPrimN({PrimDx})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="PrimICD">
+<Type>%String</Type>
+</Property>
+
+<Property name="PrimICDN">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {PrimICDN}=##class(BEDD.EDVISIT).GetICDN({PrimICD})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="PrimaryNurse">
+<Type>%String</Type>
+</Property>
+
+<Property name="PrimPrv">
+<Type>%String</Type>
+</Property>
+
+<Property name="PrimPrvN">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {PrimPrvN}=##class(BEDD.EDVISIT).GetProvN({PrimPrv}) </SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="PtStat">
+<Description>
+calculate the status of 1,2,3,8,9 depending on ci,trg,rm, or dc</Description>
+<Type>%Integer</Type>
+<SqlComputeCode> Set {PtStat}=##class(BEDD.EDVISIT).GetPtStat({ID},{PtDFN},{Room},{DCFlag},{AMERVSIT},{DCDocH},{TrgA})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+<SqlComputeOnChange>Room,DCFlag,DCDocH,TrgA</SqlComputeOnChange>
+</Property>
+
+<Property name="PtStatI">
+<Description>
+calculate the status of 1,2,3,8,9 depending on ci,trg,rm, or dc</Description>
+<Type>%Integer</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {PtStatI}=##class(BEDD.EDVISIT).GetPtStat({ID},{PtDFN},{Room},{DCFlag},{AMERVSIT},{DCDocH},{TrgA})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+<SqlComputeOnChange>Room,DCFlag,DCDocH,TrgA</SqlComputeOnChange>
+</Property>
+
+<Property name="PtStatV">
+<Description>
+calculate the status of 1,2,3,8,9 depending on ci,trg,rm, or dc</Description>
+<Type>%Integer</Type>
+</Property>
+
+<Property name="PtStatN">
+<Type>%Integer</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {PtStatN}=##class(BEDD.EDVISIT).GetPtStatN({PtStatI})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="Info">
+<Type>%GlobalCharacterStream</Type>
+</Property>
+
+<Property name="Injury">
+<Description>
+YES or NO to FM ^AMERADM</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="PtInjury">
+<Description>
+embedded serial </Description>
+<Type>BEDD.EDInjury</Type>
+</Property>
+
+<Property name="InjC">
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {InjC}=##class(BEDD.EDVISIT).GetInjC({ID})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="InjS">
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {InjS}=##class(BEDD.EDVISIT).GetInjS({ID})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="Industry">
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {Industry}=##class(BEDD.EDVISIT).GetInd({ID})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="Occupation">
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {Occupation}=##class(BEDD.EDVISIT).GetOcc({ID})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="PtDFN">
+<Description>
+dfn to ^AUPNPAT/^DPT/^AMERADM</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="PtName">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {PtName}=##class(BEDD.EDVISIT).GetName({PtDFN})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="Chart">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {Chart}=##class(BEDD.EDVISIT).GetChart({AMERVSIT},{PtDFN}) </SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="DOB">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {DOB}=##class(BEDD.EDVISIT).GetDOB({PtDFN})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="Age">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {Age}=##class(BEDD.EDVISIT).GetAge({AMERVSIT},{PtDFN})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="Sex">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {Sex}=##class(BEDD.EDVISIT).GetSex({PtDFN})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="CIDt">
+<Type>%Date</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {CIDt}=##class(BEDD.EDVISIT).GetCIDt({AMERVSIT},{PtDFN}) </SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="CITm">
+<Type>%Time</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {CITm}=##class(BEDD.EDVISIT).GetCITm({AMERVSIT},{PtDFN}) </SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="PtCIDT">
+<Description>
+combine CIDt and CITm for display</Description>
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {PtCIDT}=##class(BEDD.EDVISIT).CmbDt({CIDt},{CITm})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="Complaint">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {Complaint} = ##class(BEDD.EDVISIT).GetPtComplaint({PtDFN},{AMERVSIT})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="TrgA">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {TrgA}=##class(BEDD.EDVISIT).GetTrgA({AMERVSIT},{PtDFN})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="TrgDt">
+<Type>%Date</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {TrgDt}=##class(BEDD.EDVISIT).GetTrgDt({AMERVSIT},{PtDFN})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="TrgDtTm">
+<Type>%Date</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {TrgDtTm}=##class(BEDD.EDVISIT).GetTrgDtTm({AMERVSIT},{PtDFN})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="TrgTm">
+<Type>%Time</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {TrgTm}=##class(BEDD.EDVISIT).GetTrgTm({AMERVSIT},{PtDFN})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="PtTrgDT">
+<Description>
+combine TrgDt and TrgTm for display</Description>
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {PtTrgDT}=##class(BEDD.EDVISIT).CmbDt({TrgDt},{TrgTm})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="TrgNrs">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {TrgNrs}=##class(BEDD.EDVISIT).GetTrgN({AMERVSIT},{PtDFN}) </SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="TrgCln">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {TrgCln}=##class(BEDD.EDVISIT).GetTrgC({AMERVSIT},{VIEN}) </SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="RecLock">
+<Type>%Integer</Type>
+</Property>
+
+<Property name="RecLockUser">
+<Type>%String</Type>
+</Property>
+
+<Property name="RecLockDT">
+<Type>%String</Type>
+</Property>
+
+<Property name="RecLockSite">
+<Type>%String</Type>
+</Property>
+
+<UDLText name="T">
+<Content><![CDATA[
+// Current room assignment
+
+]]></Content>
+</UDLText>
+
+<Property name="Room">
+<Type>%String</Type>
+</Property>
+
+<Property name="RoomDtTm">
+<Type>%String</Type>
+</Property>
+
+<Property name="RoomDt">
+<Type>%Date</Type>
+</Property>
+
+<Property name="RoomTime">
+<Type>%Time</Type>
+</Property>
+
+<Property name="RoomClear">
+<Type>%String</Type>
+</Property>
+
+<Property name="RClDt">
+<Type>%String</Type>
+</Property>
+
+<Property name="RClTm">
+<Type>%String</Type>
+</Property>
+
+<UDLText name="T">
+<Content><![CDATA[
+// Original room assignment
+
+]]></Content>
+</UDLText>
+
+<Property name="OrgRoom">
+<Type>%String</Type>
+</Property>
+
+<Property name="OrgRoomDt">
+<Type>%Date</Type>
+</Property>
+
+<Property name="OrgRoomTime">
+<Type>%Time</Type>
+</Property>
+
+<Property name="ORmDt">
+<Type>%String</Type>
+</Property>
+
+<Property name="ORmTm">
+<Type>%String</Type>
+</Property>
+
+<Property name="VstDur">
+<Type>%Integer</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {VstDur}=##class(BEDD.EDVISIT).GetVD({AMERVSIT}) </SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="WtgTime">
+<Type>%Integer</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {WtgTime}=##class(BEDD.EDVISIT).GetWtg({ID},{PtStatI},{CIDt},{CITm},{TrgDt},{TrgTm},{ORmDt},{ORmTm},{RClDt},{RClTm}) </SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="VIEN">
+<Description>
+ien to ^AUPNVSIT</Description>
+<Type>%String</Type>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Index name="ADIdx">
+<Description>
+Index Section</Description>
+<Properties>VIEN:Exact</Properties>
+</Index>
+
+<Index name="DisIdx">
+<Properties>DCDt</Properties>
+</Index>
+
+<Index name="ArrIdx">
+<Data>CIDt</Data>
+<Properties>CIDt</Properties>
+</Index>
+
+<Index name="CIDtIIdx">
+<Data>CIDt</Data>
+<Properties>CIDt</Properties>
+</Index>
+
+<Index name="DCDTIdx">
+<Properties>DCDtH</Properties>
+</Index>
+
+<Method name="GetName">
+<Description>
+Method Section</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ptDFN:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	S PtName=""
+	I $G(ptDFN)]"" S PtName=$$GETF^BEDDUTIL(2,ptDFN,.01,"E") I PtName="" S PtName="PATIENT NOT REGISTERED"
+	Q PtName
+]]></Implementation>
+</Method>
+
+<Method name="GetProvN">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>prv:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	S prvName="" I +$G(prv)=0 Q prvName
+	I prv>0 S prvName=$$GETF^BEDDUTIL(200,prv,.01,"E") I prvName="" S prvName="Unknown Provider name"
+	Q prvName
+]]></Implementation>
+</Method>
+
+<Method name="GetDispN">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>disp:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	S dispName="" I $G(disp)="" Q dispName
+	S dispName=$$GETF^BEDDUTIL(9009083,disp,.01,"I") S:dispName="" dispName="Unknown"
+	Q dispName
+]]></Implementation>
+</Method>
+
+<Method name="GetInjC">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>objid:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	S ptinjury=$$INJCAUSE^BEDDUTL(objid)
+	Q ptinjury
+]]></Implementation>
+</Method>
+
+<Method name="GetInjS">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>objid:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	S ptinjstg=$$INJSTG^BEDDUTL(objid)
+	Q ptinjstg
+]]></Implementation>
+</Method>
+
+<Method name="GetPtComplaint">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ptDFN:%String,amervsit:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	S ptComplaint="" 
+	I $G(ptDFN)]""  S ptComplaint=$$GETF^BEDDUTIL(9009081,ptDFN,23,"E") Q:ptComplaint]"" ptComplaint
+	I $G(amervsit)]"" S ptComplaint=$$GETF^BEDDUTIL(9009080,amervsit,1,"E")
+	Q ptComplaint
+]]></Implementation>
+</Method>
+
+<Method name="GetDecAdmit">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>objid:%String,oldDecAdmit:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	Q $$DECADM^BEDDUTL1(objid,oldDecAdmit)
+]]></Implementation>
+</Method>
+
+<Method name="GetPtStat">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id:%String,ptDFN:%String,room:%String,dcflag:%Integer,amervsit:%String,dcdoch:%Integer,trga:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%Integer</ReturnType>
+<Implementation><![CDATA[
+	
+	S ptstat=9 I dcflag=1 Q ptstat
+	S ptstat=8 I dcdoch=1 Q ptstat
+	I ptDFN="" S ptstat=9 Q ptstat
+	I $$GETF^BEDDUTIL(9009081,ptDFN,.01,"I")]"" D
+	. S ptstat=1
+	. S:trga'="" ptstat=2
+	. S:room'="" ptstat=3
+	. I room="",$P($$RMLST^BEDDUTW(id),"^",2)]"" S ptstat=4
+	Q ptstat
+]]></Implementation>
+</Method>
+
+<Method name="GetCIDt">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>amervsit:%String,ptdfn:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	S (cidt,fmdt)="" I amervsit'="" S fmdt=$$GETF^BEDDUTIL(9009080,amervsit,.01,"I") I fmdt]"" S cidt=$$FMTH^XLFDT(fmdt,1)  Q:cidt]"" cidt
+	I ptdfn'="" S fmdt=$$GETF^BEDDUTIL(9009081,ptdfn,1,"I") I fmdt]"" S cidt=$$FMTH^XLFDT(fmdt,1)
+	Q cidt
+]]></Implementation>
+</Method>
+
+<Method name="GetCITm">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>amervsit:%String,ptdfn:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	S (citm,fmdt)="" S fmdt=$$GETF^BEDDUTIL(9009080,amervsit,.01,"I") I fmdt]"" S citm=$P($$FMTH^XLFDT(fmdt),",",2) Q:citm]"" citm
+	I ptdfn'="" S fmdt=$$GETF^BEDDUTIL(9009081,ptdfn,1,"I") I fmdt]"" S citm=$P($$FMTH^XLFDT(fmdt),",",2)
+	Q citm
+]]></Implementation>
+</Method>
+
+<Method name="GetTrgA">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>amervsit:%String,ptdfn:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	S trgA="" I amervsit'="" S trgA=$$GETF^BEDDUTIL(9009080,amervsit,.24,"E") Q:trgA]"" trgA
+	I ptdfn'="" S trgA=$$GETF^BEDDUTIL(9009081,ptdfn,20,"E")
+	Q trgA
+]]></Implementation>
+</Method>
+
+<Method name="GetTrgDt">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>amervsit:%String,ptdfn:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	S trgDt=""
+	I $G(ptdfn)]"" S fmdt=$$GETF^BEDDUTIL(9009081,ptdfn,21,"I") I fmdt'="" S trgDt=$$FMTH^XLFDT(fmdt,1) Q:trgDt]"" trgDt
+	I $G(amervsit)]"" S fmdt=$$GETF^BEDDUTIL(9009080,amervsit,12.2,"I") I fmdt'="" S trgDt=$$FMTH^XLFDT(fmdt,1)
+	Q trgDt
+]]></Implementation>
+</Method>
+
+<Method name="GetTrgDtTm">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>amervsit:%String,ptdfn:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	S trgdttm=""
+	I $G(ptdfn)]"" S trgdttm=$$GETF^BEDDUTIL(9009081,ptdfn,21,"I") Q:trgdttm]"" trgdttm
+	I $G(amervsit)]"" S trgdttm=$$GETF^BEDDUTIL(9009080,amervsit,12.2,"I")
+	Q trgdttm
+]]></Implementation>
+</Method>
+
+<Method name="GetAdPvDtm">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>amervsit:%String,ptdfn:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	S fmdt=""
+	I $G(ptdfn)]"" S fmdt=$$GETF^BEDDUTIL(9009081,ptdfn,22,"I") Q:fmdt'="" fmdt
+	I $G(amervsit)]"" S fmdt=$$GETF^BEDDUTIL(9009080,amervsit,12.1,"I")
+	Q fmdt
+]]></Implementation>
+</Method>
+
+<Method name="GetAM">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ptdfn:%String,amervsit:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	S arrmd="" I $G(amervsit)]"" S arrmd=$$GETF^BEDDUTIL(9009080,amervsit,.25,"E") Q:arrmd]"" arrmd
+	I $G(ptdfn)]"" S arrmd=$$GETF^BEDDUTIL(9009081,ptdfn,6,"E")
+	Q arrmd
+]]></Implementation>
+</Method>
+
+<Method name="GetTrgTm">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>amervsit:%String,ptdfn:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	S trgT="" I $G(amervsit)'="" S fmdt=$$GETF^BEDDUTIL(9009080,amervsit,12.2,"I") I fmdt'="" S trgT=$P($$FMTH^XLFDT(fmdt),",",2) Q:trgT]"" trgT
+	I $G(ptdfn)'="" S fmdt=$$GETF^BEDDUTIL(9009081,ptdfn,21,"I") I fmdt'="" S trgT=$P($$FMTH^XLFDT(fmdt),",",2)
+	Q trgT
+]]></Implementation>
+</Method>
+
+<Method name="GetTrgN">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>amervsit:%String,ptdfn:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	S trgN="" I $G(amervsit)'="" S trgN=$$GETF^BEDDUTIL(9009080,amervsit,.07,"I") Q:trgN]"" trgN
+	I $G(ptdfn)'="" S trgN=$$GETF^BEDDUTIL(9009081,ptdfn,19,"I")
+	Q trgN
+]]></Implementation>
+</Method>
+
+<Method name="GetTrgC">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>amervsit:%String,vien:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	S trgC="" I $G(amervsit)'="" S trgC=$$GETF^BEDDUTIL(9009080,amervsit,.04,"I") S:trgC]"" trgC=$$GETF^BEDDUTIL(9009083,trgC_",",5) Q:trgC]"" trgC
+	I $G(vien)'="" S trgC=$$GETF^BEDDUTIL(9000010,vien,.08,"I")
+	Q trgC
+]]></Implementation>
+</Method>
+
+<Method name="GetDisp">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>amervsit:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	Set dcn="" I $G(amervsit)'="" S dcn=$$GETF^BEDDUTIL(9009080,amervsit,6.1,"I")
+	Q dcn
+]]></Implementation>
+</Method>
+
+<Method name="GetDCN">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>amervsit:%String,ID:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	Set dcn="" I $G(amervsit)'="" S dcn=$$GETF^BEDDUTIL(9009080,amervsit,6.4,"I")
+	Q dcn
+]]></Implementation>
+</Method>
+
+<Method name="GetDCP">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>amervsit:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	Set dcn="" I $G(amervsit)'="" S dcn=$$GETF^BEDDUTIL(9009080,amervsit,6.3,"I")
+	Q dcn
+]]></Implementation>
+</Method>
+
+<Method name="GetDCDtTm">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>amervsit:%String,ptdfn:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	Set fmdt="" I $G(amervsit)'="" S fmdt=$$GETF^BEDDUTIL(9009080,amervsit,6.2,"I")
+	Q fmdt
+]]></Implementation>
+</Method>
+
+<Method name="GetDCDt">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>amervsit:%String,ptdfn:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	Set (dcdt,fmdt)="" I $G(amervsit)'="" S fmdt=$$GETF^BEDDUTIL(9009080,amervsit,6.2,"I") S dcdt=$$FMTH^XLFDT(fmdt,1)
+	Q dcdt
+]]></Implementation>
+</Method>
+
+<Method name="GetDCTm">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>amervsit:%String,ptdfn:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	Set (dctm,fmdt)="" I $G(amervsit)'="" S fmdt=$$GETF^BEDDUTIL(9009080,amervsit,6.2,"I") S dctm=$P($$FMTH^XLFDT(fmdt),",",2)
+	Q dctm
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// Get the Clinic for this patient
+
+]]></Content>
+</UDLText>
+
+<Method name="GetCln">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>amervsit:%String,ptdfn:%String,vien:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	S trgC="" I $G(amervsit)'="" S trgC=$$GETF^BEDDUTIL(9009080,amervsit,.04,"I") S:trgC]"" trgC=$$GET1^DIQ(40.7,trgC_",",1,"E") Q:trgC]"" trgC
+	I $G(vien)'="" S trgC=$$GETF^BEDDUTIL(9000010,vien,.08,"I") S:trgC]"" trgC=$$GET1^DIQ(40.7,trgC_",",1,"E")
+	Q trgC
+]]></Implementation>
+</Method>
+
+<Method name="GetERCC">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>amervsit:%String,ptdfn:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	Set ercc="" I $G(amervsit)'="" S ercc=$$GETF^BEDDUTIL(9009080,amervsit,1,"E")
+	Q ercc
+]]></Implementation>
+</Method>
+
+<Method name="CmbDt">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>cidt:%Date,citm:%Time</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	Set cdt="" I (cidt="")!(citm="") Q cdt
+	I (cidt=0)!(citm=0) Q cdt
+	I citm=86400 s citm=86299   ;;added 021611  RGB for midnight entry error
+	s rpf1=cidt_","_citm s cdt=$TR($$HTE^XLFDT(rpf1,"5Z"),"@"," ") Q cdt
+]]></Implementation>
+</Method>
+
+<Method name="GetCC">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>amervsit:%String,ptdfn:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	s ptCC="" I $G(amervsit)'="" S ptCC=$$GETF^BEDDUTIL(9009080,amervsit,1,"E") Q:ptCC]"" ptCC
+	I $G(ptdfn)'="" S ptCC=$$GETF^BEDDUTIL(9009081,ptdfn,23,"E")
+	Q ptCC
+]]></Implementation>
+</Method>
+
+<Method name="GetDC">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>amervsit:%String,ptdfn:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	s ptDC="" I $G(amervsit)'="" S ptDC1=$$GETF^BEDDUTIL(9009080,amervsit,6.1,"E")
+	Q ptDC
+]]></Implementation>
+</Method>
+
+<Method name="GetPrimN">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>dxn:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	S DXNm="" I $G(dxn)'="" S DXNm=$$GETF^BEDDUTIL(9999999.27,dxn,.01,"I")
+	Q DXNm
+]]></Implementation>
+</Method>
+
+<Method name="GetICDN">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>icd:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	S ICDN="" I $G(icd)'="" S ICDN=$$GETF^BEDDUTIL(80,icd,.01,"I")
+	Q ICDN
+]]></Implementation>
+</Method>
+
+<Method name="GetAdmPrv">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>amervsit:%String,ptdfn:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	S apr="" I $G(amervsit)'="" S apr=$$GETF^BEDDUTIL(9009080,amervsit,.06,"I") Q:apr]"" apr
+	I $G(ptdfn)'="" S apr=$$GETF^BEDDUTIL(9009081,ptdfn,18,"I")
+	Q apr
+]]></Implementation>
+</Method>
+
+<Method name="GetSex">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ptdfn:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	S ptSex="" I $G(ptdfn)'="" S ptSex=$$GETF^BEDDUTIL(2,ptdfn,.02,"I")
+	Q ptSex
+]]></Implementation>
+</Method>
+
+<Method name="GetDOB">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ptdfn:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	S ptDOB="" I $G(ptdfn)'="" S ptDOB=$$GETF^BEDDUTIL(2,ptdfn,.03,"I")
+	S:ptDOB]"" ptDOB=$$FMTE^XLFDT(ptDOB,"2ZD")
+	Q ptDOB
+]]></Implementation>
+</Method>
+
+<Method name="GetAge">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>amervsit:%String,ptdfn:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%Integer</ReturnType>
+<Implementation><![CDATA[	Q $$AGE^BEDDUTID(ptdfn)
+]]></Implementation>
+</Method>
+
+<Method name="GetChart">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>amervsit:%String,ptdfn:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	S ptChart="" I $G(ptdfn)'="" S ptChart=$$GETF^BEDDUTIL(9009081,ptdfn,.03,"I") Q:ptChart]"" ptChart
+	I $G(amervsit)'="" S ptChart=$$GETF^BEDDUTIL(9009080,amervsit,.13,"I")
+	Q ptChart
+]]></Implementation>
+</Method>
+
+<Method name="GetWtg">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id:%Integer,ptstat:%Integer,cidt:%Date,citm:%Time,tdt:%Date,ttm:%String,rdt:%Date,rtm:%Time,cldt:%Date,cltm:%Time</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%Numeric</ReturnType>
+<Implementation><![CDATA[
+	
+	s ptwtg=0 Q:ptstat=9 ptwtg
+	I ptstat=1 s ptwtg=$$MINWTG^BEDDUTIL(cidt,citm)
+	I ptstat=2 S ptwtg=$$MINWTG^BEDDUTIL(tdt,ttm)
+	I ptstat=3 S ptwtg=$$MINWTG^BEDDUTIL(rdt,rtm)
+	I ptstat=4 S ptwtg=$$MINWTG^BEDDUTIL(cldt,cltm)
+	Q ptwtg
+]]></Implementation>
+</Method>
+
+<Method name="GetPtStatN">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ptstat:%Integer</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	s ptsn="" I ptstat=0 s ptsn="unknown"
+	I ptstat=1 s ptsn="Check-in waiting on Triage"
+	I ptstat=2 S ptsn="Triaged waiting on Room"
+	I ptstat=3 S ptsn="Room"
+	I ptstat=9 S ptsn="Discharged"
+	Q ptsn
+]]></Implementation>
+</Method>
+
+<Method name="GetVD">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>amervsit:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	S ervd="" I $G(amervsit)'="" S ervd=$$GETF^BEDDUTIL(9009080,amervsit,12.5,"I")
+	Q ervd
+]]></Implementation>
+</Method>
+
+<Method name="GetInstN">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ien:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	S instN="" I $G(ien)'="" S instN=$$GETF^BEDDUTIL(9009083,ien,.01,"I")
+	Q instN
+]]></Implementation>
+</Method>
+
+<Method name="GetInd">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>objid:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	Set ptind="" Set ptind=$$IND^BEDDUTIL(objid)
+	Q ptind
+]]></Implementation>
+</Method>
+
+<Method name="GetOcc">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>objid:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	Set ptocc="" Set ptocc=$$OCC^BEDDUTIL(objid)
+	Q ptocc
+]]></Implementation>
+</Method>
+
+<Method name="GetFinA">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>amervsit:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	S trgA="" I amervsit'="" S trgA=$$GETF^BEDDUTIL(9009080,amervsit,5.4,"E")
+	Q trgA
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^BEDD.EDVISITD</DataLocation>
+<DefaultData>EDVISITDefaultData</DefaultData>
+<IdLocation>^BEDD.EDVISITD</IdLocation>
+<IndexLocation>^BEDD.EDVISITI</IndexLocation>
+<StreamLocation>^BEDD.EDVISITS</StreamLocation>
+<ExtentSize>100000</ExtentSize>
+<Data name="EDVISITDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>AMERVSIT</Value>
+</Value>
+<Value name="3">
+<Value>AsgCln</Value>
+</Value>
+<Value name="4">
+<Value>AsgNrs</Value>
+</Value>
+<Value name="5">
+<Value>AsgPrv</Value>
+</Value>
+<Value name="6">
+<Value>CodeBlue</Value>
+</Value>
+<Value name="7">
+<Value>DCDtH</Value>
+</Value>
+<Value name="8">
+<Value>DCTmH</Value>
+</Value>
+<Value name="9">
+<Value>DCNrsH</Value>
+</Value>
+<Value name="10">
+<Value>DCPrvH</Value>
+</Value>
+<Value name="11">
+<Value>DCDPrvH</Value>
+</Value>
+<Value name="12">
+<Value>DCDispH</Value>
+</Value>
+<Value name="13">
+<Value>DCInstH</Value>
+</Value>
+<Value name="14">
+<Value>DCTrgH</Value>
+</Value>
+<Value name="15">
+<Value>DCStat</Value>
+</Value>
+<Value name="16">
+<Value>DCStatN</Value>
+</Value>
+<Value name="17">
+<Value>DCFlag</Value>
+</Value>
+<Value name="18">
+<Value>EDConsult</Value>
+</Value>
+<Value name="19">
+<Value>EDProcedure</Value>
+</Value>
+<Value name="20">
+<Value>EDTrans</Value>
+</Value>
+<Value name="21">
+<Value>EDDx</Value>
+</Value>
+<Value name="22">
+<Value>PrimDx</Value>
+</Value>
+<Value name="23">
+<Value>PrimICD</Value>
+</Value>
+<Value name="24">
+<Value>Info</Value>
+</Value>
+<Value name="25">
+<Value>Injury</Value>
+</Value>
+<Value name="26">
+<Value>PtInjury</Value>
+</Value>
+<Value name="27">
+<Value>PtDFN</Value>
+</Value>
+<Value name="28">
+<Value>Room</Value>
+</Value>
+<Value name="29">
+<Value>RoomDt</Value>
+</Value>
+<Value name="30">
+<Value>RoomTime</Value>
+</Value>
+<Value name="31">
+<Value>VIEN</Value>
+</Value>
+<Value name="32">
+<Value>PrimDxH</Value>
+</Value>
+<Value name="33">
+<Value>PrimPrv</Value>
+</Value>
+<Value name="34">
+<Value>DCTrns</Value>
+</Value>
+<Value name="35">
+<Value>DCTrnsN</Value>
+</Value>
+<Value name="36">
+<Value>DCMode</Value>
+</Value>
+<Value name="37">
+<Value>DCModeN</Value>
+</Value>
+<Value name="38">
+<Value>OrgRoom</Value>
+</Value>
+<Value name="39">
+<Value>OrgRoomDt</Value>
+</Value>
+<Value name="40">
+<Value>OrgRoomTime</Value>
+</Value>
+<Value name="41">
+<Value>Clinic</Value>
+</Value>
+<Value name="42">
+<Value>DCDocH</Value>
+</Value>
+<Value name="43">
+<Value>PtStat</Value>
+</Value>
+<Value name="44">
+<Value>PtStatI</Value>
+</Value>
+<Value name="45">
+<Value>RecLock</Value>
+</Value>
+<Value name="46">
+<Value>RecLockUser</Value>
+</Value>
+<Value name="47">
+<Value>RecLockDT</Value>
+</Value>
+<Value name="48">
+<Value>PtStatV</Value>
+</Value>
+<Value name="49">
+<Value>DCDocHDt</Value>
+</Value>
+<Value name="50">
+<Value>DCDocHTm</Value>
+</Value>
+<Value name="51">
+<Value>DCDocHSDt</Value>
+</Value>
+<Value name="52">
+<Value>DCDocHSTm</Value>
+</Value>
+<Value name="53">
+<Value>DCDocHEDt</Value>
+</Value>
+<Value name="54">
+<Value>DCDocHETm</Value>
+</Value>
+<Value name="55">
+<Value>PrimDxNarr</Value>
+</Value>
+<Value name="56">
+<Value>RoomDtTm</Value>
+</Value>
+<Value name="57">
+<Value>ORmDt</Value>
+</Value>
+<Value name="58">
+<Value>ORmTm</Value>
+</Value>
+<Value name="59">
+<Value>PrimaryNurse</Value>
+</Value>
+<Value name="60">
+<Value>RoomClear</Value>
+</Value>
+<Value name="61">
+<Value>RClDt</Value>
+</Value>
+<Value name="62">
+<Value>RClTm</Value>
+</Value>
+<Value name="63">
+<Value>PrmNurse</Value>
+</Value>
+<Value name="64">
+<Value>DecAdmDt</Value>
+</Value>
+<Value name="65">
+<Value>RecLockSite</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

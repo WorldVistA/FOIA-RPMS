@@ -1,17 +1,21 @@
 BQIRMDR2 ;GDHS/HCD/ALA-Forecaster Reminders ; 05 Feb 2016  3:28 PM
- ;;2.5;ICARE MANAGEMENT SYSTEM;;May 24, 2016;Build 27
+ ;;2.6;ICARE MANAGEMENT SYSTEM;;Jul 07, 2017;Build 72
  ;
  ;
 IFR ; EP - Immunization Forecaster
+ S BQIUPD(90508,"1,",4.19)=$$NOW^XLFDT()
+ D FILE^DIE("","BQIUPD","ERROR")
  D PTLS^BQIRMIZ
+ S BQIUPD(90508,"1,",4.2)=$$NOW^XLFDT()
+ D FILE^DIE("","BQIUPD","ERROR")
  NEW RCAT,RCLIN,IN,IMM,TEXT,CODE,HDR,RIEN
  S RCAT="IZ Forecaster",RCLIN="Immunizations"
  I $G(SOURCE)="" S SOURCE="Reminders"
- S IMN=0
- F  S IMN=$O(^BIPDUE(IMN)) Q:'IMN  D
- . S IMM=$P(^BIPDUE(IMN,0),"^",2)
+ S IMM=""
+ F  S IMM=$O(^BIPDUE("C",IMM)) Q:IMM=""  D
+ . ;S IMM=$P(^BIPDUE(IMN,0),"^",2)
  . ; if forecast was not updated with active patients logic in PTLS, quit
- . I $P(^BIPDUE(IMN,0),"^",6)<DT Q
+ . ;I $P(^BIPDUE(IMN,0),"^",6)<DT Q
  . ; If not enabled for forecaster, quit
  . I $P(^BITN(IMM,0),U,16)=1 Q
  . S TEXT=$P(^BITN(IMM,0),U,2)

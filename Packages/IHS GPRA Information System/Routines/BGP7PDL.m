@@ -1,5 +1,5 @@
 BGP7PDL ; IHS/CMI/LAB - IHS gpra print 01 Jul 2010 8:02 PM ;
- ;;17.0;IHS CLINICAL REPORTING;;AUG 30, 2016;Build 16
+ ;;17.1;IHS CLINICAL REPORTING;;MAY 10, 2017;Build 29
  ;
  ;
 DEL ;
@@ -59,7 +59,7 @@ SUMONLY ;
  S X=BGPSTP-1,BGPLX=BGPLX+1,BGPDEVE=0 F  S X=$O(^TMP($J,"BGPDEL",X)) Q:X'=+X  S BGPLX=BGPLX+1 S ^BGPDATA(BGPLX)=^TMP($J,"BGPDEL",X)
  I '$D(BGPGUI) D
  .;I $P($G(^BGPSITE(DUZ(2),0)),U,14) ;S XBUF=$P(^BGPSITE(DUZ(2),0),U,14)
- .S XBFLT=1,XBFN=BGPDELF_".txt",XBMED="F",XBTLE="GPRA 10 DELIMITED OUTPUT",XBQ="N",XBF=0
+ .S XBFLT=1,XBFN=BGPDELF_".txt",XBMED="F",XBTLE="GPRA 17.1 DELIMITED OUTPUT",XBQ="N",XBF=0
  .D ^XBGSAVE
  .K XBFLT,XBFN,XBMED,XBTLE,XBE,XBF
  I $D(BGPGUI) D
@@ -171,11 +171,13 @@ HEADER ;EP
  S BGPI=$O(^BGPCTRL("B",2017,0))
  S BGPX=0 F  S BGPX=$O(^BGPCTRL(BGPI,14,BGPX)) Q:BGPX'=+BGPX  D
  .S X=^BGPCTRL(BGPI,14,BGPX,0) D S(X,1,1)
- I $G(BGPEXPT) S X="A file will be created called BG170"_$P(^AUTTLOC(DUZ(2),0),U,10)_"."_BGPRPT_"." D S(X,1,1)
+ I $G(BGPEXPT) S X="A file will be created called BG171"_$P(^AUTTLOC(DUZ(2),0),U,10)_"."_BGPRPT_"." D S(X,1,1)
  S X="It will reside in the public/export directory.  This file should be sent to your Area Office." D S(X,1,1)
  S X=" " D S(X,1,1)
  I $G(BGPALLPT) S X="All Communities Included." D S(X,1,1)
- I '$G(BGPALLPT),'$G(BGPSEAT) S X="Community Taxonomy Name: "_$P(^ATXAX(BGPTAXI,0),U) D S(X,1,1)
+ I '$G(BGPALLPT),'$G(BGPSEAT) D
+ .I BGPTAXI S X="Community Taxonomy Name: "_$P(^ATXAX(BGPTAXI,0),U) D S(X,1,1)
+ .I $G(BGPCOMMI) S X="Community Name: "_$P(^AUTTCOM(BGPCOMMI,0),U) D S(X,1,1)
  I '$G(BGPALLPT),'$G(BGPSEAT) S X="The following communities are included in this report:" D S(X,1,1) D
  .S BGPZZ="",N=0,Y="" F  S BGPZZ=$O(BGPTAX(BGPZZ)) Q:BGPZZ=""  S N=N+1,Y=Y_$S(N=1:"",1:";")_BGPZZ
  .S BGPZZ=0,C=0 F BGPZZ=1:3:N D

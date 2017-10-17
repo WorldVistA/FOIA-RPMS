@@ -1,5 +1,5 @@
 AMHRPSU2 ; IHS/CMI/LAB - Suicide Form data element tally ;
- ;;4.0;IHS BEHAVIORAL HEALTH;**1**;JUN 18, 2010;Build 8
+ ;;4.0;IHS BEHAVIORAL HEALTH;**1,8**;JUN 02, 2010;Build 7
  ;
  ;
 START ;
@@ -126,6 +126,17 @@ V2 ;
  .S:Y="" Y="ZZZZZ" S:X="" X="DATA NOT ENTERED" S ^(X)=$S($D(^XTMP("AMHRPSU2",AMHJ,AMHH,"TALLY","TOTAL",AMHC,Y,X)):^(X)+1,1:1)
  .;cf IF OTHER
  .I $P(^AMHPSUIC(AMHR,15,Z,0),U,2)]"" S (X,Y)=$P(^AMHPSUIC(AMHR,15,Z,0),U,2),^(X)=$S($D(^XTMP("AMHRPSU2",AMHJ,AMHH,"TALLY","TOTAL",22,Y,X)):^(X)+1,1:1)
+ S P=$P(^AMHPSUIC(AMHR,0),U,4)
+ S AMHC=23,X=$$RACE^AGUTL(P)
+ S (X,Y)=$P(X,U,2)
+ I X="" S X="UNKNOWN",Y="ZZZZZ"
+ S ^(X)=$S($D(^XTMP("AMHRPSU2",AMHJ,AMHH,"TALLY","TOTAL",AMHC,Y,X)):^(X)+1,1:1)
+ S AMHC=24,(X,Y)=$$ETHN^AMHRPSU1($P(^AMHPSUIC(AMHR,0),U,4),"E")
+ I X="" S X="UNKNOWN",Y="ZZZZZ"
+ S ^(X)=$S($D(^XTMP("AMHRPSU2",AMHJ,AMHH,"TALLY","TOTAL",AMHC,Y,X)):^(X)+1,1:1)
+ S AMHC=25,(X,Y)=$$VAL^XBDIQ1(2,P,1901)
+ I X="" S X="UNKNOWN",Y="ZZZZZ"
+ S ^(X)=$S($D(^XTMP("AMHRPSU2",AMHJ,AMHH,"TALLY","TOTAL",AMHC,Y,X)):^(X)+1,1:1)
  Q
 SCREENS ;
  K AMHSKIP
@@ -233,3 +244,6 @@ LABEL ;
 20 ;;Contributing Factor if OTHER:
 21 ;;Substance Drugs:
 22 ;;Substance Drugs if OTHER:
+23 ;;Race:
+24 ;;Ethnicity:
+25 ;;Veteran's Status

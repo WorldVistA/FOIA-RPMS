@@ -1,5 +1,5 @@
 BGP7DESL ; IHS/CMI/LAB - IHS 2017 DISPLAY IND LISTS ;
- ;;17.0;IHS CLINICAL REPORTING;;AUG 30, 2016;Build 16
+ ;;17.1;IHS CLINICAL REPORTING;;MAY 10, 2017;Build 29
  ;; ;
 RT ;EP
  ;for each measure list, choose report type

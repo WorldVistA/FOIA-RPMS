@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:35">
+<Class name="csp.astm.astmschemadocumentstructure">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>CSPX.AutoPageCSP</Super>
+<TimeChanged>61501,53311.998046</TimeChanged>
+<TimeCreated>61501,53311.992159</TimeCreated>
+<GeneratedBy>/csp/goldb/ASTM/ASTMSchemaDocumentStructure.csp</GeneratedBy>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body>"
+	Write !,"<table border=""0"" class=""LayoutMain"" width=""100%"" cellpadding=""0"" cellspacing=""0"">"
+	Do ..WriteTitlePane("@Ensemble:ASTMManagerDocumentStructure@Ensemble ASTM Document Structure")
+	Write !,"</table>"
+	Write !,!,"<div class=""Text1"">"
+	Write "ASTM <b>Document Structure</b> (<b>DocType</b>) definition is displayed below:"
+	Write "</div>"
+	Write !,!
+	#Include EnsEDIASTM
+	set ds=%request.Get("DS")
+	set category=$p(ds,":",2)
+	set secondary=$p(ds,":",3)
+	If ((category'="")&&(secondary'="")) {
+	set description=..EscapeHTML(##class(EnsLib.EDI.ASTM.Schema).GetDescription(ds))
+	if $data($$$vaSchemaGbl(category,"DS",secondary))=0 {
+	write "<b><font size=6>"_ds_" </font> Definition does not exist!</b>",!
+	quit
+	}
+	}
+	Write !,!,"<b><font size=6>"_(category_":"_secondary)_" </font> "_($G(description))_"</b>",!
+	Write "<br><br>",!
+	Write "<div style=""margin-left: 20px; margin-right: 20px;"">"
+	Write !,!
+	If ((category'="")&&(secondary'="")) {
+	Set struct=$$$vaSchemaGbl(category,"DS",secondary)
+	#; Build segment paths list
+	set rs=##class(%ResultSet).%New("Ens.VDoc.Utils:EnumerateDocContents")
+	s sc=rs.Execute("EnsLib.EDI.ASTM.Message",,category_":"_secondary,1)
+	if $$$ISOK(sc) {
+	Set iSeg=0,depth=0,fullpath=""
+	For iRow=1:1 { quit:'rs.Next()
+	set path=rs.Data("Property"), type=rs.Data("Type")
+	if $E(path,depth+1)="." { Set depth=depth+1 }
+	else {
+	while depth&&($E(path,depth)'=".") { set depth=depth-1 }
+	}
+	set seg=$p($p(type,":",3),"(")
+	set fullpath=$S(depth:$p(fullpath,".",1,depth)_".",1:"")_$E(path,depth+1,$L(path))
+	If seg'["grp"&&(seg'["union") {
+	set iSeg=iSeg+1, segs(iSeg)=fullpath, segs(iSeg,"type")=seg
+	}
+	}
+	}
+	#; Draw segments table
+	write "<table border=1 cellpadding=2 cellspacing=0 style=""font-size: 1.0em;""><tbody align=center><tr>",!
+	Set iSeg=0  For i=1:1:$l(struct,"~")  {
+	Set tSegRef=$p(struct,"~",i)
+	if tSegRef="[" write "<td><table border=1 cellpadding=2 cellspacing=0 bordercolor=green style=""border: 2 dotted""><tr>",! continue
+	if tSegRef="]" write "</tr></table></td>",! continue
+	if tSegRef="{" write "<td><table border=1 cellpadding=2 cellspacing=0 bordercolor=red><tr>",! continue
+	if tSegRef="}" write "</tr></table></td>",! continue
+	if tSegRef="<" write "<td><table border=1 cellpadding=2 cellspacing=0 bordercolor=orange style=""border: 1 dotted""><tr>",! continue
+	if tSegRef=">" write "</tr></table></td>",! continue
+	if tSegRef="|" continue
+	set iSeg=iSeg+1, tName=$P(tSegRef,":",2)
+	If "DocsRef"=$E(tName,*-$L("DocsRef")+1,*) {
+	Set tRef=$S("Message"'=$E(tName,1,*-$L("DocsRef")):
+	"ASTMSchemaMessageType.csp?MT=MT:"_$p(tSegRef,":")_":"_$E(tName,1,*-$L("DocsRef"))
+	, 1:"ASTMSchemaList.csp?ELEMENT=MT&CATEGORY="_$S("."=$P(tSegRef,":"):$G($$$vaSchemaGbl(category,"base"),category),1:$P(tSegRef,":")))
+	write "<td><a title='Zero or more """_$E(tName,1,*-$L("DocsRef"))_""" documents appear here' href='"_..Link(tRef)_"'>"_tName_"</a></td>"
+	} Else {
+	set tPath=$S($G(segs(iSeg,"type"))=tName&&(tName'=""):segs(iSeg), 1:"")
+	set tDesc=..EscapeHTML(##class(EnsLib.EDI.ASTM.Schema).GetDescription("SS:"_tSegRef))
+	write "<td><a title='"_$S(""'=tPath:tPath, 1:tSegRef)_$S(""=tDesc:"",1:" - "_tDesc)_"' href='"_..Link("ASTMSchemaSegmentStructure.csp?SS=SS:"_tSegRef_"&PATH="_$S(""=tPath:"",1:tPath)_"&DS="_ds)_"'>"_tName_"</a></td>"
+	}
+	}
+	write "</table>"
+	write "<br>"
+	write "<table cellpadding=4 cellspacing=0>"
+	write "<tr><td><table border=1 cellpadding=0 cellspacing=0 bordercolor=green style=""border: 2 dotted"" #000000><tr><td>&nbsp;&nbsp;&nbsp;&nbsp;</td></tr></table></td>"
+	write "<td>optional</td></tr>"
+	write "<tr><td><table border=1 cellpadding=0 cellspacing=0 bordercolor=red><tr><td>&nbsp;&nbsp;&nbsp;&nbsp;</td></tr></table></td>"
+	write "<td>repeating</td></tr>"
+	if struct["|" {
+	write "<tr><td><table border=1 cellpadding=0 cellspacing=0 bordercolor=orange style=""border: 1 dotted"" #000000><tr><td>&nbsp;&nbsp;&nbsp;&nbsp;</td></tr></table></td>"
+	write "<td>choice</td></tr>"
+	}
+	write "</table>"
+	write "<br>"
+	}
+	Write !,!,"<p>",!
+	Write "<a href="""_(..Link("ASTMSchemaMain.csp"))_""">"
+	Write "(Show All Categories)"
+	Write "</a>"
+	Write "<br>",!
+	Write "<a href="""_(..Link("ASTMSchemaList.csp?ELEMENT=DS&CATEGORY="_category))_""">"
+	Write "(Show All Document Structures in category '"_(category)_"')"
+	Write "</a>"
+	Write "<br>",!
+	Write "<a href="""_(..Link("ASTMSchemaRawStructure.csp?DS="_ds))_""">"
+	Write "(Show Raw Definition text)"
+	Write "</a>"
+	Write !,"</div>"
+	Write !,"</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<title>Ensemble ASTM Message Document Structure</title>",!
+	Write "<link rel=""stylesheet"" type=""text/css"" href=""/csp/sys/csputils.css"" title=""Standard Style""/>"
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>C:\InterSystems\Ensemble\CSP\goldb\ASTM\ASTMSchemaDocumentStructure.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/goldb/ASTM/ASTMSchemaDocumentStructure.csp</Default>
+</Parameter>
+
+<Parameter name="DOMAIN">
+<Default>Ensemble</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>61286,9120</Default>
+</Parameter>
+
+<Parameter name="PAGENAME">
+<Default>ASTM Document Structure</Default>
+</Parameter>
+
+<Parameter name="PARENTPAGE">
+<Default>ASTMSchemaMain.csp</Default>
+</Parameter>
+</Class>
+</Export>

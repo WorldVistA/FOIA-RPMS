@@ -1,5 +1,5 @@
 BGP7DNG ; IHS/CMI/LAB - NATL COMP EXPORT 13 Nov 2006 12:31 PM 17 Nov 2014 10:36 AM ;
- ;;17.0;IHS CLINICAL REPORTING;;AUG 30, 2016;Build 16
+ ;;17.1;IHS CLINICAL REPORTING;;MAY 10, 2017;Build 29
  ;
  ;
  W:$D(IOF) @IOF
@@ -35,16 +35,9 @@ TP ;get time period
  S BGPPER=$P(Y,U,14),BGPQTR=3
  ;BEGIN TEST STUFF
  G NT  ;comment out when testing in TEHR
- W !!,"for testing purposes only, please enter a report year",!
- D F
- I BGPPER="" W !!,"no year entered..bye" D XIT Q
- S BGPQTR=3
- S BGPBD=$E(BGPPER,1,3)_"0101",BGPED=$E(BGPPER,1,3)_"1231"
- S BGPPBD=($E(BGPPER,1,3)-1)_"0101",BGPPED=($E(BGPPER,1,3)-1)_"1231"
- W !!,"for testing purposes only, please enter a BASELINE year",!
- D B
- I BGPBPER="" W !!,"no year entered..bye" D XIT Q
- S BGPBBD=$E(BGPBPER,1,3)_"0101",BGPBED=$E(BGPBPER,1,3)_"1231"
+ D TESTDR^BGP7UTL3
+ I $D(DIRUT) D XIT Q
+ I 'BGPBD D XIT Q
 NT ;END TEST STUFF
  W !!,"The date ranges for this report are:"
  W !?5,"Report Period: ",?31,$$FMTE^XLFDT(BGPBD)," to ",?31,$$FMTE^XLFDT(BGPED)
@@ -116,7 +109,7 @@ ZIS ;call to XBDBQUE
  I $G(BGPQUIT) D XIT Q
  I BGPRPT="" D XIT Q
  I BGPEXPT D
- .W !!,"A file will be created called BG170",$P(^AUTTLOC(DUZ(2),0),U,10)_"."_BGPRPT," and will reside",!,"in the ",BGPUF," directory.",!
+ .W !!,"A file will be created called BG171",$P(^AUTTLOC(DUZ(2),0),U,10)_"."_BGPRPT," and will reside",!,"in the ",BGPUF," directory.",!
  .W !,"Depending on your site configuration, this file may need to be manually",!,"sent to your Area Office.",!
  K IOP,%ZIS I BGPROT="D",BGPDELT="F" D NODEV,XIT Q
  K IOP,%ZIS W !! S %ZIS=$S(BGPDELT'="S":"PQM",1:"PM") D ^%ZIS

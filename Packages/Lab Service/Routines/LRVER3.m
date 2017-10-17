@@ -1,5 +1,5 @@
-LRVER3 ;DALOI/CJS/JAH - DATA VERIFICATION ; 17-Dec-2015 15:37 ; MKK
- ;;5.2;LAB SERVICE;**42,100,121,140,171,1010,153,1018,286,1027,291,1031,406,1033,1038**;NOV 1, 1997;Build 6
+LRVER3 ;DALOI/CJS/JAH - DATA VERIFICATION ; 03-Oct-2016 10:28 ; MKK
+ ;;5.2;LAB SERVICE;**42,100,121,140,171,1010,153,1018,286,1027,291,1031,406,1033,1038,1039**;NOV 1, 1997;Build 38
  ;
  ; NOTE: LR*5.2*1031 restores LR*5.2*1027 modifications
  ;
@@ -64,7 +64,16 @@ L10 ;
  I $D(LRGVP) G EXIT
  ;
  I '$O(LRORD(0)) G EXIT
- I '$G(LRCHG),'LRVF F LRSB=1:0 S LRSB=$O(LRSB(LRSB)) Q:LRSB<1  S:LRSB(LRSB)'="" ^LR(LRDFN,LRSS,LRIDT,LRSB)=LRSB(LRSB)
+ ; I '$G(LRCHG),'LRVF F LRSB=1:0 S LRSB=$O(LRSB(LRSB)) Q:LRSB<1  S:LRSB(LRSB)'="" ^LR(LRDFN,LRSS,LRIDT,LRSB)=LRSB(LRSB)
+ ;
+ ; ----- BEGIN IHS/MSC/MKK - LR*5.2*1039 - Add in LEDI IV update to put Result Date into File 63
+ I '$G(LRCHG),'LRVF D
+ . N LRNOW S LRNOW=$$NOW^XLFDT
+ . F LRSB=1:0 S LRSB=$O(LRSB(LRSB)) Q:LRSB<1  I $P(LRSB(LRSB),"^")'="" D
+ . . S $P(LRSB(LRSB),U,6)=LRNOW
+ . . S ^LR(LRDFN,LRSS,LRIDT,LRSB)=LRSB(LRSB)
+ ; ----- END IHS/MSC/MKK - LR*5.2*1039 - Add in LEDI IV update
+ ;
  I $G(LRCHG) D CHG K LRCHG,LRUP I $G(LREND) S LREND=0 G EXIT
  ;
  I $D(LRSA),$D(LRF) K LRF S X=$P(^LR(LRDFN,LRSS,LRIDT,0),U,9) S:$L(X)&($E(X)'["-") $P(^(0),U,9)="-"_X G V11
@@ -121,9 +130,16 @@ READ ;
  ;
 CHG ; Check for changes, save results and create audit trail
  S LRUP=""
+ S LRNOW=$$NOW^XLFDT    ; IHS/MSC/MKK - LR*5.2*1039 - LEDI IV
  F  S LRCHG=$O(LRSB(LRCHG)) Q:LRCHG<1  D
  . I '$D(LRSA(LRCHG)) S LRUP=1 Q
- . I $P(LRSA(LRCHG),"^")=""!($P(LRSA(LRCHG),"^")="pending") S LRSA(LRCHG,3)=1,LRUP=1 Q
+ . ; I $P(LRSA(LRCHG),"^")=""!($P(LRSA(LRCHG),"^")="pending") S LRSA(LRCHG,3)=1,LRUP=1 Q
+ . ; ----- BEGIN IHS/MSC/MKK - LR*5.2*1039 - LEDI IV - Update release time
+ . I $P(LRSA(LRCHG),"^")=""!($P(LRSA(LRCHG),"^")="pending") D  Q
+ . . S LRSA(LRCHG,3)=1
+ . . S LRUP=1
+ . . S $P(LRSB(LRCHG),U,6)=LRNOW
+ . ; ----- END IHS/MSC/MKK - LR*5.2*1039
  . I $P(LRSA(LRCHG),"^")'=$P(LRSB(LRCHG),"^") S LRUP=1,$P(LRSA(LRCHG,2),"^")=1 ; results changed
  . I $P(LRSA(LRCHG),"^",2)'=$P(LRSB(LRCHG),"^",2) S LRUP=1,$P(LRSA(LRCHG,2),"^",2)=1 ; normalcy flag changed
  . I $P(LRSA(LRCHG),"^",5)'=$P(LRSB(LRCHG),"^",5) D  ; units/normals changed
@@ -131,6 +147,7 @@ CHG ; Check for changes, save results and create audit trail
  . . S LRX=$$UP^XLFSTR($P(LRSA(LRCHG),"^",5)),LRX=$TR(LRX,"""")
  . . S LRY=$$UP^XLFSTR($P(LRSB(LRCHG),"^",5)),LRY=$TR(LRY,"""")
  . . I LRX'=LRY S LRUP=1,$P(LRSA(LRCHG,2),"^",5)=1
+ . I $D(LRSA(LRCHG,2)) S $P(LRSB(LRCHG),U,6)=LRNOW  ; IHS/MSC/MKK - LR*5.2*1039 - LEDI IV - Update user/release time
  I 'LRUP S LREND=1 Q
  S LREND=0
  W !! W:IOST["C-" @LRVIDO W "Approve update of data by entering your initials: " W:IOST["C-" @LRVIDOF
@@ -220,6 +237,7 @@ GETINITS(PROMPT) ; EP - Get Initials.  Mask User input.
  ;
  W:$L($G(PROMPT)) !,PROMPT
  S ANSWER=""
- F STEP=1:1:4  R TEXT#1  S:TEXT="^" ANSWER="^"  Q:TEXT="^"!(TEXT="")  S ANSWER=ANSWER_TEXT  W $C(8),"*"
+ ; F STEP=1:1:4  R TEXT#1  S:TEXT="^" ANSWER="^"  Q:TEXT="^"!(TEXT="")  S ANSWER=ANSWER_TEXT  W $C(8),"*"
+ F STEP=1:1:6  R TEXT#1  S:TEXT="^" ANSWER="^"  Q:TEXT="^"!(TEXT="")  S ANSWER=ANSWER_TEXT  W $C(8),"*"  ; IHS/MSC/MKK - LR*5.2*1039 - Initials can be 5 characters long
  Q ANSWER
  ; ----- END IHS/MSC/MKK - LR*5.2*1038

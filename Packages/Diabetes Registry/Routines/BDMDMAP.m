@@ -1,5 +1,5 @@
 BDMDMAP ; IHS/CMI/LAB - print hs for dm patients with appts ;
- ;;2.0;DIABETES MANAGEMENT SYSTEM;**2,8**;JUN 14, 2007;Build 53
+ ;;2.0;DIABETES MANAGEMENT SYSTEM;**2,8,10**;JUN 14, 2007;Build 12
  ;
  ;
  ;this routine will go through the Diabetes Register
@@ -103,7 +103,7 @@ GUIEP ;EP
  D GUIR^XBLM("PRINT^BDMDMAP","^TMP($J,""BDMDMAP"",")
  S X=0,C=0 F  S X=$O(^TMP($J,"BDMDMAP",X)) Q:X'=+X  D
  .S BDMDATA=^TMP($J,"BDMDMAP",X)
- .I BDMDATA="ZZZZZZZ" S BDMDATA=$C(12)
+ .;I BDMDATA="ZZZZZZZ" ;S BDMDATA=$C(12)
  .S ^BDMGUI(BDMIEN,11,X,0)=BDMDATA,C=C+1
  S ^BDMGUI(BDMIEN,11,0)="^^"_C_"^"_C_"^"_DT_"^"
  S DA=BDMIEN,DIK="^BDMGUI(" D IX1^DIK

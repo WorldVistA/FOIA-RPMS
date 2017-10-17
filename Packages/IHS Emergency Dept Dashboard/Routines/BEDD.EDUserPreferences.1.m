@@ -1,5 +1,5 @@
  ;BEDD.EDUserPreferences.1
- ;(C)InterSystems, generated for class BEDD.EDUserPreferences.  Do NOT edit. 04/14/2017 08:47:49AM
+ ;(C)InterSystems, generated for class BEDD.EDUserPreferences.  Do NOT edit. 06/12/2017 07:15:26PM
  ;;7A7A3863;BEDD.EDUserPreferences
  ;
 SQLUPPER(v,l) { quit $zu(28,v,7,$g(l,32767)) }

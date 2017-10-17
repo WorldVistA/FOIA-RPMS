@@ -1,5 +1,5 @@
  ;BEDDAPPL.EDSystemModel.1
- ;(C)InterSystems, generated for class BEDDAPPL.EDSystemModel.  Do NOT edit. 04/14/2017 08:47:49AM
+ ;(C)InterSystems, generated for class BEDDAPPL.EDSystemModel.  Do NOT edit. 06/12/2017 07:15:26PM
  ;;75776A6B;BEDDAPPL.EDSystemModel
  ;
 %CopyDataFromModel(pData,pTypes,pSeries="") public {

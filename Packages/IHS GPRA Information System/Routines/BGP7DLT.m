@@ -1,5 +1,5 @@
 BGP7DLT ; IHS/CMI/LAB - national patient list 20 Dec 2004 9:24 AM ;
- ;;17.0;IHS CLINICAL REPORTING;;AUG 30, 2016;Build 16
+ ;;17.1;IHS CLINICAL REPORTING;;MAY 10, 2017;Build 29
  ;
  ;
  ;

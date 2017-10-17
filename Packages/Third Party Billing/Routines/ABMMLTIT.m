@@ -1,9 +1,9 @@
 ABMMLTIT ; IHS/SD/SDR - Input transform-anes. mod field - 8/19/2005 1:28:34 PM
- ;;2.6;IHS 3P BILLING SYSTEM;**3,14**;NOV 12, 2009;Build 238
+ ;;2.6;IHS 3P BILLING SYSTEM;**3,14,21**;NOV 12, 2009;Build 379
  ;
  ; Input transform routine for multiples
  ;IHS/SD/SDR - 2.6*14 - Added input transform for ICD DX check; used on fields 17,.01 and .59
- ;
+ ;IHS/SD/SDR - 2.6*21 - HEAT199768 - Added code for Radiology; used in 3P Fee Table
  ;
 LAB() ; EP
  S ABMF=0
@@ -18,3 +18,10 @@ ICDDX(X) ;EP
  S ABMF=$TR(+$P($G(^ICD9(X,0)),U,9),"1","0")
  Q ABMF
  ;end new abm*2.6*14
+ ;
+ ;start new abm*2.6*21 IHS/SD/SDR HEAT199768
+RAD() ; EP
+ S ABMF=0
+ I (($P(^ICPT(X,0),"^",1)>69999)&($P(^(0),"^",1)<80000)&($$CHKCPT^ABMDUTL(X)'=0))!($A($E($P($G(^ICPT(X,0)),"^",1),1),1)>65)&($A($E($P(^(0),"^",1),1),1)<90) S ABMF=1
+ Q ABMF
+ ;end new abm*2.6*21 IHS/SD/SDR HEAT199768

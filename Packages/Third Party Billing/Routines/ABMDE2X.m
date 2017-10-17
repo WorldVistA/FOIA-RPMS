@@ -1,18 +1,22 @@
 ABMDE2X ; IHS/ASDST/DMJ - PAGE 2 - INSURER data chk ;  
- ;;2.6;IHS 3P BILLING SYSTEM;**3,6,8,9,10,11**;NOV 12, 2009;Build 133
+ ;;2.6;IHS 3P BILLING SYSTEM;**3,6,8,9,10,11,21**;NOV 12, 2009;Build 379
  ;
  ; IHS/SD/SDR - V2.5 P3 - 1/24/03 - NOIS NEA-0301-180044
  ;     Modified routine to display patient info when workers comp
  ;
- ; IHS/SD/SDR - v2.5 p8 - IM15307/IM14092 - Modified to check for new MSP errors 194-197
- ; IHS/SD/SDR - v2.5 p8 - IM15111 - Check format of Medicare name
- ; IHS/SD/SDR - v2.5 p10 - IM20000 - Added code to use CARD NAME for Policy Holder
- ; IHS/SD/SDR - v2.5 p10 - IM20593 - Added new warning for NO MSP FOR MEDICARE PATIENT
- ; IHS/SD/SDR - v2.5 p10 - IM20311 - Added new error for missing DOB when Medicare active (219)
- ; IHS/SD/SDR - v2.5 p12 - UFMS - Added new warning/errors 225 and 226 for pseudo/missing TIN
- ; IHS/SD/SDR - v2.5 p13 - NO IM
- ; IHS/SD/SDR - abm*2.6*3 - HEAT7574 - added tribal self-insured warning
- ; IHS/SD/SDR - abm*2.6*6 - 5010 - added error 236
+ ;IHS/SD/SDR - v2.5 p8 - IM15307/IM14092 - Modified to check for new MSP errors 194-197
+ ;IHS/SD/SDR - v2.5 p8 - IM15111 - Check format of Medicare name
+ ;IHS/SD/SDR - v2.5 p10 - IM20000 - Added code to use CARD NAME for Policy Holder
+ ;IHS/SD/SDR - v2.5 p10 - IM20593 - Added new warning for NO MSP FOR MEDICARE PATIENT
+ ;IHS/SD/SDR - v2.5 p10 - IM20311 - Added new error for missing DOB when Medicare active (219)
+ ;IHS/SD/SDR - v2.5 p12 - UFMS - Added new warning/errors 225 and 226 for pseudo/missing TIN
+ ;IHS/SD/SDR - v2.5 p13 - NO IM
+ ;
+ ;IHS/SD/SDR - 2.6*3 - HEAT7574 - added tribal self-insured warning
+ ;IHS/SD/SDR - 2.6*6 - 5010 - added error 236
+ ;IHS/SD/SDR - 2.6*21 - HEAT145126 - Made correction to error 218 so it would display correctly.
+ ;IHS/SD/SDR - 2.6*21 - VMBP RQMT_91 - Added error 253 if Mcr/Mcd and V insurer type exists on claim also
+ ;IHS/SD/SDR - 2.6*21 - VMBP RQMT_109 - Added code to get data from the VAMB Eligible file
  ;
  ; *********************************************************************
 ERR ;
@@ -87,12 +91,14 @@ SEL ;EP - Entry Point for Checking Select Insurer for Errors
  .;end new code HEAT86262
  .S ABM("PRI")=""
  .F  S ABM("PRI")=$O(ABML(ABM("PRI"))) Q:'ABM("PRI")  I $D(ABML(ABM("PRI"),ABMX("INS"))) D  Q
- ..Q:"PMRDAW"'[$P(ABML(ABM("PRI"),ABMX("INS")),U,3)
+ ..;Q:"PMRDAW"'[$P(ABML(ABM("PRI"),ABMX("INS")),U,3)  ;abm*2.6*21 IHS/SD/SDR VMBP RQMT_109
+ ..Q:"PMRDAWV"'[$P(ABML(ABM("PRI"),ABMX("INS")),U,3)  ;abm*2.6*21 IHS/SD/SDR VMBP RQMT_109
  ..Q:$P(ABML(ABM("PRI"),ABMX("INS")),U,3)=""
  ..I $P(ABML(ABM("PRI"),ABMX("INS")),U,3)?1(1"P",1"A",1"W") S DR=".08////"_$P(ABML(ABM("PRI"),ABMX("INS")),U,2)
  ..I $P(ABML(ABM("PRI"),ABMX("INS")),U,3)="M" S DR=".04////"_$P(ABML(ABM("PRI"),ABMX("INS")),U,2)
  ..I $P(ABML(ABM("PRI"),ABMX("INS")),U,3)="R" S DR=".05////"_$P(ABML(ABM("PRI"),ABMX("INS")),U,2)
  ..I $P(ABML(ABM("PRI"),ABMX("INS")),U,3)="D" S DR=".06////"_$P(ABML(ABM("PRI"),ABMX("INS")),U,1)_";.07////"_$P(ABML(ABM("PRI"),ABMX("INS")),U,2)
+ ..I $P(ABML(ABM("PRI"),ABMX("INS")),U,3)="V" S DR=".013////"_$P(ABML(ABM("PRI"),ABMX("INS")),U,2)  ;abm*2.6*21 IHS/SD/SDR VMBP RQMT_109
  ..S DA(1)=$S(ABMP("GL")["CLM":ABMP("CDFN"),1:ABMP("BDFN"))
  ..I $D(DR) D
  ...S DIE=ABMP("GL")_"13,"
@@ -106,7 +112,9 @@ SEL ;EP - Entry Point for Checking Select Insurer for Errors
  ;I $P($G(^AUTNINS(ABMX("INS"),2)),U)="P",('$D(^AUPNPRVT(ABMP("PDFN"),11,"B",ABMX("INS")))) D ^ABMDE2X3 G XIT  ;abm*2.6*6 HEAT30524
  ;I $P($G(^AUTNINS(ABMX("INS"),2)),U)="P",('$D(^AUPNPRVT(ABMP("PDFN"),11,"B",ABMX("INS")))) D ^ABMDE2X3  ;abm*2.6*6 HEAT30524  ;abm*2.6*10 HEAT73780
  I $$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,ABMX("INS"),".211","I"),1,"I")="P",('$D(^AUPNPRVT(ABMP("PDFN"),11,"B",ABMX("INS")))) D ^ABMDE2X3  ;abm*2.6*6 HEAT30524  ;abm*2.6*10 HEAT73780
- S ABMX("DIC")=$S($P(ABMX("I0"),U,6)]"":"^AUPNMCD(",$P(ABMX("I0"),U,8)]"":"^AUPNPRVT(",$P(ABMX("I0"),U,4)]"":"^AUPNMCR(",1:"^AUPNRRE("),ABMX("SUB")=$S($P(ABMX("I0"),U,7)]"":$P(ABMX("I0"),U,7),1:"")
+ ;S ABMX("DIC")=$S($P(ABMX("I0"),U,6)]"":"^AUPNMCD(",$P(ABMX("I0"),U,8)]"":"^AUPNPRVT(",$P(ABMX("I0"),U,4)]"":"^AUPNMCR(",1:"^AUPNRRE("),ABMX("SUB")=$S($P(ABMX("I0"),U,7)]"":$P(ABMX("I0"),U,7),1:"")  ;abm*2.6*21 IHS/SD/SDR VMBP RQMT_109
+ S ABMX("DIC")=$S($P(ABMX("I0"),U,6)]"":"^AUPNMCD(",$P(ABMX("I0"),U,8)]"":"^AUPNPRVT(",$P(ABMX("I0"),U,4)]"":"^AUPNMCR(",$P(ABMX("I0"),U,13)]"":"^AUPNVAMB(",1:"^AUPNRRE(")  ;abm*2.6*21 IHS/SD/SDR VMBP RQMT_109
+ S ABMX("SUB")=$S($P(ABMX("I0"),U,7)]"":$P(ABMX("I0"),U,7),1:"")
  S ABMX(2)=$S(ABMX("DIC")="^AUPNMCD(":$P(ABMX("I0"),U,6),1:ABMP("PDFN"))
  I ABMX("DIC")="^AUPNPRVT(" S ABMX(1)=$P(ABMX("I0"),"^",8) G XIT:'ABMX(1)
  I ABMX("DIC")="^AUPNMCD(" S ABMX(1)=$P(ABMX("I0"),U,7)
@@ -148,7 +156,8 @@ SEL ;EP - Entry Point for Checking Select Insurer for Errors
  .I $G(ABMMSPRS)="",ABMP("BTYP")=111 S ABMG(194)=""
  .;
  .;I ABMP("BTYP")'=111,($G(ABMMSP)="") S ABMG(218)=""  ;abm*2.6*11 HEAT104470
- .I ABMP("BTYP")'=111,($G(ABMMSP)="") S ABME(218)=""  ;abm*2.6*11 HEAT104470
+ .;I ABMP("BTYP")'=111,($G(ABMMSP)="") S ABME(218)=""  ;abm*2.6*11 HEAT104470  ;abm*2.6*21 IHS/SD/SDR HEAT145126
+ .I ABMP("BTYP")'=111,($G(ABMMSPRS)="") S ABME(218)=""  ;abm*2.6*11 HEAT104470  ;abm*2.6*21 IHS/SD/SDR HEAT145126
  .;
  .;not inpatient and >90 days since form signed
  .I ABMP("BTYP")'=111,($G(ABMMSP)'="") D
@@ -187,6 +196,13 @@ SEL ;EP - Entry Point for Checking Select Insurer for Errors
  I ABMITYP="R",($P($G(ABMV("X1")),U,6)="") S ABME(219)=""  ;abm*2.6*10 HEAT73780
  I $P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),0)),U,11)="Y" S ABME(234)=""  ;abm*2.6*3 HEAT7574
  I $P(ABMV("X1"),U,4)="" S ABME(236)=""  ;abm*2.6*6 5010
+ ;start new abm*2.6*21 IHS/SD/SDR VMBP RQMT_91
+ I "^D^R^"[("^"_$$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,+$G(ABMP("INS")),".211","I"),1,"I")_"^") D
+ .S ABM("DR")=0
+ .F  S ABM("DR")=$O(@(ABMP("GL")_"13,"_ABM("DR")_")")) Q:'ABM("DR")  D
+ ..S ABM("DRI")=+$P(@(ABMP("GL")_"13,"_ABM("DR")_",0)"),U)
+ ..I $$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,+ABM("DRI"),".211","I"),1,"I")="V" S ABME(253)=""
+ ;end new abm*2.6*21 IHS/SD/SDR VMBP RQMT_91
  ;
 XIT ;
  K ABMX,ABMP("ERR")

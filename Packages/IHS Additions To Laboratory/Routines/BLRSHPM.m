@@ -1,7 +1,5 @@
-BLRSHPM ;cmi/anch/maw - BLR Reference Lab Shipping Manifest Others ; 17-Dec-2014 10:23 ; MAW
- ;;5.2;IHS LABORATORY;**1027,1031,1033,1034,1036**;NOV 01, 1997;Build 10
- ;
- ;
+BLRSHPM ;cmi/anch/maw - BLR Reference Lab Shipping Manifest Others ; 22-Apr-2016 15:14 ; MAW
+ ;;5.2;IHS LABORATORY;**1027,1031,1033,1034,1036,1039,1040**;NOV 01, 1997;Build 5
  ;
  ;10/17/2005 cmi/anch/maw added reprint of shipping manifest
  ;3/28/2006 cmi/anch/maw added device close before print and before storing
@@ -16,21 +14,27 @@ BLRSHPM ;cmi/anch/maw - BLR Reference Lab Shipping Manifest Others ; 17-Dec-2014
  ;10/1/2008 cmi/anch/maw masked all but 4 digits on SSN at labcorp request
  ;09/19/2013 msc/mkk - missing variables reset subroutine P1031FIX.
  ;
- ;
-PRT(RE) ;EP - print shipping manifest
+PRT(RE,CP) ;EP - print shipping manifest
  ;ihs/cmi/maw PATCH 1033 10/24/2013 added since LRUID is not there sometimes after patch 1031
  I $G(LRUID),'$G(RE) G:$D(^BLRSHPM("B",LRUID)) EOJ      ; Quit if Accession exists in ^BLRSHPM because it's already been printed
  ;
  I $G(LRUID) D P1031FIX   ; IHS/MSC/MKK - LR*5.2*1033/1034
- ;
- ; I $P($G(^BLRRL($P($G(^BLRSITE($S($G(BLRALTDZ):BLRALTDZ,1:DUZ(2)),"RL")),U),0)),U)["QUEST" D  Q  ;go to the Quest Manifest
- ; . D ^BLRSHPMQ
  I $P($G(^BLRRL($P($G(^BLRSITE($S($G(BLRALTDZ):BLRALTDZ,1:DUZ(2)),"RL")),U),0)),U)["LABCORP" D  Q  ;go to the Quest Manifest
- . D ^BLRSHPML
+ . D PRT^BLRSHPML(CP)
  Q:'$D(^TMP("BLRRL",$J))  ;don't print shipping manifest if no data
  W:'+$G(BLRAGUI) !!,"Now printing shipping manifest for this accession"
  D ^%ZISC  ;maw 3/28/2006
+ I '$G(CP) S CP=1
  U $$DEV
+ F I=1:1:CP D
+ . D NEWPRT
+ . I $G(CP)>1 W @IOF
+ D ^%ZISC  ;maw 3/28/2006
+ I I=1 D STOR(.BLRSHIEN,^TMP("BLRRL",$J,"COMMON","UID"))  ;store the shipping manifest as well as print
+ D EOJ
+ Q
+ ;
+NEWPRT  ;-- now want copies
  S BLRFAC=$$GET1^DIQ(9999999.06,$S($G(BLRALTDZ):BLRALTDZ,1:DUZ(2)),.01)
  S BLRSTR=$$GET1^DIQ(9999999.06,$S($G(BLRALTDZ):BLRALTDZ,1:DUZ(2)),.14)
  S BLRCTY=$$GET1^DIQ(9999999.06,$S($G(BLRALTDZ):BLRALTDZ,1:DUZ(2)),.15)
@@ -43,22 +47,16 @@ PRT(RE) ;EP - print shipping manifest
  S BLRPGC=$$GETPG
  S BLRNPG=1
  D ALL
- D ^%ZISC  ;maw 3/28/2006
- D STOR(.BLRSHIEN,^TMP("BLRRL",$J,"COMMON","UID"))  ;store the shipping manifest as well as print
- D EOJ
  Q
  ;
 ALL ;-- run all sub routines after initial vars
  D XHDR
  D PHDR
  D WRTS
- ;D DX
- ;D INS
  Q
  ;
 STOR(BLRSHIEN,ACC) ;-- this will store the shipping manifest
  Q:$D(^BLRSHPM("B",ACC))  ; Skip if already stored
- ;accession number gets passed in
  N BLRFDA,BLRIENS,BLRERR
  S BLRIENS=""
  S BLRFDA(9009026.2,"+1,",.01)=ACC
@@ -76,6 +74,8 @@ STOR(BLRSHIEN,ACC) ;-- this will store the shipping manifest
  S DA=BLRSHIEN,DIK="^BLRSHPM(" D IX1^DIK
  Q
  ;
+SPHDR ;-- sub patient header
+ Q:'$P($G(^BLRSITE(DUZ(2),"RLA")),U,17)
 PHDR ;-- write the common stuff to the device
  W !!,"ORDER (Control): "_^TMP("BLRRL",$J,"COMMON","ORD")
  W ?30,"ORDER DATE: "_$$FMTE^XLFDT(^TMP("BLRRL",$J,"COMMON","ODT"))
@@ -133,11 +133,12 @@ P1031FIX ; EP - Forcefully reset AGE, DOB, ORDNUM, and SEX variables
  ;
 WRTS ;-- write the output to the device
  N BLRDA,BLRIEN
- ;cmi/anch/maw 7/23/2007 here is where you could sort by order if BLRDA was the order num
  S BLRDA=0 F  S BLRDA=$O(^TMP("BLRRL",$J,BLRDA)) Q:BLRDA=""  D
  . Q:BLRDA="COMMON"
  . S BLRSAMP=$P($G(^LAB(62,^TMP("BLRRL",$J,BLRDA,"SAMP"),0)),U)
- . I $Y+($$CHKOEQ(BLRDA))>IOSL D XHDR,PHDR Q:$G(DIRUT)
+ . ;I $Y+($$CHKOEQ(BLRDA))>IOSL D XHDR Q:$D(DIRUT)  ; p1039 ,PHDR Q:$G(DIRUT)
+ . I $Y+($$CHKOEQ(BLRDA))>IOSL D XHDR,SPHDR Q:$D(DIRUT)  ; p1039 ,PHDR Q:$G(DIRUT) p1040 added SPHDR
+ . I $Y+2>IOSL D XHDR,SPHDR Q:$D(DIRUT)  ;p1039 ,PHDR Q:$G(DIRUT)
  . W !!!,"TEST NAME: "_$P(^TMP("BLRRL",$J,BLRDA,"TCNM"),U,2)_" ("_$P(^TMP("BLRRL",$J,BLRDA,"TCNM"),U)_")"
  . W ?45,"SAMPLE: "_BLRSAMP
  . W !,"SOURCE: "_^TMP("BLRRL",$J,BLRDA,"SRC")
@@ -149,7 +150,6 @@ WRTS ;-- write the output to the device
  .. N BLRODA
  .. S BLRODA=0 F  S BLRODA=$O(^TMP("BLRRL",$J,BLRDA,"COMMENT",BLRODA)) Q:'BLRODA  D
  ... S ORDC=$G(^TMP("BLRRL",$J,BLRDA,"COMMENT",BLRODA))
- ... ;W !,?5,$P(ORDC,U,2),?50,$P(ORDC,U,3)  ;cmi/maw 12/12/2007 orig line
  ... W !,?5,$P(ORDC,U,2),!,?5,$P(ORDC,U,3)  ;cmi/maw 12/12/2007 split line here
  . I $O(LRTCOM(BLRDA,0)) D
  .. W !!,"COMMENTS: "
@@ -166,12 +166,7 @@ DX(BDA) ;-- if insurance info print DX
  Q:'$G(BDA)
  Q:'$D(^TMP("BLRRL",$J,"COMMON","DX"))
  W !,"DIAGNOSIS"
- ;W !,"Diagnosis: "_$G(^TMP("BLRRL",$J,BDA,"DX")),?25,"DX Description: "_$G(^TMP("BLRRL",$J,BDA,"DXE"))
  W !,"Diagnosis: ",?25,"DX Description: "
- ;N DXDA
- ;S DXDA=0 F  S DXDA=$O(^TMP("BLRRL",$J,BDA,"DX",DXDA)) Q:'DXDA  D
- ;. W !,$G(^TMP("BLRRL",$J,BDA,"DX",DXDA)),?25,$G(^TMP("BLRRL",$J,BDA,"DXE",DXDA))
- ;ihs/cmi/maw 12/10/2014 patch 1034 for new dx storage
  N DXDA,ORD,ORDI,DXDATA,DXSTR,UID
  S UID=^TMP("BLRRL",$J,BLRDA,"UID")
  I '$G(UID) S UID=LRUID
@@ -221,19 +216,36 @@ CHKOEQ(CDA) ;-- check the number of order entry questions to determine lines lef
  ;
 GETPG() ;-- lets try and get a page count
  S BLRHDC=8
- S BLRPDC=6
- S BLRWTC=9
- N BLRNDA,BLRNCNT,BLRNIEN
- S BLRNDA=0,BLRNCNT=0
+ S BLRPDC=7
+ S BLRWTC=8
+ N BLRNDA,BLRNCNT,BLRNIEN,BLRCMCNT,BLRNACC,BLRDXCNT
+ S BLRNDA=0,BLRNCNT=0,BLRCMCNT=0,BLRNACC=0,BLRDXCNT=0
  F  S BLRNDA=$O(^TMP("BLRRL",$J,BLRNDA)) Q:'BLRNDA  D
+ . S BLRNACC=BLRNACC+1
+ . S BLRDXCNT=BLRDXCNT+$$GETDXCNT(BLRNDA)
  . S BLRNIEN=0 F  S BLRNIEN=$O(^TMP("BLRRL",$J,BLRNDA,"COMMENT",BLRNIEN)) Q:'BLRNIEN  D
- .. S BLRNCNT=BLRNCNT+1
- S BLRNCNT=(BLRHDC+BLRPDC+BLRWTC+BLRNCNT)
+ .. S BLRCMCNT=BLRCMCNT+1
+ S BLRNACC=(BLRWTC*BLRNACC)
+ S BLRNCNT=(BLRHDC+BLRPDC+BLRNACC+(+$G(BLRCMCNT)))
+ N BLRINSCN,BLRSECC
+ I $D(^TMP("BLRRL",$J,"COMMON","INSE")) D
+ . S BLRINSCN=11
+ S BLRNCNT=BLRNCNT+(+$G(BLRDXCNT)+(+$G(BLRINSCN)))
  S BLRPG=(BLRNCNT/(IOSL-2))
  S BLRPGP=$P(BLRPG,".")
  S BLRPGE=$P(BLRPG,".",2)
  I BLRPGE>0 S BLRPGP=BLRPGP+1
  Q BLRPGP
+ ;
+GETDXCNT(BDA) ;-- get number of dx to display
+ N DXCNT,ORD,ORDI,DXDATA,DXSTR,UID
+ S DXCNT=0
+ S UID=^TMP("BLRRL",$J,BDA,"UID")
+ I '$G(UID) S UID=LRUID
+ S ORD=$O(^BLRRLO("ACC",UID,0))
+ S ORDI=0 F  S ORDI=$O(^BLRRLO(ORD,1,ORDI)) Q:'ORDI  D
+ . S DXCNT=DXCNT+1
+ Q DXCNT
  ;
 WRT(SDA) ;-- write the output to the device
  S BLRSAMP=$P($G(^LAB(62,RL(SDA,"SAMP"),0)),U)
@@ -260,7 +272,7 @@ WRT(SDA) ;-- write the output to the device
 HDR ;-- this is the header
  K DIR I $E(IOST,1)="C" S DIR(0)="E" D ^DIR I Y<1 S DIRUT=1 Q
 XHDR W @IOF
- W !,?28,"INDIAN HEALTH SERVICE EREQ",?65,"PAGE: "_BLRNPG_" of "_BLRPGC
+ W !,?28,"INDIAN HEALTH SERVICE EREQ",?65,"PAGE: "_BLRNPG  ;_" of "_BLRPGC 1040
  W !!,"REF LAB NAME: "_$S($P($G(^BLRSITE(DUZ(2),"RL")),U,20)]"":$P(^BLRSITE(DUZ(2),"RL"),U,20),1:$P($G(^BLRRL(^TMP("BLRRL",$J,"COMMON","RL"),0)),U))  ;cmi/maw 2/28/2008 added for custon header on ship manifest.
  W ?40,"CLIENT #: "_^TMP("BLRRL",$J,"COMMON","CLIENT")
  W !
@@ -282,7 +294,7 @@ EOJ ;-- kill vars and quit
  D ^%ZISC
  K ^TMP("BLRRL",$J)
  K ^TMP($J,"BLRSHPM")  ;cmi/anch/maw 4/4/2006
- K BLRODA,DIRUT,ORDC,BLRSDA,MIEN,MSG,BLRRLCNT,BLRRLASK,BLRRLCLT,BLRRLCLA,BLRRLBTP,BLRDX
+ K BLRODA,DIRUT,ORDC,BLRSDA,MIEN,MSG,BLRRLCNT,BLRRLASK,BLRRLCLT,BLRRLCLA,BLRRLBTP,BLRDX,BLRDXCNT
  Q
  ;
 DEV() ;-- device handler
@@ -321,6 +333,7 @@ REP ;EP - lets reprint the shipping manifest
  Q
  ;
 ASKS ;-- get the ien of the entry
+ K DIR
  S DIR(0)="P^9009026.2",DIR("A")="Reprint for which Accession Number (UID) "
  D ^DIR
  Q:$D(DIRUT)

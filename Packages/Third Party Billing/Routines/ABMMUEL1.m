@@ -1,8 +1,10 @@
 ABMMUEL1 ;IHS/SD/SDR - Meaningful Use Report - count patients/eligibility ;
- ;;2.6;IHS 3P BILLING SYSTEM;**12,15**;NOV 12, 2009;Build 251
+ ;;2.6;IHS 3P BILLING SYSTEM;**12,15,21**;NOV 12, 2009;Build 379
  ;IHS/SD/SDR - 2.6*15 - HEAT188495 - Fixed policy holder so it will print all the time; defaulted to policy number from policy holder file the
  ;  same way Reg does
  ;IHS/SD/SDR - 2.6*15 - HEAT188548 - Formatted visit/admit date/time for VISIT section
+ ;IHS/SD/SDR - 2.6*21 - HEAT204790 - Added code to stop error <SUBSCR>WRTELIG+55^ABMMUEL1.  Occurs when Private Insurance Eligible entry doesn't
+ ;   have a coinsiding Policy Holder entry.
  ;
 WRTPTS ;^TMP($J,"ABM-MURPT","PTS",ABMP("PDFN"))
  W !!!,"PATIENTS PATIENTS PATIENTS PATIENTS PATIENTS"
@@ -74,7 +76,8 @@ WRTELIG ;
  ..W !?3,ABMP("PDFN"),?15,$P($G(^DPT(ABMP("PDFN"),0)),U)
  ..W ?50  ;abm*2.6*15 HEAT188495
  ..I $P($G(^AUPNPRVT(ABMP("PDFN"),11,ABMP("MDFN"),2)),U)'="" W $P($G(^AUPNPRVT(ABMP("PDFN"),11,ABMP("MDFN"),2)),U) ;abm*2.6*15 HEAT188495
- ..I $P($G(^AUPNPRVT(ABMP("PDFN"),11,ABMP("MDFN"),2)),U)=""&(+$P($G(^AUPNPRVT(ABMP("PDFN"),11,ABMP("MDFN"),0)),U,8)'=0) W $P($G(^AUPN3PPH($P($G(^AUPNPRVT(ABMP("PDFN"),11,ABMP("MDFN"),0)),U,8),0)),U,4)  ;abm*2.6*15 HEAT188495
+ ..;I $P($G(^AUPNPRVT(ABMP("PDFN"),11,ABMP("MDFN"),2)),U)="" W $P($G(^AUPN3PPH($P($G(^AUPNPRVT(ABMP("PDFN"),11,ABMP("MDFN"),0)),U,8),0)),U,4)  ;abm*2.6*15 HEAT188495  ;abm*2.6*21 IHS/SD/SDR HEAT204790
+ ..I $P($G(^AUPNPRVT(ABMP("PDFN"),11,ABMP("MDFN"),2)),U)=""&($P($G(^AUPNPRVT(ABMP("PDFN"),11,ABMP("MDFN"),0)),U,8)'="") W $P($G(^AUPN3PPH($P($G(^AUPNPRVT(ABMP("PDFN"),11,ABMP("MDFN"),0)),U,8),0)),U,4)  ;abm*2.6*21 IHS/SD/SDR HEAT204790
  ..W ?71,$P($G(^AUTNINS($P($G(^AUPNPRVT(ABMP("PDFN"),11,ABMP("MDFN"),0)),U),0)),U)_" ("_$P($G(^AUPNPRVT(ABMP("PDFN"),11,ABMP("MDFN"),0)),U)_")"  ;abm*2.6*15 HEAT188495 and HEAT188548
  ;
  ;^TMP($J,"ABM-MURPT","NO",ABMP("PDFN"))

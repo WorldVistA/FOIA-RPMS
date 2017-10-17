@@ -1,5 +1,5 @@
 BQIPLVWP ;PRXM/HC/ALA-Get Patient Data by View ; 17 Oct 2005  4:49 PM
- ;;2.3;ICARE MANAGEMENT SYSTEM;;Apr 18, 2012;Build 59
+ ;;2.6;ICARE MANAGEMENT SYSTEM;;Jul 07, 2017;Build 72
  ;
  Q
  ;
@@ -38,9 +38,9 @@ EN(DATA,OWNR,PLIEN,DFN) ;EP - Starting point
  . S TEMPL=$$GET1^DIQ(90505.14,IENS,.01,"E")
  ;
  ; If template, use it
- I TEMPL'="" S QFL=0 D  G FIN:'QFL
+ I TEMPL'="" S TQFL=0 D  G FIN:'TQFL
  . S LYIEN=$$TPN^BQILYUTL(DUZ,TEMPL)
- . I LYIEN="" S QFL=1 Q
+ . I LYIEN="" S TQFL=1 Q
  . S DOR=""
  . F  S DOR=$O(^BQICARE(DUZ,15,LYIEN,1,"C",DOR)) Q:DOR=""  D
  .. S VWIEN=""
@@ -55,6 +55,7 @@ EN(DATA,OWNR,PLIEN,DFN) ;EP - Starting point
  ... D GVAL
  ... S VALUE=VALUE_VAL_"^"
  ... S HEADR=HEADR_HDR_"^"
+ ... K VAL,HDR
  ;
  ; If no template, check for customized
  ;
@@ -75,6 +76,7 @@ EN(DATA,OWNR,PLIEN,DFN) ;EP - Starting point
  ... D GVAL
  ... S VALUE=VALUE_VAL_"^"
  ... S HEADR=HEADR_HDR_"^"
+ ... K VAL,HDR
  . ;
  . ; If no customized found, use default
  . I CIEN="" D STAND()
@@ -97,6 +99,7 @@ EN(DATA,OWNR,PLIEN,DFN) ;EP - Starting point
  ... D GVAL
  ... S VALUE=VALUE_VAL_"^"
  ... S HEADR=HEADR_HDR_"^"
+ ... K VAL,HDR
  . ;
  . ; If no customized found, use default
  . I CIEN="" D STAND()
@@ -131,6 +134,7 @@ STAND() ;EP - Get standard display
  ... D GVAL
  ... S VALUE=VALUE_VAL_"^"
  ... S HEADR=HEADR_HDR_"^"
+ ... K VAL,HDR
  ;
  Q
  ;

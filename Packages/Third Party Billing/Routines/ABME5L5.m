@@ -1,6 +1,7 @@
 ABME5L5 ; IHS/ASDST/DMJ - Header 
- ;;2.6;IHS Third Party Billing;**6,8,9**;NOV 12, 2009
+ ;;2.6;IHS Third Party Billing;**6,8,9,14,21**;NOV 12, 2009;Build 379
  ;Header Segments
+ ;IHS/SD/SDR - 2.6*21 - HEAT135923 - Print DTP*435 if date and bill type is 181
  ;
 START ;START HERE
  S ABMLOOP=2300
@@ -11,7 +12,8 @@ START ;START HERE
  .D WR^ABMUTL8("DTP")
  D EP^ABME5DTP(434,"RD8",$P(ABMB7,U),$P(ABMB7,U,2))
  D WR^ABMUTL8("DTP")
- I $P(ABMB6,U),($E(ABMP("BTYP"),1,2)=11) D
+ ;I $P(ABMB6,U),($E(ABMP("BTYP"),1,2)=11) D  ;abm*2.6*21 IHS/SD/SDR HEAT135923
+ I $P(ABMB6,U),(($E(ABMP("BTYP"),1,2)=11)!(ABMP("BTYP")=181)) D  ;abm*2.6*21 IHS/SD/SDR HEAT135923	
  .D EP^ABME5DTP(435,"DT",$TR($P(ABMB6,U,1,2),U,"."))
  .D WR^ABMUTL8("DTP")
  I $P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),1,ABMP("VTYP"),1)),U,11)'="" D

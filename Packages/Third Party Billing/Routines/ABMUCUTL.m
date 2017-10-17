@@ -1,5 +1,5 @@
 ABMUCUTL ; IHS/SD/SDR - 3PB/UFMS Cashiering Utilities   
- ;;2.6;IHS Third Party Billing;**1,3,4,6,8,10,11**;NOV 12, 2009;Build 133
+ ;;2.6;IHS Third Party Billing;**1,3,4,6,8,10,11,21**;NOV 12, 2009;Build 379
  ; New routine - v2.5 p12 SDD item 4.9.1
  ; Cashiering Utilities
  ;
@@ -8,6 +8,8 @@ ABMUCUTL ; IHS/SD/SDR - 3PB/UFMS Cashiering Utilities
  ; IHS/SD/SDR - abm*2.6*1 - FIXPMS10011 - Added DOS to GETBILL
  ; IHS/SD/SDR - abm*2.6*4 - NOHEAT - fix for duplicate bills when ITYP changes
  ; IHS/SD/SDR - abm*2.6*6 - HEAT27136 - Bug found when two parents on same database.
+ ;IHS/SD/SDR - 2.6*21 - HEAT121470 - Updated to use a new x-ref for session status.  Taking
+ ;    too long to look through all sessions and causing <STORE>FINDACLS+22^ABMUCUTL 
  ;
 FINDOPEN(ABMDUZ) ;EP - look for open session for one user
  ; 0 returned means no open session found
@@ -22,51 +24,12 @@ FINDOPEN(ABMDUZ) ;EP - look for open session for one user
  .S ABMFD=ABMSDT
  Q ABMFD
 FINDAOPN ;EP - look for all open sessions
- ; 0 returned means no open sessions found
- ; anything else is list of open sessions (ABMO(SESSION#,DUZ,SDT)
- ;
- K ABMO
- S ABMLOC=$$FINDLOC  ;what location to look under
- S ABMFD=0
- ;user entries
- S ABMUSER=0
- F  S ABMUSER=$O(^ABMUCASH(ABMLOC,10,ABMUSER)) Q:+ABMUSER=0  D
- .S ABMSDT=0
- .F  S ABMSDT=$O(^ABMUCASH(ABMLOC,10,ABMUSER,20,ABMSDT)) Q:+ABMSDT=0  D  Q:ABMFD'=0
- ..I $P($G(^ABMUCASH(ABMLOC,10,ABMUSER,20,ABMSDT,0)),U,3)'="" Q
- ..S ABMO(ABMSDT,ABMUSER,ABMSDT)=""
- ..S ABMAFLG=$$ACTIVCK^ABMUUTL(ABMLOC,ABMSDT,ABMUSER)  ;check for activity in session
- ..I +$G(ABMAFLG)'=0 S $P(ABMO(ABMSDT,ABMUSER,ABMSDT),U,3)=1
- ;look for POS entries
- S ABMUSER=0
- F  S ABMUSER=$O(^ABMUCASH(ABMLOC,20,ABMUSER)) Q:+ABMUSER=0  D
- .S ABMSDT=0
- .F  S ABMSDT=$O(^ABMUCASH(ABMLOC,20,ABMUSER,20,ABMSDT)) Q:+ABMSDT=0  D  Q:ABMFD'=0
- ..I $P($G(^ABMUCASH(ABMLOC,20,ABMUSER,20,ABMSDT,0)),U,3)'="" Q
- ..S ABMO(ABMSDT,"POS",ABMSDT)=""
+ D FINDAOPN^ABMUCUT2  ;abm*2.6*21 IHS/SD/SDR HEAT121470 split routine
  Q
 FINDACLS ;EP - look for all closed sessions
  ; 0 returned means no closed sessions found
  ; anything else is list of closed sessions (ABMO(SESSION#,DUZ,SDT)
- ;
- K ABMO
- S ABMLOC=$$FINDLOC  ;what location to look under
- S ABMFD=0
- S ABMDUZ=0
- F  S ABMDUZ=$O(^ABMUCASH(ABMLOC,10,ABMDUZ)) Q:+ABMDUZ=0  D
- .S ABMSDT=0
- .F  S ABMSDT=$O(^ABMUCASH(ABMLOC,10,ABMDUZ,20,ABMSDT)) Q:+ABMSDT=0  D  Q:ABMFD'=0
- ..I $P($G(^ABMUCASH(ABMLOC,10,ABMDUZ,20,ABMSDT,0)),U,3)="" Q
- ..I $G(ABMFLG)="CLOSED",($P($G(^ABMUCASH(ABMLOC,10,ABMDUZ,20,ABMSDT,0)),U,4))'="C" Q
- ..S ABMO(ABMSDT,ABMDUZ,ABMSDT)=$P($G(^ABMUCASH(ABMLOC,10,ABMDUZ,20,ABMSDT,0)),U,4)_"^"_$P($G(^ABMUCASH(ABMLOC,10,ABMDUZ,20,ABMSDT,0)),U,3)
- ..S ABMAFLG=$$ACTIVCK^ABMUUTL(ABMLOC,ABMSDT,ABMDUZ)  ;check for activity in session
- ..I +$G(ABMAFLG)'=0 S $P(ABMO(ABMSDT,ABMDUZ,ABMSDT),U,3)=1
- ;POS entries
- S ABMSDT=0
- F  S ABMSDT=$O(^ABMUCASH(ABMLOC,20,1,20,ABMSDT)) Q:+ABMSDT=0  D  Q:ABMFD'=0
- .I $P($G(^ABMUCASH(ABMLOC,20,1,20,ABMSDT,0)),U,3)="" Q
- .I $G(ABMFLG)="CLOSED",($P($G(^ABMUCASH(ABMLOC,20,1,20,ABMSDT,0)),U,4))'="C" Q
- .S ABMO(ABMSDT,"POS",ABMSDT)=$P($G(^ABMUCASH(ABMLOC,20,1,20,ABMSDT,0)),U,4)_"^"_$P($G(^ABMUCASH(ABMLOC,20,1,20,ABMSDT,0)),U,3)
+ D FINDACLS^ABMUCUT2  ;abm*2.6*21 IHS/SD/SDR HEAT121470 split routine
  Q
 FINDALLS ;EP - look for all sessions
  ; 0 returned means no sessions found

@@ -1,6 +1,7 @@
 ABME5SBR ; IHS/ASDST/DMJ - 837 SBR Segment 
- ;;2.6;IHS Third Party Billing System;**6,8,9**;NOV 12, 2009
+ ;;2.6;IHS Third Party Billing System;**6,8,9,14,21**;NOV 12, 2009;Build 379
  ;Transaction Set Header
+ ;IHS/SD/SDR - 2.6*21 - HEAT107645 - Added code to look at segment override
  ;
 EP(X) ;EP
  ;x=1 (primary), 2 (secondary) or 3 (tertiary)
@@ -16,6 +17,7 @@ LOOP ;LOOP HERE
  .I $D(^ABMEXLM("AA",+$G(ABMP("INS")),+$G(ABMP("EXP")),ABME("RTYPE"),I)) D @(^(I))
  .I $G(ABMREC("SBR"))'="" S ABMREC("SBR")=ABMREC("SBR")_"*"
  .S ABMREC("SBR")=$G(ABMREC("SBR"))_ABMR("SBR",I)
+ I '$D(^ABMEXLM("AA",+$G(ABMP("INS")),+$G(ABMP("EXP")),ABME("RTYPE"),I)) D 837^ABMUTL8  ;abm*2.6*21 HEAT107645
  Q
 10 ;segment
  S ABMR("SBR",10)="SBR"

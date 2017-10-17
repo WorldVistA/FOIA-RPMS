@@ -1,5 +1,5 @@
 LR7OSAP3 ;VA/DALOI/CKA - Silent AP Rpt from TIU;3/27/02
- ;;5.2;LAB SERVICE;**1031**;NOV 1, 1997
+ ;;5.2;LAB SERVICE;**1031**;NOV 1, 1997;Build 188
  ;
  ;;VA LR Patche(s): 259,315
  ;

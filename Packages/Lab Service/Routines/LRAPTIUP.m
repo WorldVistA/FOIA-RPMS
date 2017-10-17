@@ -1,5 +1,5 @@
 LRAPTIUP ;VA/DALOI/CKA - API Print AP Reports from TIU;09/05/2001
- ;;5.2;LAB SERVICE;**1030,1031**;NOV 1, 1997
+ ;;5.2;LAB SERVICE;**1030,1031**;NOV 1, 1997;Build 188
  ;
  ;;VA LR Patche(s): 259,315
  ;

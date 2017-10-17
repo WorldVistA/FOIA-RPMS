@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:35">
+<Class name="csp.astm.astmschemacodetable">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>CSPX.AutoPageCSP</Super>
+<TimeChanged>61501,53311.905774</TimeChanged>
+<TimeCreated>61501,53311.901076</TimeCreated>
+<GeneratedBy>/csp/goldb/ASTM/ASTMSchemaCodeTable.csp</GeneratedBy>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body>"
+	Write !,"<table border=""0"" class=""LayoutMain"" width=""100%"" cellpadding=""0"" cellspacing=""0"">"
+	Do ..WriteTitlePane("@Ensemble:ASTMManagerCodeTable@Ensemble ASTM Code Table")
+	Write !,"</table>"
+	Write !,!,"<div class=""Text1"">"
+	Write "ASTM Code Table Definition is displayed below:"
+	Write "</div>"
+	Write !,"<br>",!
+	Write !
+	#Include EnsEDIASTM
+	set ct=%request.Get("CT")
+	set category=$p(ct,":",2)
+	set secondary=$p(ct,":",3)
+	If ((category'="")&&(secondary'="")) {
+	set description=..EscapeHTML($get($$$vaSchemaDescGbl(category,"CT",secondary)))
+	if $data($$$vaSchemaGbl(category,"CT",secondary))=0 {
+	write "<b><font size=6>"_ct_" </font> Definition does not exist!</b>",!
+	quit
+	}
+	}
+	Else {
+	Quit
+	}
+	Write !,!,"<table border=1 cellpadding=4 cellspacing=0  style=""font-size: 0.8em; margin-left: 40px;"">",!
+	Write !,"<tr><td colspan=2><b><font size=6>"_(category_":"_secondary)_" </font> "_($G(description))_"</b></td></tr>",!
+	Write !
+	set type=$get($$$vaSchemaGbl(category,"CT",secondary))
+	set annotate=$case(type, 1:"user", 2:"ASTM", 3:"ASTM and user", 4:"no longer used", 5:"replaced", 6:"user group/national defined", :"undefined")
+	write:("undefined"'=annotate) "<tr><td>Table Type</td><td>"_type_" ("_annotate_")</td></tr>",!
+	Write !,!,"<tr><td valign=top>Values</td><td>",!
+	Write !,"<table border=1 cellpadding=4 cellspacing=0>",!
+	Write !
+	#Include EnsEDIASTM
+	kill indexed
+	set one="" For  {
+	set one=$o($$$vaSchemaGbl(category,"CT",secondary,one)) Quit:one=""
+	set indexed($$$vaSchemaGbl(category,"CT",secondary,one))=one
+	}
+	set i="" For  {
+	set i=$o(indexed(i)) Quit:i=""
+	set description=..EscapeHTML($get($$$vaSchemaDescGbl(category,"CT",secondary,indexed(i))))
+	write "<tr><td valign=top>",$S($C(0)=indexed(i):"&nbsp;",1:indexed(i)),"</td><td>",$s(description="":"&nbsp;",1:description),"</td></tr>"
+	}
+	Write !,!,"</table>",!
+	Write "</td></tr></table>",!
+	Write !,"<p>",!
+	Write "<a href="""_(..Link("ASTMSchemaMain.csp"))_""">"
+	Write "(Show All Categories)"
+	Write "</a>"
+	Write "<br>",!
+	Write "<a href="""_(..Link("ASTMSchemaList.csp?ELEMENT=CT&CATEGORY="_category))_""">"
+	Write "(Show All Code Tables in Category '"_(category)_"')"
+	Write "</a>"
+	Write !,!,"</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<title>Ensemble ASTM Code Table</title>",!
+	Write "<link rel=""stylesheet"" type=""text/css"" href=""/csp/sys/csputils.css"" title=""Standard Style""/>"
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>C:\InterSystems\Ensemble\CSP\goldb\ASTM\ASTMSchemaCodeTable.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/goldb/ASTM/ASTMSchemaCodeTable.csp</Default>
+</Parameter>
+
+<Parameter name="DOMAIN">
+<Default>Ensemble</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>61286,9120</Default>
+</Parameter>
+
+<Parameter name="PAGENAME">
+<Default>ASTM Code Table</Default>
+</Parameter>
+
+<Parameter name="PARENTPAGE">
+<Default>ASTMSchemaMain.csp</Default>
+</Parameter>
+</Class>
+</Export>

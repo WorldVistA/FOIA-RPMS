@@ -1,5 +1,5 @@
 ABMDTPAR ; IHS/ASDST/DMJ - Table Maintenance of 3P PARAMETERS ;  
- ;;2.6;IHS Third Party Billing;**1,3,11**;NOV 12, 2009;Build 133
+ ;;2.6;IHS Third Party Billing;**1,3,11,21**;NOV 12, 2009;Build 379
  ;
  ; IHS/SD/SDR - v2.5 p8 - added code for UNCODED DX LAG TIME prompt
  ; IHS/SD/SDR - V2.5 P8 - IM12246/IM17548 - Added code for default prompt for Reference and In-House CLIAs
@@ -10,6 +10,8 @@ ABMDTPAR ; IHS/ASDST/DMJ - Table Maintenance of 3P PARAMETERS ;
  ; IHS/SD/SDR - v2.5 p11 - Patient Statement - Added prompt for statement header line 2
  ; IHS/SD/SDR - v2.5 p13 - POA changes - Added new prompt
  ; IHS/SD/SDR - abm*2.6*1 - HEAT4158 - Added prompt for mammography cert#
+ ;IHS/SD/SDR - 2.6*21 - HEAT130406 - Removed prompt for DAYS INACTIVE BEFORE PURGING
+ ;IHS/SD/SDR - 2.6*21 - VMBP - Updated p11 changes to include Serena ref#s
  ;
  ; *********************************************************************
  ;
@@ -50,11 +52,11 @@ AFFL I '$D(^ABMDPARM(DUZ(2),1,0)) D
  S DR=DR_";.33T"                  ; Append HRN to bill number
  S DR=DR_";.25T"                  ; Allow for CPT modifiers prompt
  S DR=DR_";.27T"                  ; Set prof. component Automatically
- S DR=DR_";.28T"                  ; Days inactive before purging
+ ;S DR=DR_";.28T"                  ; Days inactive before purging  abm*2.6*21 IHS/SD/SDR HEAT130406
  S DR=DR_";.29T"                  ; Default version of HCFA-1500
  S DR=DR_";.32T"                  ; Default form for dental billing
- S DR=DR_";.312T"  ;VA Station Number  ;abm*2.6*11 VMBP
- S DR=DR_";.313T"  ;VA Contract Number  ;abm*2.6*11 VMBP
+ S DR=DR_";.312T"  ;VA Station Number  ;abm*2.6*11 VMBP RQMT_93
+ S DR=DR_";.313T"  ;VA Contract Number  ;abm*2.6*11 VMBP RQMT_93
  D ^DIE K DR Q:$D(Y)
  S DA(1)=DA
  S ABMFLD="15",ABMFLE="9002274.5" D MULTLKUP(ABMFLD,ABMFLE)  ;default unbillable clinics

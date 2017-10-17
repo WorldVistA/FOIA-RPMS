@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:35">
+<Class name="BSTS.ns1.TContentAttributeSetDescriptor">
+<Description>
+Created from: http://VDENMIHSDEVD01:8082/soap/DtsQueryDaoWS?wsdl</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>BSTS.ns1.TAttributeSetDescriptor</Super>
+<TimeChanged>63616,48123.928124</TimeChanged>
+<TimeCreated>63616,48123.906003</TimeCreated>
+
+<Parameter name="ELEMENTQUALIFIED">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="NAMESPACE">
+<Default>http://apelon.com/dtsserver/types</Default>
+</Parameter>
+
+<Parameter name="XMLNAME">
+<Default>TContentAttributeSetDescriptor</Default>
+</Parameter>
+
+<Parameter name="XMLSEQUENCE">
+<Default>1</Default>
+</Parameter>
+
+<Property name="versions">
+<Type>%Boolean</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="versions"/>
+</Property>
+
+<Property name="versionAttributeSetDescriptor">
+<Type>BSTS.ns1.TAttributeSetDescriptor</Type>
+<Parameter name="XMLNAME" value="versionAttributeSetDescriptor"/>
+</Property>
+</Class>
+</Export>

@@ -1,5 +1,5 @@
 BQINIGH1 ;VNGT/HS/ALA - iCare Nightly Job continued ; 11 Jun 2008  11:22 AM
- ;;2.5;ICARE MANAGEMENT SYSTEM;;May 24, 2016;Build 27
+ ;;2.6;ICARE MANAGEMENT SYSTEM;;Jul 07, 2017;Build 72
  ;
 MEAS ;EP - Check for new Measurement Types in File #9999999.07
  NEW VFIEN,DSIEN,MSIEN,NAME,CODE,CHIEN,TEXT,BTAG,BQIXTYP,BIL,XCLLFH
@@ -132,40 +132,21 @@ TRG ;Check for new Asthma Health Factor Triggers
  ;
 FHDX ;EP - Sep up list of Family History Allowed DX codes
  ;
- N DATA,DSC,DUP,DX,FILE,IEN,II,SRT,TXT,Y
+ NEW II,DATA,BQITMP,TXT
  ;
- S FILE=80
- S II=0,DATA=$NA(^XTMP("BQIFHDX"))
+ S II=0,DATA=$NA(^XTMP("BQIFHDX")) K @DATA
  S @DATA@(II)=$$FMADD^XLFDT(DT,7)_U_DT_U_"List of Family History Allowed DX Codes"
- K @DATA
- S DX=0 F  S DX=$O(^ICD9("AB",DX)) Q:DX=""  S IEN=0 F  S IEN=$O(^ICD9("AB",DX,IEN)) Q:'IEN  D
- . N FLG
- . I $G(^ICD9(IEN,0))="" Q
- . I $P($G(^ICD9(IEN,0)),"^",9) Q
- . S Y=IEN
- . D FHCHK^AUPNSICD I  S FLG=0
- . E  S FLG=1
- . Q:FLG
- . ;
- . ;Screen Out Duplicates
- . Q:$D(DUP(IEN))
- . S DUP(IEN)=""
- . S TXT=$$GET1^DIQ(FILE,IEN_",",.01,"E") Q:TXT=""
- . I $$VERSION^XPDUTL("AICD")>3.51 D
- .. S SYS=$$CSI^ICDEX(80,TXT)
- .. S STR=$$ICDDX^ICDEX(TXT,DT,SYS,"I")
- .. S DSC=$P(STR,U,4)
- . I $$VERSION^XPDUTL("AICD")<4.0 D
- .. S DSC=$$GET1^DIQ(FILE,IEN_",",3,"E")
- .. S SRT(TXT)=IEN_"^"_TXT_"-"_DSC
  ;
- S TXT="" F  S TXT=$O(SRT(TXT)) Q:TXT=""  D
- . S II=II+1,@DATA@(II)=SRT(TXT)
+ F TXT="Z80*","Z81*","Z82*","Z83*","Z84*" D
+ . S INDEX="BA" K BQITMP
+ . D LST^ATXAPI(30,80,TXT,"","BQITMP")
+ . S LIEN=""
+ . F  S LIEN=$O(BQITMP(LIEN)) Q:LIEN=""  D
+ .. S DESC=$$ICD9^BQIUL3(LIEN,,4),INAC=$$INIC^BQITAXX5(80,LIEN)
+ .. S II=II+1,@DATA@(II)=BQITMP(LIEN)_U_DESC_U_INAC
  ;
  K DATA,DSC,DUP,DX,FILE,IEN,II,SRT,TXT,Y
- ;
- ;If Flag Isn't Set Tag Was Called Externally
- Q:'$G(XCLLFH)
+ Q
  ;
 COMM ;EP - Set up communities
  NEW CNME,CIEN,CSTE,CNTY,STCOCOMM,CCNT,IEN,DA,FILE,DATA
@@ -253,6 +234,7 @@ AST ; Update all patients with any care management data
  .. I '$$HRN^BQIUL1(DFN) Q
  .. ; If patient has no visit in past 3 years
  .. I '$$VTHR^BQIUL1(DFN) Q
+ .. I SOURCE="Pediatric",$$AGE^BQIAGE(DFN,"")>21 Q
  .. D PAT^BQIRGASP(DFN,SRC)
  K BDMDMRG,BDMJOB,BDMBTH,CYR,CIEN,PGTHR,PGRF,BDMRBD,BDMADAT,BDMTYPE,BDMRED,BMDBDAT,BDMPD
  ;

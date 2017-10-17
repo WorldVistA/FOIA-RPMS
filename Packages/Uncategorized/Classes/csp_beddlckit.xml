@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:35">
+<Class name="csp.beddlckit">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeChanged>64446,69327.743189</TimeChanged>
+<TimeCreated>64446,69327.741074</TimeCreated>
+<GeneratedBy>/csp/foia_goldb/BEDDLCKIT.csp</GeneratedBy>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body>"
+	Write !,"	RECORD IS BEING UPDATED BY <BR> <h2>"_(user)_" &nbsp; "_($$HTE^XLFDT(editdt,"5Z"))_" </h2>",!
+	Write "	Current user is: "_($$GET1^DIQ(200,%session.Data("DUZ"),".01","I"))_" <br>",!
+	Write "    <br>",!
+	Write "	<b>"
+	Write "<div align=""center"">"
+	Write "<a href="""_($zconvert(..Link("BEDD.csp"),"O","HTML"))_""">"
+	Write "Return to ED Dashboard"
+	Write "</a>"
+	Write "</div>"
+	Write "</b> ",!
+	Write "</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<!-- BEDDLCKIT.csp - BEDD ED Locking Page -->"
+	Write !,"<!-- ;;2.0;IHS EMERGENCY DEPT DASHBOARD;**1**;Apr 02, 2014 -->"
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,!
+	Set U="^",site=%session.Data("SITE")
+	Do LOADSYS^BEDDUTW(.beddsys,site)
+	Set timeout=$G(beddsys("TimeOut"))
+	Write !,!,"<META HTTP-EQUIV=""Refresh"" CONTENT="""_( timeout )_"; URL=BEDD.csp"">"
+	Write !,!,!,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+ 	Set dfn=%request.Get("DFN"),objid=%request.Get("OBJID")
+ 	Set edvst=##class(BEDD.EDVISIT).%OpenId(objid)
+ 	// Check to see if record is locked if it is not locked or
+ 	// if this user has it locked then go to the edit page
+ 	If (+edvst.RecLock=0)||((+edvst.RecLock=1)&&(edvst.RecLockUser=%session.Data("DUZ"))) {
+ 		Set edvst.RecLock=1,edvst.RecLockDT=$H,edvst.RecLockUser=%session.Data("DUZ")
+ 		//BEDD*2.0*1;Added setting of new RecLockSite property
+ 		Set edvst.RecLockSite=$G(%session.Data("SITE"))
+ 		Set save=edvst.%Save()
+ 		Set edvst=""
+ 		Set %response.Redirect="BEDDEDIT1.csp?OBJID="_objid_"&DFN="_dfn
+ 		Q 1
+ 	}
+ 	// Otherwise tell this user that the record is locked and the user that has it locked
+ 	Set uien=edvst.RecLockUser,editdt=edvst.RecLockDT,myLock=edvst.RecLock 
+ 	Set edvst="",user="No Such User"
+ 	Set:uien]"" user=$$GET1^DIQ(200,uien_",",".01","I")
+ 	Q 1
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>D:\intersystems\E3IHS\CSP\foia_goldb\BEDDLCKIT.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/foia_goldb/BEDDLCKIT.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>64447,3918</Default>
+</Parameter>
+</Class>
+</Export>

@@ -1,5 +1,5 @@
 BQIUTB5 ;GDIT/HS/ALA-Table utilities ; 17 Dec 2014  9:14 AM
- ;;2.5;ICARE MANAGEMENT SYSTEM;;May 24, 2016;Build 27
+ ;;2.5;ICARE MANAGEMENT SYSTEM;**2**;May 24, 2016;Build 14
  ;
  ;
 USR(DATA,TYPE,FLAG) ;EP - Go through the User File
@@ -13,7 +13,7 @@ USR(DATA,TYPE,FLAG) ;EP - Go through the User File
  S @DATA@(II)="I00010IEN^T"_DLEN_"^T00001PROVIDER"_$C(30)
  ;
  I TYPE="P" D  G DONE
- . NEW NAME,IEN
+ . NEW NAME,IEN,TRMDT
  . S NAME=""
  . F  S NAME=$O(^VA(200,"AK.PROVIDER",NAME)) Q:NAME=""  D
  .. S IEN=""
@@ -21,25 +21,41 @@ USR(DATA,TYPE,FLAG) ;EP - Go through the User File
  ... I $G(^VA(200,IEN,0))="" Q
  ... I NAME'=$P(^VA(200,IEN,0),U,1) Q
  ... I IEN\1'=IEN Q
+ ... I $P(^VA(200,IEN,0),"^",3)="" Q
  ... I $P($G(^VA(200,IEN,"PS")),U,4)'="",DT'>$P(^("PS"),U,4) Q
  ... ;I (+$P($G(^VA(200,IEN,0)),U,11)'>0&$P(^(0),U,11)'>DT)!(+$P($G(^VA(200,IEN,0)),U,11)>0&$P(^(0),U,11)>DT) D
- ... I (+$P($G(^VA(200,IEN,0)),U,11)'>0)!(+$P($G(^VA(200,IEN,0)),U,11)'<DT) D
- .... I $G(FLAG)=1 S NAME=NAME_" ("_$$CLS(IEN)_")"
- .... S II=II+1,@DATA@(II)=IEN_"^"_NAME_$C(30)
+ ... ;I (+$P($G(^VA(200,IEN,0)),U,11)'>0)!(+$P($G(^VA(200,IEN,0)),U,11)'<DT) D
+ ... I $G(FLAG)=1 S NAME=NAME_" ("_$$CLS(IEN)_")"
+ ... S TRMDT=+$P($G(^VA(200,IEN,0)),U,11)
+ ... I TRMDT=0 D SAV Q
+ ... I TRMDT'>DT D SAV Q
+ ... I TRMDT>DT D SAV Q
  ;
- NEW IEN,NAME,PFLAG
+ NEW IEN,NAME,PFLAG,TRMDT
  S IEN=.6
  F  S IEN=$O(^VA(200,IEN)) Q:'IEN  D
  . I $G(^VA(200,IEN,0))="" Q
+ . I $P(^VA(200,IEN,0),"^",3)="" Q
  . I IEN\1'=IEN Q
  . ;I (+$P($G(^VA(200,IEN,0)),U,11)'>0&$P(^(0),U,11)'>DT)!(+$P($G(^VA(200,IEN,0)),U,11)>0&$P(^(0),U,11)>DT) D
- . I (+$P($G(^VA(200,IEN,0)),U,11)'>0)!(+$P($G(^VA(200,IEN,0)),U,11)'<DT) D
- .. S NAME=$$GET1^DIQ(200,IEN_",",.01,"E")
- .. I NAME="" Q
- .. S PFLAG=$S($D(^VA(200,"AK.PROVIDER",NAME,IEN)):"P",1:"")
- .. I $G(FLAG)=1 S NAME=NAME_" ("_$$CLS(IEN)_")"
- .. S II=II+1,@DATA@(II)=IEN_"^"_NAME_"^"_PFLAG_$C(30)
+ . ;I (+$P($G(^VA(200,IEN,0)),U,11)'>0)!(+$P($G(^VA(200,IEN,0)),U,11)'<DT) D
+ . S NAME=$$GET1^DIQ(200,IEN_",",.01,"E")
+ . I NAME="" Q
+ . S PFLAG=$S($D(^VA(200,"AK.PROVIDER",NAME,IEN)):"P",1:"")
+ . I $G(FLAG)=1 S NAME=NAME_" ("_$$CLS(IEN)_")"
+ . S TRMDT=+$P($G(^VA(200,IEN,0)),U,11)
+ . I TRMDT=0 D SAV1 Q
+ . I TRMDT'>DT D SAV1 Q
+ . I TRMDT>DT D SAV1 Q
  S II=II+1,@DATA@(II)=$C(31)
+ Q
+ ;
+SAV ;EP - Save record
+ S II=II+1,@DATA@(II)=IEN_"^"_NAME_$C(30)
+ Q
+ ;
+SAV1 ;EP - Save record
+ S II=II+1,@DATA@(II)=IEN_"^"_NAME_"^"_PFLAG_$C(30)
  Q
  ;
 PRCL(DATA) ;EP - Get providers with class

@@ -1,5 +1,5 @@
 BQITASK4 ;GDIT/HS/ALA-Update a diagnostic tag ; 29 Jan 2014  8:37 AM
- ;;2.5;ICARE MANAGEMENT SYSTEM;**1**;May 24, 2016;Build 17
+ ;;2.6;ICARE MANAGEMENT SYSTEM;;Jul 07, 2017;Build 72
  ;
  ;
 EN(TAG) ; EP
@@ -40,10 +40,18 @@ EN(TAG) ; EP
  K SEX,TXDXCN,TXDXCT,TXT,Y,UID
  Q
  ;
-JB ;EP - Task off the job
+JB ; EP - Task off job to update Pregnancy tag
  NEW ZTDTH,ZTDESC,ZTRTN,ZTIO,ZTSAVE,BQIUPD
  S ZTDTH=$$FMADD^XLFDT($$NOW^XLFDT(),,,3)
  S ZTDESC="Update Pregnancy Tag",ZTIO=""
  S ZTRTN="EN^BQITASK4(""Pregnant"")"
+ D ^%ZTLOAD
+ Q
+ ;
+JBAD ;EP - Task off job to update all diagnostic tags
+ NEW ZTDTH,ZTDESC,ZTRTN,ZTIO,ZTSAVE,BQIUPD
+ S ZTDTH=$$FMADD^XLFDT($$NOW^XLFDT(),,,10)
+ S ZTDESC="Update Diagnostic Tags",ZTIO=""
+ S ZTRTN="DXC^BQITASK2"
  D ^%ZTLOAD
  Q

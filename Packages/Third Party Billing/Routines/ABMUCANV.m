@@ -1,7 +1,9 @@
 ABMUCANV ; IHS/SD/SDR - 3PB/UFMS CAN view/print   
- ;;2.6;IHS 3P BILLING SYSTEM;;NOV 12, 2009
+ ;;2.6;IHS 3P BILLING SYSTEM;**21**;NOV 12, 2009;Build 379
  ;
  ; new routine - v2.5 p12 SDD item 4.3
+ ;IHS/SD/SDR - 2.6*21 - VMBP RQMT_99 - Updated to output Insurer Type correctly after switch to
+ ;   Insurer Type file (9999999.181)
  ;
  K DIR
  S DIR(0)="S^ITBA:Insurer Type to Budget Activity;CTCC:Clinic Type to Cost Center"
@@ -33,7 +35,13 @@ ITBA ;EP - INSURER TYPE to BUDGET ACTIVITY
  F  S ABMI=$O(^ABMUITBA(ABMI)) Q:+ABMI=0  D  Q:$D(DTOUT)!$D(DUOUT)!$D(DIROUT)
  .D GETS^DIQ("9002274.41",ABMI,".01:.05","E","ABMC")
  .Q:($G(ABMC("9002274.41",ABMI_",",".05","E"))'=ABMAREA)
- .W !?2,$G(ABMC("9002274.41",ABMI_",",".01","E"))
+ .;W !?2,$G(ABMC("9002274.41",ABMI_",",".01","E"))  ;abm*2.6*21 IHS/SD/SDR VMBP RQMT_99
+ .;start new abm*2.6*21 IHS/SD/SDR RQMT_99
+ .S ABMITC=$G(ABMC("9002274.41",ABMI_",",".01","E"))
+ .S ABMITYP=$O(^AUTTINTY("C",ABMITC,0))
+ .S ABMITYP=$$GET1^DIQ(9999999.181,ABMITYP,".01","E")
+ .W !?2,ABMITYP
+ .;end new abm*2.6*21 IHS/SD/SDR VMBP RQMT_99
  .W ?27,$G(ABMC("9002274.41",ABMI_",",".02","E"))
  .W ?42,$G(ABMC("9002274.41",ABMI_",",".03","E"))
  .W ?58,$G(ABMC("9002274.41",ABMI_",",".04","E"))

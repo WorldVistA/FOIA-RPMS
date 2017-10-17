@@ -1,14 +1,16 @@
 ABMDRPR2 ; IHS/ASDST/DMJ - Productivity Report-132 Width ;
- ;;2.6;IHS 3P BILLING SYSTEM;;NOV 12, 2009
+ ;;2.6;IHS 3P BILLING SYSTEM;**21**;NOV 12, 2009;Build 379
  ;Original;TMD;
+ ;IHS/SD/SDR - 2.6*21 - HEAT191849 - Fix for error <UNDEF>SUBHD^ABMDRPR2 - ABM("TXT") wasn't defined yet
  ;
 PRINT ;EP for printing data
  W:$D(ABM("PRINT",16)) @ABM("PRINT",16) S ABM("PG")=0 D HDB
  S (ABM("CNT1"),ABM("CNT2"),ABM("CNT"),ABM("TOT1"),ABM("TOT2"),ABM("TOT"))=0,(ABM("A"),ABM("L"),ABM("V"))=""
  S ABM("Z")="TMP(""ABM-PR"","_$J,ABM="^"_ABM("Z")_")" I '$D(@ABM) Q
  F  S ABM=$Q(@ABM) Q:ABM'[ABM("Z")  D  G:$D(DTOUT)!$D(DUOUT)!$D(DIROUT) XIT
- .I $Y>(IOSL-5) D HD Q:$D(DTOUT)!$D(DUOUT)!$D(DIROUT)  D SUBHD W " (cont)"
+ .;I $Y>(IOSL-5) D HD Q:$D(DTOUT)!$D(DUOUT)!$D(DIROUT)  D SUBHD W " (cont)"  ;abm*2.6*21 IHS/SD/SDR HEAT191849
  .S ABM("T")=$P(ABM,"ABM-P",2),ABM("TXT")=$P($P(ABM("T"),",",3,99),"""",2),ABM("TXT")=+$P(ABM("T"),",",3)_U_ABM("TXT")
+ .I $Y>(IOSL-5) D HD Q:$D(DTOUT)!$D(DUOUT)!$D(DIROUT)  D SUBHD W " (cont)"  ;abm*2.6*21 IHS/SD/SDR HEAT191849
  .S ABM("C")=$G(^ABMDBILL(DUZ(2),$P(ABM("TXT"),U,6),0)) Q:ABM("C")=""  S ABM("D")=+^(7),ABM("T")=+^(2),ABM("EDT")=$P($G(^(1)),"^",7)
  .S ABM("EDT")=$P($G(^ABMDTXST(DUZ(2),+ABM("EDT"),0)),U)
  .I ABM("A")'=$P(ABM("TXT"),U) S ABM("L")="" D SUB,TOT,SUBHD

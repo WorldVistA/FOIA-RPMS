@@ -1,5 +1,5 @@
 BGP7DH ; IHS/CMI/LAB - cover page for gpra 28 Apr 2010 11:30 AM 02 Jul 2010 9:25 AM 19 Feb 2017 11:07 AM ;
- ;;17.0;IHS CLINICAL REPORTING;;AUG 30, 2016;Build 16
+ ;;17.1;IHS CLINICAL REPORTING;;MAY 10, 2017;Build 29
  ;
  S BGPQHDR=0,BGPHPG=0
  D HDR
@@ -21,20 +21,20 @@ BGP7DH ; IHS/CMI/LAB - cover page for gpra 28 Apr 2010 11:30 AM 02 Jul 2010 9:25
 N1 I BGPPTYPE="P" Q:BGPQHDR
  I BGPPTYPE="P",$Y>(BGPIOSL-3) D HDR Q:BGPQHDR
  I $G(BGPEXPT),BGPRTYPE=1 D   ;,'$G(BGPNGR09) D
- .D W^BGP7DP("A file will be created called BG170"_$P(^AUTTLOC(DUZ(2),0),U,10)_"."_BGPRPT,0,2,BGPPTYPE)
+ .D W^BGP7DP("A file will be created called BG171"_$P(^AUTTLOC(DUZ(2),0),U,10)_"."_BGPRPT,0,2,BGPPTYPE)
  .D W^BGP7DP("It will reside in the "_BGPUF_" directory.",0,1,BGPPTYPE)
  .D W^BGP7DP("This file should be sent to your Area Office.",0,1,BGPPTYPE)
  .D W^BGP7DP("",0,1,BGPPTYPE)
  I BGPPTYPE="P",$Y>(BGPIOSL-3) D HDR Q:BGPQHDR
  I $G(BGPEXPT),BGPRTYPE=7 D
- .D W^BGP7DP("A file will be created called BG170"_$P(^AUTTLOC(DUZ(2),0),U,10)_".ONM"_BGPRPT,0,2,BGPPTYPE)
+ .D W^BGP7DP("A file will be created called BG171"_$P(^AUTTLOC(DUZ(2),0),U,10)_".ONM"_BGPRPT,0,2,BGPPTYPE)
  .D W^BGP7DP("It will reside in the "_BGPUF_" directory.",0,1,BGPPTYPE)
  .D W^BGP7DP("This file should be sent to your Area Office.",0,1,BGPPTYPE)
  .D W^BGP7DP("",0,1,BGPPTYPE)
  I BGPPTYPE="P",$Y>(BGPIOSL-3) D HDR Q:BGPQHDR
  I BGPRTYPE=6,$G(BGPPEEXP) D  Q:BGPQHDR
  .I BGPPTYPE="P",$Y>(BGPIOSL-3) D HDR Q:BGPQHDR
- .D W^BGP7DP("A file will be created called BG170"_$P(^AUTTLOC(DUZ(2),0),U,10)_".PED"_BGPRPT_" and will reside",0,1,BGPPTYPE)
+ .D W^BGP7DP("A file will be created called BG171"_$P(^AUTTLOC(DUZ(2),0),U,10)_".PED"_BGPRPT_" and will reside",0,1,BGPPTYPE)
  .D W^BGP7DP("in the "_BGPUF_" directory.  This file should be sent to your Area Office.",0,1,BGPPTYPE)
  .D W^BGP7DP("",0,1,BGPPTYPE)
  I BGPROT'="P",'$D(BGPGUI) D  I BGPPTYPE="P" Q:BGPQHDR
@@ -47,6 +47,7 @@ N1 I BGPPTYPE="P" Q:BGPQHDR
  I BGPYRPTH="P" K BGPX,BGPQUIT
  I '$G(BGPALLPT),'$G(BGPSEAT) D  I BGPPTYPE="P" Q:BGPQHDR
  .I BGPPTYPE="P",$Y>(BGPIOSL-2) D HDR Q:BGPQHDR
+ .I $G(BGPCOMMI) D W^BGP7DP("The following Community is included in this report: "_$P(^AUTTCOM(BGPCOMMI,0),U),0,2,BGPPTYPE,1,2) G H1
  .D W^BGP7DP("Community Taxonomy Name: "_$P(^ATXAX(BGPTAXI,0),U),0,2,BGPPTYPE,1,10)
  .D W^BGP7DP("The following communities are included in this report:",0,1,BGPPTYPE,1,10) D
  ..S BGPZZ="",N=0,Y="" F  S BGPZZ=$O(BGPTAX(BGPZZ)) Q:BGPZZ=""  S N=N+1,Y=Y_$S(N=1:"",1:";")_BGPZZ
@@ -55,7 +56,7 @@ N1 I BGPPTYPE="P" Q:BGPQHDR
  ...D W^BGP7DP($E($P(Y,";",(BGPZZ+1)),1,20),0,0,BGPPTYPE,2,30)
  ...D W^BGP7DP($E($P(Y,";",(BGPZZ+2)),1,20),0,0,BGPPTYPE,3,60)
  ...Q
- D W^BGP7DP("",0,1,BGPPTYPE)
+H1 D W^BGP7DP("",0,1,BGPPTYPE)
  I BGPRTYPE'=6,BGPPTYPE="D" D W^BGP7DP("ENDCOVERPAGE",0,1,BGPPTYPE)
  K BGPX,BGPQUIT
  Q

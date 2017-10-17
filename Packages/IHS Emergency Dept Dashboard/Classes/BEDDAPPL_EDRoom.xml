@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:34">
+<Class name="BEDDAPPL.EDRoom">
+<Description>
+BEDDAPPL.EDRoom Class App Screen</Description>
+<CompileAfter>%ZEN.Generator,BEDDAPPL.EDMenu</CompileAfter>
+<Super>%ZEN.Component.page</Super>
+<TimeChanged>63019,76955.786718</TimeChanged>
+<TimeCreated>61957,73514.572067</TimeCreated>
+<DependsOn>%ZEN.Generator,BEDDAPPL.EDMenu</DependsOn>
+
+<Parameter name="APPLICATION">
+<Description>
+Class name of application this page belongs to.</Description>
+<Default>BEDDAPPL.EDManager</Default>
+</Parameter>
+
+<Parameter name="PAGENAME">
+<Description>
+Displayed name of this page.</Description>
+<Default>EDRoom</Default>
+</Parameter>
+
+<Parameter name="DOMAIN">
+<Description>
+Domain used for localization.</Description>
+</Parameter>
+
+<XData name="Style">
+<Description>
+This Style block contains page-specific CSS style definitions.</Description>
+<Data><![CDATA[
+<style type="text/css">
+</style>
+]]></Data>
+</XData>
+
+<XData name="Contents">
+<Description>
+This XML defines the contents of this page.</Description>
+<XMLNamespace>http://mynation.chickasaw.net/BEDD</XMLNamespace>
+<Data><![CDATA[
+<page title="ED Manager Room Setup"	
+	xmlns:beddappl="http://www.intersystems.com/BEDDAPPL" 
+	xmlns="http://www.intersystems.com/zen"  >
+	
+	<beddappl:EDMenu width="100%"/>
+
+
+<hgroup width="100%">	
+<vgroup width="2%"> </vgroup>
+
+<vgroup width="75%">
+ <spacer width="2" />
+ 	<tableNavigatorBar id="roomNav" tablePaneId="roomTable"/>
+ 	<spacer width="2" />
+    
+<tablePane
+    id="roomTable" 
+    width="750px"
+    tableName="BEDD.EDRooms"
+    orderByClause="Status, RoomNo*1000"
+    onselectrow="zenPage.rowSelected(zenThis);"
+    maxRows="100" 
+    pageSize="15" 
+    showRowNumbers="true" 
+    showZebra="true" 
+    useSnapshot="true"
+    extraColumnWidth="3%"
+    caption="Room Setup"
+    valueColumn="ID">
+    
+   <column colName="ID" hidden="true"/>
+   <column header="Room Name" width="15%" colName="RoomNo" filterType="text"/>
+   <column header="Status" width="15%" colName="Status"
+	     filterOp="=" 
+	filterType="enum" 
+	filterEnum="Active,No Longer Used,Temporarily Unavailable"
+	filterEnumDisplay="Active,No Longer Used,Temporarily Unavailable"/>
+ <column header="Occupied" width="15%" colName="Occupied" 
+ 		filterType="enum" filterEnum="Yes,No" filterEnumDisplay="Yes,No"/>
+ 
+ </tablePane>
+ </vgroup>
+</hgroup>
+
+<hgroup>
+<vgroup width="10%">  
+   <spacer width="2" />
+     
+<dataController id="roomData" modelClass="BEDDAPPL.EDRoomModel" modelId="" />
+<spacer width="10%" />
+
+<fieldSet id="roomFormGroup" hidden="false" legend="Edit Room Info">
+<form id="roomForm" controllerId="roomData" 
+         layout="vertical"
+         cellStyle="padding: 2px; padding-left: 5px; padding-right: 5px;">
+
+<hgroup>
+<text label="Room Name:" dataBinding="RoomNo" id="RoomNo" name="RoomNo" size="10" required="true" />
+<spacer width="8"/>  
+<radioSet label="Status:" dataBinding="Status" id="Status" name="Status" 
+	displayList="Active,No Longer Used,Temporarily Unavailable" valueList="Active,No Longer Used,Temporarily Unavailable"/>
+<spacer width="15"/>  
+<radioSet label="Occupied:" dataBinding="Occupied" id="Occupied" name="Occupied" displayList="Yes,No" valueList="Yes,No" />
+
+</hgroup>
+<hgroup>
+<button caption="Save" onclick="zenPage.saveRoom();" />	
+<spacer width="10"/>
+<button caption="New" onclick="zenPage.newEntry();" />
+<spacer width="10"/>
+<button caption="Delete" onclick="zenPage.deleteItem();" />
+<spacer width="10"/>
+<button caption="Cancel" onclick="zenPage.cancel();" />
+
+</hgroup>
+</form>
+</fieldSet>
+</vgroup>
+</hgroup>
+</page>
+]]></Data>
+</XData>
+
+<Method name="newEntry">
+<Description>
+Create a new entry</Description>
+<Language>javascript</Language>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[
+	var controller = zenPage.getComponentById('roomData');
+	controller.createNewObject();
+]]></Implementation>
+</Method>
+
+<Method name="CurrentDate">
+<ZenMethod>1</ZenMethod>
+<Implementation><![CDATA[        Quit $$XNOW^BEDDUTIL("5D")
+]]></Implementation>
+</Method>
+
+<Method name="rowSelected">
+<Description>
+user selected a row in the table</Description>
+<Language>javascript</Language>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[
+  var table=zenPage.getComponentById('roomTable');
+  //update details pan using ID value from table
+  var id = table.getProperty('value');
+  this.showroomForm(id)
+]]></Implementation>
+</Method>
+
+<Method name="showroomForm">
+<Description>
+show user data entry for row selected</Description>
+<FormalSpec>id</FormalSpec>
+<Language>javascript</Language>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[
+  var controller = zenPage.getComponentById('roomData');
+  controller.setProperty('modelId',id);
+  var roomFormGroup=zenPage.getComponentById("roomFormGroup");
+  roomFormGroup.setProperty('hidden',false);
+]]></Implementation>
+</Method>
+
+<Method name="saveRoom">
+<Description>
+save roommodel to database</Description>
+<Language>javascript</Language>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[
+  // validate and save form
+  var form = zenPage.getComponentById('roomForm');
+  form.save();
+
+  //refresh data in contact table  
+  var table=zenPage.getComponentById('roomTable');
+  table.executeQuery();
+  alert('Save Complete.');
+  return true;
+]]></Implementation>
+</Method>
+
+<Method name="cancel">
+<Description>
+cancel the current action</Description>
+<Language>javascript</Language>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[
+	var form = zenPage.getComponentById('roomForm');
+	form.reset();
+
+	var table = zenPage.getComponentById('roomTable');
+	table.selectRow(-1);
+
+	var controller = zenPage.getComponentById('roomData');
+	controller.setProperty('modelId','');
+]]></Implementation>
+</Method>
+
+<Method name="deleteItem">
+<Description>
+Delete current item from database</Description>
+<Language>javascript</Language>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[
+	if (confirm("Are you sure you want to delete this room?")) {
+		var controller = zenPage.getComponentById('roomData');
+		controller.deleteId(controller.getModelId());
+	
+		var table = zenPage.getComponentById('roomTable');
+		table.executeQuery(true);
+	}
+]]></Implementation>
+</Method>
+</Class>
+</Export>

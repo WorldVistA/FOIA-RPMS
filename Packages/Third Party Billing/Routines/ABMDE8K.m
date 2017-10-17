@@ -1,5 +1,5 @@
 ABMDE8K ; IHS/SD/SDR - Page 8 - AMBULANCE INFO ; 
- ;;2.6;IHS 3P BILLING SYSTEM;;NOV 12, 2009
+ ;;2.6;IHS 3P BILLING SYSTEM;**10,21**;NOV 12, 2009;Build 379
  ;
  ; IHS/SD/SDR - v2.5 p8 - task 6
  ;   New routine for page 8K-ambulance
@@ -8,6 +8,7 @@ ABMDE8K ; IHS/SD/SDR - Page 8 - AMBULANCE INFO ;
  ; IHS/SD/SDR - v2.5 p11 - NPI
  ;
  ; IHS/SD/SDR - v2.6 CSV
+ ;IHS/SD/AML - 2.6*21 - HEAT155818 - Made it so the modifier can be edited.
  ;
 DISP K ABMZ S ABMZ("TITL")="AMBULANCE SERVICES",ABMZ("PG")="8K"
  I $D(ABMP("DDL")),$Y>(IOSL-9) D PAUSE^ABMDE1 G:$D(DUOUT)!$D(DTOUT)!$D(DIROUT) XIT I 1
@@ -30,7 +31,8 @@ HD W !?5,"REVN",?60,"UNIT",?71,"TOTAL"
  W !?5,"====",?10,"===============================================",?59,"======",?66,"===",?70,"========="
  Q
 LOOP S (ABMZ("LNUM"),ABMZ("NUM"),ABMZ(1),ABM)=0 F ABM("I")=1:1 S ABM=$O(^ABMDCLM(DUZ(2),ABMP("CDFN"),47,ABM)) Q:'ABM  S ABM("X")=ABM,ABMZ("NUM")=ABM("I") D PC1
- S ABMZ("MOD")=.05_U_5_.08_U_.09
+ ;S ABMZ("MOD")=.05_U_5_.08_U_.09  ;abm*2.6*21 IHS/SD/AML HEAT155818
+ S ABMZ("MOD")=.05_U_5_U_.08_U_.09  ;abm*2.6*21 IHS/SD/AML HEAT155818
  I ABMZ("NUM")>0 W !?69,"==========",!?69,$J("$"_($FN(ABMZ("TOTL"),",",2)),10)
  I +$O(ABME(0)) S ABME("CONT")="" D ^ABMDERR K ABME("CONT")
  G XIT
@@ -61,9 +63,12 @@ EOP I $Y>(IOSL-5) D PAUSE^ABMDE1,HD
  ;start CSV-c
  E  D
  .S ABMU("TXT")=""
- .D IHSCPTD^ABMCVAPI($P(ABM("X0"),U),ABMZCPTD,"",ABMP("VDT"))
+ .K ABMZCPTD  ;abm*2.6*10 HEAT56410
+ .;D IHSCPTD^ABMCVAPI($P(ABM("X0"),U),ABMZCPTD,"",ABMP("VDT"))  ;abm*2.6*10 HEAT56410
+ .D IHSCPTD^ABMCVAPI($P(ABM("X0"),U),"ABMZCPTD","",ABMP("VDT"))  ;abm*2.6*10 HEAT56410
  .S ABM("CP")=0
- .F  S ABM("CP")=$O(ABMZCPTD(ABM("CP"))) Q:'$D(ABMZCPTD(ABM("CP")))  D
+ .;F  S ABM("CP")=$O(ABMZCPTD(ABM("CP"))) Q:'$D(ABMZCPTD(ABM("CP")))  D  ;abm*2.6*10 HEAT56410
+ .F  S ABM("CP")=$O(ABMZCPTD(ABM("CP"))) Q:(+ABM("CP")=0)  D  ;abm*2.6*10 HEAT56410
  ..S ABMU("TXT")=ABMU("TXT")_ABMZCPTD(ABM("CP"))_" "
  ;end CSV-c
  I ABMU("TXT")]"" S ABMU("RM")=59,ABMU("LM")=16 D ^ABMDWRAP I 1

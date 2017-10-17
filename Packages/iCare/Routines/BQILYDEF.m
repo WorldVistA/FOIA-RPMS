@@ -1,12 +1,12 @@
 BQILYDEF ;PRXM/HC/ALA-Layout Template Defaults ; 01 Jun 2007  11:51 AM
- ;;2.3;ICARE MANAGEMENT SYSTEM;**3,4**;Apr 18, 2012;Build 66
+ ;;2.6;ICARE MANAGEMENT SYSTEM;;Jul 07, 2017;Build 72
  ;
-RET(DATA,TMIEN) ;EP -- BQI GET LAYOUTS
+RET(DATA,BDUZ,TMIEN) ;EP -- BQI GET LAYOUTS
  ;
  ; Input
  ;   TMIEN = Template internal entry number, if null gets all
  ;           defaults for a user
- ;   Assumes DUZ of user
+ ;   BDUZ  = User IEN
  ; 
  NEW UID,II,BN,CODE,BQARY,DIEN,DISPLAY,IEN,SORT,TYP,TMIEN,DEF,TEMPL,DTYP
  NEW DOR,SOR,SDIR,LEDT,TDEF,DDEF
@@ -15,7 +15,7 @@ RET(DATA,TMIEN) ;EP -- BQI GET LAYOUTS
  K @DATA
  ;
  S TMIEN=$G(TMIEN,"")
- I TMIEN'?.N S TMIEN=$$TPN^BQILYUTL(DUZ,TMIEN)
+ I TMIEN'?.N S TMIEN=$$TPN^BQILYUTL(BDUZ,TMIEN)
  ;
  S II=0
  NEW $ESTACK,$ETRAP S $ETRAP="D ERR^BQILYDEF D UNWIND^%ZTER" ; SAC 2006 2.2.3.3.2
@@ -26,7 +26,7 @@ RET(DATA,TMIEN) ;EP -- BQI GET LAYOUTS
  ;
  ; Make sure user has all templates defined - If not, set up
  S DIEN=0
- F  S DIEN=$O(^BQICARE(DUZ,15,DIEN)) Q:'DIEN  D
+ F  S DIEN=$O(^BQICARE(BDUZ,15,DIEN)) Q:'DIEN  D
  . N DA,IENS,TYP,DEF
  . ;
  . ;Track whether each type has a default template set up (and if each type has one designated as the default)
@@ -46,11 +46,11 @@ RET(DATA,TMIEN) ;EP -- BQI GET LAYOUTS
  . I '$D(DDEF(TYP)) D DTMPDEF^BQITMPLS(TYP) ;Set to default if needed
  ;
  ; Make sure templates are now defined
- S DIEN=$O(^BQICARE(DUZ,15,0))
+ S DIEN=$O(^BQICARE(BDUZ,15,0))
  ;
  ; If the template IEN is not null, get the specific information about that template
  I TMIEN'="" D
- . S TYP=$P(^BQICARE(DUZ,15,TMIEN,0),U,2)
+ . S TYP=$P(^BQICARE(BDUZ,15,TMIEN,0),U,2)
  . D STND(TYP) Q
  . D DEF(TMIEN,1)
  ;
@@ -70,7 +70,7 @@ RET(DATA,TMIEN) ;EP -- BQI GET LAYOUTS
  . ;
  . ; Otherwise, get the displays for any defined default template
  . S DIEN=0
- . F  S DIEN=$O(^BQICARE(DUZ,15,DIEN)) Q:'DIEN  D
+ . F  S DIEN=$O(^BQICARE(BDUZ,15,DIEN)) Q:'DIEN  D
  .. N DA,IENS,TYP,DEF
  .. ;
  .. ;Track whether each type has a default template set up
@@ -242,11 +242,13 @@ SAV(DATA,OWNR,LYIEN,TEMPL,TYPE,ADDEL,SOR,SDIR,DOR) ;EP -- BQI SAVE LAYOUTS
  ;
  ;Remove the previous parameters
  NEW DA,IENS,DIK
+ K DA
  S DA(2)=OWNR,DA(1)=LYIEN,DA=0
  S DIK="^BQICARE("_DA(2)_",15,"_DA(1)_",1,"
  F  S DA=$O(^BQICARE(OWNR,15,LYIEN,1,DA)) Q:'DA  D ^DIK
  ;
  NEW DA,IENS
+ K DA
  S DA(1)=OWNR,DA=LYIEN,IENS=$$IENS^DILF(.DA)
  S BQIUPD(90505.015,IENS,.01)=TEMPL
  S BQIUPD(90505.015,IENS,.02)=TYPE

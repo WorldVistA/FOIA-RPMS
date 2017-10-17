@@ -1,17 +1,16 @@
 ABMDFOVR ; IHS/ASDST/DMJ - Set Up Form Override ;   
- ;;2.6;IHS 3P BILLING SYSTEM;**10,13**;NOV 12, 2009;Build 213
+ ;;2.6;IHS 3P BILLING SYSTEM;**10,13,21**;NOV 12, 2009;Build 379
  ;IHS/DSD/MRS - Added hcfa block 11c 11/25/1998
  ;
- ;IHS/SD/SDR - V2.5 P2 - 4/17/02 - NOIS LUA-0102-160077
- ;    Modified so it wouldn't kick user out after immediately
- ;    editing one line for box 24,32, and 33.  It now asks if you
- ;    would like to edit another line.
- ;
+ ;IHS/SD/SDR - V2.5 P2 - 4/17/02 - NOIS LUA-0102-160077 - Modified so it wouldn't kick user out after immediately
+ ;    editing one line for box 24,32, and 33.  It now asks if you would like to edit another line.
  ;IHS/SD/SDR - V2.5 P2 - 4/17/02 - NOIS NCA-1001-180096 - Modified to correct so block 53 would print correct info
  ;IHS/SD/SDR - v2.5 p8 - task 8 - Added code to correct add/edit prompt for FL override
  ;IHS/SD/SDR - v2.5 p13 - IM25365 - Added FL 32a/32b/33a/33b for export mode 27
  ;
  ;IHS/SD/SDR - 2.6*13 - Added check for new export mode 35
+ ;IHS/SD/AML - 2.6*21 - HEAT132667 - Changed code to use AUTNINS for lookup so identifiers will display when selecting
+ ;IHS/SD/SDR - 2.6*21 - HEAT284071 - Added override option,fields for ADA-2012
  ;
 START ;start
  K DIC
@@ -30,24 +29,29 @@ STARTA K ABMLINE,ABMPIECE,ABMNM D @ABMBOX
 FORM ;select form
  S DIC="^ABMDEXP(",DIC(0)="AEMQ"
  ;S DIC("S")="I +Y=3!(+Y=14)!(+Y=27)"  ;abm*2.6*13 export mode 35
- S DIC("S")="I +Y=3!(+Y=14)!(+Y=27)!(+Y=35)"  ;abm*2.6*13 export mode 35
+ ;S DIC("S")="I +Y=3!(+Y=14)!(+Y=27)!(+Y=35)"  ;abm*2.6*13 export mode 35  ;abm*2.6*21 IHS/SD/SDR HEAT284071
+ S DIC("S")="I +Y=3!(+Y=14)!(+Y=27)!(+Y=35)!(+Y=34)"  ;abm*2.6*21 IHS/SD/SDR HEAT284071
  D ^DIC K DIC
  Q:+Y<0
  S ABMFORM=+Y
  Q
 INS ;select insurer
- ;S DIC="^ABMNINS(DUZ(2),"  ;abm*2.6*13 IHS/SD/AML HEAT132667
- S DIC="^AUTNINS("  ;abm*2.6*13 IHS/SD/AML HEAT132667
+ ;S DIC="^ABMNINS(DUZ(2),"  ;abm*2.6*21 IHS/SD/AML HEAT132667
+ S DIC="^AUTNINS("  ;abm*2.6*21 IHS/SD/AML HEAT132667
  S DIC(0)="AEMQ"
  D ^DIC Q:+Y<0
  S ABMINS=+Y
  Q
 BOX ;select form locator
  S DIR(0)="S^10:RESERVED FOR LOCAL USE;11:BOX 11C - INSURANCE PLAN/PROGRAM NAME;19:RESERVED FOR LOCAL USE;24:LINE ITEMS;241:LINE 24, LINE 1 ITEM;32:WHERE SERVICES RENDERED;33:BILLING INFO"
- ;start new code abm*2.6*10 HEAT64983
+ ;start new abm*2.6*10 HEAT64983
  I ABMFORM'=3  S DIR(0)="S^10:RESERVED FOR LOCAL USE;11:BOX 11C - INSURANCE PLAN/PROGRAM NAME;19:RESERVED FOR LOCAL USE;24:LINE ITEMS;241:LINE 24, LINE 1 ITEM;31:SIGNATURE OF PHYSICIAN;32:WHERE SERVICES RENDERED;33:BILLING INFO"
+ I ABMFORM=34 D
+ .S DIR(0)="S^16:PLAN/GROUP NUMBER;38:PLACE OF SERVICE;48:BILLING DENTIST OR DENTAL ENTITY ADDRESS;"
+ .S DIR(0)=DIR(0)_"49:BILLING DENTIST NPI;50:BILLING DENTIST LICENSE NUMBER;51:SSN/TIN;52:PHONE NUMBER or ADD'L PROVIDER ID;"
+ .S DIR(0)=DIR(0)_"53:TREATING DENTIST/LOCATION;54:NPI;55:TREATING DENTIST LICENSE NUMBER;56:TREATING DENTIST ADDRESS or PROVIDER SPECIALTY CODE;57:PHONE NUMBER;58:ADD'L PROVIDER ID"
  S DIR("A")="Select Form Locator"
- ;end new code HEAT64983
+ ;end new HEAT64983
  D ^DIR K DIR
  Q:'+Y
  S ABMBOX=+Y
@@ -92,7 +96,8 @@ FILE ;file in 3P Insurer file
  .W !,"Entry Deleted.",!
  .D EOP^ABMDUTL(1)
  ;I ABMNM["BOX 32"!(ABMNM["BOX 33")!(ABMNM["BOX 24") D  ;abm*2.6*10 HEAT64983
- I ABMNM["BOX 31"!(ABMNM["BOX 32")!(ABMNM["BOX 33")!(ABMNM["BOX 24") D  ;abm*2.6*10 HEAT64983
+ ;I ABMNM["BOX 31"!(ABMNM["BOX 32")!(ABMNM["BOX 33")!(ABMNM["BOX 24") D  ;abm*2.6*10 HEAT64983  ;abm*2.6*21 IHS/SD/SDR HEAT284071
+ I ABMNM["BOX 31"!(ABMNM["BOX 32")!(ABMNM["BOX 33")!(ABMNM["BOX 24")!(ABMNM["BOX 48")!(ABMNM["BOX 56") D  ;abm*2.6*10 HEAT64983  ;abm*2.6*21 IHS/SD/SDR HEAT284071
  .K DIR
  .S DIR(0)="Y"
  .S DIR("A")="EDIT ANOTHER LINE?"
@@ -101,22 +106,22 @@ FILE ;file in 3P Insurer file
  .K DIR
  .I Y=1 G STARTA
  Q
-10 ;locator 10d
+10 ;1500 locator 10d
  S ABMLINE=19
  S ABMPIECE=2
  S ABMNM="BOX 10D LOCAL USE"
  Q
-11 ;locator 11C
+11 ;1500 locator 11C
  S ABMLINE=17
  S ABMPIECE=4
  S ABMNM="BOX 11C"
  Q
-19 ;locator 19
+19 ;1500 locator 19
  S ABMLINE=29
  S ABMPIECE=1
  S ABMNM="BOX 19 LOCAL USE"
  Q
-24 ;locator 24
+24 ;1500 locator 24
  K DIR
  S DIR(0)="S^1:A1 - DOS FROM;2:A2 - DOS TO;3:B - POS;4:C - TOS;5:D - HCPCS;6:E - DIAGNOSIS;7:F - CHARGE;8:G - UNITS;9:H - EPSDT;10:I - EMG;11:J - COB;12:K - LOCAL USE"
  ;S:ABMFORM=27 DIR(0)="S^1:A1 - DOS FROM;2:A2 - DOS TO;3:B - POS;4:C - EMG;5:D - HCPCS;6:E - DIAGNOSIS;7:F - CHARGE;8:G - UNITS;9:H - EPSDT;10:I - QUALIFIER;11:J - PROVIDER#"  ;abm*2.6*13 export mode 35
@@ -128,7 +133,7 @@ FILE ;file in 3P Insurer file
  S ABMPIECE=+Y
  S ABMNM="BOX 24 "_$S($G(Y(0)):Y(0),1:Y)
  Q
-241 ;location 24, line 1
+241 ;1500 location 24, line 1
  ;IHS/SD/AML 7/18/2012 - Begin new code - Allow correct override for Shaded line in Box 24
  K DIR
  S DIR(0)="S^1:PIECE 1 - FREE TEXT;2:I - ID QUALIFIER;3:J - IDENTIFIER"
@@ -145,7 +150,7 @@ FILE ;file in 3P Insurer file
  ;IHS/SD/AML 7/18/2012 - End old code
  Q
  ;start new code abm*2.6*10 HEAT64983
-31 ;locator 31
+31 ;1500 locator 31
  K DIR
  S DIR(0)="S^1:LINE 1;2:LINE 2"
  S DIR("A")="Enter Line Number"
@@ -156,7 +161,7 @@ FILE ;file in 3P Insurer file
  S ABMNM="BOX 31 "_$S($G(Y(0)):Y(0),1:Y)
  Q
  ;end new code HEAT64983
-32 ;locator 32
+32 ;1500 locator 32
  K DIR
  S DIR(0)="N^1:4"
  ;I ABMFORM=27 S DIR(0)="S^1:LINE 1;2:LINE 2;3:LINE 3;4:LINE 4 32A;5:LINE 4 32B"  ;abm*2.6*13 export mode 35
@@ -171,7 +176,7 @@ FILE ;file in 3P Insurer file
  I +Y=5 S ABMPIECE=2,ABMLINE=54
  S ABMNM="BOX 32 "_$S($G(Y(0)):Y(0),1:Y)
  Q
-33 ;locator 33
+33 ;1500 locator 33
  K DIR
  S DIR(0)="S^1:LINE 1;2:LINE 2;3:LINE 3;4:LINE 4 PIN#;5:LINE 4 GRP#"
  ;I ABMFORM=27 S DIR(0)="S^1:LINE 1;2:LINE 2;3:LINE 3;4:LINE 4 33A;5:LINE 4 33B"  ;abm*2.6*13 export mode 35
@@ -184,3 +189,89 @@ FILE ;file in 3P Insurer file
  I +Y=5 S ABMPIECE=4,ABMLINE=54
  S ABMNM="BOX 33 "_$S($G(Y(0)):Y(0),1:Y)
  Q
+ ;start new abm*2.6*21 IHS/SD/SDR HEAT284071
+16 ;ADA-2012 locator 16
+ S ABMLINE=12
+ S ABMPIECE=3
+ S ABMNM="BOX 16"
+ Q
+38 ;ADA-2012 locator 38
+ S ABMLINE=42
+ S ABMPIECE=1
+ S ABMNM="BOX 38"
+ Q
+48 ;ADA-2012 locator 48
+ K DIR
+ S DIR(0)="N^1:3"
+ S DIR(0)="S^1:LINE 1;2:LINE 2;3:LINE 3"
+ S DIR("A")="Enter Line Number"
+ D ^DIR K DIR
+ Q:'Y
+ S ABMLINE=+Y+53
+ S ABMPIECE=1
+ S ABMNM="BOX 48 "_$S($G(Y(0)):Y(0),1:Y)
+ Q
+49 ;ADA-2012 locator 49
+ S ABMLINE=59
+ S ABMPIECE=1
+ S ABMNM="BOX 49"
+ Q
+50 ;ADA-2012 locator 50
+ S ABMLINE=59
+ S ABMPIECE=2
+ S ABMNM="BOX 50"
+ Q
+51 ;ADA-2012 locator 51
+ S ABMLINE=59
+ S ABMPIECE=3
+ S ABMNM="BOX 51"
+ Q
+52 ;ADA-2012 locator 52 and 52A
+ K DIR
+ S DIR(0)="N^1:2"
+ S DIR(0)="S^1:52 PHONE NUMBER;2:52A ADDITIONAL PROVIDER ID"
+ S DIR("A")="Enter Line Number"
+ D ^DIR K DIR
+ Q:'Y
+ S ABMLINE=60
+ S ABMPIECE=+Y
+ S ABMNM="BOX 52"_$S(Y=2:"A",1:"")
+ Q
+53 ;ADA-2012 locator 53
+ S ABMLINE=54
+ S ABMPIECE=2
+ S ABMNM="BOX 53"
+ Q
+54 ;ADA-2012 locator 54
+ S ABMLINE=56
+ S ABMPIECE=2
+ S ABMNM="BOX 54"
+ Q
+55 ;ADA-2012 locator 55
+ S ABMLINE=56
+ S ABMPIECE=3
+ S ABMNM="BOX 55"
+ Q
+56 ;ADA-2012 locator 56
+ K DIR
+ S DIR(0)="N^1:3"
+ S DIR(0)="S^1:56 ADDRESS LINE 1;2:56 ADDRESS LINE 2;3:56A PROVIDER SPECIALTY CODE"
+ S DIR("A")="Enter Number"
+ D ^DIR K DIR
+ Q:'Y
+ S ABMLINE=$S(Y=2:59,Y=3:57,1:58)
+ S ABMPIECE=1
+ I ABMLINE=59 S ABMPIECE=4
+ S ABMNM="BOX 56"_$S(Y=3:"A",1:" LINE "_Y)
+ Q
+57 ;ADA-2012 locator 57
+ S ABMLINE=60
+ S ABMPIECE=3
+ S ABMNM="BOX 57"
+ Q
+58 ;ADA-2012 locator 58
+ S ABMLINE=60
+ S ABMPIECE=4
+ S ABMNM="BOX 58"
+ Q
+ ;end new abm*2.6*21 IHS/SD/SDR HEAT284071 

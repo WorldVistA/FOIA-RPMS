@@ -1,5 +1,5 @@
 AMHRPSU3 ; IHS/CMI/LAB - Suicide Form data element tally ;
- ;;4.0;IHS BEHAVIORAL HEALTH;**1**;JUN 18, 2010;Build 8
+ ;;4.0;IHS BEHAVIORAL HEALTH;**1,8**;JUN 02, 2010;Build 7
  ;
  ;
 START ;
@@ -105,6 +105,11 @@ V1 ;
  ..S AMHC=AMHC+1
  ..S Y=$P(^AMHPSUIC(AMHVDFN,13,AMHX,0),U),$P(AMHREC,U,AMHC)=$P(^AMHTSCF(Y,0),U,1)
  ..I $P(^AMHPSUIC(AMHVDFN,13,AMHX,0),U,2)]"" S $P(AMHREC,U,36)=$P(^AMHPSUIC(AMHVDFN,13,AMHX,0),U,2)
+ .S AMHDFNP=$P(^AMHPSUIC(AMHVDFN,0),U,4)
+ .S $P(AMHREC,U,37)=$P($$RACE^AGUTL(AMHDFNP),U,2)
+ .S $P(AMHREC,U,38)=$P($$RACE^AGUTL(AMHDFNP),U,3)
+ .S $P(AMHREC,U,39)=$$ETHN^AMHRPSU1(AMHDFNP,"E")
+ .S $P(AMHREC,U,40)=$$VAL^XBDIQ1(2,AMHDFNP,1901)
  .S ^XTMP("AMHRPSU3",AMHJ,AMHH,"RECS",AMHVDFN)=AMHREC
  Q
 PRINT ;EP called from xbdbque
@@ -120,6 +125,10 @@ PRINT ;EP called from xbdbque
  S $P(X,U,32)="Substance if Other"
  F AMHX=33:1:35 S $P(X,U,AMHX)="Contributing Factor "_(AMHX-32)
  S $P(X,U,36)="Contributing Factor, if other"
+ S $P(X,U,37)="Race"
+ S $P(X,U,38)="Race"
+ S $P(X,U,39)="Ethnicity"
+ S $P(X,U,40)="Veteran Status"
  W !!,X
  S AMHVDFN="" F  S AMHVDFN=$O(^XTMP("AMHRPSU3",AMHJ,AMHH,"RECS",AMHVDFN)) Q:AMHVDFN=""  D
  .W !,^XTMP("AMHRPSU3",AMHJ,AMHH,"RECS",AMHVDFN)

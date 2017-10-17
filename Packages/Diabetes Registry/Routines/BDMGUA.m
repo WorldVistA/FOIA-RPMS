@@ -1,5 +1,5 @@
 BDMGUA ; cmi/anch/maw - BDM DMS GUI Utilities ; 11 Feb 2010  7:45 AM
- ;;2.0;BDM DIABETES MANAGEMENT SYSTEM;**1,3,5,6,7,8,9**;JUN 14, 2007;Build 78
+ ;;2.0;BDM DIABETES MANAGEMENT SYSTEM;**1,3,5,6,7,8,9,10**;JUN 14, 2007;Build 12
  ;
  ;
  ;
@@ -9,7 +9,7 @@ DEBUG(BDMRET,BDMSTR) ;-- debug
  Q
  ;
 DELPT(BDMRET,BDMSTR) ;-- delete a patient and data from dms
- S X="MERR^BDMGU",@^%ZOSF("TRAP") ; m error trap
+ S X="MERR^BDMGU",@^%ZOSF("TRAP")
  N P,BDMPAT,BDMGREF,BDMI,BDMX
  S P="|"
  S BDMPAT=$P(BDMSTR,P)  ;patient
@@ -31,8 +31,8 @@ DELPT(BDMRET,BDMSTR) ;-- delete a patient and data from dms
  S BDMRET=""
  Q
  ;
-TAXCHKO(BDMRET) ;-- check taxonomies for DM Audit
- S X="MERR^BDMGU",@^%ZOSF("TRAP") ; m error trap
+TAXCHKO(BDMRET) ;-- check taxonomies for Audit
+ S X="MERR^BDMGU",@^%ZOSF("TRAP")
  N BDMI,BDMJ,BDMDATA,BDMDA
  S BDMI=0
  S BDMERR=""
@@ -51,8 +51,8 @@ TAXCHKO(BDMRET) ;-- check taxonomies for DM Audit
  K ^XTMP("BDMTAX",$J)
  Q
  ;
-TAXCHK(RETVAL,BDMSTR) ;-- check taxonomies for Visual DMS
- S X="MERR^BDMGU",@^%ZOSF("TRAP") ; m error trap
+TAXCHK(RETVAL,BDMSTR) ;-- check taxonomies
+ S X="MERR^BDMGU",@^%ZOSF("TRAP")
  N BDMI,BDMJ,BDMDATA,BDMDA,BDMRTN,P
  S P="|"
  S BDMI=0
@@ -74,7 +74,7 @@ TAXCHK(RETVAL,BDMSTR) ;-- check taxonomies for Visual DMS
  Q
  ;
 UPDTAX(BDMRET,BDMSTR) ;update taxonomies based on option selected
- S X="MERR^BDMGU",@^%ZOSF("TRAP") ; m error trap
+ S X="MERR^BDMGU",@^%ZOSF("TRAP")
  N P,BDMOPT,BDMI
  S P="|"
  S BDMI=0
@@ -130,6 +130,10 @@ UPDTAX(BDMRET,BDMSTR) ;update taxonomies based on option selected
  . D INIT^BDMPDTS
  I BDMOPT="Upd DM Audit 16" D
  . D INIT^BDMDDTS
+ I BDMOPT="Upd DM Audit P 17" D
+ . D INIT^BDMPETS
+ I BDMOPT="Upd DM Audit 17" D
+ . D INIT^BDMDETS
  N BDMDA,BDMT
  S BDMDA=0 F  S BDMDA=$O(BDMTAX("IDX",BDMDA)) Q:'BDMDA  D
  . N BDMN,BDMFL,BDMRO,BDMFLT,BDMPAN
@@ -152,7 +156,7 @@ UPDTAX(BDMRET,BDMSTR) ;update taxonomies based on option selected
  Q
  ;
 CHTDATA(BDMRET,BDMSTR) ;-- get lab, bp or wt data for chart
- S X="MERR^BDMGU",@^%ZOSF("TRAP") ; m error trap
+ S X="MERR^BDMGU",@^%ZOSF("TRAP")
  N P,BDMCTP,BDMBD,BDMED,BDMPIEN,BDMI,BDMPAT,BDMCHT,BDMINST,BDMLAB,BDMEL
  S P="|"
  S BDMCTP=$P(BDMSTR,P)
@@ -258,7 +262,7 @@ LAB(BD,ED,PIEN,PAT,CHT,INST,LAB,EL) ;-- get the chartable labss
  Q
  ;
 ASTMP(BDMRET,BDMSTR) ;-- add entries from search template
- S X="MERR^BDMGU",@^%ZOSF("TRAP") ; m error trap
+ S X="MERR^BDMGU",@^%ZOSF("TRAP")
  N P,BDMRGE,BDMST,BDMRG,BDMGLB,BDMU,BDMTRNE,BDMTRN
  S P="|"
  K ^BDMTMP($J)
@@ -280,7 +284,7 @@ ASTMP(BDMRET,BDMSTR) ;-- add entries from search template
  Q
  ;
 DELRPT(RETVAL,BDMSTR) ;-- delete a report out of the DMS GUI REPORT OUTPUT file
- S X="MERR^BDMGU",@^%ZOSF("TRAP") ; m error trap
+ S X="MERR^BDMGU",@^%ZOSF("TRAP")
  N P,R,I
  S P="|",R="~"
  S BDMERR=""
@@ -301,7 +305,7 @@ DELRPT(RETVAL,BDMSTR) ;-- delete a report out of the DMS GUI REPORT OUTPUT file
  Q
  ;
 PRB(BDMRET,BDMSTR) ;-- return a list of problems by patient
- S X="MERR^BDMGU",@^%ZOSF("TRAP") ; m error trap
+ S X="MERR^BDMGU",@^%ZOSF("TRAP")
  N BDMDA,BDMI,BDMERR,BDMDATA,BDMPAT,BDMPIEN,P,BDMDX,BDMDLM,BDMCL,BDMNAR,BDMFAC,BDMNMBR,BDMDE,BDMST,BDMON,BDMULM,BDMENT,BDMUENT
  N BDMOEN,BDMFACA,BDMFACE,BDMFAC,BDMPOVD,BDMDEL
  S P="|"
@@ -311,6 +315,8 @@ PRB(BDMRET,BDMSTR) ;-- return a list of problems by patient
  S BDMI=0
  S BDMERR=""
  S ^BDMTMP($J,BDMI)="T00035NMBR^T00010DIAGNOSISIEN^T00010DIAGNOSIS^T00020DLM^T00025CLASS^T00080NARRATIVE^T00020ENT^T00010STATUS^T00020ONSET^T00030ULM^T00030ENTER^T00003NOTES^T00008IEN^T00050FACILITY"_$C(30)
+ S ^BDMTMP($J,BDMI+1)=$C(31)
+ Q
  S BDMDA=0 F  S BDMDA=$O(^AUPNPROB("AA",BDMPAT,BDMDA)) Q:'BDMDA  D
  . S BDMIEN=0 F  S BDMIEN=$O(^AUPNPROB("AA",BDMPAT,BDMDA,BDMIEN)) Q:BDMIEN=""  D
  .. S BDMOEN=0 F  S BDMOEN=$O(^AUPNPROB("AA",BDMPAT,BDMDA,BDMIEN,BDMOEN)) Q:'BDMOEN  D
@@ -340,7 +346,7 @@ PRB(BDMRET,BDMSTR) ;-- return a list of problems by patient
  Q
  ;
 NOTES(BDMRET,BDMSTR) ;-- get problem list notes
- S X="MERR^BDMGU",@^%ZOSF("TRAP") ; m error trap
+ S X="MERR^BDMGU",@^%ZOSF("TRAP")
  N P,BDMDA,BDMIEN,BDMI
  S P="|"
  S BDMPIEN=$P(BDMSTR,P)
@@ -367,7 +373,7 @@ NOTES(BDMRET,BDMSTR) ;-- get problem list notes
  Q
  ;
 ADDPRB(BDMRET,BDMSTR) ;-- add a problem to the problem list
- S X="MERR^BDMGU",@^%ZOSF("TRAP") ; m error trap
+ S X="MERR^BDMGU",@^%ZOSF("TRAP")
  N P,BDMPAT,BDMDX,BDMDLM,BDMCL,BDMNAR,BDMFAC,BDMDE,BDMST,BDMON
  S P="|"
  S BDMPAT=$P(BDMSTR,P)
@@ -383,8 +389,8 @@ ADDPRB(BDMRET,BDMSTR) ;-- add a problem to the problem list
  S BDMRET=$$ADDPROB^BDMPROB(BDMDX,BDMPAT,BDMDLM,BDMCL,BDMNAR,BDMFAC,"",BDMST,BDMON)
  Q
  ;
-DELPR(BDMRET,BDMSTR) ;-- delete a problem from the problem list
- S X="MERR^BDMGU",@^%ZOSF("TRAP") ; m error trap
+DELPR(BDMRET,BDMSTR) ;-- delete a problem
+ S X="MERR^BDMGU",@^%ZOSF("TRAP")
  S R="~"
  N BDMIEN,BDMREA,BDMOTH
  S BDMIEN=$P(BDMSTR,R)
@@ -417,4 +423,3 @@ VC(RETVAL,BDMSTR) ;-- get version number to see if client matches
  S ^BDMTMP($J,BDMI)=0_$C(30)
  S ^BDMTMP($J,BDMI+1)=$C(31)
  Q
- ;

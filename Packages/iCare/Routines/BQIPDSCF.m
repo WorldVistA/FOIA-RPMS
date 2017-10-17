@@ -1,5 +1,5 @@
 BQIPDSCF ;VNGT/HS/BEE-Panel Description Utility ; 7 Apr 2008  4:28 PM
- ;;2.5;ICARE MANAGEMENT SYSTEM;**1**;May 24, 2016;Build 17
+ ;;2.6;ICARE MANAGEMENT SYSTEM;;Jul 07, 2017;Build 72
  ;
 FILTER(OWNR,PLIEN,FPARMS) ;EP - Include filter description
  ;
@@ -27,7 +27,7 @@ FILTER(OWNR,PLIEN,FPARMS) ;EP - Include filter description
  . S VALUE=$$GVAL(PTYP,90505.115,IENS,FSOURCE,FNAME)
  . ;
  . ;Pull associate parameters
- . S ASTR=$$ASPARM(FN)
+ . S ASTR=$$ASPARM^BQIPDSCL(FN)
  . ;
  . ;Call any defined executable
  . S PMAP=$$PMAP^BQIDCDF(FSOURCE,FNAME) I VALUE]"",PMAP]"" D MAP^BQIPDSCM(FSOURCE,PMAP,.VALUE,.FNAME)
@@ -36,14 +36,29 @@ FILTER(OWNR,PLIEN,FPARMS) ;EP - Include filter description
  . ;Save single value
  . I VALUE]"" D  Q
  .. I $G(ASTR)="",FNAME="LAB",$G(VALUE)'="",VALUE["^" S VALUE=$P(VALUE,"^",1)
+ .. I $G(ASTR)="",FNAME="MEAS",$G(VALUE)'="",VALUE["^" S VALUE=$P(VALUE,"^",1)
  .. I $G(ASTR)'="" D
  ... NEW RES
  ... I ASTR["NUMLAB" D
  .... S RES=$P(VALUE,U,2),VALUE=$P(VALUE,U,1)
  .... S VALUE=VALUE_" is"_$$LBRS^BQIPDSC1(ASTR)
+ ... NEW RES
+ ... I ASTR["NUMMEAS" D
+ .... S RES=$P(VALUE,U,2),VALUE=$P(VALUE,U,1)
+ .... S VALUE=VALUE_" is"_$$MSRS^BQIPDSC2(ASTR)
  ... I ASTR["SETLAB" D
  .... S RES=$P(VALUE,U,2),VALUE=$P(VALUE,U,1),ASTR=$P(ASTR,"SETLAB",2)
  .... NEW LVAL,NVAL
+ .... S VALUE=VALUE_" is "
+ .... S ASTR=$TR(ASTR,$C(28),""),NVAL=$L(ASTR,$C(29))
+ .... F I=1:1:NVAL S LVAL=$P(ASTR,$C(29),I) I LVAL'="" S VALUE=VALUE_$$SCD^BQIUL2(RES,LVAL)_$S(NVAL>1:" or ",1:"")
+ ... S VALUE=$$TKO^BQIUL1(VALUE," or ")
+ ... I ASTR["SETMEAS" D
+ .... ;S RES=$P(VALUE,U,2),VALUE=$P(VALUE,U,1),ASTR=$P(ASTR,"SETMEAS",2)
+ .... S ASTR=$P(ASTR,"SETMEAS",2)
+ .... NEW LVAL,NVAL,AN
+ .... S AN=$O(^BQI(90507.2,"B",VALUE,"")) I AN'="" S RES=$G(^BQI(90507.2,AN,2))
+ .... I AN="" S AN=$O(^BQI(90507.2,"C",VALUE,"")) I AN'="" S RES=$G(^BQI(90507.2,AN,2))
  .... S VALUE=VALUE_" is "
  .... S ASTR=$TR(ASTR,$C(28),""),NVAL=$L(ASTR,$C(29))
  .... F I=1:1:NVAL S LVAL=$P(ASTR,$C(29),I) I LVAL'="" S VALUE=VALUE_$$SCD^BQIUL2(RES,LVAL)_$S(NVAL>1:" or ",1:"")
@@ -58,7 +73,7 @@ FILTER(OWNR,PLIEN,FPARMS) ;EP - Include filter description
  .. S VALUE=$$GMVAL(PTYP,90505.1151,IENS,FSOURCE,FNAME)
  .. ;
  .. ;Pull associate parameters
- .. S ASTR=$$ASMPARM(MN)
+ .. S ASTR=$$ASMPARM^BQIPDSCL(MN)
  .. ;
  .. ;Call any defined executable
  .. I VALUE]"",PMAP]"" D MAP^BQIPDSCM(FSOURCE,PMAP,.VALUE,.FNAME)
@@ -67,15 +82,30 @@ FILTER(OWNR,PLIEN,FPARMS) ;EP - Include filter description
  .. ;Save multiple value
  .. I VALUE]"" D
  ... I $G(ASTR)="",FNAME="LAB",$G(VALUE)'="",VALUE["^" S VALUE=$P(VALUE,"^",1)
+ ... I $G(ASTR)="",FNAME="MEAS",$G(VALUE)'="",VALUE["^" S VALUE=$P(VALUE,"^",1)
  ... I $G(ASTR)'="" D
  .... NEW RES
  .... I ASTR["NUMLAB" D
  ..... S RES=$P(VALUE,U,2),VALUE=$P(VALUE,U,1)
  ..... S VALUE=VALUE_" is"_$$LBRS^BQIPDSC1(ASTR)
+ .... NEW RES
+ .... I ASTR["NUMMEAS" D
+ ..... S RES=$P(VALUE,U,2),VALUE=$P(VALUE,U,1)
+ ..... S VALUE=VALUE_" is"_$$MSRS^BQIPDSC2(ASTR)
  .... I ASTR["SETLAB" D
  ..... S RES=$P(VALUE,U,2),VALUE=$P(VALUE,U,1),ASTR=$P(ASTR,"SETLAB",2)
  ..... S VALUE=VALUE_" is "
  ..... NEW LVAL,NVAL
+ ..... S ASTR=$TR(ASTR,$C(28),""),NVAL=$L(ASTR,$C(29))
+ ..... F I=1:1:NVAL S LVAL=$P(ASTR,$C(29),I) I LVAL'="" S VALUE=VALUE_$$SCD^BQIUL2(RES,LVAL)_$S(NVAL>1:" or ",1:"")
+ .... ;S VALUE=$$TKO^BQIUL1(VALUE," or ")
+ .... I ASTR["SETMEAS" D
+ ..... ;S RES=$P(VALUE,U,2),VALUE=$P(VALUE,U,1),ASTR=$P(ASTR,"SETMEAS",2)
+ ..... S ASTR=$P(ASTR,"SETMEAS",2)
+ ..... NEW LVAL,NVAL,AN
+ ..... S AN=$O(^BQI(90507.2,"B",VALUE,"")) I AN'="" S RES=$G(^BQI(90507.2,AN,2))
+ ..... I AN="" S AN=$O(^BQI(90507.2,"C",VALUE,"")) I AN'="" S RES=$G(^BQI(90507.2,AN,2))
+ ..... S VALUE=VALUE_" is "
  ..... S ASTR=$TR(ASTR,$C(28),""),NVAL=$L(ASTR,$C(29))
  ..... F I=1:1:NVAL S LVAL=$P(ASTR,$C(29),I) I LVAL'="" S VALUE=VALUE_$$SCD^BQIUL2(RES,LVAL)_$S(NVAL>1:" or ",1:"")
  .... S VALUE=$$TKO^BQIUL1(VALUE," or ")
@@ -94,6 +124,7 @@ GVAL(PTYP,FILN,IENS,SRC,NM) ; EP - Get value of parameter/filter
  .. S VALUE=$P(@PGL@($P(VALUE,";",1),0),U,1)
  . S BQFIL=$$FILN^BQIDCDF(SRC,NM) Q:BQFIL=""
  . I NM="LAB",VALUE'="" S LABR=$$LSET^BQIDCAH3(VALUE)
+ . I NM="MEAS",VALUE'="" S VALUE=$$GET1^DIQ(BQFIL,VALUE_",",.01,"E") Q
  . S VALUE=$$GET1^DIQ(BQFIL,VALUE_",",.01,"E")
  ;
  ;Non-table
@@ -106,107 +137,16 @@ GVAL(PTYP,FILN,IENS,SRC,NM) ; EP - Get value of parameter/filter
  ;
  Q VALUE_$S($G(LABR)'="":"^"_LABR,1:"")
  ;
-ASPARM(FN) ;EP - Retrieve associated parameters from single value field
- NEW AP,APRM,ASTR
- ;First look for single value parameter
- S AP=0
- F  S AP=$O(^BQICARE(OWNR,1,PLIEN,15,FN,2,AP)) Q:'AP  D
- . NEW DA,IENS,APNAME,AVALUE,APTYP
- . S DA(3)=OWNR,DA(2)=PLIEN,DA(1)=FN,DA=AP,IENS=$$IENS^DILF(.DA)
- . S APNAME=$$GET1^DIQ(90505.1152,IENS,.01,"E") Q:APNAME=""
- . S APTYP=$$PTYP^BQIDCDF(FSOURCE,APNAME)
- . S AVALUE=$$GVAL(APTYP,90505.1152,IENS,FSOURCE,APNAME)
- . I AVALUE'="" S APRM(APNAME)=AVALUE
- . ;
- . ;Now try looking for multi value parameter
- . I AVALUE="" D
- .. NEW MAP
- .. S MAP=0
- .. F  S MAP=$O(^BQICARE(OWNR,1,PLIEN,15,FN,2,AP,1,MAP)) Q:'MAP  D
- ... NEW DA,IENS,AVAL
- ... S DA(4)=OWNR,DA(3)=PLIEN,DA(2)=FN,DA(1)=AP,DA=MAP,IENS=$$IENS^DILF(.DA)
- ... S AVAL=$$GET1^DIQ(90505.11521,IENS,.01,"E")
- ... S AVAL=$$GMVAL(APTYP,90505.11521,IENS,FSOURCE,APNAME)
- ... I AVAL'="" S AVALUE=AVALUE_$S(AVALUE="":"",1:$C(29))_AVAL
- .. S:AVALUE]"" APRM(APNAME)=AVALUE
- S ASTR=""
- S APRM="" F  S APRM=$O(APRM(APRM)) Q:APRM=""  D
- . ;
- . ;Form associate string
- . S ASTR=ASTR_$S(ASTR="":"",1:$C(26))_APRM_$C(28)_APRM(APRM)
- Q ASTR
- ;
-ASMPARM(MN) ;EP - Retrieve associated parameters from multiple value field
- NEW AP,APRM,ASTR
- ;First look for single value parameter
- S AP=0
- F  S AP=$O(^BQICARE(OWNR,1,PLIEN,15,FN,1,MN,2,AP)) Q:'AP  D
- . NEW DA,IENS,APNAME,AVALUE,APTYP
- . S DA(4)=OWNR,DA(3)=PLIEN,DA(2)=FN,DA(1)=MN,DA=AP,IENS=$$IENS^DILF(.DA)
- . S APNAME=$$GET1^DIQ(90505.11512,IENS,.01,"E") Q:APNAME=""
- . S APTYP=$$PTYP^BQIDCDF(FSOURCE,APNAME)
- . S AVALUE=$$GVAL(APTYP,90505.11512,IENS,FSOURCE,APNAME)
- . I AVALUE'="" S APRM(APNAME)=AVALUE
- . ;Now try looking for multi value parameter
- . I AVALUE="" D
- .. NEW MAP
- .. S MAP=0
- .. F  S MAP=$O(^BQICARE(OWNR,1,PLIEN,15,FN,1,MN,2,AP,1,MAP)) Q:'MAP  D
- ... NEW DA,IENS,AVAL
- ... S DA(5)=OWNR,DA(4)=PLIEN,DA(3)=FN,DA(2)=MN,DA(1)=AP,DA=MAP,IENS=$$IENS^DILF(.DA)
- ... S AVAL=$$GET1^DIQ(90505.115121,IENS,.01,"E")
- ... S AVAL=$$GMVAL(APTYP,90505.115121,IENS,FSOURCE,APNAME)
- ... I AVAL'="" S AVALUE=AVALUE_$S(AVALUE="":"",1:$C(29))_AVAL
- .. S:AVALUE]"" APRM(APNAME)=AVALUE
- S ASTR=""
- S APRM="" F  S APRM=$O(APRM(APRM)) Q:APRM=""  D
- . ;Form associate string
- . S ASTR=ASTR_$S(ASTR="":"",1:$C(26))_APRM_$C(28)_APRM(APRM)
- Q ASTR
- ;
 GMVAL(PTYP,FILN,IENS,SRC,NM) ; EP - Get value for multiples
  N VALUE,BQFIL,LABR
  I PTYP="T" D
  . S VALUE=$$GET1^DIQ(FILN,IENS,.02,"E")
  . S BQFIL=$$FILN^BQIDCDF(SRC,NM) Q:BQFIL=""
  . I NM="LAB",VALUE'="" S LABR=$$LSET^BQIDCAH3(VALUE)
+ . ;I NM="MEAS" Q
  . S VALUE=$$GET1^DIQ(BQFIL,VALUE,.01,"E")
  I PTYP'="T" S VALUE=$$GET1^DIQ(FILN,IENS,.01,"E")
  Q VALUE_$S($G(LABR)'="":"^"_LABR,1:"")
- ;
-NVIS(PORD,VALUE,ASTR) ;EP - Assemble number of visits
- NEW I,CLIN,PROV,STR,N1,N2,FND,V,VAL
- S ASTR=$G(ASTR,"")
- S (CLIN,PROV)=""
- F I=1:1:$L($G(ASTR),$C(26)) D
- . NEW FINFO,FNAME,FVAL,NVAL,PC
- . S FINFO=$P(ASTR,$C(26),I)
- . S FNAME=$P(FINFO,$C(28)) Q:FNAME=""
- . S FVAL=$P(FINFO,$C(28),2) Q:FVAL=""
- . S NVAL=""
- . F PC=1:1:$L(FVAL,$C(29)) D
- .. S VAL=$P(FVAL,$C(29),PC) S:VAL]"" NVAL=NVAL_$S(NVAL]"":", ",1:"")_VAL
- . I FNAME]"",NVAL]"" S @FNAME=NVAL
- ;
- ;Get visit number(s)
- S (N1,FND)="" F I=1:1:$L(VALUE) Q:(FND=1&($E(VALUE,I)'?1N))  I $E(VALUE,I)?1N S N1=N1_$E(VALUE,I),FND=1
- Q:N1=""
- S (N2,FND)="" I I<$L(VALUE) F I=I:1:$L(VALUE) Q:(FND=1&($E(VALUE,I)'?1N))  I $E(VALUE,I)?1N S N2=N2_$E(VALUE,I),FND=1
- ;
- S STR="# of Visits"
- I CLIN]"" S STR=STR_" in clinic "_CLIN
- I PROV]"" S STR=STR_" for provider "_PROV
- ;
- S V=VALUE
- I V["~",V["'" S STR=STR_" in range (inclusive) "_N1_" thru "_N2
- E  I V["~" S STR=STR_" out of range (exclusive) less than "_N1_" or greater than "_N2
- E  I V["'<" S STR=STR_" greater than or equal to "_N1
- E  I V["'>" S STR=STR_" less than or equal to "_N1
- E  I V["<" S STR=STR_" less than "_N1
- E  I V[">" S STR=STR_" greater than "_N1
- E  S STR=STR_" equal to "_N1
- S VALUE=STR
- Q
  ;
 DLM(FPARMS,FLD) ;EP - Determine delimiter between multiple entries
  NEW PORD,FND,FNAME,FENT

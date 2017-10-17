@@ -1,5 +1,5 @@
 BGP7D721 ; IHS/CMI/LAB - measure AHR.A ;
- ;;17.0;IHS CLINICAL REPORTING;;AUG 30, 2016;Build 16
+ ;;17.1;IHS CLINICAL REPORTING;;MAY 10, 2017;Build 29
  ;
  ;
 IAHRA ;EP
@@ -52,48 +52,6 @@ IAHRA ;EP
  .S BGPVALUE=BGPVALUE_$P(BGPSTAT(X),U,2)_$S($P(BGPSTAT(X),U,3)]"":" "_$P(BGPSTAT(X),U,3),1:"")
  K ^TMP($J)
  Q
-IHD(P,BDATE,EDATE) ;EP
- ;first dx prior to report period
- ;at least 2 visits during report period
- ;at least 2 ihd dxs ever
- I '$$V2^BGP7D1(P,BDATE,EDATE) Q ""  ;not 2 visits during report period
- K ^TMP($J)
- I '$$FIRSTIHD(P,EDATE) Q ""  ;first dx not prior to report period
- I '$$V2IHD(P,$$DOB^AUPNPAT(P),EDATE) Q ""  ;at least 2 IHD dxs ever
- Q 1
-FIRSTIHD(P,EDATE) ;EP
- I $G(P)="" Q ""
- NEW BGPG,Y,X,E
- K BGPG
- S Y="BGPG("
- S X=P_"^FIRST DX [BGP IHD DXS" S E=$$START1^APCLDF(X,Y)
- I '$D(BGPG(1)) Q ""
- S X=$$FMDIFF^XLFDT(EDATE,$P(BGPG(1),U))
- Q $S(X>365:1,1:"")
- ;
-V2IHD(P,BDATE,EDATE) ;EP
- I '$G(P) Q ""
- I '$D(^AUPNVSIT("AC",P)) Q ""
- NEW A,B,E,T,X,G,V,Y,%,G
- K ^TMP($J,"A")
- S A="^TMP($J,""A"",",B=P_"^ALL VISITS;DURING "_$$FMTE^XLFDT(BDATE)_"-"_$$FMTE^XLFDT(EDATE),E=$$START1^APCLDF(B,A)
- I '$D(^TMP($J,"A",1)) Q ""
- S T=$O(^ATXAX("B","BGP IHD DXS",0))
- I 'T Q ""
- S (X,G)=0 F  S X=$O(^TMP($J,"A",X)) Q:X'=+X!(G>2)  S V=$P(^TMP($J,"A",X),U,5) D
- .Q:'$D(^AUPNVSIT(V,0))
- .Q:'$P(^AUPNVSIT(V,0),U,9)
- .Q:$P(^AUPNVSIT(V,0),U,11)
- .Q:"SAHO"'[$P(^AUPNVSIT(V,0),U,7)
- .Q:"V"[$P(^AUPNVSIT(V,0),U,3)
- .Q:$P(^AUPNVSIT(V,0),U,6)=""
- .S (D,Y)=0 F  S Y=$O(^AUPNVPOV("AD",V,Y)) Q:Y'=+Y!(D)  I $D(^AUPNVPOV(Y,0)) S %=$P(^AUPNVPOV(Y,0),U) I $$ICD^BGP7UTL2(%,T,9) S D=1
- .Q:'D
- .S G=G+1
- .Q
- K ^TMP($J,"A")
- Q $S(G<2:"",1:1)
- ;
 BETA(P,BDATE,EDATE,BGPNDAYS) ;EP
  NEW BGPMEDS1,K,R,T,T1,X,Y,G,D,N,J,V,S
  K BGPMEDS1

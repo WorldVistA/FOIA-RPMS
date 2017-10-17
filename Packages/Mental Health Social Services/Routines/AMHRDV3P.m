@@ -1,5 +1,5 @@
 AMHRDV3P ; IHS/CMI/LAB - list refusals ;
- ;;4.0;IHS BEHAVIORAL HEALTH;;MAY 14, 2010
+ ;;4.0;IHS BEHAVIORAL HEALTH;**8**;JUN 02, 2010;Build 7
  ;
  ;
 PRINT ;EP - called from xbdbque
@@ -159,7 +159,8 @@ SHOW ;
  .I X=4 W "  ","PRESENT AND PAST"
  .I X=5 W "  ","REFUSED"
  .I X=6 W "  ","UNABLE TO SCREEN"
- .I X=7 W !?8,"SCREENINGS WITH NO RECORDED RESULT"
+ .I X=7 W "  ","REFERRAL NEEDED"
+ .I X=8 W !?8,"SCREENINGS WITH NO RECORDED RESULT"
  I $D(AMHRCLNT) W !,"Screenings done in the following clinics are included:" D
  .S X=0 F  S X=$O(AMHRCLNT(X)) Q:X'=+X  W !?10,$P(^DIC(40.7,X,0),U)," ("_$P(^DIC(40.7,X,0),U,2)_")"
  I '$D(AMHRCLNT),AMHREXPC W !,"Screenings done in ALL clinics included"

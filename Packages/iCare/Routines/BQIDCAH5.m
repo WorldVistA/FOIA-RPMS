@@ -1,5 +1,5 @@
 BQIDCAH5 ;GDIT/HS/ALA-Ad Hoc Logic Continued ; 18 Jan 2013  6:42 AM
- ;;2.5;ICARE MANAGEMENT SYSTEM;**1**;May 24, 2016;Build 17
+ ;;2.6;ICARE MANAGEMENT SYSTEM;;Jul 07, 2017;Build 72
  ;
 DOB(FGLOB,TGLOB,DBFROM,DBTHRU) ;EP - Date of Birth search
  I $G(TGLOB)="" Q
@@ -74,9 +74,9 @@ RCE ;EP
  Q
  ;
 RCHK ;EP
- I $G(RCN)?.N S RACE=$P(^DIC(10,RCN,0),U,1)
- I $P($$RCE^BQIPTDMG(IEN,.01),$C(28),2)'=RACE Q
- S @TGLOB@(IEN)=""
+ ;I $G(RCN)?.N S RACE=$P(^DIC(10,RCN,0),U,1)
+ ;I $P($$RCE^BQIPTDMG(IEN,.01),$C(28),2)'=RACE Q
+ I $D(^DPT(IEN,.02,RCN)) S @TGLOB@(IEN)=""
  Q
  ;
 ETHN(FGLOB,TGLOB,ETHN,MPARMS) ;EP - Ethnicity search
@@ -97,9 +97,9 @@ ETH ;EP
  Q
  ;
 ECHK ;EP
- I EN?.N S ETHN=$P(^DIC(10.2,EN,0),U,1)
- I $P($$ETHN^BQIPTDMG(IEN,.01),$C(28),2)'=ETHN Q
- S @TGLOB@(IEN)=""
+ ;I EN?.N S ETHN=$P(^DIC(10.2,EN,0),U,1)
+ ;I $P($$ETHN^BQIPTDMG(IEN,.01),$C(28),2)'=ETHN Q
+ I $D(^DPT(IEN,.06,EN)) S @TGLOB@(IEN)=""
  Q
  ;
 PLANG(FGLOB,TGLOB,PLANG) ;EP - Preferred Language search

@@ -1,5 +1,6 @@
 ABMDTEMR ; IHS/ASDST/DMJ - MERGE EMPLOYER DATA ;
- ;;2.6;IHS 3P BILLING SYSTEM;;NOV 12, 2009
+ ;;2.6;IHS 3P BILLING SYSTEM;**21**;NOV 12, 2009;Build 379
+ ;IHS/SD/SDR - 2.6*21 - HEAT184392 - Correction to Policy Holder repoint to use ^AUPN3PPH instead of ^AUPNPAT
  ;
  S U="^"
 SEL W !
@@ -55,7 +56,8 @@ MV2 S DIK="^AUTNEMPL(",DA=ABM("X") D ^DIK
  W !!,"Re-directing Pointers..."
  S DA="" F ABMZ("I")=1:1 S DA=$O(^AUPNPAT("AF",ABM("X"),DA)) Q:'DA  S DIE="^AUPNPAT(",DR=".19////"_ABM("Y") D ^ABMDDIE K DR
  S DA="" F ABMZ("I")=1:1 S DA=$O(^AUPNPAT("AG",ABM("X"),DA)) Q:'DA  S DIE="^AUPNPAT(",DR=".22////"_ABM("Y") D ^ABMDDIE K DR
- S DA="" F ABMZ("I")=1:1 S DA=$O(^AUPN3PPH("AE",ABM("X"),DA)) Q:'DA  S DIE="^AUPNPAT(",DR=".16////"_ABM("Y") D ^ABMDDIE K DR
+ ;S DA="" F ABMZ("I")=1:1 S DA=$O(^AUPN3PPH("AE",ABM("X"),DA)) Q:'DA  S DIE="^AUPNPAT(",DR=".16////"_ABM("Y") D ^ABMDDIE K DR  ;abm*2.6*21 IHS/SD/SDR HEAT184392
+ S DA="" F ABMZ("I")=1:1 S DA=$O(^AUPN3PPH("AE",ABM("X"),DA)) Q:'DA  S DIE="^AUPN3PPH(",DR=".16////"_ABM("Y") D ^ABMDDIE K DR  ;abm*2.6*21 IHS/SD/SDR HEAT184392
  Q
  ;
 XIT K ABM

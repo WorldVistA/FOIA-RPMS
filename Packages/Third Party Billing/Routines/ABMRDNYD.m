@@ -1,0 +1,50 @@
+ABMRDNYD ; IHS/SD/SDR - Bill Status Report ;
+ ;;2.6;IHS 3P BILLING SYSTEM;**21**;NOV 12, 2009;Build 379
+ ; IHS/SD/SDR - 2.6*21 - HEAT241429 - New Report
+ ;
+ K ABM,ABMY
+ S ABM("RFOR")=1  ;printer or comma-delimited
+ S ABM("RFOR","NM")="Printer"
+ S ABM("PG")=0
+ S ABM("DNYDT")=""
+ ;
+SEL ;
+ S ABM("NODX")=""
+ S ABM("NOSTAT")=""
+ D ^ABMDRSEL Q:$D(DTOUT)!$D(DUOUT)!$D(DIROUT)
+ S ABM("HD",0)="Bill Status Report"
+ D ^ABMDRHD
+ S ABMQ("RC")="COMPUTE^ABMRDNYD"
+ S ABMQ("RX")="POUT^ABMDRUTL"
+ S ABMQ("NS")="ABM"
+ S ABMQ("RP")="PRINT^ABMRDNY"_ABM("RFOR")
+ D ^ABMDRDBQ
+ Q
+ ;
+COMPUTE ;EP - Entry Point for Setting up Data
+ S ABM("SUBR")="ABM-RDNY"
+ K ^TMP("ABM-RDNY",$J)
+SLOOP ;
+ I $D(ABMY("DT")) D  Q
+ .S ABM("RD")=ABMY("DT",1)-1
+ .F  S ABM("RD")=$O(^ABMDBILL(DUZ(2),"AD",ABM("RD"))) Q:'+ABM("RD")!(ABM("RD")>ABMY("DT",2))  D
+ ..S ABM=""
+ ..F  S ABM=$O(^ABMDBILL(DUZ(2),"AD",ABM("RD"),ABM)) Q:'ABM  D DATA
+ ;LOOP THROUGH STATUS
+ S ABM("RD")=0
+ F  S ABM("RD")=$O(^ABMDBILL(DUZ(2),"AD",ABM("RD"))) Q:'ABM("RD")  D
+ .S ABM=""
+ .F  S ABM=$O(^ABMDBILL(DUZ(2),"AD",ABM("RD"),ABM)) Q:'ABM  D DATA
+ Q
+ ;
+DATA ;
+ S ABMP("HIT")=0
+ D BILL^ABMDRCHK Q:'ABMP("HIT")
+ I '$D(ABMY("PRV")) D
+ .S ABMT=$O(^ABMDBILL(DUZ(2),ABM,41,"C","A",0))
+ .I +ABMT=0 S ABMT=$O(^ABMDBILL(DUZ(2),ABM,41,"C","R",0))
+ .I +ABMT=0 S ABMT("PRV")="NO PROVIDER"
+ .I +ABMT>0 S ABMT("PRV")=$$GET1^DIQ(200,$P($G(^ABMDBILL(DUZ(2),ABM,41,ABMT,0)),U),".01","E")
+ I $D(ABMY("PRV")) S ABMT("PRV")=$$GET1^DIQ(200,ABMY("PRV"),".01","E")
+ S ^TMP("ABM-RDNY",$J,ABMT("PRV"),ABM)=""
+ Q

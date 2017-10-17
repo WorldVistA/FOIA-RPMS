@@ -1,9 +1,10 @@
 ABMDTFEE ; IHS/ASDST/DMJ - Table Maintenance of 3P CODES ;
- ;;2.6;IHS Third Party Billing;**1,2**;NOV 12, 2009
+ ;;2.6;IHS Third Party Billing;**1,2,21**;NOV 12, 2009;Build 379
  ;
- ; IHS/SD/SDR - v2.6 CSV
- ; IHS/SD/SDR - abm*2.6*1 - NO HEAT - Populate owner of table
- ; IHS/SD/SDR - abm*2.6*2 - 3PMS10003A - populate new effective dates multiple
+ ;IHS/SD/SDR - v2.6 CSV
+ ;IHS/SD/SDR - abm*2.6*1 - NO HEAT - Populate owner of table
+ ;IHS/SD/SDR - abm*2.6*2 - 3PMS10003A - populate new effective dates multiple
+ ;IHS/SD/SDR 2.6*21 HEAT135354 Fix so when CPT selected the effective fee, if there is one, will display; was just printing a dash, no description, and 0.00 for the fee no matter what was entered.
  ;
  S U="^" W !
 FEE K DIC
@@ -38,7 +39,8 @@ EDIT K DIC  ;abm*2.6*2 3PMS10003A moved EDIT tag to here
  ;end old code start new code 3PMS10003A
  I ABM=7 S DIC("W")="W "" - "",$P($G(^AUTTREVN(Y,0)),U,2),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),31,Y,DT),U),"","",2),9)"
  I ABM=6 S DIC("W")="W "" - "",$P($G(^AUTTADA(Y,0)),U,2),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),21,Y,DT),U),"","",2),9)"
- I "123458"[ABM S DIC("W")="W "" - "",$P($$CPT^ABMCVAPI(Y,DT),U,3),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),ABM(""SUB""),Y,DT),U),"","",2),9)"  ;CSV-c
+ ;I "123458"[ABM S DIC("W")="W "" - "",$P($$CPT^ABMCVAPI(Y,DT),U,3),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),ABM(""SUB""),Y,DT),U),"","",2),9)"  ;CSV-c  ;abm*2.6*21 IHS/SD/SDR HEAT135354
+ I "123458"[ABM S DIC("W")="W "" - "",$P($$CPT^ABMCVAPI(X,DT),U,3),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),ABM(""SUB""),$P($$CPT^ABMCVAPI(X,DT),U),DT),U),"","",2),9)"  ;CSV-c  ;abm*2.6*21 IHS/SD/SDR HEAT135354
  ;end new code 3PMS10003A
  ;
  W !!  ;abm*2.6*2 3PMS10003A removed EDIT tag from here

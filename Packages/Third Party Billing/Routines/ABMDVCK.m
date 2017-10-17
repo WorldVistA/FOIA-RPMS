@@ -1,5 +1,5 @@
 ABMDVCK ; IHS/ASDST/DMJ - PCC Visit Edits ;  
- ;;2.6;IHS 3P BILLING SYSTEM;**11,19,20**;NOV 12, 2009;Build 317
+ ;;2.6;IHS 3P BILLING SYSTEM;**11,19,20,21**;NOV 12, 2009;Build 379
  ;Original;TMD;08/19/96 4:49 PM
  ;Note special input variable ABMDFN
  ;It is optional
@@ -29,6 +29,7 @@ ABMDVCK ; IHS/ASDST/DMJ - PCC Visit Edits ;
  ;  generate claims.
  ;IHS/SD/SDR - 2.6*20 - HEAT270671 - Made change to stop <UNDEF>SITE+1^ABMDVCK error.  Occurs when there is an entry
  ;  in the A/R Parent/Satellite file but no matching entry in the 3P Parameter file.
+ ;IHS/SD/SDR - 2.6*21 - HEAT130406 - Removed auto-purge of claims from CG.
  ; *********************************************************************
 START ;START HERE
  I DUZ(2)="" S DUZ(2)=1
@@ -152,21 +153,23 @@ SITE ;ONE SITE
  I '$D(ABMDFN),$P(^ABMDPARM(DUZ(2),1,0),U,19) D ^ABMDBACK
  ;
 AP ;AUTO PURGE CLAIMS
- S ABM("DIF")=$S($P($G(^ABMDPARM(DUZ(2),1,2)),U,8):$P(^(2),U,8),1:180)
- S X1=DT
- S X2=-ABM("DIF")
- D C^%DTC
- S ABM("DIF")=X
- ;X-ref AC on date last edited
- I '$D(ABMDFN) D
- .;F ABM("C")=0:0 S ABM("C")=$O(^ABMDCLM(DUZ(2),"AC",ABM("C"))) Q:'ABM("C")  Q:ABM("C")>ABM("DIF")  D
- ..S ABMP("CDFN")=0
- ..F  S ABMP("CDFN")=$O(^ABMDCLM(DUZ(2),"AC",ABM("C"),ABMP("CDFN"))) Q:'ABMP("CDFN")  D
- ...Q:$P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),0)),"^",4)="U"
- ...Q:$D(^ABMDBILL(DUZ(2),"AS",ABMP("CDFN")))
- ...;Kill claim
- ...S DR=".04///2"
- ...D KCLM^ABMDECAN
+ ;start old abm*2.6*21 IHS/SD/SDR HEAT130406
+ ;S ABM("DIF")=$S($P($G(^ABMDPARM(DUZ(2),1,2)),U,8):$P(^(2),U,8),1:180)
+ ;S X1=DT
+ ;S X2=-ABM("DIF")
+ ;D C^%DTC
+ ;S ABM("DIF")=X
+ ;;X-ref AC on date last edited
+ ;I '$D(ABMDFN) D
+ ;.;F ABM("C")=0:0 S ABM("C")=$O(^ABMDCLM(DUZ(2),"AC",ABM("C"))) Q:'ABM("C")  Q:ABM("C")>ABM("DIF")  D
+ ;..S ABMP("CDFN")=0
+ ;..F  S ABMP("CDFN")=$O(^ABMDCLM(DUZ(2),"AC",ABM("C"),ABMP("CDFN"))) Q:'ABMP("CDFN")  D
+ ;...Q:$P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),0)),"^",4)="U"
+ ;...Q:$D(^ABMDBILL(DUZ(2),"AS",ABMP("CDFN")))
+ ;...;Kill claim
+ ;...S DR=".04///2"
+ ;...D KCLM^ABMDECAN
+ ;end old abm*2.6*21 IHS/SD/SDR HEAT130406
  ;
 VLP ;LOOP THROUGH VISITS IN VISIT FILE
  ;ABILL X-REF set in ABMDBACK. On date visit created

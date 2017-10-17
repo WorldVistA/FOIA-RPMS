@@ -1,5 +1,5 @@
 BQIUL2 ;PRXM/HC/ALA-Miscellaneous BQI utilities ; 01 Nov 2007  2:20 PM
- ;;2.5;ICARE MANAGEMENT SYSTEM;**1**;May 24, 2016;Build 17
+ ;;2.6;ICARE MANAGEMENT SYSTEM;;Jul 07, 2017;Build 72
  ;
 STC(FIL,FLD,VAL) ; EP - Find a value for a set of codes code
  ;  Input Parameters
@@ -50,7 +50,7 @@ PTR(FIL,FLD,VVAL,VPEC) ;EP - Find alternate value for a pointer
  K VEPAR
  ;
  D FIELD^DID(VFILN,VPEC,"N","GLOBAL SUBSCRIPT LOCATION","ARR")
- S ARR1=ARR("GLOBAL SUBSCRIPT LOCATION")
+ S ARR1=$G(ARR("GLOBAL SUBSCRIPT LOCATION"))
  ;
  I VVAL'="" S VEHDTA="^"_VEDATA_VVAL_","_$P(ARR1,";",1)_")"
  ;
@@ -108,7 +108,7 @@ MCD(DFN) ;EP - Medicaid Number
  Q RESULT
  ;
 NSC(DFN,TMFRAME,TYP) ;EP - Number of no shows and patient cancels
- NEW BDT,NSC,PCC,STAT
+ NEW BDT,NSC,PCC,STAT,PAR
  I $G(TMFRAME)="" S BDT=$E(DT,1,3)_"0101"
  I $G(TMFRAME)'="" S BDT=$$DATE^BQIUL1(TMFRAME)
  S NSC=0,PCC=0

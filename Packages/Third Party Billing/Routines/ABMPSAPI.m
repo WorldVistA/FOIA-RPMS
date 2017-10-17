@@ -1,5 +1,5 @@
 ABMPSAPI ; IHS/ASDS/LSL - 3PB Pharmacy POS API   
- ;;2.6;IHS Third Party Billing System;**2,4,6**;NOV 12, 2009
+ ;;2.6;IHS Third Party Billing System;**2,4,6,10,21**;NOV 12, 2009;Build 379
  ;
  ; IHS/ASDS/LSL - 05/17/2001 - V2.4 Patch 6 - New routine to accomodate
  ;     Pharmacy POS.  A somewhat generic API to accept info from
@@ -26,6 +26,7 @@ ABMPSAPI ; IHS/ASDS/LSL - 3PB Pharmacy POS API
  ;   and don't display warning message
  ; IHS/SD/SDR - abm*2.6*4 - NO HEAT - populate INSURER TYPE
  ; IHS/SD/SDR - abm*2.6*6 - NOHEAT - populate OTHER BILL IDENTIFER in 3P Bill file
+ ;IHS/SD/SDR - 2.6*21 - HEAT118656 - Made change to send back error if A/R Bill isn't found (if it was deleted)
  ;
  Q
  ;
@@ -39,7 +40,7 @@ EN(ABMPOS)         ; PEP
  ; ABMPOS(.23)             Gross amount
  ; ABMPOS(.05)             Patient
  ; ABMPOS(.71)             Service date from
- ; ABMPOS(.72)             Serviec date to
+ ; ABMPOS(.72)             Service date to
  ; ABMPOS(.1)              Clinic
  ; ABMPOS(.03)             Visit location
  ; ABMPOS(.08)             Active insurer
@@ -109,7 +110,8 @@ EN(ABMPOS)         ; PEP
  .S DR=ABMFLD_"////"_ABMPOS(ABMFLD)
  .D ^DIE
  ;start new code abm*2.6*4 NOHEAT
- S DR=".22////"_$P($G(^AUTNINS(ABMPOS(.08),2)),U)
+ ;S DR=".22////"_$P($G(^AUTNINS(ABMPOS(.08),2)),U)  ;abm*2.6*10 HEAT73780
+ S DR=".22////"_$$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,ABMPOS(.08),".211","I"),1,"I")  ;abm*2.6*10 HEAT73780
  D ^DIE
  ;end new code abm*2.6*4 NOHEAT
  ;start new code abm*2.6*6 NOHEAT
@@ -233,7 +235,8 @@ POSUFMS ; create/populate UFMS Cashiering Session
  ;S DIC(0)="LM"  ;abm*2.6*6 HEAT28427
  S DIC(0)="LMX"  ;abm*2.6*6 HEAT28427
  S DIC("P")=$P(^DD(9002274.45302,11,0),U,2)
- S X=$P($G(^AUTNINS($P($G(^ABMDBILL(DUZ(2),ABMBILL,0)),U,8),2)),U)
+ ;S X=$P($G(^AUTNINS($P($G(^ABMDBILL(DUZ(2),ABMBILL,0)),U,8),2)),U)  ;abm*2.6*10 HEAT73780
+ S X=$$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,$P($G(^ABMDBILL(DUZ(2),ABMBILL,0)),U,8),".211","I"),1,"I")  ;abm*2.6*10 HEAT73780
  S ABMP("INS")=$P($G(^ABMDBILL(DUZ(2),ABMBILL,0)),U,8)
  D ^DIC
  I +Y<0 W !,"NO ENTRY IN CASHIERING SESSION MADE",! H 2 Q
@@ -263,6 +266,7 @@ CAN(ABM,ABM2) ;
  S ABMHOLD=DUZ(2)
  S DUZ(2)=ABMDUZ2
  S ABMBILL=$$GET1^DIQ(90050.01,ABMAR,.01)
+ I ABMBILL="" Q "No A/R Bill found"  ;no A/R bill  ;abm*2.6*21 IHS/SD/SDR HEAT118656
  S ABMBILL=$P(ABMBILL,"-")
  S DUZ(2)=$P($G(^BARBL(ABMDUZ2,ABMAR,0)),U,22)           ; 3P DUZ(2)
  S:DUZ(2)="" DUZ(2)=$P($G(^BARBL(ABMDUZ2,ABMAR,1)),U,8)  ; visit loc
@@ -335,7 +339,8 @@ CPOSUFMS ; create/populate UFMS Cashiering Session
  S DIC="^ABMUCASH("_DA(3)_",20,"_DA(2)_",20,"_DA(1)_",11,"
  S DIC(0)="LM"
  S DIC("P")=$P(^DD(9002274.45302,11,0),U,2)
- S X=$P($G(^AUTNINS($P($G(^ABMDBILL(DUZ(2),ABMDA,0)),U,8),2)),U)
+ ;S X=$P($G(^AUTNINS($P($G(^ABMDBILL(DUZ(2),ABMDA,0)),U,8),2)),U)  ;abm*2.6*10 HEAT73780
+ S X=$$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,$P($G(^ABMDBILL(DUZ(2),ABMDA,0)),U,8),".211","I"),1,"I")  ;abm*2.6*10 HEAT73780
  S ABMP("INS")=$P($G(^ABMDBILL(DUZ(2),ABMDA,0)),U,8)
  D ^DIC
  I +Y<0 W !,"NO ENTRY IN CASHIERING SESSION MADE",! H 2 Q

@@ -1,5 +1,5 @@
 BISITE1 ;IHS/CMI/MWR - EDIT SITE PARAMETERS; MAY 10, 2010
- ;;8.5;IMMUNIZATION;**13**;AUG 01,2016
+ ;;8.5;IMMUNIZATION;**14**;AUG 01,2017
  ;;* MICHAEL REMILLARD, DDS * CIMARRON MEDICAL INFORMATICS, FOR IHS *
  ;;  INIT FOR EDIT SITE PARAMETERS.
  ;   PATCH 2: Fix display of default Low Supply Alert.  INIT+72
@@ -8,6 +8,7 @@ BISITE1 ;IHS/CMI/MWR - EDIT SITE PARAMETERS; MAY 10, 2010
  ;;  PATCH 9: Return the IP Address used for the TCH Forecaster.  INIT+139
  ;;           Update display of selected High Risk parameters.  INIT+165
  ;;  PATCH 13: Add Flu Season Date Range parameter. INIT+197
+ ;;  PATCH 14: Update display of selected High Risk parameters.  INIT+164
  ;
  ;
  ;----------
@@ -175,18 +176,19 @@ INIT ;EP
  K X
  ;
  ;
- ;********** PATCH 9, v8.5, OCT 01,2014, IHS/CMI/MWR
+ ;********** PATCH 14, v8.5, AUG 01,2017, IHS/CMI/MWR
  ;---> Update display of selected High Risk parameters.
  ;---> Risk Check enabled.
  N Z S Z=$$RISKP^BIUTL2(BISITE)
  D
- .I 'Z S X="Disabled" Q
- .I Z=1 S X="Enabled: Hep B Only" Q
- .I Z=2 S X="Enabled: Pneumo Only" Q
- .I Z=12 S X="Enabled: Hep B and Pneumo" Q
- .I Z=23 S X="Enabled: Pneumo Only (+Smoking)" Q
- .I Z=123 S X="Enabled: Hep B and Pneumo (+Smoking)" Q
- .S X="ERROR: Unable to determine."
+ .I 'Z S X="High Risk Disabled" Q
+ .S X=$$RISKTX^BISITE1(Z)
+ .S X="Enabled: "_X
+ .;I Z=1 S X="Enabled: Hep B Only" Q
+ .;I Z=2 S X="Enabled: Pneumo Only" Q
+ .;I Z=12 S X="Enabled: Hep B and Pneumo" Q
+ .;I Z=23 S X="Enabled: Pneumo Only (+Smoking)" Q
+ .;I Z=123 S X="Enabled: Hep B and Pneumo (+Smoking)" Q
  ;**********
  ;
  S X="  18) High Risk Factor Check.......: "_X
@@ -244,3 +246,26 @@ LOTSDEF(BIDUZ2) ;EP
  Q:($P($G(^BISITE(+$G(BIDUZ2),0)),U,25)="") 50
  Q $P($G(^BISITE(+$G(BIDUZ2),0)),U,25)
  ;**********
+ ;
+ ;********** PATCH 14, v8.5, AUG 01,2017, IHS/CMI/MWR
+ ;---> Update display of selected High Risk parameters.
+ ;----------
+RISKTX(Z) ;EP
+ ;---> Return text of Risk Factors.
+ ;---> Parameters:
+ ;     1 - Z (req) Number representing High Risk.
+ ;
+ N X S X=""
+ I Z=1 S X="Pneumo"
+ I Z=2 S X="HepB for DM"
+ I Z=3 S X="HepA & HepB for CLD/HepC"
+ I Z=19 S X="Pneumo (+Smoking)"
+ I Z=12 S X="Pneumo, HepB for DM"
+ I Z=13 S X="Pneumo, HepA & HepB for CLD/HepC"
+ I Z=23 S X="HepA & HepB for DM and CLD/HepC"
+ I Z=139 S X="Pneumo (+Smoking), HepA & HepB"
+ I Z=129 S X="Pneumo (+Smoking), HepB for DM"
+ I Z=123 S X="Pneumo, HepB, HepA & HepB"
+ I Z=1239 S X="Pneumo(+Smkg), HepB, HepA & HepB"
+ I X="" S X="ERROR: Unable to determine."
+ Q X

@@ -1,5 +1,5 @@
 AMHEGR ; IHS/CMI/LAB - GROUP ENTRY ;
- ;;4.0;IHS BEHAVIORAL HEALTH;**2,4,5**;JUN 02, 2010;Build 18
+ ;;4.0;IHS BEHAVIORAL HEALTH;**2,4,5,8**;JUN 02, 2010;Build 7
  ;
  ;
 START ;
@@ -205,7 +205,8 @@ ADDREC2 ;
  K DIADD,DLAYGO
  D ^XBFMK
  S DIE="^AMHREC(",DA=AMHR
- S DR=".09////1;.11////U;.19////"_DUZ_";.33////R;.28////"_DUZ_";.22///A;.21///^S X=DT;.25////"_$P(AMHNG,U,14)_";.34////1;.12////"_AMHACTP_";1109////"_$P(^AMHGROUP(AMHNG,0),U,3)  ;_";2101///"_$P($G(^AMHGROUP(AMHNG,12)),U,1)
+ S DR=".09////1;.11////U;.19////"_DUZ_";.33////R;.28////"_DUZ_";.22///A;.21///^S X=DT;.25////"_$P(AMHNG,U,14)_";.34////1;.12////"_AMHACTP_";1109////"_$P(^AMHGROUP(AMHNG,0),U,3)_";1117////"_$$HL^AMHUTIL2($$VALI^XBDIQ1(9002011,AMHR,.02))
+ ;_";2101///"_$P($G(^AMHGROUP(AMHNG,12)),U,1)
  D ^DIE
  I $D(Y) W !!,"updating record for patient ",$P(^DPT(DFN,0),U)," failed." D PAUSE,EXIT Q
  S DIE="^AMHREC(",DA=AMHR,DR="5100///NOW",DR(2,9002011.5101)=".02////^S X=DUZ" D ^DIE K DIE,DA,DR

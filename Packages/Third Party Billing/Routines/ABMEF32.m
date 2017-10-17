@@ -1,5 +1,7 @@
 ABMEF32 ; IHS/ASDST/DMJ - Electronic 837 version 5010 Professional ;      
- ;;2.6;IHS 3P BILLING SYSTEM;**6,8**;NOV 12, 2009
+ ;;2.6;IHS 3P BILLING SYSTEM;**6,8,10,21**;NOV 12, 2009;Build 379
+ ;IHS/SD/SDR - 2.6*21 - HEAT132394 - Made change to K ABMP; data was hanging around, causing UNKNOWN in
+ ;  SBR04 for Medicare and dropping CAS segments.
  ;
 START ;
  ;START HERE
@@ -16,7 +18,8 @@ START ;
  .W !,"Insurer NOT identified.",!
  .D EOP^ABMDUTL(1)
  S ABMPINS=ABMP("INS")
- S ABMP("ITYPE")=$P($G(^AUTNINS(ABMP("INS"),2)),U)
+ ;S ABMP("ITYPE")=$P($G(^AUTNINS(ABMP("INS"),2)),U)  ;abm*2.6*10 HEAT73780
+ S ABMP("ITYPE")=$$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,ABMP("INS"),".211","I"),1,"I")  ;abm*2.6*10 HEAT73780
  S ABMPITYP=ABMP("ITYPE")
  I ($G(ABMER("CNT"))=1) D  Q:$G(POP)
  .D OPEN
@@ -47,6 +50,7 @@ LOOP ;loop through bills
  ..D CLAIM
  Q
 CLAIM ;one claim
+ K ABMP  ;abm*2.6*21 IHS/SD/SDR HEAT132394
  S ABMP("INS")=ABMPINS
  S ABMP("ITYPE")=ABMPITYP
  S ABMP("BDFN")=ABMBILL

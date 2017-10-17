@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:35">
+<Class name="csp.hl7.hl7schemadatastructure">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>CSPX.AutoPageCSP</Super>
+<TimeChanged>61501,53312.412127</TimeChanged>
+<TimeCreated>61501,53312.354791</TimeCreated>
+<GeneratedBy>/csp/goldb/HL7/HL7SchemaDataStructure.csp</GeneratedBy>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body>"
+	Write !,"<table border=""0"" class=""LayoutMain"" width=""100%"" cellpadding=""0"" cellspacing=""0"">"
+	Do ..WriteTitlePane("@Ensemble:HL7ManagerDataStructure@Ensemble HL7 Data Structure")
+	Write !,"</table>"
+	Write !,!,"<div class=""Text1"">"
+	Write "HL7 Data Structure Definition is displayed below:"
+	Write "</div>"
+	Write !,!
+	#Include EnsHL7
+	set tPath=%request.Get("PATH")
+	set ms=%request.Get("MS")
+	set ss=%request.Get("SS")
+	set iField=%request.Get("FIELD")
+	set ds=%request.Get("DS")
+	set ds1=%request.Get("DS1")
+	set ds1Field=%request.Get("DS1FIELD")
+	set category=$p(ds,":",2)
+	set secondary=$p(ds,":",3)
+	If ((category'="")&&(secondary'="")) {
+	set description=..EscapeHTML($G($$$vaSchemaDescGbl(category,"DS",secondary)))
+	if $D($$$vaSchemaGbl(category,"DS",secondary))=0 {
+	write "<b><font size=6>"_ds_" </font> Definition does not exist!</b>",!
+	quit
+	}
+	}
+	Write !
+	If '($L(tPath)) Goto %csp00001 ;{
+	Write !,"<div class=""Text1"">"
+	Write "<i>Path you followed to get to this data structure:</i>&nbsp;<b>"_(tPath)_"</b><br>",!
+	Write "	"
+	If '($L(ds1Field)) Goto %csp00002 ;{
+	Write !,"		<i>Data Structure </i>&nbsp;<b>'"_($P(ds1,":",2,3))_"'</b>, field # <b>"_(ds1Field)_"</b>,<br>",!
+	Write "	"
+%csp00002	;}
+	Write !,"	<i>At Field#</i>&nbsp;<b>"_(iField)_"</b><br>",!
+	Write "	<i>Of Segment Structure </i>&nbsp;<b>'"_($P(ss,":",2,3))_"'</b>,<br>",!
+	Write "	<i>Of Message Structure </i>&nbsp;<b>'"_($P(ms,":",2,3))_"'</b>"
+	Write "</div>"
+	Write !
+%csp00001	;}
+	Write !,!,"<div style=""margin-left: 20px; margin-right: 20px;"">"
+	Write !,"<table border=1 cellpadding=4 cellspacing=0  style=""font-size: 0.8em;"">",!
+	Write !,"<tr><td colspan=6><b><font size=6>"_(category_":"_secondary)_" </font> "_($G(description))_"</b></td></tr>",!
+	Write !,"<tr align='left'><th>Component</th><th>Description</th><th>Property&nbsp;Name</th><th>Data&nbsp;Structure</th><th>Code&nbsp;Table</th><th><center><i>Alternate<br>Description</i></center></th></tr>",!
+	Write !
+	If ((category'="")&&(secondary'="")) {
+	set struct=$$$vaSchemaGbl(category,"DS",secondary)
+	kill names set name="" for  {
+	set name=$O($$$vaSchemaGbl(category,"DS",secondary,"names",name)) quit:name=""
+	set names($$$vaSchemaGbl(category,"DS",secondary,"names",name))=name
+	}
+	For i=1:1:$LL(struct) { Set value=$LG(struct,i)
+	write "<tr>"
+	write "<td>"_i_"</td>"
+	; description
+	set description=..EscapeHTML($G($$$vaSchemaDescGbl(category,"DS",secondary,i)))
+	write "<td>",$S(description="":"&nbsp;",1:description),"</td>"
+	; property name
+	set tPropPath=$S(""=tPath||(""=$G(names(i))):"",1:tPath_"."_$G(names(i)))
+	write "<td><a"_$S(""=tPropPath:"",1:" title='"_tPropPath_"' href='"_..Link("HL7SchemaPath.csp?PATH="_tPropPath_"&DS="_ds_"&DSFIELD="_i_"&DS1="_ds1_"&DS1FIELD="_ds1Field_"&FIELD="_iField_"&MS="_ms_"&SS="_ss)_"'")_">"_$G(names(i),"&nbsp")_"</a></td>"
+	; data structure
+	write "<td>",$S(value="":"&nbsp;",1:"<a href='"_..Link("HL7SchemaDataStructure.csp?DS=DS:"_value_"&PATH="_tPropPath_"&DS1="_ds_"&DS1FIELD="_i_"&FIELD="_iField_"&MS="_ms_"&SS="_ss)_"'>"_value_"</a>"),"</td>"
+	; code table
+	set value=$G($$$vaSchemaGbl(category,"DS",secondary,"tables",i))
+	write "<td>",$S(value="":"&nbsp;",1:"<a href='"_..Link("HL7SchemaCodeTable.csp?CT=CT:"_value)_"'>"_value_"</a>"),"</td>"
+	; alternate description
+	set altdesc=..EscapeHTML($G($$$vaSchemaDescGbl(category,"DS",secondary,i,"alt")))
+	write "<td>",$S(altdesc="":"&nbsp;",1:altdesc),"</td>"
+	write "</tr>",!
+	}
+	}
+	Write !,!,"</table>",!
+	Write !,"<p>",!
+	Write "<a href="""_(..Link("HL7SchemaMain.csp"))_""">"
+	Write "(Show All Categories)"
+	Write "</a>"
+	Write "<br>",!
+	Write "<a href="""_(..Link("HL7SchemaList.csp?ELEMENT=DS&CATEGORY="_category))_""">"
+	Write "(Show All Data Structures in Category '"_(category)_"')"
+	Write "</a>"
+	Write !,"</div>"
+	Write !,!,"</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<title>Ensemble HL7 Data Structure</title>",!
+	Write "<link rel=""stylesheet"" type=""text/css"" href=""/csp/sys/csputils.css"" title=""Standard Style""/>"
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>C:\InterSystems\Ensemble\CSP\goldb\HL7\HL7SchemaDataStructure.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/goldb/HL7/HL7SchemaDataStructure.csp</Default>
+</Parameter>
+
+<Parameter name="DOMAIN">
+<Default>Ensemble</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>61286,9120</Default>
+</Parameter>
+
+<Parameter name="PAGENAME">
+<Default>HL7 Data Structure</Default>
+</Parameter>
+
+<Parameter name="PARENTPAGE">
+<Default>HL7SchemaMain.csp</Default>
+</Parameter>
+</Class>
+</Export>

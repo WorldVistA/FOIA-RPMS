@@ -1,5 +1,5 @@
 ABME5N4 ; IHS/ASDST/DMJ - 837 N4 Segment 
- ;;2.6;IHS Third Party Billing System;**6,8,9**;NOV 12, 2009
+ ;;2.6;IHS Third Party Billing System;**6,8,9**;NOV 12, 2009;Build 379
  ;City/State/Zip
  ;
 EP(X,Y) ;EP - START HERE

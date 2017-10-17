@@ -1,10 +1,11 @@
 ABMDTMS ;IHS/ABM/THL - INTERFACE WITH PYXIS/M SYSTEMS; 
- ;;2.6;IHS 3P BILLING SYSTEM;;NOV 12, 2009
+ ;;2.6;IHS 3P BILLING SYSTEM;**10,21**;NOV 12, 2009;Build 379
  ;;
  ; IHS/SD/SDR - v2.5 p8 - Link to Omnicell
  ;    Code supplied by Carlene McIntyre to connect TPB to Omnicell
  ;
  ; IHS/SD/SDR - v2.6 CSV
+ ;IHS/SD/SDR - 2.6*21 - HEAT110091 - Default rev code for Meds to 250
  ;
 EN F  D EN1 Q:$D(ABMQUIT)!$D(ABMOUT)
 EXITOUT K ABM,ABMAR,ABMDA,ABMDTMS,ABMFL,ABMFN,ABMHDR,ABMI,ABMJ,ABMOUT,ABMQUIT,ABMROU,ABMVALM,ABMX,ABMQUIT,ABMOUT,ABMDA,DFN,VALMBCK,VISDATE,PATIENT,ABMDTMS
@@ -177,7 +178,11 @@ A1 ;ADD ITEMS TO THE CLAIM
  .I '$D(^PSDRUG(+X,0)) S X="" Q
  .S DIC="^ABMDCLM("_DUZ(2)_","_ABMDA_",23,"
  .S $P(^ABMDCLM(DUZ(2),DA(1),23,0),U,2)="9002274.3023P"
- .S DIC("DR")=".02///"_$P(ABM2,U,6)_";.03////"_$P(ABM2,U,3)_";.04////"_$P(ABM2,U,4)_";.05////"_$S($G(DISPFEE):DISPFEE,1:4.5)_";.06////"_$S($P(ABM2,U,7)]"":$P(ABM2,U,7),1:"NOT STATED")_";.14////"_$P(ABM0,U,3)
+ .;S DIC("DR")=".02///"_$P(ABM2,U,6)_";.03////"_$P(ABM2,U,3)_";.04////"_$P(ABM2,U,4)_";.05////"_$S($G(DISPFEE):DISPFEE,1:4.5)_";.06////"_$S($P(ABM2,U,7)]"":$P(ABM2,U,7),1:"NOT STATED")_";.14////"_$P(ABM0,U,3)  ;;abm*2.6*21 IHS/SD/SDR HEAT110091
+ .;start new abm*2.6*21 IHS/SD/SDR HEAT110091
+ .S DIC("DR")=".02///"_$S(+$P(ABM2,U,6)'=0:$P(ABM2,U,6),1:250)_";.03////"_$P(ABM2,U,3)_";.04////"_$P(ABM2,U,4)_";.05////"_$S($G(DISPFEE):DISPFEE,1:4.5)_";.06////"_$S($P(ABM2,U,7)]"":$P(ABM2,U,7),1:"NOT STATED")_";.14////"_$P(ABM0,U,3)
+ .;end new abm*2.6*21 IHS/SD/SDR HEAT110091
+ .S DIC("DR")=DIC("DR")_";.24////"_$P($G(^PSDRUG($P(ABM1,U,3),2)),U,4)  ;NDC  abm*2.6*10 HEAT74646
  E  I $P(ABM2,U,5) D  I 1
  .S X=+$P(ABM2,U,5)
  .I '$D(^ICPT(+X,0)) S X="" Q

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:35">
+<Class name="BSTS.ns1.TConceptAttributeSetDescriptor">
+<Description>
+Created from: http://VDENMIHSDEVD01:8082/soap/DtsQueryDaoWS?wsdl</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>BSTS.ns1.TTermAttributeSetDescriptor</Super>
+<TimeChanged>63616,48123.343773</TimeChanged>
+<TimeCreated>63616,48123.292584</TimeCreated>
+
+<Parameter name="ELEMENTQUALIFIED">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="NAMESPACE">
+<Default>http://apelon.com/dtsserver/types</Default>
+</Parameter>
+
+<Parameter name="XMLNAME">
+<Default>TConceptAttributeSetDescriptor</Default>
+</Parameter>
+
+<Parameter name="XMLSEQUENCE">
+<Default>1</Default>
+</Parameter>
+
+<Property name="allRoleTypes">
+<Type>%Boolean</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="allRoleTypes"/>
+</Property>
+
+<Property name="roleTypes">
+<Type>BSTS.ns1.TRoleType</Type>
+<Collection>list</Collection>
+<Parameter name="XMLNAME" value="roleTypes"/>
+<Parameter name="XMLPROJECTION" value="ELEMENT"/>
+</Property>
+
+<Property name="allInverseRoleTypes">
+<Type>%Boolean</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="allInverseRoleTypes"/>
+</Property>
+
+<Property name="inverseRoleTypes">
+<Type>BSTS.ns1.TRoleType</Type>
+<Collection>list</Collection>
+<Parameter name="XMLNAME" value="inverseRoleTypes"/>
+<Parameter name="XMLPROJECTION" value="ELEMENT"/>
+</Property>
+
+<Property name="definedViewAttributes">
+<Type>%Boolean</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="definedViewAttributes"/>
+</Property>
+
+<Property name="queryHasSubs">
+<Type>%Boolean</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="queryHasSubs"/>
+</Property>
+
+<Property name="queryHasSups">
+<Type>%Boolean</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="queryHasSups"/>
+</Property>
+
+<Property name="subconcepts">
+<Type>%Boolean</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="subconcepts"/>
+</Property>
+
+<Property name="superconcepts">
+<Type>%Boolean</Type>
+<Required>1</Required>
+<Parameter name="XMLNAME" value="superconcepts"/>
+</Property>
+</Class>
+</Export>

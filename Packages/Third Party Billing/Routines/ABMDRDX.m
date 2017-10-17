@@ -1,11 +1,12 @@
 ABMDRDX ; IHS/ASDST/DMJ - DX Summary Report ;
- ;;2.6;IHS 3P BILLING SYSTEM;**14**;NOV 12, 2009;Build 238
+ ;;2.6;IHS 3P BILLING SYSTEM;**14,21**;NOV 12, 2009;Build 379
  ;Original;TMD;
  ;
- ; IHS/SD/SDR - v2.6 CSV
+ ;IHS/SD/SDR - v2.6 CSV
  ;IHS/SD/SDR - 2.6*14 - ICD10 009 - Correct to report found while coding for ICD10. was using code,
  ;   not IEN so any codes starting with alpha wouldn't print.
  ;IHS/SD/SDR - 2.6*14 - Updated DX^ABMCVAPI call to be numeric
+ ;IHS/SD/SDR - 2.6*21 - HEAT112272, HEAT167616 - Made correction so report would store and sort by DX code, not by IEN.
  ;
  K ABM,ABMY
  D ^ABMDRSEL G XIT:$D(DTOUT)!$D(DUOUT)!$D(DIROUT)
@@ -27,7 +28,8 @@ DATA S ABMP("HIT")=0 D ^ABMDRCHK Q:'ABMP("HIT")
 TL S:'$D(^TMP("ABM-DX",$J)) ^TMP("ABM-DX",$J)=0_U_0
  S $P(^TMP("ABM-DX",$J),U)=$P(^($J),U)+1,$P(^($J),U,2)=$P(^($J),U,2)+ABM("BL")
  ;S ABM("CD")=+$P($$DX^ABMCVAPI(ABM("DX"),ABM("D")),U,2)  ;CSV-c  ;abm*2.6*14 ICD10 009
- S ABM("CD")=+$P($$DX^ABMCVAPI(+ABM("DX"),ABM("D")),U)  ;CSV-c  ;abm*2.6*14 ICD10 009 and updated API call
+ ;S ABM("CD")=+$P($$DX^ABMCVAPI(ABM("DX"),ABM("D")),U)  ;CSV-c  ;abm*2.6*14 ICD10 009  ;abm*2.6*21 IHS/SD/SDR HEAT167616
+ S ABM("CD")=""""_$P($$DX^ABMCVAPI(ABM("DX"),ABM("D")),U,2)_""""  ;CSV-c  ;abm*2.6*14 ICD10 009  ;abm*2.6*21 IHS/SD/SDR HEAT167616
  S:'$D(^TMP("ABM-DX",$J,ABM("CD"),ABM("DX"))) ^TMP("ABM-DX",$J,ABM("CD"),ABM("DX"))=0_U_0
  S $P(^TMP("ABM-DX",$J,ABM("CD"),ABM("DX")),U)=$P(^TMP("ABM-DX",$J,ABM("CD"),ABM("DX")),U)+1,$P(^(ABM("DX")),U,2)=$P(^(ABM("DX")),U,2)+ABM("BL")
  Q

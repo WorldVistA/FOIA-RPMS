@@ -1,7 +1,5 @@
 APCLSIHL ;cmi/flag/maw - APCL ILI CDC HL7 Export 5/12/2010 9:26:17 AM
- ;;3.0;IHS PCC REPORTS;**29,30**;FEB 05, 1997;Build 27
- ;
- ;
+ ;;3.0;IHS PCC REPORTS;**29,30,31**;FEB 05, 1997;Build 32
  ;
 ILI(TYPE) ;EP -  lets create the ILI HL7 export here
  N APCLLAST
@@ -27,19 +25,12 @@ GETLAST() ;-- get the last record
  ;
 ZHS(TYP) ;-- lets create the ZHS segment
  N ZHS,ZHS1,ZHS2,ZHS3,ZHS4,ZHS5,ZHS6
- ;ZHS1 = DBID
- ;ZHS2 = Test/Production
- ;ZHS3 = #of records in file
- ;ZHS4 = IEN of export log
- ;ZHS5 = Location Name
- ;ZHS6 = ASUFAC_IEN of export log
  I TYP="ILI" D
  . N DBIDI,DBID,ILII,PT,LOC,ASUFAC,LAST,LASTDT,TOT
  . S DBIDI=$P($G(^AUTTSITE(1,0)),U)
  . S DBID=$P($G(^AUTTLOC(DBIDI,1)),U,3)
  . S ILII=$O(^APCLILIC("B",0))
  . S PT="P"
- . ;I '$$PROD^XUPROD()!($P($G(^APCLILIC(ILII,0)),U,5)="T") S PT="T"
  . I $P($G(^APCLILIC(ILII,0)),U,5)="T" S PT="T"
  . S LOC=$P($G(^DIC(4,DBIDI,0)),U)
  . S LASTDT=$O(^APCLILIC(ILII,12,"B",""),-1)
@@ -58,12 +49,6 @@ ZHS(TYP) ;-- lets create the ZHS segment
  ;
 ZTS(TYP,LA) ;-- lets create the ZTS segment
  N ZTS,ZTS1,ZTS2,ZTS3,ZTS4,ZTS5
- ;ZTS1 = sequence
- ;ZTS2 = date
- ;ZTS3 = repeating counts
- ;ZTS4 = count of ILI clinic visits old comma 13
- ;ZTS5 = count of H visits old comma 20
- ;ZTS6 = count of A visits old comma 42
  I TYP="ILI" D
  . N CNT,RDA,RDATA,RLOC,RDT,RCNT1,RCNT2,RCNT3
  . S CNT=0
@@ -135,7 +120,6 @@ NEWMSG(HLST,HLPM,RC,MTYPE,EVNTTYPE,TYP,LDA) ;EP
  .. D ZHS(TYP)
  .. D ZTS(TYP,LDA)
  I '$D(ERR) D
- .; Define sending and receiving parameters
  .S APPARMS("SENDING APPLICATION")="RPMS-ILI"
  .S APPARMS("ACCEPT ACK TYPE")="AL"
  .S APPARMS("APP ACK RESPONSE")="AACK^APCLSHL"
@@ -219,14 +203,7 @@ PV1(R) ;-- setup the PV1 segment
  I $G(PRVI) D
  . S NPI=$$GET1^DIQ(200,PRVI,41.99)
  . S PRV=$$GET1^DIQ(200,PRVI,.01)
- . ;D STDNAME^XLFNAME(.PRV,"CP")
- . ;S LNM=$G(PRV("FAMILY"))
- . ;S FNM=$G(PRV("GIVEN"))
- . ;S MI=$G(PRV("MIDDLE"))
  . D SET(.ARY,NPI,7,1)
- . ;D SET(.ARY,LNM,7,2)
- . ;D SET(.ARY,FNM,7,3)
- . ;D SET(.ARY,MI,7,4)
  . D SET(.ARY,"N",7,8)
  D SET(.ARY,R(12),19)
  D SET(.ARY,R(16),36)
@@ -242,7 +219,6 @@ PV1LAB(R) ;-- setup the PV1 LAB segment
  ;
 DG1(R,SQ,DG13) ;-- set the repeating DG1
  N ICDT
- ;S ICDT=$P($$ICDDX^APCLSILU(DG13,$P($G(^APCLDATA($J,R,"PV1")),U,5)),U,20)  ;get the icd type based on the code
  S ICDT=$P($$ICDDX^APCLSILU(DG13,R(7)),U,20)  ;get the icd type based on the code
  D SET(.ARY,"DG1",0)
  D SET(.ARY,SQ,1)
@@ -310,17 +286,23 @@ ZLI(R) ;-- setup the ILI ZLI segment
  D SET(.ARY,R(22),9)
  I $G(R(22))["." D
  . N ICDTA
- . ;S ICDTA=$P($$ICDDX^APCLSILU(R(22),$P($G(^APCLDATA($J,R,"PV1")),U,5)),U,20)
  . S ICDTA=$P($$ICDDX^APCLSILU(R(22),R(7)),U,20)  ;get the icd type based on the code
  . D SET(.ARY,$S(ICDTA="30":"I10",1:"I9"),9,3)
  D SET(.ARY,R(33),10)
  D SET(.ARY,R(34),11)
  D SET(.ARY,R(35),12)
  D SET(.ARY,R(36),13)
- D SET(.ARY,R(39),16)
+ I $G(R(39))["." D  ;ihs/cmi/maw p31
+ . N ICDTB
+ . S ICDTB=$P($$ICDDX^APCLSILU(R(39),R(7)),U,20)
+ . D SET(.ARY,R(39),16,1)
+ . D SET(.ARY,$S(ICDTB="30":"I10",1:"I9"),16,3)
+ I $L($G(R(39)))=5,$G(R(39))'["." D
+ . D SET(.ARY,R(39),16,1)
+ . D SET(.ARY,"C4",16,3)
+ I $G(R(39))'[".",$L($G(R(39)))<4 D SET(.ARY,R(39),16)
  D SET(.ARY,$$HLD(R(40)),17)
  N ICDT
- ;S ICDT=$P($$ICDDX^APCLSILU(R(43),$P($G(^APCLDATA($J,R,"PV1")),U,5)),U,20)
  S ICDT=$P($$ICDDX^APCLSILU(R(43),R(7)),U,20)  ;get the icd type based on the code
  D SET(.ARY,R(43),19)
  I $G(R(43))]"" D SET(.ARY,$S(ICDT="30":"I10",1:"I9"),19,3)
@@ -351,31 +333,26 @@ ZPC(R) ;-- setup the ZPC segment
  D SET(.ARY,R(107),1)
  D SET(.ARY,R(113),2)
  N ICDT
- ;S ICDT=$P($$ICDDX^APCLSILU(R(113),$P($G(^APCLDATA($J,R,"PV1")),U,5)),U,20)  ;get the icd type based on the code
  S ICDT=$P($$ICDDX^APCLSILU(R(113),R(7)),U,20)  ;get the icd type based on the code
  I $G(R(113))]"" D SET(.ARY,$S(ICDT="30":"I10",1:"I9"),2,3)
  D SET(.ARY,$$HLD(R(114)),3)
  D SET(.ARY,R(115),4)
  N ICDTA
- ;S ICDTA=$P($$ICDDX^APCLSILU(R(115),$P($G(^APCLDATA($J,R,"PV1")),U,5)),U,20)  ;get the icd type based on the code
  S ICDTA=$P($$ICDDX^APCLSILU(R(115),R(7)),U,20)  ;get the icd type based on the code
  I $G(R(115))]"" D SET(.ARY,$S(ICDTA="30":"I10",1:"I9"),4,3)
  D SET(.ARY,$$HLD(R(116)),5)
  D SET(.ARY,R(117),6)
  N ICDTB
- ;S ICDTB=$P($$ICDDX^APCLSILU(R(117),$P($G(^APCLDATA($J,R,"PV1")),U,5)),U,20)  ;get the icd type based on the code
  S ICDTB=$P($$ICDDX^APCLSILU(R(117),R(7)),U,20)  ;get the icd type based on the code
  I $G(R(117))]"" D SET(.ARY,$S(ICDTB="30":"I10",1:"I9"),6,3)
  D SET(.ARY,$$HLD(R(118)),7)
  D SET(.ARY,R(119),8)
  N ICDTC
- ;S ICDTC=$P($$ICDDX^APCLSILU(R(119),$P($G(^APCLDATA($J,R,"PV1")),U,5)),U,20)  ;get the icd type based on the code
  S ICDTC=$P($$ICDDX^APCLSILU(R(119),R(7)),U,20)  ;get the icd type based on the code
  I $G(R(119))]"" D SET(.ARY,$S(ICDTC="30":"I10",1:"I9"),8,3)
  D SET(.ARY,$$HLD(R(120)),9)
  D SET(.ARY,R(121),10)
  N ICDTD
- ;S ICDTD=$P($$ICDDX^APCLSILU(R(121),$P($G(^APCLDATA($J,R,"PV1")),U,5)),U,20)  ;get the icd type based on the code
  S ICDTD=$P($$ICDDX^APCLSILU(R(121),R(7)),U,20)  ;get the icd type based on the code
  I $G(R(121))]"" D SET(.ARY,$S(ICDTD="30":"I10",1:"I9"),10,3)
  D SET(.ARY,$$HLD(R(122)),11)
@@ -392,7 +369,6 @@ ZAV(R,SQ,ZAV2,ZAV3) ;-- setup the ILI ZAV segment
  ;
 ZSR(R,SQ,ZSR2) ;-- setup the ILI ZSR segment
  N ICDT
- ;S ICDT=$P($$ICDDX^APCLSILU(ZSR2,$P($G(^APCLDATA($J,R,"PV1")),U,5)),U,20)  ;get the icd type based on the code
  S ICDT=$P($$ICDDX^APCLSILU(ZSR2,R(7)),U,20)  ;get the icd type based on the code
  D SET(.ARY,"ZSR",0)
  D SET(.ARY,SQ,1)
@@ -426,7 +402,6 @@ ZAN(R) ;-- setup the ILI ZAN segment
  .. D SET(.ARY,"ZAN",0)
  .. D SET(.ARY,ZANC,1)
  .. N ICDT
- .. ;S ICDT=$P($$ICDDX^APCLSILU(VAL,$P($G(^APCLDATA($J,R,"PV1")),U,5)),U,20)
  .. S ICDT=$P($$ICDDX^APCLSILU(VAL,R(7)),U,20)  ;get the icd type based on the code
  .. D SET(.ARY,VAL,2)
  .. D SET(.ARY,$S(ICDT="30":"I10",1:"I9"),2,3)
@@ -474,7 +449,6 @@ MSA ;EP
 SET(ARY,V,F,C,S,R) ;EP
  D SET^HLOAPI(.ARY,.V,.F,.C,.S,.R)
  Q
- ; Fix for non-working ZIPCODE Field trigger in File 2
 FIXZIP(DFN,ZIP) ;EP
  Q:$G(ZIP) ZIP
  Q $$GET1^DIQ(2,DFN,.116)
@@ -532,9 +506,8 @@ WRITE(T) ; use XBGSAVE to save the temp global (APCLDATA) to a delimited
  ;is this a test system?
  NEW TST
  S TST=0
- ;I '$$PROD^XUPROD() S TST=1
  I $P($G(^APCLILIC(1,0)),U,5)="T" S TST=1
- S (XBFN,APCLDFN)=$S(TST:"FLZ",$G(APCLFLF):"FLF",1:"FLU")_"_"_APCLASU_"_"_$$DATE(DT)_"_P30.txt"
+ S (XBFN,APCLDFN)=$S(TST:"FLZ",$G(APCLFLF):"FLF",$G(APCLFLFN):"FLF",1:"FLU")_"_"_APCLASU_"_"_$$DATE(DT)_"_P31.txt"  ;IHS/CMI/LAB - PATCH 31 FILENAME AND PATCH #
  S XBS1="SURVEILLANCE ILI SEND"
  ;
  D ^XBGSAVE

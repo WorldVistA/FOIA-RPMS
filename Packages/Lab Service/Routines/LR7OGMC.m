@@ -1,5 +1,5 @@
-LR7OGMC ;VA/DALOI/STAFF- Interim report rpc memo chem ; 22-Oct-2013 09:22 ; MKK
- ;;5.2;LAB SERVICE;**1027,1028,1031,1033**;NOV 01, 1997
+LR7OGMC ;VA/DALOI/STAFF- Interim report rpc memo chem ; 03-Jul-2014 07:41 ; MKK
+ ;;5.2;LAB SERVICE;**1027,1028,1031,1033**;NOV 01, 1997;Build 146
  ;
  ;;VA LR Patche(s): 187,230,312,286,356,372,395
  ;

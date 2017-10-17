@@ -1,5 +1,5 @@
 BGP7D74 ; IHS/CMI/LAB - measure 1,2,3,4 05 Apr 2010 1:44 PM ;
- ;;17.0;IHS CLINICAL REPORTING;;AUG 30, 2016;Build 16
+ ;;17.1;IHS CLINICAL REPORTING;;MAY 10, 2017;Build 29
  ;
 IEFR ;EP
  S (BGPD1,BGPD2,BGPD3,BGPD4,BGPD5,BGPD6,BGPD7,BGPD8,BGPD9)=0
@@ -69,12 +69,12 @@ IBFR ;EP
  I $D(BGPBFR) S BGPN1=1  ;has a screening
  ;n2
  D
- .S X=44,G="" K Z F  S X=$O(BGPBFR(X)) Q:X'=+X!(X>89)  S Z($$ABS^XLFMTH(X-60))=X
+ .S X=37,G="" K Z F  S X=$O(BGPBFR(X)) Q:X'=+X!(X>89)  S Z($$ABS^XLFMTH(X-60))=X
  .Q:'$D(Z)
  .S X=$O(Z("")),X=Z(X)  ;this is the lowest/closest to 60 days
  .S BGPN2=1
  .S Y=BGPBFR(X)
- .I +Y=1!(+Y=2) S BGPN6=1
+ .I +Y=1!(+Y=2)!(+Y=6) S BGPN6=1
  .S BGPV2="2 MOS: "_X_" DO, "_$$DATE^BGP7UTL($P(Y,U,2))_" "_$$EXTSET^XBFUNC(9000010.44,.01,+Y)
  .S G=1
  D
@@ -83,7 +83,7 @@ IBFR ;EP
  .S X=$O(Z("")),X=Z(X)  ;this is the lowest/closest to 180 days
  .S BGPN3=1
  .S Y=BGPBFR(X)
- .I +Y=1!(+Y=2) S BGPN7=1
+ .I +Y=1!(+Y=2)!(+Y=6) S BGPN7=1
  .S BGPV3="6 MOS: "_X_" DO, "_$$DATE^BGP7UTL($P(Y,U,2))_" "_$$EXTSET^XBFUNC(9000010.44,.01,+Y)
  .S G=1
  D
@@ -92,7 +92,7 @@ IBFR ;EP
  .S X=$O(Z("")),X=Z(X)  ;this is the lowest/closest to 270 days
  .S BGPN4=1
  .S Y=BGPBFR(X)
- .I +Y=1!(+Y=2) S BGPN8=1
+ .I +Y=1!(+Y=2)!(+Y=6) S BGPN8=1
  .S BGPV4="9 MOS: "_X_" DO, "_$$DATE^BGP7UTL($P(Y,U,2))_" "_$$EXTSET^XBFUNC(9000010.44,.01,+Y)
  .S G=1
  D
@@ -101,7 +101,7 @@ IBFR ;EP
  .S X=$O(Z("")),X=Z(X)  ;this is the lowest/closest to 365 days
  .S BGPN5=1
  .S Y=BGPBFR(X)
- .I +Y=1!(+Y=2) S BGPN9=1
+ .I +Y=1!(+Y=2)!(+Y=6) S BGPN9=1
  .S BGPV5="1 YR: "_X_" DO, "_$$DATE^BGP7UTL($P(Y,U,2))_" "_$$EXTSET^XBFUNC(9000010.44,.01,+Y)
  .S G=1
  S BGPVALUE=$S(BGPN1=1:"Scrn: ",1:"")  ;,BGPVALUE=BGPVALUE_$S(BGPV2]""!(BGPV3]"")!(BGPV4]"")!(BGPV5)]"":": ",1:"")

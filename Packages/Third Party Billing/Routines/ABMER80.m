@@ -1,5 +1,5 @@
 ABMER80 ; IHS/ASDST/DMJ - UB92 EMC RECORD 80 (PHYSICIAN DATA) ;    
- ;;2.6;IHS 3P BILLING SYSTEM;;NOV 12, 2009
+ ;;2.6;IHS 3P BILLING SYSTEM;**14,21**;NOV 12, 2009;Build 379
  ;Original;DMJ;08/18/95 10:09 AM
  ;  
  ; IHS/ASDS/SDH - 04/26/01 - V2.4 Patch 9 - NOIS NCA-1100-180025
@@ -10,6 +10,7 @@ ABMER80 ; IHS/ASDST/DMJ - UB92 EMC RECORD 80 (PHYSICIAN DATA) ;
  ; IHS/SD/LSL - 09/05/02 0 v2.5 Patch 2
  ;     Added Kidscare check when getting provider numbers.
  ;
+ ;IHS/SD/SDR - 2.6*21 - HEAT123457 - Updated 61044 check from 'equals' to 'contains'
  ; *********************************************************************
  ;
 START ;START HERE
@@ -18,7 +19,8 @@ START ;START HERE
  D SET^ABMERUTL
  F ABME("S#")=1:1:3 D
  .Q:'$D(ABMP("INS",ABME("S#")))
- .I $$RCID^ABMERUTL(ABMP("INS"))=61044,ABME("S#")>1 Q
+ .;I $$RCID^ABMERUTL(ABMP("INS"))=61044,ABME("S#")>1 Q  ;abm*2.6*21 IHS/SD/SDR HEAT123457
+ .I $$RCID^ABMERUTL(ABMP("INS"))["61044",ABME("S#")>1 Q  ;abm*2.6*21 IHS/SD/SDR HEAT123457
  .S ABME("NTYPE")=$S($P(ABMP("INS",ABME("S#")),"^",2)="D":"D",$P(ABMP("INS",ABME("S#")),"^",2)="R":"R",1:"P")
  .I $$RCID^ABMERUTL(ABMP("INS"))=99999,ABME("NTYPE")'="D" Q
  .S ABME("NTYPE",ABME("NTYPE"))=""

@@ -1,5 +1,5 @@
 ABMDE0X1 ; IHS/ASDST/DMJ - Set Summary Display Variables ;  
- ;;2.6;IHS 3P BILLING SYSTEM;**14,19**;NOV 12, 2009;Build 300
+ ;;2.6;IHS 3P BILLING SYSTEM;**14,19,21**;NOV 12, 2009;Build 379
  ;
  ; IHS/DSD/LSL - 05/18/98 -  NOIS QBA-0598-130045
  ;               Get error 004 - Claim has no charges or procedures to
@@ -11,6 +11,8 @@ ABMDE0X1 ; IHS/ASDST/DMJ - Set Summary Display Variables ;
  ; IHS/SD/SDR - v2.6 CSV
  ;IHS/SD/SDR - 2.6*14 - ICD10 008 - warning if Service Date cross over ICD10 EFFECTIVE DATE
  ;IHS/SD/SDR - 2.6*19 - HEAT109144 - Made change to 72-hr check so it will work for error 255 as well as 191.
+ ;IHS/SD/SDR - 2.6*21 - VMBP RQMT_92 - Added warning 254 to page0 if active insurer has insurer type 'V' and
+ ;   there are entries in V Med file.
  ;
  ; *********************************************************************
  I ABMP("PX")="C" D CPT
@@ -32,6 +34,11 @@ ABMDE0X1 ; IHS/ASDST/DMJ - Set Summary Display Variables ;
  I ABMP("ICD10")>ABMP("VDT"),+$G(ABM("ABMCS",0))=0 S ABME(251)=""
  I ABMP("ICD10")<ABMP("VDT"),+$G(ABM("ABMCS",1))=0 S ABME(251)=""
  ;end new code ICD10 027A
+ I +$G(ABMVIEN)'=0,$D(^AUPNVMED("AD",ABMVIEN))&($$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,ABMP("INS"),".211","I"),1,"I")="V") S ABME(254)=""  ;abm*2.6*21 VMBP RQMT_92
+ ;start new abm*2.6*21 IHS/SD/SDR VMBP RQMT_90
+ D FIND^DIC(9999999.18,"","@;.01;.211","CP","V","*",,"I $$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,Y,"".211"",""I""),1,""I"")=""V""","","ABMIL")
+ I +$O(ABMIL("DILIST",0))=0 S ABME(252)=""
+ ;end new abm*2.6*21 IHS/SD/SDR VMBP RQMT_90
  Q
  ;
  ; *********************************************************************

@@ -1,12 +1,16 @@
 ABMDE8D ; IHS/SD/SDR - Page 8 - MEDICATIONS ; APR 05, 2002
- ;;2.6;IHS Third Party Billing System;**2,7,9,19**;NOV 12, 2009;Build 300
+ ;;2.6;IHS Third Party Billing System;**2,7,9,19,21**;NOV 12, 2009;Build 379
  ;
- ; IHS/SD/SDR - V2.5 P8 - Rewrote routine - Request to completely change display
- ; IHS/SD/SDR - v2.5 p9 - IM16660 - 4-digit revenue codes
- ; IHS/SD/SDR - v2.5 p9 - task 1 - Use service line provider multiple
- ; IHS/SD/SDR - v2.5 p11 - NPI
- ; IHS/SD/SDR - abm*2.6*2 - 3PMS10003A - Modified to call ABMFEAPI
+ ;IHS/SD/SDR - V2.5 P8 - Rewrote routine - Request to completely change display
+ ;IHS/SD/SDR - v2.5 p9 - IM16660 - 4-digit revenue codes
+ ;IHS/SD/SDR - v2.5 p9 - task 1 - Use service line provider multiple
+ ;IHS/SD/SDR - v2.5 p11 - NPI
+ ;
+ ;IHS/SD/SDR - 2.6*2 - 3PMS10003A - Modified to call ABMFEAPI
  ;IHS/SD/SDR - 2.6*19 - HEAT173117 - Added code to prompt for CPT Narrative if necessary for med.
+ ;IHS/SD/SDR - 2.6*21 - HEAT168435 - Added code to display/add/edit pharmacy modifiers
+ ;IHS/SD/SDR - 2.6*21 - HEAT207995 - Gave user ability to edit NDC even when a prescription from the
+ ;  prescription file is selected.  They want ability to remove dashes in NDC.
  ;
 DISP K ABMZ,DIC
  S ABMZ("TITL")="MEDICATIONS",ABMZ("PG")="8D"
@@ -29,6 +33,7 @@ LOOP S (ABMZ("LNUM"),ABMZ("NUM"),ABMZ(1),ABM)=0 F ABM("I")=1:1 S ABM=$O(^ABMDCLM
  G XIT
  ;
 PC1 S ABM("X0")=^ABMDCLM(DUZ(2),ABMP("CDFN"),23,ABM("X"),0)
+ S ABM("X2")=$G(^ABMDCLM(DUZ(2),ABMP("CDFN"),23,ABM("X"),2))  ;abm*2.6*21 IHS/SD/SDR HEAT168435
  S ABMZ("UNIT")=$P(ABM("X0"),U,3)
  S:'+ABMZ("UNIT") ABMZ("UNIT")=1
  Q:'$D(^PSDRUG(+ABM("X0"),0))  S ABMZ(ABM("I"))=$P(^(0),U)_U_ABM("X")_U_$P(ABM("X0"),U,2)
@@ -42,11 +47,15 @@ EOP I $Y>(IOSL-8) D PAUSE^ABMDE1,HD
  I $P(ABM("X0"),U,27)'="" W " (*)"  ;RTS
  W ?30,$S($P(ABM("X0"),U,22)]"":"  Rx:"_$P($G(^PSRX($P(ABM("X0"),U,22),0)),U)_" ",$P($G(ABM("X0")),U,6)'="":" Rx: "_$P(ABM("X0"),U,6)_" ",1:"<No Rx>")  ;Rx number
  I $P(ABM("X0"),U,29)'="" W ?40,"CPT: ",$P($$CPT^ABMCVAPI(+$P(ABM("X0"),U,29),ABMP("VDT")),U,2)  ;abm*2.6*7 HEAT30524
+ S ABMZ("MOD")=""  ;abm*2.6*21 IHS/SD/SDR HEAT168435
+ F ABM("M")=3,4,5 S:$P(ABM("X2"),U,ABM("M"))]"" ABMZ("MOD")=ABMZ("MOD")_"-"_$P(ABM("X2"),U,ABM("M"))  ;abm*2.6*21 IHS/SD/SDR HEAT168435
+ W:ABMZ("MOD")]"" ABMZ("MOD")_" "  ;abm*2.6*21 IHS/SD/SDR HEAT168435
  S ABMRPRV=$O(^ABMDCLM(DUZ(2),ABMP("CDFN"),23,ABM("X"),"P","C","D",0))
  S:ABMRPRV="" ABMRPRV=$O(^ABMDCLM(DUZ(2),ABMP("CDFN"),23,ABM("X"),"P","C","R",0))
  I ABMRPRV'="" D  ;rendering provider on line item
  .;W " ("_$P($G(^VA(200,$P(^ABMDCLM(DUZ(2),ABMP("CDFN"),23,ABM("X"),"P",ABMRPRV,0),U),0)),U)_"-"_$P(^ABMDCLM(DUZ(2),ABMP("CDFN"),23,ABM("X"),"P",ABMRPRV,0),U,2)_")"  ;abm*2.6*7 HEAT30524
- .W ?51," ("_$E($P($G(^VA(200,$P(^ABMDCLM(DUZ(2),ABMP("CDFN"),23,ABM("X"),"P",ABMRPRV,0),U),0)),U),1,23)_"-"_$P(^ABMDCLM(DUZ(2),ABMP("CDFN"),23,ABM("X"),"P",ABMRPRV,0),U,2)_")"  ;abm*2.6*7 HEAT30524
+ .;W !?51," ("_$E($P($G(^VA(200,$P(^ABMDCLM(DUZ(2),ABMP("CDFN"),23,ABM("X"),"P",ABMRPRV,0),U),0)),U),1,23)_"-"_$P(^ABMDCLM(DUZ(2),ABMP("CDFN"),23,ABM("X"),"P",ABMRPRV,0),U,2)_")"  ;abm*2.6*7 HEAT30524  ;abm*2.6*21 IHS/SD/SDR HEAT168435
+ .W !?40," ("_$E($P($G(^VA(200,$P(^ABMDCLM(DUZ(2),ABMP("CDFN"),23,ABM("X"),"P",ABMRPRV,0),U),0)),U),1,23)_"-"_$P(^ABMDCLM(DUZ(2),ABMP("CDFN"),23,ABM("X"),"P",ABMRPRV,0),U,2)_")"  ;abm*2.6*7 HEAT30524  ;abm*2.6*21 IHS/SD/SDR HEAT168435
  W !
  W ?4,$S($P($G(ABM("X0")),U,24)]"":$P(ABM("X0"),U,24)_" ",1:"<NO NDC>        ")  ;NDC number
  S ABMU("TXT")=$P(ABMZ(ABM("I")),U)  ;Medication
@@ -67,7 +76,9 @@ EOP I $Y>(IOSL-8) D PAUSE^ABMDE1,HD
  .Q:ABM(52,DA,12,"E")=""
  .S ABMU("TXT")=$G(ABMU("TXT"))_" Comments: "_ABM(52,DA,12,"E")
  S ABM("FEE")=ABM("FEE")+$P(ABM("X0"),U,5)
- S ABMZ("TOTL")=(ABMZ("UNIT")*$P(ABM("X0"),U,4))+ABMZ("TOTL")+$P(ABM("X0"),U,5)
+ S ABMZ("CHARGE")=+$P(ABM("X0"),U,4)  ;abm*2.6*21 IHS/SD/SDR HEAT168435
+ ;S ABMZ("TOTL")=(ABMZ("UNIT")*$P(ABM("X0"),U,4))+ABMZ("TOTL")+$P(ABM("X0"),U,5)  ;abm*2.6*21 IHS/SD/SDR HEAT168435
+ S ABMZ("TOTL")=(ABMZ("UNIT")*ABMZ("CHARGE"))+ABMZ("TOTL")+$P(ABM("X0"),U,5)  ;abm*2.6*21 IHS/SD/SDR HEAT168435
  Q
 XIT K ABM,ABMMODE
  Q
@@ -80,6 +91,7 @@ A ;EP  ADD ENTRY
  Q:+Y<0  S ABMZ("DRUG")=+Y
  S DA(1)=ABMP("CDFN")
  S DIC="^ABMDCLM(DUZ(2),DA(1),23,",X=+Y
+ S ABMX("Y")=X,$P(ABMZ(ABMX("Y")),U,2)=X ;abm*2.6*21 IHS/SD/SDR HEAT168435
  K DD,DO
  D FILE^DICN
  Q:Y<0  S DA=+Y
@@ -94,6 +106,11 @@ E ;EDIT EXISTING ENTRY
  .S ABMZ("DRUG")=$P(^ABMDCLM(DUZ(2),DA(1),23,DA,0),U)
  D MODE^ABMDE8X
  S DIE="^ABMDCLM(DUZ(2),DA(1),23,"
+ ;start new abm*2.6*21 IHS/SD/SDR HEAT168435
+ S ABMX("Y")=DA,$P(ABMZ(ABMX("Y")),U,2)=DA
+ S ABMZ("MOD")=.31_U_3_U_.32_U_.33
+ D MOD3^ABMDEMLC
+ ;end new abm*2.6*21 IHS/SD/SDR HEAT168435
  D PPDU Q:$D(DIRUT)
  S DR=DR_".22Prescription"
  S ABMSCRIP=$P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),23,DA,0)),U,22)
@@ -114,7 +131,8 @@ E ;EDIT EXISTING ENTRY
  .S DR=".05///"_(ABMZ("DISPFEE")*X) D ^DIE
  .S DR=".25////"_$P($G(^PSRX(ABMIEN,0)),U,13)  ;date written
  .S DR=DR_";.2////"_$P($G(^PSRX(ABMIEN,0)),U,8)  ;days supply
- .S DR=DR_";.24////"_$P($G(^PSRX(ABMIEN,2)),U,7)  ;NDC
+ .;S DR=DR_";.24////"_$P($G(^PSRX(ABMIEN,2)),U,7)  ;NDC  ;abm*2.6*21 IHS/SD/SDR HEAT207995
+ .S DR=DR_";.24//"_$P($G(^PSRX(ABMIEN,2)),U,7)  ;NDC  ;abm*2.6*21 IHS/SD/SDR HEAT207995
  .S DR=DR_";.29//"  ;CPT code  ;abm*2.6*7 HEAT30524
  .D ^DIE
  .D NARR  ;abm*2.6*19 IHS/SD/SDR HEAT173117

@@ -1,5 +1,5 @@
-LR7OGMP ;VA/DALOI/STAFF- Interim report rpc memo print ; 22-Oct-2013 09:22 ; MKK
- ;;5.2;LAB SERVICE;**1027,1031,1033**;NOV 01, 1997
+LR7OGMP ;VA/DALOI/STAFF- Interim report rpc memo print ; 03-Jul-2014 07:41 ; MKK
+ ;;5.2;LAB SERVICE;**1027,1031,1033**;NOV 01, 1997;Build 146
  ;
  ;;VA LR Patche(s): 187,246,282,286,344,395
  ;

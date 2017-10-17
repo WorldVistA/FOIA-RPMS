@@ -1,5 +1,5 @@
-APCLSILI ; IHS/CMI/LAB - ILI surveillance export ; 19 Jun 2013  1:38 PM
- ;;3.0;IHS PCC REPORTS;**22,23,24,25,26,27,28,29,30**;FEB 05, 1997;Build 27
+APCLSILI ; IHS/CMI/LAB - ILI surveillance export ; 27 Jun 2017  2:26 PM
+ ;;3.0;IHS PCC REPORTS;**22,23,24,25,26,27,28,29,30,31**;FEB 05, 1997;Build 32
  ;
  ;
 START ;
@@ -31,8 +31,8 @@ PROC ;EP - called from xbdbque
  I $E(DT,4,7)="0710"!($E(DT,4,7)="1210") S APCLSCOM=1
  K APCLLOCT,APCLALLT,APCLHTOT,APCLALL1
  K ^TMP($J)
- K ^APCLDATA($J)  ;export global
- S APCLCTAX=$O(^ATXAX("B","SURVEILLANCE ILI CLINICS",0))  ;clinic taxonomy
+ K ^APCLDATA($J)
+ S APCLCTAX=$O(^ATXAX("B","SURVEILLANCE ILI CLINICS",0))
  S APCLDTAX=$O(^ATXAX("B","SURVEILLANCE ILI",0))  ;dx taxonomy
  S APCLTTAX=$O(^ATXAX("B","SURVEILLANCE ILI NO TMP NEEDED",0))
  I 'APCLCTAX D EXIT Q
@@ -47,7 +47,7 @@ EP1 ;EP - called from on demand option
  ;wipe out log? - yes per Deborah
  I $G(APCLFLF) D
  .S APCLX=0 F  S APCLX=$O(^APCLILIL(APCLX)) Q:APCLX'=+APCLX  S DA=APCLX,DIK="^APCLILIL(" D ^DIK
- D UNFOLDTX^APCLSILU  ;unfold taxonomies for speed
+ D UNFOLDTX^APCLSILU
  K ^XTMP("APCLILIV",$J)
  I $G(APCLWEXP)="P" G MONUP
  S APCLVTOT=0
@@ -67,7 +67,6 @@ EP1 ;EP - called from on demand option
  ;NOW GO THROUGH AVDEL XREF FOR DELETES SKIP IF THIS IS A FULL EXPORT
  S APCLSD=APCLDELD
  F  S APCLSD=$O(^AUPNVSIT("AVDEL",APCLSD)) Q:APCLSD'=+APCLSD!($P(APCLSD,".")>APCLED)  D
- .;W:'$D(ZTQUEUED) ".",$$FMTE^XLFDT(APCLSD)
  .S APCLV=0 F  S APCLV=$O(^AUPNVSIT("AVDEL",APCLSD,APCLV)) Q:APCLV'=+APCLV  D
  ..I '$D(^APCLILIL(APCLV)) Q  ;never exported so no need to send delete
  ..I $P(^AUPNVSIT(APCLV,0),U,11),$D(^APCLILIL("B",APCLV)) S APCLSTAT="D" D SR("VISIT HAS BEEN DELETED")
@@ -111,7 +110,7 @@ S ;NOW SET TOTAL IN PIECE 13
  S L="" F  S L=$O(^TMP($J,"APCLALL1",L)) Q:L=""  S D="" F  S D=$O(^TMP($J,"APCLALL1",L,D)) Q:D=""  S ^TMP($J,"APCLX",D,L)=^TMP($J,"APCLALL1",L,D)
  S X=0,C=0 F  S X=$O(^APCLDATA($J,X)) Q:X'=+X  S L=X
  S C=L
- S D="" F  S D=$O(^TMP($J,"APCLX",D)) Q:D=""  D
+ S D=APCLSD F  S D=$O(^TMP($J,"APCLX",D)) Q:D=""  D   ;IHS/CMI/LAB - "" to APCLSD PATCH 31 06/14/17
  .S L="" F  S L=$O(^TMP($J,"APCLX",D,L)) Q:L=""  D
  ..S C=C+1
  ..S ^APCLDATA($J,C)="" D
@@ -211,7 +210,7 @@ HASIVAC(V) ;EP - get flu iz
  .Q:'$D(^AUTTIMM(Y,0))
  .S Z=$P(^AUTTIMM(Y,0),U,3)
  .Q:'$D(^ATXAX(T,21,"B",Z))
- .;get lot and manufacturer
+ .;
  .S C=1_U_Z_U_$$VAL^XBDIQ1(9000010.11,X,.05) I $P(^AUPNVIMM(X,0),U,5),$D(^AUTTIML($P(^AUPNVIMM(X,0),U,5),0)) S C=C_U_$$VAL^XBDIQ1(9999999.41,$P(^AUPNVIMM(X,0),U,5),.02)
  .S Z=$$VALI^XBDIQ1(9000010.11,X,1201)
  .S $P(C,U,5)=$S(Z:$P(Z,".",1),1:$$VD^APCLV(V))
@@ -223,7 +222,7 @@ HASIVAC(V) ;EP - get flu iz
  .Q:'$D(^AUTTIMM(Y,0))
  .S Z=$P(^AUTTIMM(Y,0),U,3)
  .Q:'$D(^ATXAX(T,21,"B",Z))
- .;get lot and manufacturer
+ .;
  .S C=1_U_Z_U_$$VAL^XBDIQ1(9000010.11,X,.05) I $P(^AUPNVIMM(X,0),U,5),$D(^AUTTIML($P(^AUPNVIMM(X,0),U,5),0)) S C=C_U_$$VAL^XBDIQ1(9999999.41,$P(^AUPNVIMM(X,0),U,5),.02)
  .S Z=$$VALI^XBDIQ1(9000010.11,X,1201)
  .S $P(C,U,5)=$S(Z:$P(Z,".",1),1:$$VD^APCLV(V))
@@ -252,7 +251,7 @@ HASIVAC(V) ;EP - get flu iz
 ILIDX ;
  Q:"AORSH"'[$P(^AUPNVSIT(APCLV,0),U,7)
  I $P(^AUPNVSIT(APCLV,0),U,7)="H" S ^TMP($J,"APCLHTOT",APCLASUF,APCLDATE)=$G(^TMP($J,"APCLHTOT",APCLASUF,APCLDATE))+1
- S APCLCLIN=$$CLINIC^APCLV(APCLV,"I")  ;get clinic code
+ S APCLCLIN=$$CLINIC^APCLV(APCLV,"I")  ;
  S X=0,P=0 F  S X=$O(^AUPNVPRV("AD",APCLV,X)) Q:X'=+X!(P)  D
  .Q:'$D(^AUPNVPRV(X,0))
  .S Y=$P(^AUPNVPRV(X,0),U)
@@ -344,7 +343,7 @@ EOP ;EP - End of page.
 USR() ;EP - Return name of current user from ^VA(200.
  Q $S($G(DUZ):$S($D(^VA(200,DUZ,0)):$P(^(0),U),1:"UNKNOWN"),1:"DUZ UNDEFINED OR 0")
  ;----------
-LOC() ;EP - Return location name from file 4 based on DUZ(2).
+LOC() ;EP - 
  Q $S($G(DUZ(2)):$S($D(^DIC(4,DUZ(2),0)):$P(^(0),U),1:"UNKNOWN"),1:"DUZ(2) UNDEFINED OR 0")
  ;----------
 STOPD ;EP

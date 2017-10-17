@@ -1,0 +1,405 @@
+BLRMANPU ; IHS/MSC/MKK - Multiple Accession Not Performed Utility ;10-Jan-2017 09:29;MKK
+ ;;5.2;IHS LABORATORY;**1039**;NOV 01, 1997;Build 38
+ ;
+EEP ; Ersatz EP
+ D EEP^BLRGMENU
+ Q
+ ;
+EP ; EP
+PEP ; EP
+ NEW (DILOCKTM,DISYS,DT,DTIME,DUZ,IO,IOBS,IOF,IOM,ION,IOS,IOSL,IOST,IOT,IOXY,U,XPARSYS,XQXFLG)
+ ;
+ D SETBLRVS
+ ;
+ S HEADER(1)="Multiple Accessions"
+ S HEADER(2)="Not Performed Utility"
+ ;
+ S ONGO="YES"
+ F  Q:ONGO="NO"  D
+ . D HEADERDT^BLRGMENU
+ . I $D(REMOVEA) D
+ .. W "The following Accessions have been selected:",!,?4
+ .. S LRAS=""
+ .. F  S LRAS=$O(REMOVEA(LRAS))  Q:LRAS=""  D
+ ... W $$LJ^XLFSTR(LRAS,22)
+ ... I $X>69 W !,?4
+ . W !!
+ . D LRWU4
+ . I LRAA<1!(LRAD<1)!(LRAN<1)  S ONGO="NO"  Q
+ . ;
+ . I $D(^LRO(68,LRAA,1,LRAD,1,LRAN))<1 D  Q
+ .. D PROMPTO^BLRUTIL7("Accession "_BLRLRAS_" does not exist.")
+ . ;
+ . S (COMPLTED,LRAT)=0
+ . F  S LRAT=$O(^LRO(68,LRAA,1,LRAD,1,LRAN,4,LRAT))  Q:LRAT<1!(COMPLTED)  D
+ .. I $$GET1^DIQ(68.04,LRAT_","_LRAN_","_LRAD_","_LRAA,4,"I") S COMPLTED=COMPLTED+1
+ . ;
+ . I COMPLTED D  Q
+ .. D PROMPTO^BLRUTIL7("Accession "_BLRLRAS_" has completed data.  Cannot be selected.")
+ . ;
+ . S REMOVEA(BLRLRAS)=LRAA_U_LRAD_U_LRAN
+ ;
+ I $D(REMOVEA)<1 D BADSTUFF^BLRUTIL7("No Accessions selected.")  Q
+ ;
+ D HEADERDT^BLRGMENU
+ W "The following Accessions have been selected to be marked as NOT PERFORMED:",!,?4
+ S LRAS=""
+ F  S LRAS=$O(REMOVEA(LRAS))  Q:LRAS=""  D
+ . W $$LJ^XLFSTR(LRAS,22)
+ . I $X>69 W !,?4
+ W !!
+ ;
+ D ^XBFMK
+ S DIR(0)="YO"
+ S DIR("A")="Do you want to continue"
+ S DIR("B")="NO"
+ D ^DIR
+ I +$G(DIRUT)!(+Y<1) D PROMPTO^BLRUTIL7("Per response, routine ends.")  Q
+ ;
+ S CANCLRSN=""
+ F  Q:$L(CANCLRSN)  D
+ . D HEADERDT^BLRGMENU
+ . D ^XBFMK
+ . S DIR(0)="FO"
+ . S DIR("A")="Not Performed Reason"
+ . D ^DIR
+ . I +$G(DIRUT) D  Q
+ .. D BADSTUFF^BLRUTIL7("No/Quit/Invalid Input.")
+ .. S CANCLRSN="BLRMANPU NO GOOD"
+ . ;
+ . S CANCLRSN="Cancel Reason:*"_$G(X)
+ ;
+ Q:CANCLRSN="BLRMANPU NO GOOD"
+ ;
+ S LRAS=""
+ F  S LRAS=$O(REMOVEA(LRAS))  Q:LRAS=""  D
+ . S STR=$G(REMOVEA(LRAS))
+ . S LRAA=$P(STR,U),LRAD=$P(STR,U,2),LRAN=$P(STR,U,3)
+ . S UID=$$GET1^DIQ(68.02,LRAN_","_LRAD_","_LRAA,16,"I")
+ . S OKAY=$$NOTPERF(LRAA,LRAD,LRAN,UID,CANCLRSN)
+ . S:OKAY<1 NOTOKAY(LRAS)=""
+ . S:OKAY NPOKAY(LRAS)=""
+ ;
+ D HEADERDT^BLRGMENU
+ I $D(NPOKAY) D
+ . S LRAS=""
+ . F  S LRAS=$O(NPOKAY(LRAS))  Q:LRAS=""  W ?4,LRAS,?29,"*NP Marked",!
+ ;
+ ; Now, mark them discontinued in the Order (#100) file
+ S DISCPTR=$$FIND1^DIC(100.01,,,"DISCONTINUED")
+ K WHOCANCL
+ S LRAS=""
+ F  S LRAS=$O(NPOKAY(LRAS))  Q:LRAS=""  D
+ . S STR=$G(REMOVEA(LRAS))
+ . S LRAA=$P(STR,U),LRAD=$P(STR,U,2),LRAN=$P(STR,U,3)
+ . S LRODNUM=$$GET1^DIQ(68.02,LRAN_","_LRAD_","_LRAA,14,"I")
+ . S LRODT=0
+ . F  S LRODT=$O(^LRO(69,"C",LRODNUM,LRODT))  Q:LRODT<1  D
+ .. S LRSP=0
+ .. F  S LRSP=$O(^LRO(69,"C",LRODNUM,LRODT,LRSP))  Q:LRSP<1  D
+ ... K TESTS,NAT
+ ... S LROT=0
+ ... F  S LROT=$O(^LRO(69,LRODT,1,LRSP,2,LROT))  Q:LROT<1  D
+ .... S LROTIEN=LROT_","_LRSP_","_LRODT
+ .... S LROLRAD=$$GET1^DIQ(69.03,LROTIEN,2,"I")
+ .... Q:LROLRAD'=LRAD
+ .... S LROLRAA=$$GET1^DIQ(69.03,LROTIEN,3,"I")
+ .... Q:LROLRAA'=LRAA
+ .... S LROLRAN=$$GET1^DIQ(69.03,LROTIEN,4,"I")
+ .... Q:LROLRAN'=LRAN
+ .... ;
+ .... S F60PTR=$$GET1^DIQ(69.03,LROTIEN,.01,"I")
+ .... S TESTS(F60PTR)=""
+ .... S WHOCANCL(LRODT,LRSP,LROT)=$$GET1^DIQ(69.03,LROTIEN,10,"I")
+ .... S $P(^LRO(69,LRODT,1,LRSP,2,LROT,0),U,11)=""    ; Have to make null for NEW^LR7OB1 to work
+ ... Q:$D(TESTS)<1
+ ... ;
+ ... S NAT="^^^5^OTHER CANCEL REASON^99ORR"
+ ... D NEW^LR7OB1(LRODT,LRSP,"OC",NAT,.TESTS)
+ ;
+ ; Now, set or restore the WHO CANCELLED field
+ S LRODT=0
+ F  S LRODT=$O(WHOCANCL(LRODT))  Q:LRODT<1  D
+ . S LRSP=0
+ . F  S LRSP=$O(WHOCANCL(LRODT,LRSP))  Q:LRSP<1  D
+ .. S LROT=0
+ .. F  S LROT=$O(WHOCANCL(LRODT,LRSP,LROT))  Q:LROT<1  D
+ ... S WHOCANCL=$G(WHOCANCL(LRODT,LRSP,LROT))
+ ... S WHOCANCL=$S(WHOCANCL:WHOCANCL,1:DUZ)
+ ... S $P(^LRO(69,LRODT,1,LRSP,2,LROT,0),U,11)=WHOCANCL
+ ;
+ I $D(NOTOKAY) D
+ . W !!,"The following accessions were NOT marked as *NP Complete:",!,?4
+ . S LRAS=""
+ . F  S LRAS=$O(NOTOKAY(LRAS))  Q:LRAS=""  D
+ .. W $$LJ^XLFSTR(LRAS,22)
+ .. I $X>69 W !,?4
+ ;
+ D PRESSKEY^BLRGMENU(9)
+ Q
+ ;
+NOTPERF(LRAA,LRAD,LRAN,UID,CANCLRSN) ; EP - Not Performed
+ NEW (CANCLRSN,DILOCKTM,DISYS,DT,DTIME,DUZ,IO,IOBS,IOF,IOM,ION,IOS,IOSL,IOST,IOT,IOXY,LRAA,LRAD,LRAN,U,UID,XPARSYS,XQXFLG)
+ ;
+ D ^LRPARAM
+ S BLRLOG=1
+ ;
+ S SAVLRAA=LRAA,SAVLRAD=LRAD,SAVLRAN=LRAN
+ ;
+ S LRSS=$$GET1^DIQ(68,LRAA,"LR SUBSCRIPT","I")
+ S IEN=LRAN_","_LRAD_","_LRAA_","
+ S LRDFN=$$GET1^DIQ(68.02,IEN,"LRDFN","I")
+ S LRIDT=$$GET1^DIQ(68.02,IEN,"INVERSE DATE","I")
+ ;
+ S BLROPT="DELACC"
+ ;
+ K LRXX,LRSCNXB
+ S (LREND,LRNOP)=0
+ D FIX^BLRMANP2
+ I $G(LREND) S LREND=1 Q 0
+ ;
+ Q 1
+ ;
+GETRID(LRAA,LRAD,LRAN,LRAS,LRNOP) ; EP - Mark Accession as NOT Performed.
+ ; Following code cloned from LRTSTJAN & LRTSTOUT
+ NEW (DILOCKTM,DISYS,DT,DTIME,DUZ,IO,IOBS,IOF,IOM,ION,IOS,IOSL,IOST,IOT,IOXY,LRAA,LRAD,LRAN,LRAS,LRNOP,U,XPARSYS,XQXFLG)
+ ;
+ S UID=$$GET1^DIQ(68.02,LRAN_","_LRAD_","_LRAA,16,"I")
+ D NOTPERF^BLRRLTDR(UID)
+ ;
+ I '$P($G(^LRO(68,+$G(LRAA),1,+$G(LRAD),1,+$G(LRAN),0)),U,2) W !?5,"Accession has no Test ",! S LRNOP=1 Q
+ L +^LRO(68,LRAA,1,LRAD,1,LRAN):1 I '$T W !,"Someone else is working on this accession",! S LRNOP=1 Q
+ S LRX=^LRO(68,LRAA,1,LRAD,1,LRAN,0),LRACN=$P(^(.2),U),LRUID=$P(^(.3),U)
+ S LRDFN=+LRX,LRSN=+$P(LRX,U,5),LRODT=+$P(LRX,U,4)
+ S LRSS=$$GET1^DIQ(68,LRAA,.02,"I")
+ S LRDPF=$P(^LR(LRDFN,0),U,2),DFN=$P(^(0),U,3)
+ D PT^LRX
+ ;
+ S LRIDT=$P($G(^LRO(68,LRAA,1,LRAD,1,LRAN,3)),U,5) L +^LR(LRDFN,LRSS,LRIDT):1 I '$T W !,"Someone else is working on this data." L -^LRO(68,LRAA,1,LRAD,1,LRAN) S LRNOP=1 Q
+ I '$G(^LR(LRDFN,LRSS,LRIDT,0)) W !?5," Can't find Lab Data for this accession",! D UNLOCK S LRNOP=1 Q
+ ;
+ S LRTOTL=1,LRIFN=0
+ I LRTOTL>0 D
+ .F  S LRIFN=$O(^LR(LRDFN,LRSS,LRIDT,LRIFN)) Q:LRIFN=""  S:$P($G(^LR(LRDFN,LRSS,LRIDT,LRIFN)),U)="pending" $P(^LR(LRDFN,LRSS,LRIDT,LRIFN),U)=""
+ I LRTOTL=0 D CHG^LRTSTOUT Q
+ D FX2^LRTSTOUT I $G(LREND) Q
+ D
+ . N LRTSTS
+ . S LRTSTS=0,LRNOW=$$NOW^XLFDT F  S LRTSTS=+$O(^LRO(68,LRAA,1,LRAD,1,LRAN,4,LRTSTS)) Q:LRTSTS<1  I $D(^(LRTSTS,0))#2,'$P(^(0),U,5) D
+ . . I $D(^LAB(60,LRTSTS,0)) S LRTNM=$P(^(0),U) D SET^LRTSTOUT
+ L -^LRO(68,LRAA,1,LRAD,1,LRAN)
+ I $L($G(LRSS)) L -^LR(+$G(LRDFN),LRSS,+$G(LRIDT))
+ D:BLRLOG ^BLREVTQ("M","D",$G(BLROPT),,LRACN)
+ Q
+ ;
+ ;
+UNLOCK ; EP
+ L -(^LR($G(LRDFN),$G(LRSS),$G(LRIDT)),^LRO(68,$G(LRAA),1,$G(LRAD),1,$G(LRAN)))
+ Q
+ ;
+ ;
+SETBLRVS(TWO) ; EP - Set the BLRVERN variable(s)
+ K BLRVERN,BLRVERN2
+ ;
+ S BLRVERN=$P($P($T(+1),";")," ")
+ S:$L($G(TWO)) BLRVERN2=$G(TWO)
+ Q
+ ;
+SLABDATA ; EP - Setup the Lab Data file variables
+ D ^LRWU4
+ ;
+ S LRAIEN=LRAN_","_LRAD_","_LRAA
+ S LRDFN=$$GET1^DIQ(68.02,LRAIEN,"LRDFN","I")
+ S LRIDT=$$GET1^DIQ(68.02,LRAIEN,"INVERSE DATE","I")
+ ;
+ W !!,"LRDFN:",LRDFN,"; LRIDT:",LRIDT,!!
+ Q
+ ;
+LRWU4 ; EP - Code cloned from LRWU4 routine
+ N %,DIC,DIR,DIRUT,DUOUT,DTOUT,LRQUIT,LRX
+ ;
+ K LRNATURE
+ S U="^",DT=$$DT^XLFDT,LRQUIT=0
+ F  D LRWU4AA Q:LRQUIT
+ Q
+ ;
+LRWU4AA ;
+ S DIR(0)="FO^1:30",DIR("A")="Select Accession"_$S($G(LRVBY)=1:"",1:" or UID")
+ S DIR("?")="^D QUES^LRWU4"
+ D ^DIR
+ I Y=""!$D(DIRUT) D QUIT^LRWU4 Q
+ S LRX=Y
+ S BLRLRAS=$G(X)
+ ;
+ S:$L(LRX)>2 ^DISV(DUZ,"LRACC")=LRX
+ S:LRX=" " LRX=$S($D(^DISV(DUZ,"LRACC")):^("LRACC"),1:"?")
+ S (LRAA,LRAD,LRAN)=0
+ ;
+ ; see if entry is UID
+ I $G(LRVBY)<1,$D(^LRO(68,"C",LRX)) D UNIV^LRWU4 Q
+ ;
+ ; Parse and process user input.
+ S (X1,X2,X3)="",X1=$P(LRX," ",1),X2=$P(LRX," ",2),X3=$P(LRX," ",3)
+ S:X3=""&(+X2=X2) X3=X2,X2=""
+ I X1'?1A.AN D QUES^LRWU4 Q
+ S LRAA=$O(^LRO(68,"B",X1,0))
+ I LRAA<1 D WLQUES^LRWU4 Q:LRAA<1
+ S %=$P(^LRO(68,LRAA,0),U,14)
+ S %=$$LKUP^XPDKEY(%)
+ I $L(%),'$D(^XUSEC(%,DUZ)) D WLQUES^LRWU4 Q:LRAA<1
+ ;
+ S LRX=$G(^LRO(68,LRAA,0)),LRIDIV=$S($L($P(LRX,U,19)):$P(LRX,U,19),1:"CP")
+ ; W !,$P(LRX,U)
+ ;
+ ; User entered only accession area identifier, no date or number.  Not allowed.
+ I X2="",X3="" D QUIT^LRWU4  Q
+ ;
+ ; Convert middle value to FileMan date
+ ; Adjust for monthly and quarterly formats (MM00) if user enters 4 digit
+ ; number as middle part of accession then convert to appropriate date.
+ I LRAD<1 D
+ . N %DT
+ . I X2="" S X2=DT
+ . I X2?4N D
+ . . S X2=$E(DT,1,3)_X2
+ . . I X2>DT S X2=X2-10000
+ . S %DT="EP",X=X2
+ . D ^%DT
+ . I Y>0 S LRAD=Y Q
+ . D QUES^LRWU4
+ I LRAD<1 Q
+ ;
+ ; Convert date entered to apropriate date for accession area transform
+ S X=$P(^LRO(68,LRAA,0),U,3)
+ S LRAD=$S("D"[X:LRAD,X="Y":$E(LRAD,1,3)_"0000","M"[X:$E(LRAD,1,5)_"00","Q"[X:$E(LRAD,1,3)_"0000"+(($E(LRAD,4,5)-1)\3*300+100),1:LRAD)
+ W:X3>0 "  ",+X3
+ ;
+ I X3="",$D(LRACC) D
+ . N DIR,DIRUT,DUOUT,DTOUT,X,Y
+ . S DIR(0)="NO^1:999999",DIR("A")="  Number part of Accession"
+ . D ^DIR
+ . I Y=""!$D(DIRUT) Q
+ . S X3=Y
+ ;
+ I X3="",$D(LRACC) D QUIT^LRWU4 Q
+ S LRAN=+X3
+ I LRAN<1,$D(LRACC) D QUES^LRWU4 Q
+ I $D(LRACC),'$D(^LRO(68,LRAA,1,LRAD,1,LRAN,0)) D  Q
+ . W !,"ACCESSION: ",$P(^LRO(68,LRAA,0),U,11)," ",$$FMTE^XLFDT(LRAD,"5D")," ",LRAN," DOES NOT EXIST!"
+ ;
+ S LRQUIT=1
+ Q
+ ;
+MENU ; EP - Menu
+ NEW (DILOCKTM,DISYS,DT,DTIME,DUZ,IO,IOBS,IOF,IOM,ION,IOS,IOSL,IOST,IOT,IOXY,U,XPARSYS,XQXFLG)
+ ;
+ D SETBLRVS
+ ;
+ D ADDTMENU^BLRGMENU("PEP^BLRMANPU","Mark Multiple Accessions NP")
+ D ADDTMENU^BLRGMENU("XTMPRPT^BLRMANP3","Report on Errors For Mult Accs NP")
+ D ADDTMENU^BLRGMENU("XTMPKILL^BLRMANP3","Purge Error Report Global")
+ D ADDTMENU^BLRGMENU("DETAIL68^BLRMANP3","Accession Detail")
+ D ADDTMENU^BLRGMENU("F6869100^BLRMANPU","Report on Files 68, 69, & 100")
+ ;
+ D MENUDRVR^BLRGMENU("RPMS Lab","Mark Multiple Accessions NP Utilities")
+ Q
+ ;
+ ; The following cloned from BLRRLTDU
+XTMPISET(MSG,RTN) ; EP - Set data in ^XTMP when there are issues
+ NEW UID,STR
+ ;
+ S STR=$G(^XTMP("BLRMANPU",0))
+ I $L(STR)<1 D  ; Set ^XTMP Node Zero
+ . S STR=$$HTFM^XLFDT(+$H)_"^^Multiple Accessions as Not Performed Errors"
+ S $P(STR,"^",2)=$$HTFM^XLFDT(+$H+30)
+ S ^XTMP("BLRMANPU",0)=STR
+ ;
+ S UID=$G(^LRO(68,+$G(LRAA),1,+$G(LRAD),1,+$G(LRAN),.3),"<UNKNOWN>")
+ S ^XTMP("BLRMANPU","UID",UID,"DUZ",DUZ,$H)=RTN_"^"_MSG
+ S ^XTMP("BLRMANPU","UID")=1+$G(^XTMP("BLRMANPU","UID"))
+ S LREND=1
+ ;
+ Q
+ ;
+ ;
+F6869100 ; EP - Given an Accession, display data from 68, 69 & 100
+ NEW (DILOCKTM,DISYS,DT,DTIME,DUZ,IO,IOBS,IOF,IOM,ION,IOS,IOSL,IOST,IOT,IOXY,U,XPARSYS,XQXFLG)
+ ;
+ D SETBLRVS
+ ;
+ S HEADER(1)="Accession Data"
+ S HEADER(2)="File 68, 69 & 100 Status"
+ D HEADERDT^BLRGMENU
+ ;
+ D ^LRWU4
+ ;
+ I LRAA<1!(LRAD<1)!(LRAN<1)  S ONGO="NO"  Q
+ ;
+ I $D(^LRO(68,LRAA,1,LRAD,1,LRAN))<1 D  Q
+ . D PROMPTO^BLRUTIL7("Accession "_BLRLRAS_" does not exist.")
+ ;
+ D HEADERDT^BLRGMENU
+ D HEADONE^BLRGMENU(.HDRONE)
+ D HEADERDT^BLRGMENU
+ ;
+ S LRAAIEN=LRAN_","_LRAD_","_LRAA
+ S ORDNUM=$$GET1^DIQ(68.02,LRAAIEN,14)
+ S LRAS=$$GET1^DIQ(68.02,LRAAIEN,15)
+ S LRAUID=$$GET1^DIQ(68.02,LRAAIEN,16)
+ ;
+ K HEADER(1)
+ S HEADER(1)="Accession "_LRAS_" ["_LRAUID_"] Data"
+ ;
+ S HEADER(3)=" "
+ S HEADER(4)="File 60"
+ S $E(HEADER(4),10)=$$COLHEAD^BLRGMENU("File 68",31)
+ S $E(HEADER(4),43)=$$COLHEAD^BLRGMENU("File 69",18)
+ S $E(HEADER(4),63)=$$COLHEAD^BLRGMENU("File 100",18)
+ S HEADER(5)="IEN"
+ S $E(HEADER(5),10)="LRAS"
+ S $E(HEADER(5),28)="Disposition"
+ S $E(HEADER(5),43)="Order #"
+ S $E(HEADER(5),53)="CancelBy"
+ S $E(HEADER(5),63)="OERR #"
+ S $E(HEADER(5),75)="Status"
+ ;
+ S MAXLINES=IOSL-4,LINES=MAXLINES+10
+ S (CNT,PG)=0
+ S QFLG="NO"
+ ;
+ ; Create File 69 Array by File 60 IEN
+ S LRODT=0
+ F  S LRODT=$O(^LRO(69,"C",ORDNUM,LRODT))  Q:LRODT<1  D
+ . S LRSP=0
+ . F  S LRSP=$O(^LRO(69,"C",ORDNUM,LRODT,LRSP))  Q:LRSP<1  D
+ .. S LROT=0
+ .. F  S LROT=$O(^LRO(69,LRODT,1,LRSP,2,LROT))  Q:LROT<1  D
+ ... S LROTIEN=LROT_","_LRSP_","_LRODT
+ ... S LROF60=$$GET1^DIQ(69.03,LROTIEN,.01,"I")
+ ... S OERRIEN=$$GET1^DIQ(69.03,LROTIEN,6,"I")
+ ... S LROSTS=$$GET1^DIQ(69.03,LROTIEN,9)
+ ... S LROCANBY=$$GET1^DIQ(69.03,LROTIEN,10,"I")
+ ... S LROTARRY(LROF60)=LRODT_U_LRSP_U_OERRIEN_U_LROCANBY_U_LROSTS
+ ;
+ ; Go through File 68's File 60 IENs
+ S LRAT=0
+ F  S LRAT=$O(^LRO(68,LRAA,1,LRAD,1,LRAN,4,LRAT))  Q:LRAT<1!(QFLG="Q")  D
+ . S DISPTION=$$GET1^DIQ(68.04,LRAT_","_LRAAIEN,5)
+ . S STR=$G(LROTARRY(LRAT))
+ . S OERRIEN=$P(STR,U,3)
+ . S OERRSTS=$$GET1^DIQ(100,OERRIEN,"STATUS")
+ . S CANCBY=$P(STR,U,4)
+ . I LINES>MAXLINES D HEADERPG^BLRGMENU(.PG,.QFLG,HDRONE)  Q:QFLG="Q"
+ . ;
+ . W LRAT
+ . W ?9,LRAS
+ . W ?27,$E(DISPTION,1,13)
+ . W ?42,ORDNUM
+ . W ?52,CANCBY
+ . W ?62,OERRIEN
+ . W ?74,$E(OERRSTS,1,6)
+ . W !
+ . S LINES=LINES+1
+ ;
+ D PRESSKEY^BLRGMENU(9)
+ Q

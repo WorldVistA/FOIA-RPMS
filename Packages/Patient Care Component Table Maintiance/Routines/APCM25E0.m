@@ -1,5 +1,5 @@
 APCM25E0 ;IHS/CMI/LAB - IHS MU; 
- ;;1.0;MU PERFORMANCE REPORTS;**8**;MAR 26, 2012;Build 22
+ ;;1.0;MU PERFORMANCE REPORTS;**8,9**;MAR 26, 2012;Build 25
  ;;;;;;Build 3
 SC ;EP - TRANSITION OF CARE SUMMARY
  ;new logic for patch 8, keep old logic in case need to revert based on testing
@@ -101,10 +101,12 @@ SUMNUM ..;
  ...I $P(^BMCREF(APCMX,6,B,0),U,4)'="CT" Q
  ...S E=$P($P(^BMCREF(APCMX,6,B,0),U,1),".")
  ...I E="" Q  ;NO .01
+ ...I $G(APCMEDUD),E>APCMEDUD Q  ;IHS/CMI/LAB - PATCH 9 - printed after 12/31/17
  ...S M=$$CD(E,APCMBD)
  ...I 'M Q  ;NOT IN REPORTING YEAR
  ...;I 'M S E=$P($P(^BMCREF(APCMX,6,B,0),U,1),".") S M=$$CD(E) Q:'M  ;dates aren't good
  ...S A=$P($P(^BMCREF(APCMX,6,B,0),U,3),".")  ;tx acknowledged
+ ...I $G(APCDEDUD),A,A>APCDEDUD Q  ;IHS/CMI/LAB - PATCH 9 in 2017, acknowledged after 12/31/17
  ...I A,$$CD(A,APCMBD) D SN S G=1
  Q
 SN ;

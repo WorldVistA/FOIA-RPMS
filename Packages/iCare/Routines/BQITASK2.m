@@ -1,5 +1,5 @@
 BQITASK2 ;PRXM/HC/ALA-Separate tasks for post-installs ; 31 Jul 2007  11:24 AM
- ;;2.5;ICARE MANAGEMENT SYSTEM;;May 24, 2016;Build 27
+ ;;2.6;ICARE MANAGEMENT SYSTEM;;Jul 07, 2017;Build 72
  ;
 DXC ;EP - Entry point to identify the diagnostic tags
  ; Variables
@@ -46,6 +46,7 @@ CMG(SOURCE) ;EP - Update a Care Management group
  . I '$$HRN^BQIUL1(DFN) Q
  . ; If patient has no visit in past 3 years
  . I '$$VTHR^BQIUL1(DFN) Q
+ . I SOURCE="Pediatric",$$AGE^BQIAGE(DFN,"")>21 Q
  . D PAT^BQIRGASP(DFN,SRC)
  K BDMDMRG,BDMJOB,BDMBTH,CYR,CIEN,PGTHR,PGRF,BDMRBD,BDMADAT,BDMTYPE,BDMRED,BMDBDAT,BDMPD
  S BQIUPD(90508,"1,",4.17)=$$NOW^XLFDT(),BQIUPD(90508,"1,",4.18)="@"

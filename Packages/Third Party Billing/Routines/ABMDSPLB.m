@@ -1,12 +1,10 @@
-ABMDSPLB ; IHS/ASDST/DMJ - SPLIT CLAIM IN TWO medicare B;     
- ;;2.6;IHS 3P BILLING SYSTEM;;NOV 12, 2009
+ABMDSPLB ; IHS/SD/SDR - SPLIT CLAIM IN TWO medicare B;     
+ ;;2.6;IHS 3P BILLING SYSTEM;**14,21**;NOV 12, 2009;Build 379
  ;
- ; IHS/SD/SDR - v2.5 p8 - task 6
- ;    Added code to not split claim if ambulance
+ ; IHS/SD/SDR - v2.5 p8 - task 6 - Added code to not split claim if ambulance
+ ; IHS/SD/SDR - v2.5 p9 - IM19717/IM20374 - Added to merge check primary provider and primary DX
  ;
- ; IHS/SD/SDR - v2.5 p9 - IM19717/IM20374
- ;   Added to merge check primary provider and primary DX
- ;
+ ;IHS/SD/SDR - 2.6*21 - HEAT112417 - Made change so MCR pro fee bill will still have itemized data
  ; *********************************************************************
  ;
 MAIN(ABMCF) ;EP - main section
@@ -63,8 +61,10 @@ EDIT ; EP - edit fields
  D ^DIE
  Q
 DEL ; EP - delete sections
- N I F I=13,23,25,33,37,43,45 D
- .K ^ABMDCLM(DUZ(2),DA,I)
+ ;start old abm*2.6*21 IHS/SD/SDR HEAT112417
+ ;N I F I=13,23,25,33,37,43,45 D
+ ;.K ^ABMDCLM(DUZ(2),DA,I)
+ ;end old HEAT112417
  Q
 XREF ; EP - cross reference
  S DIK="^ABMDCLM(DUZ(2),"

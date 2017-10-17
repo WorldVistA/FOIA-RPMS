@@ -1,6 +1,6 @@
  ;csp.beddedit1.1
- ;(C)InterSystems, generated for class csp.beddedit1.  Do NOT edit. 04/14/2017 08:47:50AM
- ;;75516C75;csp.beddedit1
+ ;(C)InterSystems, generated for class csp.beddedit1.  Do NOT edit. 06/12/2017 07:15:27PM
+ ;;66376D6A;csp.beddedit1
  ;
 zMyXdate(rawDtTm)
  	Set val=$$XDATE^BEDDUTID(rawDtTm)

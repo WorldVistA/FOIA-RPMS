@@ -1,5 +1,5 @@
 ABMDECAN ; IHS/ASDST/DMJ - Cancel Selected Claim ;
- ;;2.6;IHS 3P BILLING SYSTEM;**9,11,19**;NOV 12, 2009;Build 300
+ ;;2.6;IHS 3P BILLING SYSTEM;**9,11,19,21**;NOV 12, 2009;Build 379
  ;
  ; 03/10/04 V2.5 Patch 5 - Deny cancel claim if bill attached
  ; IHS/SD/SDR - V2.5 P8 - Added code for cancellation reason
@@ -10,6 +10,7 @@ ABMDECAN ; IHS/ASDST/DMJ - Cancel Selected Claim ;
  ;
  ;IHS/SD/SDR - 2.6*19 - HEAT155799 - Updated code that creates 3P Cancelled Claim entry so it can
  ;   be called from the Merged claim option if user decides to delete claims that were merged.
+ ;IHS/SD/SDR - 2.6*21 - HEAT242626	 - Updated so only claims with a status of F, E or P can be cancelled.
  ;   
  K ABMP
  S U="^"
@@ -30,6 +31,14 @@ SEL ;
  .I +$G(ABMUOPNS)=0 D  Q
  ..W !!,"* * YOU MUST SIGN IN TO BE ABLE TO PERFORM BILLING FUNCTIONS! * *",!
  ..S DIR(0)="E",DIR("A")="Enter RETURN to Continue" D ^DIR K DIR
+ ;start new abm*2.6*21 IHS/SD/SDR HEAT242626
+ I "^F^E^P^"'[("^"_$P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),0)),U,4)_"^") D  G SEL
+ .W !,*7,"Claim status is ("_$P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),0)),U,4)_") "_$P($P($P(^DD(9002274.3,.04,0),U,3),$P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),0)),U,4)_":",2),";")
+ .W !,"Only claims with one of the below status can be cancelled:"
+ .W !?3,"(F) Flagged as Billable"
+ .W !?3,"(E) In Edit Mode"
+ .W !?3,"(P) Pending"
+ ;end new abm*2.6*21 IHS/SD/SDR HEAT242626
  I $D(^ABMDCLM(DUZ(2),ABMP("CDFN"),65)) D  G:ABMACBEX SEL
  .S ABMACBEX=0
  .S D1=0

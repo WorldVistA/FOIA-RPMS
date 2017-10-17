@@ -1,6 +1,7 @@
 ABME5L9 ; IHS/ASDST/DMJ - Header 
- ;;2.6;IHS Third Party Billing System;**6,8,9**;NOV 12, 2009
+ ;;2.6;IHS Third Party Billing System;**6,8,9,10,21**;NOV 12, 2009;Build 379
  ;Header Segments
+ ;IHS/SD/SDR - 2.6*21 - HEAT70826 - Modified to remove 2310B loop based on SGTM entry
 EP ;START HERE
  N ABM
  K ABMP("PRV")  ;reset provider array
@@ -22,6 +23,14 @@ EP ;START HERE
  I $D(ABMP("PRV","R"))!($D(ABMP("PRV","A"))) D
  .Q:$G(ABMP("VTYP"))=831  ;don't write provider info for ASC
  .Q:$G(ABMP("CLIN"))="A3"
+ .;start new abm*2.6*21 IHS/SD/SDR HEAT70826
+ .S ABMOFLG=0
+ .I $D(^ABMNINS(ABMP("LDFN"),ABMP("INS"),2.5,"ASEND",ABMP("EXP"),"2310B","00","0","N"))>0 D
+ ..S ABMO=0
+ ..F  S ABMO=$O(^ABMNINS(ABMP("LDFN"),ABMP("INS"),2.5,"ASEND",ABMP("EXP"),"2310B","00","0","N",ABMO)) Q:'ABMO  D
+ ...I $P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),2.5,ABMO,0)),U,6)=""!($P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),2.5,ABMO,0)),U,6)=ABMP("VTYP")) S ABMOFLG=1
+ .Q:ABMOFLG=1
+ .;end new abm*2.6*21 IHS/SD/SDR HEAT70826
  .S ABM("PRV")=$S($D(ABMP("PRV","R")):$O(ABMP("PRV","R",0)),1:$O(ABMP("PRV","A",0)))
  .D EP^ABME5NM1("82")
  .D WR^ABMUTL8("NM1")
@@ -55,8 +64,10 @@ EP ;START HERE
  .D EP^ABME5N4(ABMFILE,ABMIEN)
  .D OVER^ABMUTLP(53)
  .D WR^ABMUTL8("N4")
- .D EP^ABME8REF("LU",9999999.06,ABMP("LDFN"))
- .D WR^ABMUTL8("REF")
+ .;start old code abm*2.6*10 NOHEAT
+ .;D EP^ABME8REF("LU",9999999.06,ABMP("LDFN"))
+ .;D WR^ABMUTL8("REF")
+ .;end old code abm*2.6*10 NO HEAT
  ;
  ; Loop 2310D - Supervising Physician Name
  S ABMLOOP="2310D"

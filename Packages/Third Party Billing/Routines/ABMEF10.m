@@ -1,12 +1,13 @@
 ABMEF10 ; IHS/ASDST/DMJ - Medicare Electronic UB-92 Version 041 ;   
- ;;2.6;IHS 3P BILLING SYSTEM;;NOV 12, 2009
+ ;;2.6;IHS 3P BILLING SYSTEM;**10,21**;NOV 12, 2009;Build 379
  ;Original;DMJ;07/08/96 4:53 PM
  ;
  ; IHS/ASDS/LSL - 05/09/00 - V2.4 Patch 1 - NOIS NCA-0500-180017
- ;     Modified to only allow 1 to 15 characters when user enters
- ;     EMC file name
+ ;     Modified to only allow 1 to 15 characters when user enters EMC file name
  ; IHS/ASDS/DMJ - 7/10/01 - V2.4 Patch 5 - NOIS NDA-0301-180017
  ;     Modified to resolve <UNDEF>PCN+1^ABMERUTL
+ ;
+ ;IHS/SD/SDR - 2.6*21 - HEAT123457 - Updated 61044 check from 'equals' to 'contains'
  ;
  ; *********************************************************************
  ;
@@ -20,7 +21,8 @@ START ;
  ..D ^DIC
  ..Q:Y<0
  ..S ABMP("INS")=+Y
- .S ABMP("ITYPE")=$P($G(^AUTNINS(ABMP("INS"),2)),U)
+ .;S ABMP("ITYPE")=$P($G(^AUTNINS(ABMP("INS"),2)),U)  ;abm*2.6*10 HEAT73780
+ .S ABMP("ITYPE")=$$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,ABMP("INS"),".211","I"),1,"I")  ;abm*2.6*10 HEAT73780
  I 'ABMP("INS") D  Q
  .W !,"Insurer NOT identified.",!
  .S DIR="E"
@@ -60,7 +62,8 @@ LOOP ;
  .S ABMP("LDFN")=$P(ABMBIL0,U,3)
  .S ABMP("VTYP")=$P(ABMBIL0,U,7)
  .I ABMP("BTYP")'=ABMP("OBTYP")!(ABMP("LDFN")'=ABMP("OLDFN")) D
- ..I $$RCID^ABMERUTL(ABMP("INS"))=61044,$G(ABMEF("BATCH#")) Q
+ ..;I $$RCID^ABMERUTL(ABMP("INS"))=61044,$G(ABMEF("BATCH#")) Q  ;abm*2.6*21 IHS/SD/SDR HEAT123457
+ ..I $$RCID^ABMERUTL(ABMP("INS"))["61044",$G(ABMEF("BATCH#")) Q  ;abm*2.6*21 IHS/SD/SDR HEAT123457
  ..S ABMEF("BATCH#")=ABMEF("BATCH#")+1
  ..I ABMP("OBTYP") D
  ...D ^ABMER95

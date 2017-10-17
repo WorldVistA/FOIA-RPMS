@@ -1,5 +1,5 @@
 LA7SMP ;VA/DALOI/JMC - Shipping Manifest Print ; 22-Oct-2013 09:22 ; MAW
- ;;5.2;AUTOMATED LAB INSTRUMENTS;**27,45,46,1018,64,1027,1033**;NOV 01, 1997
+ ;;5.2;AUTOMATED LAB INSTRUMENTS;**27,45,46,1018,64,1027,1033,1039**;NOV 01, 1997;Build 38
  ;
 EN ;
  D EN^DDIOL("Print Shipping Manifest","","!!")
@@ -13,6 +13,11 @@ EN ;
  S LA7CHK=1 ; flag to check for missing info.
  W !
  D DEV
+ ;ihs/cmi/maw 04/10/2016 1039 do copies here
+ N L
+ F L=1:1:$S($G(COP):COP,1:1) D
+ . D DQ
+ . ;I $G(COP)>1 W @IOF
  D END^LA7SMP0
  Q
  ;
@@ -31,6 +36,9 @@ DEV ; Alternate entry point when user has already selected a manifest.
  . I Y'=1 S LA7SBC=0
  I $G(LA7EXIT) Q
  ;
+ ;ihs/cmi/maw 04/10/2016 1039 ask for # of copies
+ S COPI=$$GETCOP^BLRRLEVN(DUZ(2))
+ I $G(COPI) S COP=$$ASKCOP^BLRRLEVN(COPI)
  S %ZIS="MQ" D ^%ZIS
  I POP D  Q
  . D HOME^%ZIS
@@ -41,6 +49,8 @@ DEV ; Alternate entry point when user has already selected a manifest.
  . D ^%ZTLOAD,^%ZISC
  . D EN^DDIOL("Request "_$S($G(ZTSK):"queued - Task #"_ZTSK,1:"NOT queued"),"","!")
  . S LA7EXIT=1
+ Q
+ ; 
 DQ ;
  ;
  U IO
@@ -231,6 +241,6 @@ ASK(LA7SM) ; Ask it user wants to print manifest.
  ;
  S DIR(0)="YO",DIR("A")="Print Shipping Manifest",DIR("B")="NO"
  D ^DIR Q:$D(DIRUT)
- I Y=1 D DEV,END^LA7SMP0
+ I Y=1 D DEV,DQ,END^LA7SMP0
  ;
  Q

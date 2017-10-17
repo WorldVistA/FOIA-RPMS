@@ -1,5 +1,5 @@
 LRBLPC1 ;VA/AVAMC/REG - PT ADM,RX SPECIALTY,ICDCM CODES ; 17-Oct-2014 09:22 ; MKK
- ;;5.2;LAB SERVICE;**247,315,1031,1034**;NOV 1, 1997;Build 88
+ ;;5.2;LAB SERVICE;**247,315,1031,1034**;NOV 1, 1997;Build 188
  ;
  ;Per VHA Directive 97-033 this routine should not be modified.  Medical Device # BK970021
  ;Reference to ^DGPT is supported by ICR# 418

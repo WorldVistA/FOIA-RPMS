@@ -1,5 +1,5 @@
 LRBEBA ;DALOI/JAH/FHS - SCI, EI, AND LRBEDGX QUESTIONS ; 17-Oct-2014 09:22 ; MKK
- ;;5.2;LAB SERVICE;**291,352,315,1031,1033,1034**;NOV 1, 1997;Build 88
+ ;;5.2;LAB SERVICE;**291,352,315,1031,1033,1034**;NOV 1, 1997;Build 188
  ;
  ; This routine contains the questions to be asked for 
  ; Service Connected Indicator, Environmental Indicator,

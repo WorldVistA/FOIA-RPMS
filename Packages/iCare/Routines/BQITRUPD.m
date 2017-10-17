@@ -1,5 +1,5 @@
 BQITRUPD ;GDIT/HS/ALA-Update Treatment Prompts ; 30 May 2014  3:09 PM
- ;;2.5;ICARE MANAGEMENT SYSTEM;**1**;May 24, 2016;Build 17
+ ;;2.6;ICARE MANAGEMENT SYSTEM;;Jul 07, 2017;Build 72
  ;
  ;
 CBP ; Update CVD Best Practice Prompts for Health Summary
@@ -39,4 +39,11 @@ NON(NAME,TEXT) ;Non tag specific BP update
  S BQIUPD(9001018,AIEN_",",1)="APCH;BQITRASM"
  S BQIUPD(9001018,AIEN_",",.06)=1
  D FILE^DIE("E","BQIUPD","ERROR")
+ Q
+ ;
+DESC(NAME,TEXT) ; Update description
+ NEW AIEN
+ S AIEN=$$FIND1^DIC(9001018,"","BX",NAME,"","","ERROR")
+ I 'AIEN Q
+ D WP^DIE(9001018,AIEN_",",2,"","TEXT")
  Q

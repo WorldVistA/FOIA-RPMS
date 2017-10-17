@@ -1,5 +1,5 @@
 BGP7ASL1 ; IHS/CMI/LAB - DISPLAY IND LISTS 28 Apr 2006 2:10 PM ;
- ;;17.0;IHS CLINICAL REPORTING;;AUG 30, 2016;Build 16
+ ;;17.1;IHS CLINICAL REPORTING;;MAY 10, 2017;Build 29
  ;; ;
 NGR ;EP
  K BGPTIND S BGPHIGH=""
@@ -9,7 +9,7 @@ NGR ;EP
  .Q:$P(V,U)'=BGPBD
  .Q:$P(V,U,2)'=BGPED
  .Q:$P(V,U,7)'=BGPPER
- .Q:$P(V,U,21)'="16"
+ .Q:$P(V,U,21)'="17.1"
  .I $G(BGPYGPU),$P(V,U,12)'=9 Q
  .I '$G(BGPYGPU),$P(V,U,12)'=1 Q
  .Q:$P(V,U,20)  ;DPRV
@@ -41,7 +41,7 @@ ONM ;EP
  .Q:$P(V,U)'=BGPBD
  .Q:$P(V,U,2)'=BGPED
  .Q:$P(V,U,7)'=BGPPER
- .Q:$P(V,U,21)'="16"
+ .Q:$P(V,U,21)'="17.1"
  .Q:$P(V,U,5)'=BGPBBD
  .Q:$P(V,U,6)'=BGPBED
  .Q:$P(V,U,14)'=BGPBEN

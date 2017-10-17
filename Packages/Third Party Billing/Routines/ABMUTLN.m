@@ -1,9 +1,8 @@
 ABMUTLN ; IHS/ASDST/DMJ - NAME UTILITIES ;    
- ;;2.6;IHS 3P BILLING SYSTEM;;NOV 12, 2009
+ ;;2.6;IHS 3P BILLING SYSTEM;;NOV 12, 2009;Build 379
  ;Original;DMJ;02/07/96 12:33 PM
  ;
- ; IHS/SD/SDR - v2.5 p10 - IM20000
- ;   Added code to look at Card Name for Policy Holder
+ ;IHS/SD/SDR - v2.5 p10 - IM20000 Added code to look at Card Name for Policy Holder
  ;
 LNM(X,Y) ;PEP - last name
  ;x=file

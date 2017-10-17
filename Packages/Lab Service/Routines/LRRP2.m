@@ -1,5 +1,5 @@
-LRRP2 ;DALOI/OIT/RWF-INTERIM REPORT ; 17-Dec-2015 15:37 ; MKK
- ;;5.2;LAB SERVICE;**1003,1018,1019,1021,1022,1025,1027,1038**;NOV 01, 1997;Build 6
+LRRP2 ;DALOI/OIT/RWF-INTERIM REPORT ; 01-Jun-2016 06:24 ; MKK
+ ;;5.2;LAB SERVICE;**1003,1018,1019,1021,1022,1025,1027,1038,1039**;NOV 01, 1997;Build 38
  ;;5.2;LAB SERVICE;**106,121,221,283,300**;Sep 27, 1994
  ;from option LRRP2
  ;
@@ -349,7 +349,8 @@ LASTFOOT ; EP
  . I +$L($$NAME^XUAF4(WOTSITE))+$L($$PADD^XUAF4(WOTSITE))>IOM S NUMSITES=NUMSITES+1
  W !
  W:$Y'<(IOSL-(5+NUMSITES)) !
- F I=$Y:1:(IOSL-(5+NUMSITES)) W !      ; Get to "bottom" of the page
- D SITELIST                            ; Print sites & addresses
+ F I=$Y:1:(IOSL-(5+NUMSITES)) W !           ; Get to "bottom" of the page
+ D SITELIST                                 ; Print sites & addresses
+ W !!,PNM,?30,"  HRCN:",HRCN,?54,LRDT0      ; IHS/MSC/MKK - LR*5.2*1039 - Print Name
  Q
  ; ----- Begin IHS/MSC/MKK - LR*5.2*1038

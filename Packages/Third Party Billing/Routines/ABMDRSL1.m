@@ -1,12 +1,16 @@
 ABMDRSL1 ; IHS/ASDST/DMJ - Selective Report Parameters-PART 2 ; 
- ;;2.6;IHS Third Party Billing;**1,4,6,11**;NOV 12, 2009;Build 133
+ ;;2.6;IHS Third Party Billing;**1,4,6,11,21**;NOV 12, 2009;Build 379
  ;Original;TMD;07/14/95 12:27 PM
  ;
- ; IHS/SD/SDR - V2.5 P8 - Added code for Cancelling official
- ; IHS/SD/SDR - v2.5 p8 - Added code for pending status (12)
- ; IHS/SD/SDR - v2.5 p13 - NO IM
- ; IHS/SD/SDR - abm*2.6*1 - HEAT4482 - Added claim status prompt
- ; IHS/SD/SDR  - abm*2.6*4 - NOHEAT - fixed report headers for closed/exported dates
+ ;IHS/SD/SDR - V2.5 P8 - Added code for Cancelling official
+ ;IHS/SD/SDR - v2.5 p8 - Added code for pending status (12)
+ ;IHS/SD/SDR - v2.5 p13 - NO IM
+ ;
+ ;IHS/SD/SDR - 2.6*1 - HEAT4482 - Added claim status prompt
+ ;IHS/SD/SDR - 2.6*4 - NOHEAT - fixed report headers for closed/exported dates
+ ;IHS/SD/SDR - 2.6*21 - HEAT241429 - Added code to do Visit Dates only for Denied Bills Report
+ ;IHS/SD/SDR - 2.6*21 - VMBP - Updated p11 changes to include Serena ref#s
+ ;IHS/SD/SDR - 2.6*21 - VMBP - Updated to include all new insurer types
  ;
 LOC ;EP
  W ! K DIC,ABMY("LOC")
@@ -41,13 +45,34 @@ PAT ;
 TYP ;EP
  K DIR,ABMY("TYP"),ABMY("INS"),ABMY("PAT")
  ;S DIR(0)="SO^1:MEDICARE;2:MEDICAID;3:PRIVATE INSURANCE;4:NON-BENEFICIARY PATIENTS;5:BENEFICIARY PATIENTS;6:SPECIFIC INSURER;7:SPECIFIC PATIENT;8:WORKMEN'S COMP;9:PRIVATE + WORKMEN'S COMP;10:CHIP"  ;abm*2.6*11 VMBP#3
- S DIR(0)="SO^1:MEDICARE;2:MEDICAID;3:PRIVATE INSURANCE;4:NON-BENEFICIARY PATIENTS;5:BENEFICIARY PATIENTS;6:SPECIFIC INSURER;7:SPECIFIC PATIENT;8:WORKMEN'S COMP;9:PRIVATE + WORKMEN'S COMP;10:CHIP;11:VETERANS MEDICAL BENEFIT"  ;abm*2.6*11 VMBP#3
+ ;start new abm*2.6*21 IHS/SD/SDR VMBP#3 RQMT_96
+ S DIR(0)="SO^1:MEDICARE;2:MEDICAID;3:PRIVATE INSURANCE;4:NON-BENEFICIARY PATIENTS;5:BENEFICIARY PATIENTS;6:SPECIFIC INSURER;7:SPECIFIC PATIENT;8:WORKMEN'S COMP;9:PRIVATE + WORKMEN'S COMP;10:CHIP;11:VETERANS MEDICAL BENEFIT"
+ S DIR(0)=DIR(0)_";12:3P LIABILITY;13:FPL 133 PERCENT;14:GUARANTOR;15:MEDICARE HMO;16:STATE EXCHANGE PLAN;17:TRIBAL SELF INSURED"
+ ;end new abm*2.6*21 IHS/SD/SDR RQMT_96
  S DIR("A")="Select TYPE of BILLING ENTITY to Display"
  D ^DIR
  K DIR
  Q:$D(DIRUT)!$D(DIROUT)
  ;S ABMY("TYP")=$S(Y=1:"R",Y=2:"D",Y=3:"PHFM",Y=4:"N",Y=5:"I",Y=8:"W",Y=9:"PHFMW",Y=10:"K",1:Y) ;abm*2.6*11 VMBP#3
- S ABMY("TYP")=$S(Y=1:"R",Y=2:"D",Y=3:"PHFM",Y=4:"N",Y=5:"I",Y=8:"W",Y=9:"PHFMW",Y=10:"K",Y=11:"V",1:Y) ;abm*2.6*11 VMBP#3
+ ;S ABMY("TYP")=$S(Y=1:"R",Y=2:"D",Y=3:"PHFM",Y=4:"N",Y=5:"I",Y=8:"W",Y=9:"PHFMW",Y=10:"K",Y=11:"V",1:Y) ;abm*2.6*11 VMBP#3 RQMT_96  ;abm*2.6*21 IHS/SD/SDR VMBP RQMT_96
+ ;start new abm*2.6*21 IHS/SD/SDR VMBP RQMT_96
+ I Y=1 S ABMY("TYP")="^R^MMC^MC^MD^"
+ I Y=2 S ABMY("TYP")="^D^"
+ I Y=3 S ABMY("TYP")="^P^H^F^C^M^"
+ I Y=4 S ABMY("TYP")="^N^"
+ I Y=5 S ABMY("TYP")="^I^"
+ I Y=8 S ABMY("TYP")="^W^"
+ I Y=9 S ABMY("TYP")="^P^H^F^M^W^"
+ I Y=10 S ABMY("TYP")="^K^"
+ I Y=11 S ABMY("TYP")="^V^"
+ I Y=12 S ABMY("TYP")="^T^"
+ I Y=13 S ABMY("TYP")="^FPL^"
+ I Y=14 S ABMY("TYP")="^G^"
+ I Y=15 S ABMY("TYP")="^MH^"
+ I Y=16 S ABMY("TYP")="^SEP^"
+ I Y=17 S ABMY("TYP")="^TSI^"
+ S:$G(ABMY("TYP"))="" ABMY("TYP")=Y
+ ;end new abm*2.6*21 IHS/SD/SDR VMBP RQMT_96
  S ABMY("TYP","NM")=Y(0)
  ;
  I Y'=6,Y'=7 Q  ;Only want specific insurer or patient
@@ -81,6 +106,7 @@ DT ;EP
  I $G(ABM("DT"))="C" S Y=4 G DTYP
  ;I $D(ABM("STA")),($G(ABM("STA"))'="X") S Y=2 G DTYP  ;abm*2.6*4 NOHEAT
  I $D(ABM("STA")),($G(ABM("STA"))'="M") S Y=2 G DTYP  ;abm*2.6*4 NOHEAT
+ I $D(ABM("DNYDT")) S Y=2 G DTYP  ;abm*2.6*21 IHS/SD/SDR HEAT241429
  S DIR(0)="SO^1:Approval Date;2:Visit Date"
  G DDIR:$G(ABMP("TYP"))=2
  I $D(ABM("PAY")) S DIR(0)=DIR(0)_";3:Payment Date"
