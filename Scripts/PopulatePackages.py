@@ -99,6 +99,7 @@ def populate(input):
     # Collect routines and globals in current directory.
     routines = set(glob.glob('*.m'))
     globals = set(glob.glob('*.zwr'))
+    classes = set(glob.glob('*.xml'))
 
     #-----------------------------------------------------------------------------
 
@@ -107,15 +108,19 @@ def populate(input):
         path = namespaces[ns]
         gbls = [gbl for gbl in globals if gbl.startswith(ns)]
         rtns = [rtn for rtn in routines if rtn.startswith(ns)]
-        if (rtns or gbls) and not path:
+        clss = [cls for cls in classes if cls.startswith(ns)]
+        if (rtns or gbls or clss) and not path:
             sys.stderr.write('Namespace "%s" has no path!\n' % ns)
             continue
         routines.difference_update(rtns)
         globals.difference_update(gbls)
+        classes.difference_update(clss)
         for src in sorted(rtns):
             place(src,os.path.join(path,'Routines',src))
         for src in sorted(gbls):
             place(src,os.path.join(path,'Globals',src))
+        for src in sorted(clss):
+            place(src,os.path.join(path,'Classes',src))
 
     # Map globals explicitly listed in each package.
     for p in packages:
@@ -130,6 +135,8 @@ def populate(input):
         place(src,os.path.join('Uncategorized','Routines',src))
     for src in globals:
         place(src,os.path.join('Uncategorized','Globals',src))
+    for src in classes:
+        place(src,os.path.join('Uncategorized','Classes',src))
 
 def main():
     populate(sys.stdin)
