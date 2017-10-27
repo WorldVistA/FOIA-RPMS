@@ -76,7 +76,6 @@ Unpack routines from the routine transfer format to .m files:
  $ cd ..
 
 Remove Caché-specific routines
-(TODO: Handle these routines correctly):
 
  $ rm Packages/*.*.m
 
