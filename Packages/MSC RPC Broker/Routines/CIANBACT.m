@@ -1,7 +1,13 @@
 CIANBACT ;MSC/IND/DKM/PLS - MSC RPC Broker Actions;16-Apr-2013 18:42;PLS
- ;;1.1;CIA NETWORK COMPONENTS;**001007,001010**;Sep 18, 2007
+ ;;1.1;CIA NETWORK COMPONENTS;**001007,001010,1000**;Sep 18, 2007
  ;;Copyright 2000-2008, Medsphere Systems Corporation
  ;=================================================================
+ ;
+ ; *1000 changes by Sam Habiel to support GT.M (Feb 2011)
+ ; Change Log:
+ ; - Added entry point $$JOB4 to support GT.M as GT.M is CIAOS 4.
+ ; - Numerous calls to XWBDLOG in various places to support logging. XWBDLOG is set in CIANBLIS.
+ ;
  ; Connect action
  ; CIADATA is returned to client as:
  ;   callback flag^authentication method^server version^case sensitive^context cached
@@ -103,12 +109,12 @@ ERRCHK(TEST,ERR,P1,P2,P3) ;
  Q
  ; Writes return data to TCP stream
 DATAOUT D TCPUSE^CIANBLIS
- W $C(0)
- I XWBPTYPE=1 W $G(CIAD),! Q
+ W $C(0) D LOG^XWBDLOG("Write: "_$C(0))
+ I XWBPTYPE=1 W $G(CIAD),! D LOG^XWBDLOG("Write: "_$G(CIAD)_" (flush)") Q
  I XWBPTYPE=2 D OUT("CIAD",1) Q
  I XWBPTYPE=3 D OUT("CIAD",XWBWRAP) Q
  I XWBPTYPE=4 D OUT(CIAD,XWBWRAP) Q
- I XWBPTYPE=5 W $G(@CIAD),! Q
+ I XWBPTYPE=5 W $G(@CIAD),! D LOG^XWBDLOG("Write: "_$G(@CIAD)_" (flush)") Q
  I XWBPTYPE="H" D HFSOUT(CIAD,XWBWRAP) Q
  Q
  ; Write array (local or global) to TCP stream
@@ -119,7 +125,7 @@ OUT(ARY,EOL) ;
  Q:'$L(ARY)
  S ARY=$NA(@ARY)
  S X=ARY,L=$QL(ARY),EOL=$S($G(EOL):$C(13),1:"")
- F  S X=$Q(@X) Q:'$L(X)  Q:$NA(@X,L)'=ARY  W @X,EOL,!
+ F  S X=$Q(@X) Q:'$L(X)  Q:$NA(@X,L)'=ARY  W @X,EOL,! D LOG^XWBDLOG("Write: "_@X_EOL_" (flush)")
  K:K @ARY
  Q
  ; Write contents of HFS to TCP stream
@@ -129,7 +135,7 @@ HFSOUT(HFS,EOL) ;
  D OPEN^CIAUOS(.HFS,"R")
  F  Q:$$READ^CIAUOS(.X,HFS)  D
  .D TCPUSE^CIANBLIS
- .W X,EOL,!
+ .W X,EOL,! D LOG^XWBDLOG("Write: "_X_EOL_" (flush)")
  D CLOSE^CIAUOS(.HFS),DELETE^CIAUOS(HFS)
  Q
  ; Returns true if RPC can run in current context
@@ -163,7 +169,8 @@ JOB3() I $G(CIA("DBG"))!($G(CIA("VER"))<1.5) J EN^CIANBLIS(PORT,IP,1)[$P(UCI,","
  K CIADATA
  J EN^CIANBLIS(CIAPORT,CIAIP,2)[$P(UCI,",")]:(:4:CIATDEV:CIATDEV):15
  Q $T
- ; Mode 2 support for MSM and DSM
+JOB4() I CIAMODE=2 D MODE2 Q 1 ; SAM NEW LINE
+ ; Mode 2 support for MSM, DSM & GT.M
 MODE2 D:UCI'=UCI(0) SETUCI(UCI)
  S UCI(0)=UCI
  I '$G(CIA("DBG")),$G(CIA("VER"))'<1.5 S $P(CIADATA,U)=1,CIAMODE=1
