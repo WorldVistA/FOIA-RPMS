@@ -2,12 +2,7 @@ Instructions to Import FOIA-RPMS from a CACHE.DAT
 
 Download FOIA-RPMS
 -------------------
-
-Download FOIA release .ZIP from sourceforge.net:
-
- http://sourceforge.net/projects/foiarpms/files/
-
-Extract the .ZIP to obtain the "CACHE.DAT".
+Download releases from the OSEHRA Tech Journal from here: https://code.osehra.org/journal/journal/view/?revisionId=320 and ff.
 
 
 Configure InterSystems Caché
@@ -22,6 +17,19 @@ CACHETEMP namespace.  Also map globals %Z* and %z* and routines
 
 into the RPMS namespace.
 
+Instance Set-up
+---------------
+For Telnet Device, change to be appropriate.
+Change default HFS directory to be appropriate.
+Double check printing the latest installs from Fileman to check that the RPMS instance is really the date it says it was last updated.
+
+Recompile all Objects and Reindex Routines
+------------------------------------------
+  D ^%RCOMPIL
+  N $NAMESPACE S $NAMESPACE="%SYS" W $System.OBJ.UpgradeAll()
+  Q
+  D RebuildIndex^%R("","",1)
+  Do $System.OBJ.Compile("*","ckr")
 
 Extract Routines and Globals
 ----------------------------
@@ -36,34 +44,53 @@ Start the Caché Terminal.  Dump all RPMS routines using %RO:
  Output routines to
  Device: /tmp/RPMS/Routines.ro
 
+Currently there is a routine/class called AGMPI which crashes the %RO. I let Floyd know. For now, you need to exclude it by putting 'AGMPI.* after *.
+
 Pack the "ZGO" routine into routine transfer format:
 
  $ python Scripts/PackRO.py Scripts/ZGO.m > /tmp/ZGO.ro
 
 Start the Caché Terminal.  Load the ZGO routine:
 
- VISTA>D ^%RI
+ RPMS>D ^%RI
  Input routines from Sequential
  Device: /tmp/ZGO.ro
  Parameters? "R" =>
  Override and use this File with %RI? No => Yes
 
-Dump all RPMS globals using the ZGO routine:
+Dump all RPMS globals using the ZGO routine. We do this using single threading as there are bad globals that cause crashes. It would be wise therefore to run this and see if it crashes in front of you.
 
- VISTA>D SAVEALL^ZGO("/tmp/RPMS/Globals/")
-
-RPMS has now been extracted to the host disk as
-
- $ ls /tmp/RPMS/Routines.ro /tmp/RPMS/Globals/*.zwr
+ RPMS>S ZGODEBUG=1 D SAVEALL^ZGO("/tmp/RPMS/Globals/")
+ 
+My records show that the following non-Fileman globals crash:
+^XCR
+^XCSV
+^XCSVICD9
 
 To extract Classes, run this:
  
- RPMS>Do $system.OBJ.ExportAllClassesIndividual("/tmp/classes","diffexport")
+  RPMS>Do $system.OBJ.ExportAllClassesIndividual("/tmp/RPMS/classes","diffexport")
 
-At this moment, there are no classes to version.
+This fails right now due to AGMPI (again!). To fix, do this:
+
+  RPMS>S ^oddDEF("AGMPI.Adapters.HLOGlobalInbound","m","OnTask",30,146)=" "
+
+RPMS has now been extracted to the host disk as
+
+ $ ls /tmp/RPMS/Routines.ro /tmp/RPMS/Globals/*.zwr /tmp/RPMS/Classes/*.xml
+
 
 Unpack Routines and Globals
 ---------------------------
+Clean globals:
+$ rm -v [A-Za-Z]*.*.zwr
+removed ‘DICT.COMO.zwr’
+removed ‘DICT.PH.zwr’
+removed ‘DICT.SAVEDLISTS.zwr’
+removed ‘DICT.VOC.zwr’
+removed ‘MV.SYS.zwr’
+removed ‘MV.VOC.zwr’
+
 
 Remove old FOIA-RPMS files but not Packages/.gitattributes:
 
@@ -75,7 +102,7 @@ Unpack routines from the routine transfer format to .m files:
  $ python ../Scripts/UnpackRO.py < /tmp/VistA/Routines.ro
  $ cd ..
 
-Remove Caché-specific routines
+Remove Caché-specific routines. These are classes which are handled later.
 
  $ rm Packages/*.*.m
 
@@ -92,6 +119,9 @@ Split large global .zwr files into pieces no larger than 64 MiB:
 
  $ ls Packages/*.zwr | python Scripts/SplitZWR.py --size 64 --stdin
 
+Copy the classes into the packages directory
+
+ $ cp /tmp/RPMS/Classes/*.zwr Packages/
 
 Populate Package Directories
 ----------------------------
