@@ -1,5 +1,5 @@
-BGP8POS ; IHS/CMI/LAB - NO DESCRIPTION PROVIDED 28 Jan 2005 1:34 PM 25 Nov 2007 7:41 PM ; 
- ;;8.0;IHS CLINICAL REPORTING;**2**;MAR 12, 2008
+BGP8POS ; IHS/CMI/LAB - NO DESCRIPTION PROVIDED 08 Dec 2010 3:10 PM 04 Aug 2018 2:27 PM 20 Dec 2016 11:46 AM ; 
+ ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
  ;
  ;
  ;SEND OUT BGP TAXONOMIES
@@ -7,119 +7,76 @@ BGP8POS ; IHS/CMI/LAB - NO DESCRIPTION PROVIDED 28 Jan 2005 1:34 PM 25 Nov 2007 
  ; Routines..." questions from being asked during the install.
  I $G(XPDENV)=1 S (XPDDIQ("XPZ1"),XPDDIQ("XPZ2"))=0
  F X="XPO1","XPZ1","XPZ2","XPI1" S XPDDIQ(X)=0
- I '$$INSTALLD("ATX*5.1*10") D SORRY(2)
- ;I '$$INSTALLD("IHS CLINICAL REPORTING 7.0") D SORRY(2)
- I '$$INSTALLD("BGP*7.0*2") D SORRY(2)
- I '$$INSTALLD("BKM*1.0*3") D SORRY(2)
- I '$$INSTALLD("AUPN*99.1*18") D SORRY(2)
- I '$$INSTALLD("APCL*3.0*20") D SORRY(2)
- ;I '$D(^DIC(9.4,"C","LEX")) D SORRY(2)
- ;I '$$INSTALLD("BKM*1.0*2") D SORRY(2)
+ ;I '$$INSTALLD("ATX*5.1*14") D MES^XPDUTL($$CJ^XLFSTR("Taxonomy v5.1 patch 14 is required.  Not installed.",80)) D SORRY(2)
+ I +$$VERSION^XPDUTL("BGP")<17.1 D MES^XPDUTL($$CJ^XLFSTR("Version 17.1 of the IHS CLINICAL REPORTING is required.  Not installed.",80)) D SORRY(2) I 1
  Q
  ;
 PRE ;EP
+ ;WIPE OUT CHS AND URBAN PARAMETERS, FIELDS ARE BEING DELETED
  D PRE^BGP8POS2
+ ;MARK OOO ALL BGP 02 THROUGH BGP 08 OPTIONS
  Q
 POST ;EP - called from kids build
- ;NEW X
- ;S X=$$ADD^XPDMENU("BGPMENU","BGP 08 MENU","CI08",50)
- ;I 'X W "Attempt to add National GPRA report for GPRA year 2008 option failed.." H 3
- S ATXFLG=1
- D EN^XBVK("ATX")
- K ^TMP("ATX",$J)
-MT ;MOVE TEMPORARY TAXONOMIES TO ATXAX
- S ATXFLG=1
- S BGPX=0 F  S BGPX=$O(^BGPTAXTE(BGPX)) Q:BGPX'=+BGPX  D
- .S BGPN=$P(^BGPTAXTE(BGPX,0),U)
- .S BGPY=$O(^ATXAX("B",BGPN,0))
- .I BGPY S DA=BGPY,DIK="^ATXAX(" D ^DIK
- .S X=BGPN,DIC="^ATXAX(",DIC(0)="L",DIADD=1,DLAYGO=9002226 D ^DIC K DIC,DA,DIADD,DLAYGO,I
- .I Y=-1 W !!,"creating taxonomy failed....",BGPN Q
- .S BGPZ=+Y
- .M ^ATXAX(BGPZ)=^BGPTAXTE(BGPX)
- .I $D(^ATXAX(BGPZ,21,0)) S $P(^ATXAX(BGPZ,21,0),U,2)="9002226.02101A"
- .I $D(^ATXAX(BGPZ,41,0)) S $P(^ATXAX(BGPZ,41,0),U,2)="9002226.04101P"
- .S DA=BGPZ,DIK="^ATXAX(" D IX1^DIK
- .Q
- D ^BGP8AX
- D ^BGP8BX
- D ^BGP8CX
- D ^BGP8DX
- D ^BGP8EX
- D ^BGP8FX
- D ^BGP8GX
- D ^BGP8HX
- D ^BGP8IX,^BGP8JX
- D PRVTAX^BGP8POS1
- D CLTAX^BGP8POS1
- D MHTAX^BGP8POS1
- D LAB^BGP8POS1
+ D ^BGP81
+ D ^BGP82
+ D ^BGP83
+ ;rename taxonomy
+ D TN
  D DRUGS^BGP8POS1
- K ATXFLG
- S X=0 F  S X=$O(^ATXAX(X)) Q:X'=+X  I $E($P($G(^ATXAX(X,0)),U,1),1,3)["BGP" S $P(^ATXAX(X,0),U,4)="n"
- S X=0 F  S X=$O(^ATXLAB(X)) Q:X'=+X  I $E($P($G(^ATXLAB(X,0)),U,1),1,3)["BGP" S $P(^ATXLAB(X,0),U,4)="n"
- D EN^XBVK("BGP")
- ;D SEC
- D SETTAX
- D SETTAXL
- D SETTAXF
- D SEC
+ D LAB^BGP8POS1
+ D BMXPO
+ D ADA
+ D S17
+T ;OOO OPTIONS
+ D OOO
+ Q
+TN ;
+ S ATXFLG=1
+ S DA=$O(^ATXAX("B","BGP CPT DTAP/TD",0))
+ I DA S DIE="^ATXAX(",DR=".01///BGP CPT TDAP/TD" D ^DIE K DIE,DA,DR,ATXFLG
+ Q
+OOO ;
+ S BGPN="BGP 02" F  S BGPN=$O(^DIC(19,"B",BGPN)) Q:BGPN]"BGP 09Z"!(BGPN="")  D
+ .S DA=$O(^DIC(19,"B",BGPN,0))
+ .S DIE="^DIC(19,"
+ .S DR="2///NO LONGER AVAILABLE"
+ .D ^DIE K DA,DR,DIE
+ .Q
+ Q
+S17 ;WIPE OUT ALL 18.0 FILES SO START CLEAN WITH 18.0 FILES
+ S BGPX=0 F  S BGPX=$O(^BGPGPDCR(BGPX)) Q:BGPX'=+BGPX  D
+ .S DA=BGPX,DIK="^BGPGPDCR(" D ^DIK
+ S BGPX=0 F  S BGPX=$O(^BGPGPDPR(BGPX)) Q:BGPX'=+BGPX  D
+ .S DA=BGPX,DIK="^BGPGPDPR(" D ^DIK
+ S BGPX=0 F  S BGPX=$O(^BGPGPDBR(BGPX)) Q:BGPX'=+BGPX  D
+ .S DA=BGPX,DIK="^BGPGPDBR(" D ^DIK
+ Q
+NDC ;
+ S BGPX=0 F  S BGPX=$O(^ATXAX(BGPX)) Q:BGPX'=+BGPX  D
+ .Q:$P(^ATXAX(BGPX,0),U,15)]""  ;already has a file
+ .Q:$P(^ATXAX(BGPX,0),U,1)'["NDC"
+ .Q:$E($P(^ATXAX(BGPX,0),U,1),1,3)'="BGP"
+ .S $P(^ATXAX(BGPX,0),U,15)=50.67
+ .Q
+ Q
+BMXPO ;-- update the RPC file
+ N BGPRPC
+ S BGPRPC=$O(^DIC(19,"B","BGPGRPC",0))
+ Q:'BGPRPC
+ D CLEAN(BGPRPC)
+ D GUIEP^BMXPO(.RETVAL,BGPRPC_"|BGP")
+ D GUIEP^BMXPO(.RETVAL,BGPRPC_"|ATX")
+ Q
+CLEAN(APP) ;-- clean out the RPC multiple first
+ S DA(1)=APP
+ S DIK="^DIC(19,"_DA(1)_","_"""RPC"""_","
+ N BGPDA
+ S BGPDA=0 F  S BGPDA=$O(^DIC(19,APP,"RPC",BGPDA)) Q:'BGPDA  D
+ . S DA=BGPDA
+ . D ^DIK
+ K ^DIC(19,APP,"RPC","B")
  Q
  ;
-SETTAXF ;
- S X=0 F  S X=$O(^ATXLAB(X)) Q:X'=+X  D
- .Q:$P(^ATXLAB(X,0),U,9)]""
- .S $P(^ATXLAB(X,0),U,9)=60
- .Q
- Q
-SETTAX ;
- Q:'$D(^DD(9002226,4101,0))  ;taxonomy patch not yet installed
- S BGPTFI="" F  S BGPTFI=$O(^BGPTAXE("B",BGPTFI)) Q:BGPTFI=""  D
- .S BGPTFIEN=$O(^BGPTAXE("B",BGPTFI,0))
- .I 'BGPTFIEN Q
- .Q:'$D(^BGPTAXE(BGPTFIEN))
- .Q:$P(^BGPTAXE(BGPTFIEN,0),U,2)="L"
- .S BGPTDA=$O(^ATXAX("B",BGPTFI,0))
- .Q:'BGPTDA  ;did not find taxonomy
- .S BGPE=$P(^BGPTAXE(BGPTFIEN,0),U,4)
- .I BGPE=0 S $P(^ATXAX(BGPTDA,0),U,22)=1
- .I BGPE=1 S $P(^ATXAX(BGPTDA,0),U,22)=0
- .S $P(^ATXAX(BGPTDA,0),U,4)="n"
- .;set packages in multiple
- .K DIC,DA,DR
- .S BGPPI=$O(^DIC(9.4,"C","BGP",0))
- .Q:BGPPI=""  ;NO PACKAGE
- .Q:$D(^ATXAX(BGPTDA,41,"B",BGPPI))
- .S X="`"_BGPPI,DIC="^ATXAX("_BGPTDA_",41,",DIC(0)="L",DIC("P")=$P(^DD(9002226,4101,0),U,2),DA(1)=BGPTDA
- .D ^DIC
- .I Y=-1 W !,"updating package multiple for ",BGPPP," entry ",$P(^ATXAX(BGPDA,0),U)," failed"
- .K DIC,DA,Y,X
- .Q
- Q
-SETTAXL ;
- Q:'$D(^DD(9002228,4101,0))  ;taxonomy patch not yet installed
-  S BGPTFI="" F  S BGPTFI=$O(^BGPTAXE("B",BGPTFI)) Q:BGPTFI=""  D
- .S BGPTFIEN=$O(^BGPTAXE("B",BGPTFI,0))
- .I 'BGPTFIEN Q
- .Q:'$D(^BGPTAXE(BGPTFIEN))
- .Q:$P(^BGPTAXE(BGPTFIEN,0),U,2)='"L"
- .S BGPTDA=$O(^ATXLAB("B",BGPTFI,0))
- .Q:'BGPTDA  ;did not find taxonomy
- .S BGPE=$P(^BGPTAXE(BGPTFIEN,0),U,4)
- .I BGPE=0 S $P(^ATXLAB(BGPTDA,0),U,22)=1
- .I BGPE=1 S $P(^ATXLAB(BGPTDA,0),U,22)=0
- .S $P(^ATXLAB(BGPTDA,0),U,4)="n"
- .;set packages in multiple
- .K DIC,DA,DR
- .S BGPPI=$O(^DIC(9.4,"C","BGP",0))
- .Q:BGPPI=""  ;NO PACKAGE
- .Q:$D(^ATXLAB(BGPTDA,41,"B",BGPPI))
- .S X="`"_BGPPI,DIC="^ATXLAB("_BGPTDA_",41,",DIC(0)="L",DIC("P")=$P(^DD(9002228,4101,0),U,2),DA(1)=BGPTDA
- .D ^DIC
- .I Y=-1 W !,"updating package multiple for ",BGPPP," entry ",$P(^ATXAX(BGPDA,0),U)," failed"
- .K DIC,DA,Y,X
- .Q
- Q
 INSTALLD(BGPSTAL) ;EP - Determine if patch BGPSTAL was installed, where
  ; BGPSTAL is the name of the INSTALL.  E.g "AG*6.0*11".
  ;
@@ -145,152 +102,18 @@ SORRY(X) ;
  S XPDQUIT=X
  W *7,!,$$CJ^XLFSTR("Sorry....FIX IT!",IOM)
  Q
-CLINICS ;
- ;;01
- ;;06
- ;;13
- ;;20
- ;;24
- ;;28
- ;;
-PRVS ;
- ;;00
- ;;11
- ;;16
- ;;17
- ;;18
- ;;21
- ;;25
- ;;33
- ;;41
- ;;44
- ;;45
- ;;49
- ;;64
- ;;68
- ;;69
- ;;70
- ;;71
- ;;72
- ;;73
- ;;74
- ;;75
- ;;76
- ;;77
- ;;78
- ;;79
- ;;80
- ;;81
- ;;82
- ;;83
- ;;84
- ;;85
- ;;86
- ;;A1
- ;;
-PREPROV ;;
- ;;00
- ;;08
- ;;11
- ;;16
- ;;17
- ;;18
- ;;21
- ;;24
- ;;25
- ;;30
- ;;33
- ;;41
- ;;44
- ;;45
- ;;47
- ;;49
- ;;64
- ;;67
- ;;68
- ;;70
- ;;71
- ;;72
- ;;73
- ;;74
- ;;75
- ;;76
- ;;77
- ;;78
- ;;79
- ;;80
- ;;81
- ;;82
- ;;83
- ;;85
- ;;86
- ;;A1
- ;;A9
- ;;B1
- ;;B2
- ;;B3
- ;;B4
- ;;B5
- ;;B6
- ;;
-SEC ;set security on selected dd's
-LP ;EP - loop through file entries
- F I=1:1 D  Q:BGPTXT["end"
- .S BGPTXT=$T(TXT+I)
- .Q:BGPTXT["end"
- .F J=2:1:4 S BGP(J)=$P(BGPTXT,";;",J)
- .S BGP(3)=""""_BGP(3)_""""
- .S BGPREF="^DIC("_BGP(2)_",0,"_BGP(3)_")"
- .S @BGPREF=BGP(4)
- Q
-TXT ;file entries start here
- ;;90244.01;;AUDIT;;@
- ;;90244.01;;DD;;@
- ;;90244.01;;DEL;;@
- ;;90244.01;;LAYGO;;@
- ;;90244.01;;RD;;M
- ;;90244.01;;WR;;@
- ;;90244.02;;AUDIT;;@
- ;;90244.02;;DD;;@
- ;;90244.02;;DEL;;@
- ;;90244.02;;LAYGO;;@
- ;;90244.02;;RD;;M
- ;;90244.02;;WR;;@
- ;;90371.04;;AUDIT;;@
- ;;90371.04;;DD;;@
- ;;90371.04;;DEL;;@
- ;;90371.04;;LAYGO;;M
- ;;90371.04;;RD;;M
- ;;90371.04;;WR;;M
- ;;90372.03;;AUDIT;;@
- ;;90372.03;;DD;;@
- ;;90372.03;;DEL;;M
- ;;90372.03;;LAYGO;;M
- ;;90372.03;;RD;;M
- ;;90372.03;;WR;;M
- ;;90372.05;;AUDIT;;@
- ;;90372.05;;DD;;@
- ;;90372.05;;DEL;;M
- ;;90372.05;;LAYGO;;M
- ;;90372.05;;RD;;M
- ;;90372.05;;WR;;M
- ;;90533.12;;AUDIT;;@
- ;;90533.12;;DD;;@
- ;;90533.12;;DEL;;@
- ;;90533.12;;LAYGO;;M
- ;;90533.12;;RD;;M
- ;;90533.12;;WR;;M
- ;;90533.13;;AUDIT;;@
- ;;90533.13;;DD;;@
- ;;90533.13;;DEL;;M
- ;;90533.13;;LAYGO;;M
- ;;90533.13;;RD;;M
- ;;90533.13;;WR;;M
- ;;90533.14;;AUDIT;;@
- ;;90533.14;;DD;;@
- ;;90533.14;;DEL;;M
- ;;90533.14;;LAYGO;;M
- ;;90533.14;;RD;;M
- ;;90533.14;;WR;;M
- ;;end
+ADA ;
+ S ATXFLG=1
+ S BGPDA=0 S BGPDA=$O(^ATXAX("B","BGP DENTAL EXAM ADA CODES",BGPDA))
+ I BGPDA S DIK="^ATXAX(",DA=BGPDA D ^DIK  ;get rid of existing one
+ W !,"Creating/Updating DENTAL EXAM ADA Codes Taxonomy..."
+ S X="BGP DENTAL EXAM ADA CODES",DIC="^ATXAX(",DIC(0)="L",DIADD=1,DLAYGO=9002226 D ^DIC K DIC,DA,DIADD,DLAYGO,I
+ I Y=-1 W !!,"ERROR IN CREATING DENTAL EXAM ADA CODES TAX" Q
+ S BGPTX=+Y,$P(^ATXAX(BGPTX,0),U,2)="BGP DENTAL EXAM ADA CODES",$P(^(0),U,5)=DUZ,$P(^(0),U,8)=0,$P(^(0),U,9)=DT,$P(^(0),U,12)=174,$P(^(0),U,13)=0,$P(^(0),U,15)=9999999.31,^ATXAX(BGPTX,21,0)="^9002226.02101A^0^0"
+ S BGPX=0
+ F X="0120","0150","0145" S DIC="^AUTTADA(",DIC(0)="M" D ^DIC K DIC,DA,DR,DIADD,DLAYGO,DQ,DI,D1,D0 I $P(Y,U)>0 D
+ .S BGPX=BGPX+1
+ .S ^ATXAX(BGPTX,21,BGPX,0)=+Y,$P(^ATXAX(BGPTX,21,0),U,3)=BGPX,$P(^(0),U,4)=BGPX,^ATXAX(BGPTX,21,"AA",+Y,BGPX)=""
+ .Q
+ S DA=BGPTX,DIK="^ATXAX(" D IX1^DIK
  Q

@@ -1,5 +1,5 @@
-APSPAUTO ;IHS/CIA/PLS - Auto Release Prescription ;27-May-2014 10:23;PLS
- ;;7.0;IHS PHARMACY MODIFICATIONS;**1002,1006,1008,1013,1014,1015,1017,1018**;Sep 23, 2004;Build 21
+APSPAUTO ;IHS/CIA/PLS - Auto Release Prescription ;25-Mar-2016 14:20;DU
+ ;;7.0;IHS PHARMACY MODIFICATIONS;**1002,1006,1008,1013,1014,1015,1017,1018,1021**;Sep 23, 2004;Build 14
  ; This routine contains code from PSODISP and PSODISPS.
  ; Call to OREL^PSOCMOPB was changed to include one parameter.
 AUTOREL ; EP
@@ -23,7 +23,7 @@ AUTOREL ; EP
  ....N REF
  ....S REF=$O(^PSRX(APSPRXP,1,$C(1)),-1)
  ....Q:$$STATCHK^APSPLBL(APSPRXP)
- ....Q:$$EXISTPOS(APSPRXP,REF)
+ ....;Q:$$EXISTPOS(APSPRXP,REF)  ;IHS/MSC/PLS - 03/25/2016
  ....D CALLPOS^APSPFUNC(APSPRXP,REF,"A")
  Q
  ; Returns presence of Prescription/Refill in Point Of Sale

@@ -42,7 +42,7 @@ CHKLK(BEDDID,DUZ,TIMEOUT) ; EP - Check and Possibly Unlock
  . NEW SINFO,SIEN
  . S SIEN=$O(^BEDD.EDSYSTEMI("SiteIdx"," "_+LUSITE,"")) Q:'SIEN
  . S SINFO=##class(BEDD.EDSYSTEM).%OpenId(SIEN)
- . S TIMEOUT=+SINFO.TimeOut S:TIMEOUT=0 TIMOUT=300
+ . S TIMEOUT=+SINFO.TimeOut S:TIMEOUT=0 TIMEOUT=300
  ;
  ;Unlock any record after 30 seconds after timeout value
  S LDT=EDVST.RecLockDT

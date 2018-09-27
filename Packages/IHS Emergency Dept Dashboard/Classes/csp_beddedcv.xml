@@ -1,0 +1,767 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2018-09-27 12:54:35">
+<Class name="csp.beddedcv">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeChanged>64672,29653.43893</TimeChanged>
+<TimeCreated>64672,29653.413583</TimeCreated>
+<GeneratedBy>/csp/foia_goldb/BEDDEDCV.csp</GeneratedBy>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPagePREHTML()
+	Do ..OnPageCSPROOT()
+	Do ..OnPagePOSTHTML()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<BODY bgcolor=""#CCCCFF"" onload=""setFocus()"">"
+	Write !,!
+	If ((%request.Get("OBJID"))'="") {
+	Set objForm = ##class(BEDD.EDVISIT).%OpenId((%request.Get("OBJID")))
+	} Else {
+	Set objForm = ##class(BEDD.EDVISIT).%New()
+	}
+	Write !,"<form name=""form"" onsubmit='return form_validate();'>"
+	Write !,..InsertHiddenFields(""),!
+	Write !,!
+	//
+	//Pull Technical Information
+	Set objid=objForm.%Id()
+	Set vien=objForm.VIEN
+	//
+	Set (DFN,ptdfn)=objForm.PtDFN
+	//
+	//Allergies and PCP
+	Set ptalg=$$PTALG^BEDDUTIL(DFN)
+	Set ptpcp=$$PPR^BEDDUTIL(vien,objid,DFN)
+	//
+	//Name and Gender
+	Set ptname=objForm.PtName
+	Set ptsex=objForm.Sex
+	//
+	//DOB, Age and Chart
+	Set ptdob=objForm.DOB
+	Set ptage=objForm.Age
+	Set ptchart=objForm.Chart
+	//
+	//Admission TimeStamp
+	Set astmp=objForm.PtCIDT
+	//
+	//Code Blue
+	Set ptcdbl=objForm.CodeBlue
+	//
+	//Pull Technical Information
+	Set objid=objForm.%Id()
+	Set vien=objForm.VIEN
+	//
+	//Room Information
+	Set errm=$P($$RMLST^BEDDUTW(objid),"^",2)
+	Set erdt=$P($$RMLST^BEDDUTW(objid),"^")
+	//
+	//Pull from ER VISIT file
+	Kill ercons
+	Set amervsit=objForm.AMERVSIT
+	Set (pstcmp,vsttyp,trnfrm,trnmod,medatd,intact,admcln,injrel,occrel,adnrtm,adpvtm)=""
+	Set (admprv,trinrs,injwhr,injtim,injcau,injset,injsaf)=""
+	Set (erconn,finact,findsp,dspwhr,finfol,dspprv,dspnrs,dspdpt)=""
+	Set (ercons,erproc,erdx,prmnrs)=0
+	If (amervsit]"") {
+	S pstcmp=$$GETF^BEDDUTIL(9009080,amervsit,1,"E")
+	S vsttyp=$$GETF^BEDDUTIL(9009080,amervsit,.05,"E")
+	S trnfrm=$$GETF^BEDDUTIL(9009080,amervsit,17.2,"E")
+	S trnmod=$$GETF^BEDDUTIL(9009080,amervsit,17.3,"E")
+	S medatd=$$GETF^BEDDUTIL(9009080,amervsit,17.4,"E")
+	S intact=$$GETF^BEDDUTIL(9009080,amervsit,.24,"E")
+	S admcln=$$GETF^BEDDUTIL(9009080,amervsit,.04,"E")
+	S injrel=$$GETF^BEDDUTIL(9009080,amervsit,3.1,"E")
+	S occrel=$$GETF^BEDDUTIL(9009080,amervsit,2.1,"E")
+	S adnrtm=$$FMTE^BEDDUTIL($$GETF^BEDDUTIL(9009080,amervsit,12.2,"I"))
+	S adpvtm=$$FMTE^BEDDUTIL($$GETF^BEDDUTIL(9009080,amervsit,12.1,"I"))
+	S admprv=$$GETF^BEDDUTIL(9009080,amervsit,.06,"E")
+	S trinrs=$$GETF^BEDDUTIL(9009080,amervsit,.07,"E")
+	S injwhr=$$GETF^BEDDUTIL(9009080,amervsit,3.6,"E")
+	S injtim=$$FMTE^BEDDUTIL($$GETF^BEDDUTIL(9009080,amervsit,3.4,"I"))
+	S injcau=$$GETF^BEDDUTIL(9009080,amervsit,3.2,"E")
+	S injset=$$GETF^BEDDUTIL(9009080,amervsit,3.3,"E")
+	S injsaf=$$GETF^BEDDUTIL(9009080,amervsit,3.5,"E")
+	S erconn=$$GETF^BEDDUTIL(9009080,amervsit,.22,"E")
+	S finact=$$GETF^BEDDUTIL(9009080,amervsit,5.4,"E")
+	S findsp=$$GETF^BEDDUTIL(9009080,amervsit,6.1,"E")
+	S dspwhr=$$GETF^BEDDUTIL(9009080,amervsit,6.6,"E")   
+	S finfol=$$GETF^BEDDUTIL(9009080,amervsit,7,"E")
+	S dspprv=$$GETF^BEDDUTIL(9009080,amervsit,6.3,"E")
+	S dspnrs=$$GETF^BEDDUTIL(9009080,amervsit,6.4,"E")
+	S dspdpt=$$FMTE^BEDDUTIL($$GETF^BEDDUTIL(9009080,amervsit,6.2,"I"))
+	D EDCON^BEDDUTID(amervsit,.ercons)
+	D PROC^BEDDUTID(amervsit,.erproc)
+	D DX^BEDDUTID(amervsit,.erdx)
+	}
+	//
+	//Primary Nurse
+	Set prmnrs=objForm.PrmNurse
+	If (prmnrs'="") {
+	Set prmnrs=$$GETF^BEDDUTIL(200,prmnrs,.01,"E")
+	}
+	//
+	//Decision to Admit Dt/Tm
+	Set decadmdt=$$FMTE^BEDDUTIL(objForm.NewDecAdmit)
+	//
+	Set asgn=objForm.AsgNrs
+	Set asgnn=""
+	If (asgn'="") {
+	Set asgnn=$$GETF^BEDDUTIL(200,asgn,.01,"E")
+	}
+	Set asgp=objForm.AsgPrv
+	Set asgpn=""
+	If (asgp'="") {
+	S asgpn=$$GETF^BEDDUTIL(200,asgp,.01,"E")
+	}
+	Set asgc=objForm.TrgCln
+	Set asgcn=""
+	If (asgc'="") {
+	Set asgcn=$$GETF^BEDDUTIL(40.7,asgc,.01,"I")
+	}
+	Set dcn=objForm.DCNrsH
+	If (dcn="") {
+	If (asgn'="") {
+	Set dcn=asgn
+	}    
+	}
+	Set dcp=objForm.DCDPrvH
+	Set (ppr,pprN)=""
+	Set ppr=$$PPR^BEDDUTIL(objForm.VIEN)
+	If (ppr'="") {
+	Set pprN=$$GETF^BEDDUTIL(200,ppr,.01,"I")
+	}
+	Set dctx=objForm.DCTrgH 	
+	Set disp=objForm.DCDispH
+	Set dcinst=objForm.DCInstH
+	Set dcstat=objForm.DCStat
+	Set rpfver=$$EMV^BEDDUTID(objForm.VIEN)
+	Set ervd=objForm.VstDur 
+	Set edvisitid=%request.Get("OBJID")
+	//Audit the activity
+	Do LOG^BEDDUTIU($G(%session.Data("DUZ")),"P","Q","BEDDEDCV.csp","BEDD: User displayed patient discharge detail",$G(DFN))
+	Write !,!,"<b>	"
+	Set %value = $$$HTMLENCODE($get(%request.Data("ID",1),$ZSTRIP($select(objForm="":"",1:(objForm.%Id())),">W")))
+	Write "<input value="""_(%value)_""" type=""hidden"" id=""ID"" name=""ID"" readonly/>"
+	Write !,"	"
+	Set %value = $$$HTMLENCODE($get(%request.Data("ptdfn",1),$ZSTRIP($select(objForm="":"",1:(objForm.PtDFNLogicalToDisplay(objForm.PtDFN))),">W")))
+	Write "<input value="""_(%value)_""" type=""hidden"" id=""ptdfn"" name=""ptdfn"" readonly/>"
+	Write !,"	"
+	Set %value = $$$HTMLENCODE($get(%request.Data("VIEN",1),$ZSTRIP($select(objForm="":"",1:(objForm.VIENLogicalToDisplay(objForm.VIEN))),">W")))
+	Write "<input value="""_(%value)_""" type=""hidden"" id=""VIEN"" name=""VIEN"" readonly size=""4""/>"
+	Write !,"	"
+	Write "<input type=""hidden"" id=""VERIEN"" name=""VERIEN"" value="_(rpfver)," readonly size=""4""/>"
+	Write !,"	"
+	Write "<input type=""hidden"" id=""DUZ"" name=""DUZ"" value="_(%session.Data("DUZ")),"/>"
+	Write !,"	"
+	Write "<input type=""hidden"" id=""SITE"" name=""SITE"" value="_(%session.Data("SITE")),"/>"
+	Write !,"	"
+	Set %value = $$$HTMLENCODE($get(%request.Data("AMERVSIT",1),$ZSTRIP($select(objForm="":"",1:(objForm.AMERVSITLogicalToDisplay(objForm.AMERVSIT))),">W")))
+	Write "<input value="""_(%value)_""" type=""hidden"" id=""AMERVSIT"" name=""AMERVSIT"" readonly size=""4""/>"
+	Write !,"	"
+	Set %value = $$$HTMLENCODE($get(%request.Data("DCFlag",1),$ZSTRIP($select(objForm="":"",1:(objForm.DCFlagLogicalToDisplay(objForm.DCFlag))),">W")))
+	Write "<input value="""_(%value)_""" type=""hidden"" id=""DCFlag"" name=""DCFlag"" readonly size=""4""/>"
+	Write !,!,"<input type=""button"" name=""btnBack"" value=""Back"" onclick='GoBack();'>"
+	Write !,!,"<center><b><font size=6>Discharge Summary</font></b></center>",!
+	Write "<hr>",!
+	Write "<br><b><font size=4>Patient Information</font></b><br><br>",!
+	Write !,"<label for=""PtName"">Patient (Gender)</label> "
+	Write "<input name=""%noname"" type=""text"" id=""PtName"" value='"_(ptname)_" ("_(ptsex)_")' size=""40"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write "<label for=""PtDOB"">DOB (Age)</label> "
+	Write "<input name=""%noname"" type=""text"" id=""PtDOB"" value='"_(ptdob)_" ("_(ptage)_")' size=""25"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write "<label for=""PtChart"">Chart</label> "
+	Write "<input name=""%noname"" type=""text"" id=""PtChart"" value='"_(ptchart)_"' size=""8"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"<br><br>",!
+	Write "<label for=""PtAlg"">Allergies</label> "
+	Write "<input name=""%noname"" type=""text"" id=""PtAlg"" value='"_(ptalg)_"' size=""80"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write "<label for=""PtPCP"">PCP</label> "
+	Write "<input name=""%noname"" type=""text"" id=""PtPCP"" value='"_(ptpcp)_"' size=""25"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !," <hr>",!
+	Write " <b><font size=4>Admission Information</font></b><br><br>",!
+	Write "<label for=""AStmp"">Check-In</label> "
+	Write "<input name=""%noname"" type=""text"" id=""AStmp"" value='"_(astmp)_"' size=""16"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write "<label for=""AdmCln"">Clinic</label> "
+	Write "<input name=""%noname"" type=""text"" id=""AdmCln"" value='"_(admcln)_"' size=""25"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"<br><br>",!
+	Write "<label for=""PstCmp"">Presenting Complaint</label> "
+	Write "<input name=""%noname"" type=""text"" id=""PstCmp"" value='"_(pstcmp)_"' size=""80"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"<br><br>",!
+	Write "<label for=""VstTyp"">Visit Type</label> "
+	Write "<input name=""%noname"" type=""text"" id=""VstTyp"" value='"_(vsttyp)_"' size=""25"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write "<label for=""TrnMod"">Transport Mode</label> "
+	Write "<input name=""%noname"" type=""text"" id=""TrnMod"" value='"_(trnmod)_"' size=""30"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write "<label for=""MedAtd"">Medical Attendant Present</label> "
+	Write "<input name=""%noname"" type=""text"" id=""MedAtd"" value='"_(medatd)_"' size=""5"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write "<br><br>",!
+	Write "<label for=""IntAct"">Initial Acuity</label> "
+	Write "<input name=""%noname"" type=""text"" id=""IntAct"" value='"_(intact)_"' size=""1"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write "<label for=""TriDtTm"">Triaged</label> "
+	Write "<input name=""%noname"" type=""text"" id=""AdNrTm"" value='"_(adnrtm)_"' size=""18"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write "<label for=""TriNrs"">Triage Nurse</label> "
+	Write "<input name=""%noname"" type=""text"" id=""TriNrs"" value='"_(trinrs)_"' size=""25"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"<br><br>",!
+	Write "<hr>",!
+	Write "<b><font size=4>Room Information</font></b><br><br>",!
+	Write !,"<label for=""ErRm"">ER Room</label> "
+	Write "<input name=""%noname"" type=""text"" id=""ErRm"" value='"_(errm)_"' size=""10"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write "<label for=""ErDt"">ER Room Assigned</label> "
+	Write "<input name=""%noname"" type=""text"" id=""ErDt"" value='"_(erdt)_"' size=""18"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"<br><br>",!
+	Write "<hr>",!
+	Write "<b><font size=4>Injury Information</font></b><br><br>",!
+	Write !,"<label for=""injrel"">Injury Related</label> "
+	Write "<input name=""%noname"" type=""text"" id=""injrel"" value='"_(injrel)_"' size=""3"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"			&nbsp;",!
+	If '(injrel="YES") Goto %csp00001 ;{
+	Write !,"		<label for=""InjWhr"">Where Injury Occurred</label> "
+	Write "<input name=""%noname"" type=""text"" id=""InjWhr"" value='"_(injwhr)_"' size=""25"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"		&nbsp;",!
+	Write "		<label for=""InjTim"">Injury Occurred</label> "
+	Write "<input name=""%noname"" type=""text"" id=""InjTim"" value='"_(injtim)_"' size=""18"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"		<br><br>",!
+	Write "		<label for=""InjCau"">Injury Cause</label> "
+	Write "<input name=""%noname"" type=""text"" id=""InjCau"" value='"_(injcau)_"' size=""35"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"		&nbsp;",!
+	Write "		<label for=""InjSet"">Injury/Accident Setting</label> "
+	Write "<input name=""%noname"" type=""text"" id=""InjSet"" value='"_(injset)_"' size=""35"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"		<br><br>",!
+	Write "		<label for=""InjSaf"">Safety Equipment Used</label> "
+	Write "<input name=""%noname"" type=""text"" id=""InjSaf"" value='"_(injsaf)_"' size=""35"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !
+%csp00001	;}
+	Write !,!,"<br><br>",!
+	Write "<label for=""OccRel"">Occupation Related</label> "
+	Write "<input name=""%noname"" type=""text"" id=""OccRel"" value='"_(occrel)_"' size=""3"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,!,"<br><br>",!
+	Write "<hr>",!
+	Write "<b><font size=4>Visit Information</font></b><br><br>",!
+	Write !,"<label for=""PrmNrs"">Primary Nurse</label> "
+	Write "<input name=""%noname"" type=""text"" id=""PrmNrs"" value='"_(prmnrs)_"' size=""25"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;&nbsp;",!
+	Write "<label for=""DecAdmDt"">Decision to Admit Time</label> "
+	Write "<input type=""DecAdmDt"" id=""DecAdmDt"" name=""DecAdmDt"" size=""18"" value='"_(decadmdt)_"' readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write !,"<br><br>",!
+	Write !,"<label for=""AdPvTm"">Medical Screening Exam Time</label> "
+	Write "<input name=""%noname"" type=""text"" id=""AdPvTm"" value='"_(adpvtm)_"' size=""18"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write "<label for=""AdmPrv"">ED Provider</label> "
+	Write "<input name=""%noname"" type=""text"" id=""AdmPrv"" value='"_(admprv)_"' size=""25"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"<br><br>",!
+	Write "<label for=""erconn"">ER Consult Notified</label> "
+	Write "<input name=""%noname"" type=""text"" id=""erconn"" value='"_(erconn)_"' size=""3"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"			&nbsp;",!
+	Write "	"
+	If '(erconn="YES") Goto %csp00002 ;{
+	Write !,"		<br><br>",!
+	Write "		<table border=1 bgcolor="""" width=""80%"">",!
+	Write "		<tr><td><b>Consult Service</b></td>",!
+	Write "		<td><b>Date and Time Seen</b></td>",!
+	Write "		<td><b>Consult</b></td>",!
+	Write "		</tr>",!
+	Write "		",!
+	Write "		"
+	For erlst=1:1:(ercons) {
+	Write !,"                <tr>",!
+	Write "                <td>"_($P(ercons(erlst),"^",1))_" </td>",!
+	Write "                <td>"_($P(ercons(erlst),"^",2))_" </td>",!
+	Write "                <td>"_($P(ercons(erlst),"^",3))_" </td>",!
+	Write "                </tr>",!
+	Write "		"
+	}
+	Write !,!,"		</table>	",!
+	Write "	"
+%csp00002	;}
+	Write !,"	",!
+	Write "	"
+	If '(erproc>0) Goto %csp00003 ;{
+	Write !,"		<br><br>",!
+	Write "		<table border=1 bgcolor="""" width=""40%"">",!
+	Write "		<tr><td><b>Procedures</b></td>",!
+	Write "		</tr>",!
+	Write "		",!
+	Write "		"
+	For erprc=1:1:(erproc) {
+	Write !,"                <tr>",!
+	Write "                <td>"_(erproc(erprc))_" </td>",!
+	Write "                </tr>",!
+	Write "		"
+	}
+	Write !,!,"		</table>	",!
+	Write "	"
+%csp00003	;}
+	Write !,!
+	If '(erdx>0) Goto %csp00004 ;{
+	Write !,"		<br><br>",!
+	Write "		<table border=1 bgcolor="""" width=""80%"">",!
+	Write "		<tr><td><b>Diagnosis</b></td>",!
+	Write "		<td><b>Provider Narrative</b></td>",!
+	Write "		</tr>",!
+	Write "		",!
+	Write "		"
+	For erdrg=1:1:(erdx) {
+	Write !,"                <tr>",!
+	Write "                <td>"_($P(erdx(erdrg),"^",1))_" </td>",!
+	Write "                <td>"_($P(erdx(erdrg),"^",2))_" </td>",!
+	Write "                </tr>",!
+	Write "		"
+	}
+	Write !,!,"		</table>	",!
+	Write "	"
+%csp00004	;}
+	Write !,!,"<br><br>",!
+	Write "	<label for=""PtCdBl"">Code Blue</label> "
+	Write "<input name=""%noname"" type=""text"" id=""PtCdBl"" value='"_(ptcdbl)_"' size=""3"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write !,"<br><br>",!
+	Write "<hr>",!
+	Write "<b><font size=4>Disposition Information</font></b><br><br>",!
+	Write !,"<label for=""finact"">Final Acuity</label> "
+	Write "<input name=""%noname"" type=""text"" id=""finact"" value='"_(finact)_"' size=""1"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write "<label for=""findsp"">Disposition</label> "
+	Write "<input name=""%noname"" type=""text"" id=""findsp"" value='"_(findsp)_"' size=""40"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write !
+	If '(findsp="TRANSFER TO ANOTHER FACILITY") Goto %csp00005 ;{
+	Write !,"	<label for=""dspwhr"">Where Transferred</label> "
+	Write "<input name=""%noname"" type=""text"" id=""dspwhr"" value='"_(dspwhr)_"' size=""40"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"	",!
+	Write "	"
+%csp00005	;}
+	Write !,!,"<br><br>",!
+	Write "<label for=""finfol"">Follow Up Instructions</label> "
+	Write "<input name=""%noname"" type=""text"" id=""finfol"" value='"_(finfol)_"' size=""60"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write "<br><br>",!
+	Write "<label for=""dspprv"">(PRIMARY) Provider who signed PCC form</label> "
+	Write "<input name=""%noname"" type=""text"" id=""dspprv"" value='"_(dspprv)_"' size=""30"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write "<label for=""dspnrs"">Discharge Nurse</label> "
+	Write "<input name=""%noname"" type=""text"" id=""dspnrs"" value='"_(dspnrs)_"' size=""30"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write "<br><br>",!
+	Write "<label for=""dspdpt"">Departure Time</label> "
+	Write "<input name=""%noname"" type=""text"" id=""dspdpt"" value='"_(dspdpt)_"' size=""18"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,!,"<br><br><br>",!
+	Write "<hr>",!
+	Write "<label for=""TecObj"">Technical Use Only: ObjId</label> "
+	Write "<input name=""%noname"" type=""text"" id=""TecObj"" value='"_(objid)_"' size=""6"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write "<label for=""TecDFN"">Dfn</label> "
+	Write "<input name=""%noname"" type=""text"" id=""TecDFN"" value='"_(DFN)_"' size=""7"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write "<label for=""TecVIEN"">Vien</label> "
+	Write "<input name=""%noname"" type=""text"" id=""TecVIEN"" value='"_(vien)_"' size=""8"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write "<label for=""TecAmer"">AmerVsit</label> "
+	Write "<input name=""%noname"" type=""text"" id=""TecAmer"" value='"_(amervsit)_"' size=""8"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,!,"<input id=""OBJID"" name=""OBJID"" type=""hidden"" value="""_($select(objForm="":"",1:objForm.%Id()))_""">"
+	Write "</form>"
+	Write !,"</BODY>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<!-- BEDDEDCV.csp - BEDD ED Discharge Summary -->"
+	Write !,"<!-- ;;2.0;IHS EMERGENCY DEPT DASHBOARD;;Apr 02, 2014 -->"
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,!,!,"<script type=""text/javascript"">"
+	Write !,!,"	// Close this page and return to the calling page",!
+	Write "	function GoBack( ) {",!
+	Write "		self.document.location.replace = ""BEDDEDC.csp"" ;",!
+	Write "	}",!
+	Write !,"	function setFocus() {",!
+	Write "		",!
+	Write "		//Make sure user is logged in",!
+	Write !,"		//Get user",!
+	Write "		var user = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".ReturnDUZ"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"') ;",!
+	Write !,"		if (user == 0) {",!
+	Write "			location.replace='BEDDLogin.csp';",!
+	Write "			return true;",!
+	Write "		}",!
+	Write "	}",!
+	Write "	",!
+	Write "	//BEDD*2.0*2;New button to return to discharges",!
+	Write "	function rpfeddsh(duz) {",!
+	Write "		",!
+	Write "		location.replace(""BEDDEDC.csp"");",!
+	Write "	}",!
+	Write "</script>"
+	Write !,!
+	Set U="^",site=%session.Data("SITE")
+	Do LOADSYS^BEDDUTW(.beddsys,site)
+	Set timeout=$G(beddsys("TimeOut"))
+	Write !,!,"<META HTTP-EQUIV=""Refresh"" CONTENT="""_( timeout )_"; URL=BEDD.csp"">"
+	Write !,!,"<title>	DISCHARGE </title>",!
+	Set U="^"
+	Set duz=%session.Data("DUZ")
+	Set objid=%request.Get("OBJID") 
+	Do ..formGenJS()
+	Write !,(..HyperEventHead(0,0))
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPagePOSTHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[	Set objForm=$$$NULLOREF
+]]></Implementation>
+</Method>
+
+<Method name="OnPagePREHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[	Set objForm=$$$NULLOREF
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+ 	If ('$D(%session.Data("DUZ"))) {
+ 		Set %response.Redirect="BEDDLogin.csp" Quit 1
+ 	}
+ 	If ('$D(^BEDD.EDSYSTEMD)) {
+ 		Set %response.Redirect="BEDDAPPL.EDSYSTEM.cls" Quit 1
+ 	}
+ 	Quit 1
+ 
+]]></Implementation>
+</Method>
+
+<Method name="ReturnDUZ">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set user=$Get(%session.Data("DUZ"))
+ 	If (user<1) {
+ 		Set user=0
+ 	}
+ 
+ 	Quit user
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="formGenJS">
+<Description><![CDATA[
+Called to render JavaScript code that is required for form <var>form</var>.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<Language>cache</Language>
+<ReturnType/>
+<Implementation><![CDATA[
+	Write !,"<script language=""JavaScript"" type=""text/javascript"">",!
+	Write "<!--",!
+	Write "function form_new()",!
+	Write "{",!
+	Write "   // invoke #server(csp.beddedcv.formLoad())",!
+	Write "   return ("_"cspHttpServerMethod"_"('",..Encrypt($listbuild("csp.beddedcv.formLoad"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""),"','') == 1);",!
+	Write "}",!
+	Write "function form_save()",!
+	Write "{",!
+	Write "   var form = self.document.form;",!
+	Write "   var objid = form.OBJID.value;",!
+	Write "   var result = 0;",!
+	Write "   if (form_validate()) {",!
+	Do ..formSavJS()
+	Write "   }",!
+	Write "   return (result == 1);",!
+	Write "}",!
+	Write "function form_validate()",!
+	Write "{",!
+	Write "   var errorMsg = '';",!
+	Write "   var missingMsg = '';",!
+	Write "   var invalidMsg = '';",!
+	Write "   var missingArray = new Array();",!
+	Write "   var invalidArray = new Array();",!
+	Write "   var valid;",!
+	Write "   missingMsg = form_testRequired(missingArray);",!
+	Write "   invalidMsg = form_testValid(invalidArray);",!
+	Write "   if ((missingMsg == '') && (invalidMsg == '')) {",!
+	Write "      return true;",!
+	Write "   }",!
+	Write "   errorMsg   = "_..QuoteJS(%response.GetText("","%CSPBind","SaveErrorLine","_______________________________________________________________"))_"+'\n\n';",!
+	Write "   errorMsg  += "_..QuoteJS(%response.GetText("","%CSPBind","SaveError","The form was not saved because of the following error(s)."))_"+'\n';",!
+	Write "   errorMsg  += "_..QuoteJS(%response.GetText("","%CSPBind","SaveCorrect","Please correct these error(s) and try again."))_"+'\n';",!
+	Write "   errorMsg  += "_..QuoteJS(%response.GetText("","%CSPBind","SaveErrorLine","_______________________________________________________________"))_"+'\n\n';",!
+	Write "   if (missingMsg!= '') {",!
+	Write "      errorMsg += "_..QuoteJS(%response.GetText("","%CSPBind","SaveRequiredError","The following required field(s) are empty: "))_" + missingMsg + '\n';",!
+	Write "   }",!
+	Write "   if (invalidMsg != '') {",!
+	Write "      errorMsg += "_..QuoteJS(%response.GetText("","%CSPBind","SaveInvalidError","The following field(s) contain invalid values: "))_" + invalidMsg + '\n';",!
+	Write "   }",!
+	Write "   alert(errorMsg);",!
+	Write "   return false;",!
+	Write "}",!
+	Write "function form_testRequired(missingArray)",!
+	Write "{",!
+	Write "   var missingMsg = '';",!
+	Do ..formReqJS()
+	Write "   return missingMsg;",!
+	Write "}",!
+	Write "function form_testValid(invalidArray)",!
+	Write "{",!
+	Write "   var valid;",!
+	Write "   var invalidMsg = '';",!
+	Do ..formValJS()
+	Write "   return invalidMsg;",!
+	Write "}",!
+	Write "// -->",!
+	Write "</script>",!
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="formLoad">
+<Description><![CDATA[
+Updates the form <var>form</var> from the specified object instance by sending JavaScript to the client.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>objid:%String,obj:%Integer=""</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	If '..formLoadJS(.objid,obj) {
+		Write "CSPPage.alert("_..QuoteJS("formLoad: "_%response.GetText("","%CSPBind","OpenObjectError","Unable to open object."))_");",!
+		Do ..formLoadJS(objid,obj,1)
+	}
+	Quit 1
+]]></Implementation>
+</Method>
+
+<Method name="formLoadJS">
+<Description><![CDATA[
+Updates the form <var>form</var> from the specified object instance by sending JavaScript to the client.  Error reporting is left to the caller.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>objid:%String,obj:%Integer="",alwaysLoad:%Boolean=0</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	New close,ok
+	Set close=0,ok=1
+	If (obj'=$$$NULLOREF) {
+		Set objid = obj.%Id()
+	} Else {
+		If (objid'="") {
+			Set obj = ##class(BEDD.EDVISIT).%OpenId(objid)
+		} Else {
+			Set obj = ##class(BEDD.EDVISIT).%New()
+		}
+		If (obj=$$$NULLOREF) {
+			If 'alwaysLoad Quit 0
+			Set ok=0
+		} Else {
+			Set close=1
+		}
+	}
+	Write "var form = CSPPage.document.form;",!
+	Write "if (form.ID != null && form.ID != null) { form.ID.value = ",..QuoteJS($select(obj="":"",1:(obj.%Id()))),";}",!
+	Write "if (form.ptdfn != null && form.ptdfn != null) { form.ptdfn.value = ",..QuoteJS($select(obj="":"",1:($select(obj.PtDFN=$c(0):"",1:(obj.PtDFNLogicalToDisplay(obj.PtDFN)))))),";}",!
+	Write "if (form.VIEN != null && form.VIEN != null) { form.VIEN.value = ",..QuoteJS($select(obj="":"",1:($select(obj.VIEN=$c(0):"",1:(obj.VIENLogicalToDisplay(obj.VIEN)))))),";}",!
+	Write "if (form.AMERVSIT != null && form.AMERVSIT != null) { form.AMERVSIT.value = ",..QuoteJS($select(obj="":"",1:($select(obj.AMERVSIT=$c(0):"",1:(obj.AMERVSITLogicalToDisplay(obj.AMERVSIT)))))),";}",!
+	Write "if (form.DCFlag != null && form.DCFlag != null) { form.DCFlag.value = ",..QuoteJS($select(obj="":"",1:($select(obj.DCFlag=$c(0):"",1:(obj.DCFlagLogicalToDisplay(obj.DCFlag)))))),";}",!
+	Write "if (form.OBJID != null) { form.OBJID.value = ",..QuoteJS(objid),";}",!
+	If close=1 Set obj=""
+	Quit ok
+]]></Implementation>
+</Method>
+
+<Method name="formReqJS">
+<Description><![CDATA[
+Called during rendering of this page to write out JavaScript code to do required field tests for form <var>form</var>.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<Language>cache</Language>
+<ReturnType/>
+<Implementation><![CDATA[	Quit
+]]></Implementation>
+</Method>
+
+<Method name="formSavJS">
+<Description><![CDATA[
+Called during rendering of this page to write out JavaScript code to invoke the server-side save method for form <var>form</var>.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<Language>cache</Language>
+<ReturnType/>
+<Implementation><![CDATA[
+	Write "      //invoke #server(csp.beddedcv.formSave())"
+	Write !,"      result = "_"cspHttpServerMethod"_"('",..Encrypt($listbuild("csp.beddedcv.formSave"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""),"',1,'',objid"
+	Write ");",!
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="formSave">
+<Description><![CDATA[
+Saves the data sent from the form <var>form</var> into the specified object instance. If successful, updates the values on the form.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec><![CDATA[respond:%Boolean=0,&errmsg:%String="",objid:%String=""]]></FormalSpec>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	New obj,sc,value,in,error,sverror,err,i,ok
+	Set sc=$$$OK
+	Set ok=1
+	Set error=""
+	Set sverror=""
+	If (objid="") {
+		Set obj = ##class(BEDD.EDVISIT).%New()
+	} ElseIf '$isobject(objid) {
+		Set obj = ##class(BEDD.EDVISIT).%OpenId(objid)
+	} Else {
+		Set obj = objid
+	}
+	If (obj=$$$NULLOREF) {
+		If (respond) {
+			Write "CSPPage.alert("_..QuoteJS(%response.GetText("","%CSPBind","SaveObjectError","Unable to open object for saving"))_");",!
+		} Else {
+			Set errmsg = %response.GetText("","%CSPBind","SaveObjectError","Unable to open object for saving")
+		}
+		Quit 0
+	}
+	Try {
+	Set:error'="" ok=0
+	Set:error="" sc=obj.%Save()
+	} Catch ex {
+		Set ok=0
+		If ($classname(ex)'="%Exception.SystemException") || (ex.Name'="<MAXSTRING>") || (error="") {
+			Set sc=ex.AsStatus(),error=""
+		}
+	}
+	If $$$ISERR(sc) {
+		Set ok=0
+		Do DecomposeStatus^%apiOBJ(sc,.err,"",%response.MatchLanguage())
+		For i=1:1:err {
+			If (respond) {
+				Set sverror=sverror_" + "_..QuoteJS(err(i))_" + '\n'"
+			} Else {
+				Set sverror=sverror_..EscapeHTML(err(i))_"\n"
+			}
+		}
+	}
+	If (respond) {
+		If (ok) {
+			Do ..formLoad("",obj)
+		} Else {
+			Write "CSPPage.alert(",!
+			Write ..QuoteJS(%response.GetText("","%CSPBind","SaveErrorLine","_______________________________________________________________"))_"+'\n\n'+",!
+			Write ..QuoteJS(%response.GetText("","%CSPBind","SaveError","The form was not saved because of the following error(s)."))_"+'\n'+",!
+			Write ..QuoteJS(%response.GetText("","%CSPBind","SaveCorrect","Please correct these error(s) and try again."))_"+'\n'+",!
+			Write ..QuoteJS(%response.GetText("","%CSPBind","SaveErrorLine","_______________________________________________________________"))_"+'\n\n'+",!
+			Write "'",error,"'",sverror,");",!
+		}
+	} Else {
+		Set errmsg=..EscapeHTML(error)_sverror
+	}
+	Quit ok
+]]></Implementation>
+</Method>
+
+<Method name="formSubmit">
+<Description><![CDATA[
+Translates a submit request from form <var>form</var> into a call to <METHOD>formSave</METHOD>.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec><![CDATA[&errmsg:%String="",objid]]></FormalSpec>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+ New v
+	If $get(objid)="" Set objid=$get(%request.Data("OBJID",1))
+	Quit ..formSave(0,.errmsg,objid,)
+]]></Implementation>
+</Method>
+
+<Method name="formValJS">
+<Description><![CDATA[
+Called during rendering of this page to write out JavaScript code to do field validation tests for form <var>form</var>.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<Language>cache</Language>
+<ReturnType/>
+<Implementation><![CDATA[	Quit
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>D:\intersystems\E3IHS\CSP\foia_goldb\BEDDEDCV.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/foia_goldb/BEDDEDCV.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>64671,78199</Default>
+</Parameter>
+</Class>
+</Export>

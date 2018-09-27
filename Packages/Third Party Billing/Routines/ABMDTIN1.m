@@ -1,11 +1,14 @@
 ABMDTIN1 ; IHS/SD/SDR - Maintenance of INSURER FILE part 2 ;   
- ;;2.6;IHS Third Party Billing;**1,6,8,9,10,11,13,14,21**;NOV 12, 2009;Build 379
+ ;;2.6;IHS Third Party Billing;**1,6,8,9,10,11,13,14,21,22,23**;NOV 12, 2009;Build 427
  ;IHS/SD/SDR-2.6*1-FIXPMS10028 - prompt for UB04 FL38
  ;IHS/SD/SDR-2.6*6-5010 - added code for BHT06
  ;IHS/SD/SDR-2.6*9-HEAT46087 - Added parameter chk for 4 vs 8 DXs
  ;IHS/SD/SDR-2.6*13 -Added chk for new exp mode 35
  ;IHS/SD/SDR-2.6*14-Changed dt from 10/1/14 to 10/1/15
  ;IHS/SD/SDR 2.6*21 HEAT198159 - Resent routine to get block 28 question added for exp mode 35
+ ;IHS/SD/SDR 2.6*22 HEAT329144 Added prompt for fld 121 to print medication name or not
+ ;IHS/SD/SDR 2.6*22 HEAT313777 Added prompt to print decimal in amount for ADA-2012
+ ;IHS/SD/SDR 2.6*23 HEAT347035 Added prompt for display print order screen claim editor
  ; *****************
  W ! K DIC
  S X="`"_ABM("DFN"),DIC="^ABMNINS(DUZ(2),",DIC(0)="LX" D ^DIC Q:+Y<0
@@ -100,10 +103,13 @@ DIC2 S DA=ABM("VTYP")
  S DR="101EMC Reference ID....:" D ^DIE
  S DR=".13Auto Approve?.......:" D ^DIE G XIT:$D(Y)
  S DR=".04Mode of Export......:" D ^DIE
+ I ("^28^35^"[("^"_($P($G(^ABMNINS(DUZ(2),ABM("DFN"),1,ABM("VTYP"),0)),U,4))_"^")) S DR="121Should Medication Name print?" D ^DIE  ;abm*2.6*22 IHS/SD/SDR HEAT329144
+ I ($P($G(^ABMNINS(DUZ(2),ABM("DFN"),1,ABM("VTYP"),0)),U,4)=34) S DR="122Print decimal in dollar amount?" D ^DIE  ;abm*2.6*22 IHS/SD/SDR HEAT313777
  K DR
  ;I ("^11^21^31^51^28^"[("^"_($P($G(^ABMNINS(DUZ(2),ABM("DFN"),1,ABM("VTYP"),0)),U,4))_"^")) S DR=".18Relationship Code?;.12Itemized UB?.....:;115UB-04 Form Locater 38;109ICD PX on Claim?;.125Print meds on 2 lines?"  ;abm*2.6*8 5010  ;abm*2.6*11 IHS/SD/AML HEAT92962
  I ("^11^21^31^51^28^"[("^"_($P($G(^ABMNINS(DUZ(2),ABM("DFN"),1,ABM("VTYP"),0)),U,4))_"^")) D  ;abm*2.6*11 IHS/SD/AML HEAT92962
  .S DR=".18Relationship Code?;.12Itemized UB?.....:;115UB-04 Form Locater 38;109ICD PX on Claim?;.125Print meds on 2 lines?;120UB-04 Block 44 Blank?"  ;abm*2.6*11 IHS/SD/AML HEAT92962
+ .I $$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,ABM("DFN"),".211","I"),1,"I")="D" S DR=DR_";124Display Print Order Screen in Claim Editor?"  ;abm*2.6*23 IHS/SD/SDR HEAT347035
  ;start old abm*2.6*10 HEAT72503
  ;I ("^3^14^22^27^32^"[("^"_($P($G(^ABMNINS(DUZ(2),ABM("DFN"),1,ABM("VTYP"),0)),U,4))_"^")) S DR=".15Block 24K..........:;.17Block 29...........:;.2Block 33 PIN#......:"  ;abm*2.6*8 HEAT32544
  ;end old start new HEAT72503

@@ -1,5 +1,5 @@
 ABSPOSR1 ; IHS/FCS/DRS - silent claim submitter ;   
- ;;1.0;PHARMACY POINT OF SALE;;JUN 21, 2001
+ ;;1.0;PHARMACY POINT OF SALE;**48**;JUN 21, 2001;Build 27
  ; This routine monitors ^PSRX indexes.  As it detects 
  ; the release of prescriptions and sometimes cancellations, too,
  ; it silently submits claims and sometimes reversals, too.
@@ -161,6 +161,7 @@ SETFIELD(FIELD,VALUE,FLAGS) ;EP -
  N FDA,IENS,MSG,FN S IENS="1,",FN=9002313.99
  S FDA(FN,IENS,FIELD)=VALUE
 SF1 D FILE^DIE($G(FLAGS),"FDA","MSG")
+ I $D(MSG) D LOG^ABSPOSL2("SF1^ABSPOSR1",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  Q:'$D(MSG)  ; success
  D ZWRITE^ABSPOS("FLAGS","FDA","MSG","FIELD","VALUE")
  G SF1:$$IMPOSS^ABSPOSUE("FM","TRI","FILE^DIE failed",,"SETFIELD",$T(+0))

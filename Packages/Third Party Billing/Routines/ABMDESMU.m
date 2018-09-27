@@ -1,24 +1,22 @@
 ABMDESMU ; IHS/ASDST/DMJ - Summarized Claim Misc. Info ;   
- ;;2.6;IHS 3P BILLING SYSTEM;**13**;NOV 12, 2009;Build 213
+ ;;2.6;IHS 3P BILLING SYSTEM;**13,23**;NOV 12, 2009;Build 427
  ;
- ; IHS/DSD/LSL - 09/02/98 - Patch 2 - NOIS NDA-0898-180038
- ;             0.00 charges on HCFA because version 2.0 does not assume
- ;             1 for units.  Modify code to set units to 1 if not
- ;             already defined.
- ; IHS/ASDS/LSL - 07/28/00 - V2.4 Patch 3 - NOIS NDA-0700-180063
- ;     Modified Supply section to quit if the item has been deleted
- ;     from the Charge Master (Supply) file.
+ ;IHS/DSD/LSL09/02/98 - Patch 2 - NOIS NDA-0898-180038 0.00 charges on HCFA because version 2.0 does not assume
+ ;             1 for units.  Modify code to set units to 1 if not already defined.
+ ;IHS/ASDS/LSL - 07/28/00 - V2.4 Patch 3 - NOIS NDA-0700-180063
+ ;     Modified Supply section to quit if the item has been deleted from the Charge Master (Supply) file.
  ;
- ; IHS/SD/SDR - V2.5 P2 - 5/9/02 - NOIS HQW-0302-100190 - Modified to display 2nd and 3rd modifiers and units
- ; IHS/SD/SDR - v2.5 p5 - 5/18/04 - Modified to put POS and TOS by line item
- ; IHS/SD/SDR - V2.5 P8 - IM10618/IM11164 - Prompt/display provider
- ; IHS/SD/SDR - v2.5 p9 - task 1 - Use new service line provider multiple
- ; IHS/SD/SDR - v2.5 p11 - NPI
- ; IHS/SD/SDR - v2.5 p12 - IM25331 - Add provider taxonomy to CMS-1500 block 24K
- ; IHS/SD/SDR,AML - v2.5 p13 - IM25899 - Alignment changes
+ ;IHS/SD/SDR V2.5 P2 - 5/9/02 - NOIS HQW-0302-100190 - Modified to display 2nd and 3rd modifiers and units
+ ;IHS/SD/SDR v2.5 p5 - 5/18/04 - Modified to put POS and TOS by line item
+ ;IHS/SD/SDR V2.5 P8 - IM10618/IM11164 - Prompt/display provider
+ ;IHS/SD/SDR v2.5 p9 - task 1 - Use new service line provider multiple
+ ;IHS/SD/SDR v2.5 p11 - NPI
+ ;IHS/SD/SDR v2.5 p12 - IM25331 - Add provider taxonomy to CMS-1500 block 24K
+ ;IHS/SD/SDR,AML v2.5 p13 - IM25899 - Alignment changes
  ;
- ; IHS/SD/SDR - v2.6 CSV
- ;IHS/SD/SDR - 2.6*13 - Added check for new export mode 35
+ ;IHS/SD/SDR v2.6 CSV
+ ;IHS/SD/SDR 2.6*13 - Added check for new export mode 35
+ ;IHS/SD/AML 2.6*23 HEAT247169 If the export mode is 27 or 35 and there's a NDC print 'N4' and the NDC with the description
  ;
 MISC ;EP for MISC charges
  I $G(ABMP("VTYP",993)),'$G(ABMPRINT) Q:ABMP("VTYP",993)'=ABMP("EXP")
@@ -63,6 +61,8 @@ MISCH ;ABMS ARRAY FOR HCFA 1500
  .S $P(ABMS(ABMS("I")),U,9)=$$K24N^ABMDFUTL(ABMDPRV)
  .S $P(ABMS(ABMS("I")),U,11)=$P($$NPI^XUSNPI("Individual_ID",ABMDPRV),U)
  .I $G(ABMP("NPIS"))="N" S $P(ABMS(ABMS("I")),U,9)=$$PTAX^ABMEEPRV(ABMDPRV)
+ S $P(ABMS(ABMS("I")),U,19)=$P(ABMX(0),"^",19) ;abm*2.6*23 IHS/SD/AML HEAT247169
+ I (ABMP("EXP")=27!(ABMP("EXP")=35))&($P(ABMS(ABMS("I")),U,19)'="") S $P(ABMS(ABMS("I")),U,8)="N4"_$P(ABMS(ABMS("I")),U,19)_" "_$P(ABMS(ABMS("I")),U,8)  ;abm*2.6*23 IHS/SD/AML HEAT247169
  Q
  ;
 REVN ;EP for REVENUE charges

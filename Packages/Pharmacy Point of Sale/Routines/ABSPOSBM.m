@@ -1,5 +1,5 @@
 ABSPOSBM ; IHS/FCS/DRS - POS billing, part 3 ;      
- ;;1.0;PHARMACY POINT OF SALE;;JUN 21, 2001
+ ;;1.0;PHARMACY POINT OF SALE;**48**;JUN 21, 2001;Build 27
  ; *****
  ; *****  Interface to ABSB, the ILC A/R package
  ; *****  This code is reached _ONLY_ by sites using ILC A/R,
@@ -75,6 +75,7 @@ DTBILLED ; Update the DATE BILLED multiple
  S FDA(FN,IENS,.03)=AMT ; AMOUNT BILLED
  S FDA(FN,IENS,.04)=$$INSIEN^ABSPOS57
 DTB8 D UPDATE^DIE(,"FDA",,"MSG")
+ I $D(MSG) D LOG^ABSPOSL2("F^ABSPOSBX",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  I $D(MSG) D  G DTB8:$$IMPOSS^ABSPOSUE("FM","TRI",$T(DTBILLED),,"DTB8",$T(+0))
  . D LOG^ABSPOSL("Failed to update DATE BILLED")
  . D LOGARRAY^ABSPOSL("FDA")

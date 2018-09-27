@@ -1,24 +1,28 @@
 ABMPPADJ ; IHS/SD/SDR - Prior Payments/Adjustments page (CE); 
- ;;2.6;IHS 3P BILLING SYSTEM;**4,6,8,9,10,19,21**;NOV 12, 2009;Build 379
+ ;;2.6;IHS 3P BILLING SYSTEM;**4,6,8,9,10,19,21,23**;NOV 12, 2009;Build 427
  ; split routine to ABMPPAD1 because of size
  ;
- ; IHS/SD/SDR - v2.5 p13 - NO IM
- ; IHS/SD/SDR - abm*2.6*6 - 5010 - added export mode 32
- ;IHS/SD/SDR - 2.6*19 - HEAT168248 - Added code to put each SAR only once with the total amt.  In split routine, ABMPPAD3
- ;IHS/SD/SDR - 2.6*21 - HEAT118718 - Check for replacement insurer
+ ;IHS/SD/SDR - v2.5 p13 - NO IM
  ;
- ; ABMPL(Insurer priority, Insurer IEN)=
- ;        P1=13 multiple IEN
- ;        P2=Billing status
- ; ABMPP(Insurer IEN, "P" or "A", Counter)=
- ;        P1=Amount
- ;        P2=Adj Category
- ;        P3=Trans. Type
- ;        P4=Std Adj. Reason
- ;        P5=billable?(Y/N)
- ;        P6=Payment multiple IEN
-DISPCK ; chk if no complete insurer OR if 2 export modes on claim
- ; don't do if either is true
+ ;IHS/SD/SDR 2.6*6 5010 - added export mode 32
+ ;IHS/SD/SDR 2.6*19 HEAT168248 - Added code to put each SAR only once with the total amt.  In split routine, ABMPPAD3
+ ;IHS/SD/SDR 2.6*21 HEAT118718 - Check for replacement insurer
+ ;IHS/SD/SDR 2.6*23 CR9730 Added call for PRINT ORDER CHARGE SCREEN page
+ ;
+ ;ABMPL(Insurer priority, Insurer IEN)=
+ ;    P1=13 multiple IEN
+ ;    P2=Billing status
+ ;ABMPP(Insurer IEN, "P" or "A", Counter)=
+ ;    P1=Amount
+ ;    P2=Adj Category
+ ;    P3=Trans. Type
+ ;    P4=Std Adj. Reason
+ ;    P5=billable?(Y/N)
+ ;    P6=Payment multiple IEN
+DISPCK ; chk if no complete insurer OR if 2 export modes on claim; don't do if either is true
+ ;
+ ;if medicaid insurer type, UB-04 or 837I, itemized, and they chose to display print order screen
+ I (ABMP("ITYP")="D")&("^28^31^"[("^"_ABMP("EXP")_"^"))&($P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),1,ABMP("VTYP"),0)),U,12)=1)&($P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),1,ABMP("VTYP"),1)),U,24)="Y") D PRTORD^ABMDEOK1  ;abm*2.6*23 IHS/SD/SDR CR9730
  K ABMTFLAG,ABMSFLG,ABMMFLG
  K ABMPM
  N ABMPP
@@ -28,11 +32,9 @@ DISPCK ; chk if no complete insurer OR if 2 export modes on claim
  .S ABMAI=$P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),13,ABMA,0)),U)
  .Q:ABMAI=""  ;abm*2.6*10 HEAT74239
  .I $P($G(^ABMNINS(ABMP("LDFN"),ABMAI,0)),U,11)="Y",($P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),13,ABMA,0)),U,3)="C") S ABMAFLG=1
- .;I $P($G(^AUTNINS(ABMAI,2)),U)="R",($P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),0)),U,8)=ABMAI) S ABMMFLG=1  ;abm*2.6*9 tribal self-insured
- .;I $P($G(^AUTNINS(ABMAI,2)),U)'="R",($P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),0)),U,8)=ABMAI) S ABMMFLG=1  ;abm*2.6*9 tribal self-insured  ;abm*2.6*10 HEAT73780
  .I $$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,ABMAI,".211","I"),1,"I")="R",($P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),0)),U,8)=ABMAI) S ABMMFLG=1  ;abm*2.6*9 tribal self-insured  ;abm*2.6*10 HEAT73780
  I $G(ABMAFLG)=1,($G(ABMMFLG)=1) Q  ;don't do COB page cuz there is a tribal insurer and Medicare
- K ABMAFLG,ABMMFLG  ;abm*2.6*9
+ K ABMAFLG,ABMMFLG
  D DISPCK^ABMPPAD1
 GATHER Q:$G(ABMCHK)=1  ;quit if no complete insurer or 2 export modes on claim
  K ABMPM,ABMPP

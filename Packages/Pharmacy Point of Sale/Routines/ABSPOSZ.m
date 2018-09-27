@@ -1,5 +1,5 @@
 ABSPOSZ ; IHS/FCS/DRS - Upgrades ;       
- ;;1.0;PHARMACY POINT OF SALE;;JUN 21, 2001
+ ;;1.0;PHARMACY POINT OF SALE;**48**;JUN 21, 2001;Build 27
  Q
  ; Upgrades for files are in ABSPOSZA.  Only needed at a couple of
  ; places, so run them manually, separately.
@@ -68,6 +68,7 @@ ANMC ; Special for ANMC
  S PRO=PRO_","
  N FDA,MSG S FDA(101,PRO,1)="Print DUR data"
  D FILE^DIE(,"FDA","MSG")
+ I $D(MSG) D LOG^ABSPOSL2("ANMC+10^ABSPOSZ",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  I $D(MSG) W "Error in FILE^DIE: ",! D ZWRITE^ABSPOS("MSG") Q
  W "Done",!
  ;
@@ -85,6 +86,7 @@ ANMC ; Special for ANMC
  I 'PRO1 W "Could not find it!",! Q
  K FDA,MSG S FDA(101.01,PRO1_","_PRO,2)="DUR"
  D FILE^DIE(,"FDA","MSG")
+ I $D(MSG) D LOG^ABSPOSL2("ANMC+28^ABSPOSZ",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  I $D(MSG) W "Error in FILE^DIE: ",! D ZWRITE^ABSPOS("MSG") Q
  W "Done",!
  Q
@@ -110,6 +112,7 @@ BILLMENU ; If so, then on the main menu ABSPMENU,
  I 'BILLMENU W !!?10,"Couldn't find ABSP BILLING MENU in ABSPMENU??",! Q
  N FDA,MSG S FDA(19.01,BILLMENU_","_MAINMENU_",",.01)="ABSP BILLING MENU FOR ILC A/R"
  D FILE^DIE("E","FDA","MSG")
+ I $D(MSG) D LOG^ABSPOSL2("BILLMENU^ABSPOSZ",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  I $D(MSG) D
  . W !!?10,"Failed to change the BILLING MENU item",!
  . D ZWRITE^ABSPOS("FDA","MSG")
@@ -119,4 +122,5 @@ INIT58 ; Make sure there's an entry in file 9002313.58
  N FDA,MSG
  S FDA(9002313.58,"+1,",.01)=1
  D UPDATE^DIE(,"FDA",,"MSG")
+ I $D(MSG) D LOG^ABSPOSL2("INIT58^ABSPOSZ",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  Q

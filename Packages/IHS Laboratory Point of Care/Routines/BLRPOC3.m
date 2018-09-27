@@ -1,0 +1,192 @@
+BLRPOC3 ;IHS/MSC/MKK - EHR POC Component support, part 2 ; 13-Oct-2017 14:04 ;  MKK
+ ;;5.2;IHS LABORATORY;**1041**;NOV 01, 1997;Build 23
+ ;
+ Q
+ ;
+ ; IHS/MSC/MKK
+ ;      TEST subroutine moved to this routine due to the BLRPOC routine
+ ;      becoming too large (i.e., violated SAC guidelines).
+ ;
+TEST ; EP - Interactively TEST Point-Of-Care
+ NEW (DILOCKTM,DISYS,DT,DTIME,DUZ,IO,IOBS,IOF,IOM,ION,IOS,IOSL,IOST,IOT,IOXY,U,XPARSYS,XQXFLG)
+ ;
+ K ^TMP("BLRDIAG",$J)   ; Make sure Diagnosis is cleared.
+ ;
+ W !!,"POC Test."
+ S ARY("CD")=$$NOW^XLFDT
+ ;
+ Q:$$GETYVAL(60,.TESTY)<1
+ I $$CHKTST^BLRPOC(+TESTY)<1 D  Q
+ . D BADSTUFF("Test "_$$GET1^DIQ(60,TEST6,.01)_" ["_TESTY_"] cannot be used.")
+ ;
+ S ARY("ORDTST")=$G(TESTY)
+ ;
+ I $$ISPANEL^BLRPOC(+TESTY) S CONTINUE=$$GETCOSMC(TESTY,.ARY)
+ E  D
+ . S ARY("TST",1)=$G(TESTY)
+ . S CONTINUE=$$GETRESLT(+TESTY,.RESULTS,.COMMENT)
+ . I CONTINUE="OK" S ARY("RES",1)=RESULTS  S:RESULTS="*" ARY("CMT",1)=COMMENT
+ Q:$G(CONTINUE)="Q"
+ ;
+ S SITESPEC=$O(^LAB(60,+TESTY,1,0))
+ ;
+ S ARY("CM")=$$GET1^DIQ(61,SITESPEC,.01,"I")_U_$$GET1^DIQ(61,SITESPEC,.01)
+ S CSI=+$$GET1^DIQ(60,+TESTY,9,"I") ; Collection Sample IEN
+ I CSI<1 D
+ . S CSI=+$O(^LAB(60,+TESTY,3,0))
+ . S CSI=+$G(^LAB(60,+TESTY,3,CSI,0))
+ S ARY("COL")=CSI_U_$$GET1^DIQ(62,CSI,.01)
+ ;
+ Q:$$GETYVAL(44,.Y)<1
+ S ARY("LOC")=$G(Y)
+ ;
+ Q:$$GETYVAL(200,.Y,"PROVIDER")<1
+ S ARY("PRV")=$G(Y)
+ ;
+ Q:$$GETYVAL(100.02,.Y)<1
+ S ARY("NOO")=$G(Y)
+ ;
+ Q:$$GETYVAL(62.05,.Y)<1
+ S ARY("URG")=$G(Y)
+ ;
+ S COMMCNT=+$O(ARY("CMT","A"),-1)
+ I $G(ARY("CMT",COMMCNT))'["TEST^BLRPOC" D
+ . S ARY("CMT",COMMCNT+1)="Testing POC Code from TEST^BLRPOC entry."
+ ;
+ Q:$$GETYVAL(2,.Y)<1
+ S DFN=+$G(Y)
+ ;
+ S STR=$$CHKITOUT^BLRSGNSU(DFN,$$DT^XLFDT)
+ Q:STR=""
+ S STR1=$P(STR,U,2)
+ S ARY("SYMP")=STR1_U_$P(STR,U,3)_U_$P(STR,U)
+ ;
+ W !!,"Before SAVE call.",!
+ D ARRYDUMP("ARY")
+ D ^XBFMK
+ S DIR(0)="YO"
+ S DIR("A")="Make ARY(""CD"")=Just a Date"
+ D ^DIR
+ I +Y D
+ . S ARY("CD")=$P($G(ARY("CD")),".")
+ . D ARRYDUMP("ARY")
+ ;
+ D PRESSKEY^BLRGMENU(9)
+ ;
+ W !,"DFN:",DFN," - ",$P(Y,U,2),!
+ ;
+ D SAVE^BLRPOC(.RET,DFN,.ARY)
+ ;
+ W !,"After SAVE Call.",!
+ W ?4,"RET:",RET,!!
+ ;
+ S LRDFN=$$GET1^DIQ(2,DFN,63,"I")
+ S LRIDT=$O(^LR(LRDFN,"CH",0))
+ S LRAS=$$GET1^DIQ(63.04,LRIDT_","_LRDFN,.06)
+ ;
+ H 1
+ S BLRTXLOG=$O(^BLRTXLOG("D",LRAS,0))
+ I BLRTXLOG D
+ . S X=$$GETACCCP^BLRUTIL3(LRAS,.LRAA,.LRAD,.LRAN)
+ . D SHOWIT
+ . ; S VLABIEN=$$GET1^DIQ(9009022,BLRTXLOG,105,"I")
+ . ; W !,?4,"Latest Accession:",$$GET1^DIQ(63.04,LRIDT_","_LRDFN,.06),!
+ . ; W ?10,"BLRTXLOG:",BLRTXLOG,?30,"FLAG:",$$GET1^DIQ(9009022,BLRTXLOG,2002),!
+ . ; W ?9,"V LAB IEN:",VLABIEN,?30,"FLAG:",$$GET1^DIQ(9000010.09,VLABIEN,.05),!
+ E  W ?4,"Could not determine BLRTXLOG for Accession ",LRAS,!
+ ;
+ K ^TMP("BLRDIAG",$J)
+ Q
+ ;
+GETYVAL(FNUM,YVAL,PROMPT) ; EP - MSC/MKK - Make this a function and add ability to pass a prompt string.
+ D ^XBFMK
+ S DIR(0)="PO^"_FNUM_":EMZ"
+ S:$L($G(PROMPT)) DIR("A")=PROMPT
+ D ^DIR
+ I +$G(DIRUT) D INVALENT  Q 0
+ ;
+ S YVAL=$G(Y)
+ Q 1
+ ;
+INVALENT ; EP - Invalid Entry Prompt
+ W !,?4,"No/Quit Entry.  Routine Ends."
+ D PRESSKEY^BLRGMENU(9)
+ Q
+ ;
+ARRYDUMP(ARRY) ; EP - "Dump" the array
+ NEW STR1
+ ;
+ S STR1=$Q(@ARRY@(""))
+ W !,?5,ARRY,!
+ W ?10,STR1,"=",@STR1,!
+ F  S STR1=$Q(@STR1)  Q:STR1=""  D
+ . W ?10,STR1,"=",@STR1,!
+ Q
+ ;
+ ; --- BEGIN MSC/MKK - Allow COSMIC tests
+GETCOSMC(COSMCTST,ARRAY) ; EP - Get results for ALL tests
+ NEW (ARRAY,COSMCTST,DILOCKTM,DISYS,DT,DTIME,DUZ,IO,IOBS,IOF,IOM,ION,IOS,IOSL,IOST,IOT,IOXY,U,XPARSYS,XQXFLG)
+ ;
+ S COSMCIEN=+$G(COSMCTST)
+ S (CNT,BAILOUT,PANELN)=0
+ F  S PANELN=$O(^LAB(60,COSMCIEN,2,PANELN))  Q:PANELN<1!(BAILOUT)  D
+ . S PANELIEN=PANELN_","_COSMCIEN
+ . S F60IEN=$$GET1^DIQ(60.02,PANELIEN,.01,"I")
+ . ; I $$GETRESLT(F60IEN,.RESULTS)="Q" S BAILOUT=BAILOUT+1  Q
+ . I $$GETRESLT(F60IEN,.RESULTS,.COMMENT)="Q" S BAILOUT=BAILOUT+1  Q      ; MSC/MKK - LR*5.2*XXXX
+ . ;
+ . S CNT=CNT+1
+ . S TESTSTR=F60IEN_U_$$GET1^DIQ(60,F60IEN,.01)
+ . S ARRAY("TST",CNT)=$G(TESTSTR)
+ . S ARRAY("RES",CNT)=RESULTS
+ . S:RESULTS="*" ARRAY("CMT",CNT)=COMMENT   ; MSC/MKK - LR*5.2*XXXX
+ ;
+ Q $S(BAILOUT:"Q",1:"OK")
+ ;
+GETRESLT(IEN,RESULT,COMMENT) ; EP - Get Result Value
+ NEW TESTNAME
+ ;
+ S COMMENT=""
+ S TESTNAME=$$GET1^DIQ(60,IEN,.01)
+ ;
+ D ^XBFMK
+ S DIR(0)="FO",DIR("A")=TESTNAME_"'s Result Text or Number"
+ D ^DIR
+ I +$G(DIRUT) D INVALENT  Q "Q"
+ S RESULT=$G(Y)
+ ;
+ I RESULT="*" D
+ . D ^XBFMK
+ . S DIR(0)="FO",DIR("A")="Comment for cancelled result"
+ . D ^DIR
+ . S COMMENT=$S($L($G(X)):$G(X),1:"Cancelled")
+ ;
+ Q "OK"
+ ;
+BADSTUFF(STR,TAB) ; EP - BADSTUFF error message
+ S TAB=$S($L($G(TAB))<1:4,1:TAB)
+ W !!,?TAB,STR,"  Routine Ends."
+ D PRESSKEY^BLRGMENU(TAB+5)
+ Q
+ ;
+SHOWFLAG ; EP - Given Accession number, show V LAB FLAG
+ NEW BLRLRAS,BLRTXLOG,LRAA,LRAAIEN,LRAD,LRDATA,LRAN,LRAS,VLABIEN
+ ;
+ W !!
+ D ^LRWU4
+ S LRAS=BLRLRAS
+ ;
+SHOWIT ; EP
+ S LRAAIEN=LRAN_","_LRAD_","_LRAA
+ S LRDFN=$$GET1^DIQ(68.02,LRAAIEN,.01,"I")
+ S LRIDT=$$GET1^DIQ(68.02,LRAAIEN,13.5,"I")
+ S LRDATA=$O(^LR(LRDFN,"CH",LRIDT,"A"),-1)
+ S BLRTXLOG=$O(^BLRTXLOG("D",LRAS,0))
+ S VLABIEN=$$GET1^DIQ(9009022,BLRTXLOG,105,"I")
+ ;
+ W !,?4,"Accession:",$$GET1^DIQ(63.04,LRIDT_","_LRDFN,.06),!
+ W ?8, "LAB DATA RESULT:",$P($G(^LR(LRDFN,"CH",LRIDT,LRDATA)),U),?35,"FLAG:",$P($G(^(LRDATA)),U,2),!
+ W ?15,"BLRTXLOG:",BLRTXLOG,?35,"FLAG:",$$GET1^DIQ(9009022,BLRTXLOG,2002),!
+ W ?14,"V LAB IEN:",VLABIEN,?35,"FLAG:",$$GET1^DIQ(9000010.09,VLABIEN,.05),!
+ D PRESSKEY^BLRGMENU(4)
+ Q

@@ -1,5 +1,5 @@
 BYIMSEGS ;IHS/CIM/THL - IMMUNIZATION DATA EXCHANGE;
- ;;2.0;BYIM IMMUNIZATION DATA EXCHANGE;**3,4,5,6,7**;JUN 01, 2015;Build 242
+ ;;2.0;BYIM IMMUNIZATION DATA EXCHANGE;**3,4,5,6,7,8**;JUL 11, 2017;Build 310
  ;
  ;code to supplement fields in the HL7 segments
  ;
@@ -33,7 +33,7 @@ MSH ;EP;entry point
 MSH3 ;
  S X=BYIM("MSH3.1")
  S:X="" X="RPMS"
- I BYIM("MSH3.2")]"" S X=X_CS_BYIM("MSH3.2")_CS_"ISO"
+ I BYIM("MSH3.2")]"" S X=X_CS_BYIM("MSH3.2")_CS_$S($G(BYIM("MSH3.3")):BYIM("MSH3.3"),1:"ISO")
  S INA("MSH3")=X
  Q
  ;-----
@@ -41,13 +41,13 @@ MSH4 ;
  N X
  S X=BYIM("MSH4.1")
  S:X="" X=$P($G(^DIC(4,+$G(DUZ(2)),0)),U)
- I BYIM("MSH4.2")]"" S X=X_CS_BYIM("MSH4.2")_CS_"ISO"
+ I BYIM("MSH4.2")]"" S X=X_CS_BYIM("MSH4.2")_CS_$S($G(BYIM("MSH4.3")):BYIM("MSH4.3"),1:"ISO")
  S INA("MSH4")=X
  Q
  ;-----
 MSH5 ;
  S X=BYIM("MSH5.1")
- I BYIM("MSH5.2")]"" S X=X_CS_BYIM("MSH5.2")_CS_"ISO"
+ I BYIM("MSH5.2")]"" S X=X_CS_BYIM("MSH5.2")_CS_$S($G(BYIM("MSH5.3")):BYIM("MSH5.3"),1:"ISO")
  S INA("MSH5")=X
  Q
  ;-----
@@ -83,7 +83,6 @@ MSH12 ;
  ;-----
 MSHEND Q
  ;-----
- ;-----
 PID ;EP;
  D PID3
  D PID5
@@ -99,11 +98,13 @@ PID ;EP;
 PID3 ;PID-3 HRN
  N X,Y,Z
  S X=$$HRN^BYIMIMM3(INDA)
+ ;PATCH 8 CR 08549 - OVERRIDE SSN EXCLUSION FOR MULTIPLE STATE FILES
  ;PATCH 6 ALLOW EXCLUSION OF SSN
- I '$G(BYIMESSN) D
- .S Y=$TR($P($G(^DPT(INDA,0)),U,9),"-")
- .S:Y]"" X=X_"~"_Y_CS_CS_CS_"SSA"_CS_"SS"
+ ;I '$G(BYIMESSN) D
+ S Y=$TR($P($G(^DPT(INDA,0)),U,9),"-")
+ S:Y]"" X=X_"~"_Y_CS_CS_CS_"SSA"_CS_"SSN"
  ;PATCH 6 ALLOW EXCLUSION OF SSN
+ ;PATCH 8 CR 08549 END
  S Y=""
  S Z=$O(^AUPNMCD("B",INDA,9999999999),-1)
  S:Z Y=$P($G(^AUPNMCD(Z,0)),U,3)
@@ -134,7 +135,9 @@ PID10 ;PID-10 RACE
  ;-----
 PID11 ;PID-11 ADDRESS
  S X=$G(^DPT(+INDA,.11))
- S INA("PID11")=$P(X,U)_CS_CS_$P(X,U,4)_CS_$P($G(^DIC(5,+$P(X,U,5),0)),U,2)_CS_$P(X,U,6)_CS_"USA"_CS_"L"
+ ;PATCH 8 CR 08631 - PATIENT ADDRESS TYPE
+ S INA("PID11")=$P(X,U)_CS_CS_$P(X,U,4)_CS_$P($G(^DIC(5,+$P(X,U,5),0)),U,2)_CS_$P(X,U,6)_CS_"USA"_CS_$S($G(BYIMATYP)]"":BYIMATYP,1:"L")
+ ;PATCH 8 CR 08631 END
  S INA("PID11",1)=INA("PID11")
  Q
  ;-----
@@ -184,7 +187,6 @@ PID24 ;PID-24 BIRTH ORDER
  S INA("PID24",1)="N"
 PIDEND Q
  ;-----
- ;-----
 PD1 ;EP;
  D PD13
  D PD111
@@ -196,7 +198,7 @@ PD1 ;EP;
  Q
  ;-----
 PD13 ;PD1-3 variable - location
- S INA("PD13",1)=$G(BYIM("PD13.1"))_CS_$G(BYIM("PD13.2"))
+ S INA("PD13",1)=$G(BYIM("PD13.1"))_CS_$G(BYIM("PD13.2"))_CS_$G(BYIM("PD13.3"))
  Q
  ;-----
 PD111 ;PD1-11 PUBLICITY
@@ -223,7 +225,8 @@ PD116 ;PD1-16
 PD117 ;PD1-17
  ;PATCH 6 INCLUDE ACTIVE/INACTIVE STATUS
  S INA("PD117",1)=$$ACTDT^BYIMIMM3(INDA)
- S:INA("PD117",1)="" INA("PD113",1)=DT+17000000
+ ;S:INA("PD117",1)="" INA("PD113",1)=DT+17000000
+ S:INA("PD117",1)="" INA("PD117",1)=DT+17000000
  ;PATCH 6 INCLUDE ACTIVE/INACTIVE STATUS
  Q
  ;-----
@@ -235,8 +238,7 @@ PD118 ;PD1-18
  ;-----
 PD1END Q
  ;-----
- ;-----
-NK1 ;-- this will generate the NK1 segment
+NK1 ; generate the NK1 segment
  D NK11
  D NK12
  D NK13
@@ -290,7 +292,6 @@ NK15 ;PHONE NUMBER
  .S INA("NK15")="("_$E(X,1,3)_")"_$E(X,4,6)_"-"_$E(X,7,10)_CS_"PRN"_CS_"PH"
  .S INA("NK15",1)=INA("NK15")
 NK1END Q
- ;-----
  ;-----
 PV1 ;EP;FOR PV1 SEGMENT CONTENT
  ;PATCH 7 ADD PV1 COMPONENT
@@ -349,7 +350,6 @@ PV144 ;PV1-44 VISIT DATE
  S INA("PV144",1)=X+17000000
 PV1END Q
  ;-----
- ;-----
 ORC ;EP; - for ORC components
  D VSET(INDA)
  D ORC1
@@ -374,8 +374,9 @@ ORC2 ;
 ORC3 ;
  N X
  S X=$P($G(^AUPNVSIT(+$P($G(^AUPNVIMM(+INDA,0)),U,3),0)),".")
- S INA("ORC3",INDA)=$E($$TIMEIO^INHUT10(X),1,8)_"-"_INDA_"-"_$P($$HRN^BYIMIMM3($P($G(^AUPNVIMM(+INDA,0)),U,2)),U)_CS_$P($$HRN^BYIMIMM3($P($G(^AUPNVIMM(+INDA,0)),U,2)),U,4)
  ;PATCH 7 NOT MORE THAN 20 CHARACTERS
+ S INA("ORC3",INDA)=$E($E($$TIMEIO^INHUT10(X),1,8)_"-"_INDA_"-"_$P($$HRN^BYIMIMM3($P($G(^AUPNVIMM(+INDA,0)),U,2)),U),1,20)_CS_$P($$HRN^BYIMIMM3($P($G(^AUPNVIMM(+INDA,0)),U,2)),U,4)
+ ;PATCH 7
  S $P(INA("ORC3",INDA),U,2)=$E($P(INA("ORC3",INDA),U,2),1,20)
  Q
  ;-----
@@ -410,9 +411,12 @@ ORC12 ;ordering provider
 ORC17 ;setup for ORC17 variable - location
  ;PATCH 7
  ;S INA("ORC17",INDA)=CS_CS_CS_$P($G(^DIC(4,+$G(DUZ(2)),0)),U)
- S INA("ORC17",INDA)=$P($G(^AUTTLOC(+$G(DUZ(2)),0)),U,10)_CS_$P($G(^DIC(4,+$G(DUZ(2)),0)),U)_CS_"RPMS"
+ ;S INA("ORC17",INDA)=$P($G(^AUTTLOC(+$G(DUZ(2)),0)),U,10)_CS_$P($G(^DIC(4,+$G(DUZ(2)),0)),U)_CS_"RPMS"
+ ;PATCH 8 CR 08611 - LIMIT NAME TO 20 CHARACTERS
+ S INA("ORC17",INDA)=$P($G(^AUTTLOC(+$G(DUZ(2)),0)),U,10)_CS_$E($P($G(^DIC(4,+$G(DUZ(2)),0)),U),1,20)_CS_"RPMS"
+ ;PATCH 7 END
+ ;PATCH 8 CR 08611 END
 ORCEND Q
- ;-----
  ;-----
 RXA ;EP;
  Q:'$D(^AUPNVIMM(INDA,0))
@@ -448,9 +452,22 @@ RXA4 ;date/time entered
  ;-----
 RXA5 ;admin code
  N X
+ I $G(Z1)="" S X=+$G(^AUPNVIMM(INDA,0)),Z1=$G(^AUTTIMM(X,1))
  S X=$P(Z0,U,3)
  S:$L(X)=1 X="0"_X
  S INA("RXA5",INDA)=X_CS_$P(Z0,U)_CS_"CVX"
+ ;PATCH 8 CR 08781 - CPT CODE
+ N CPT,CPT2,ICPT,X1,X2
+ S CPT=$P(Z0,U,11)
+ S CPT2=$P(Z1,U,15)
+ Q:'CPT&'CPT2
+ D:CPT2
+ .S X1=$P($P(V0,U),".")
+ .S X2=$P($G(^DPT(+$P(X0,U,2),0)),U,3)
+ .D D^%DTC
+ .S:X>1096 CPT=CPT2
+ S INA("RXA5",INDA)=INA("RXA5",INDA)_"~"_CPT_CS_$P($G(^ICPT(CPT,0)),U,2)_CS_"CPT"
+ ;PATCH 8 CR 08781 END
  Q
  ;-----
 RXA6 ;dose
@@ -458,15 +475,16 @@ RXA6 ;dose
  S X=+$P(X0,U,11)
  S:$E(X)="." X="0"_X
  ;PATCH 7 USE DEFAULT VOLUME WHEN NOT RECORDED
+ ;PATCH 8 CR 08549 - DEFAULT VOLUME FOR MULTIPLE STATE FILES
  S:'X X=$P(Z0,U,18)
- ;S:'X X="999"
- S:'X X=""
+ S:'X X=$S($G(BYIMDVOL):BYIMDVOL,1:"")
+ ;PATCH 8 CR 08549 END
  S INA("RXA6",INDA)=X
  Q
  ;-----
 RXA7 ;quantity definition
  S INA("RXA7",INDA)=""
- I INA("RXA6",INDA),INA("RXA6",INDA)'>997 S INA("RXA7",INDA)="mL^MilliLiters^UCUM"
+ I INA("RXA6",INDA),INA("RXA6",INDA)'>997 S INA("RXA7",INDA)="ML^MilliLiters^ISO+"
  Q
  ;-----
 RXA9 ;admin history
@@ -544,11 +562,9 @@ RXA22 ;action code
  S INA("RXA22",INDA)=$E($P($$TIMEIO^INHUT10(X),"-"),1,8)
 RXAEND Q
  ;-----
- ;-----
 RXR ;EP;
  D RXR^BYIMSEG1
  Q
- ;-----
  ;-----
 QRD ;EP; setup the variables for the QRD segment
  N BYIMDA,BYIMNM,BYIMRN,BYIMASU
@@ -607,7 +623,6 @@ QRD12 ;
  S INA("QRD12")="T"
 QRDEND Q
  ;-----
- ;-----
 FHS ;EP;
  D FHS3
  D MSH
@@ -620,29 +635,27 @@ FHS3 ;
  S INA("FSH3")=X
 FHSEND Q
  ;-----
- ;-----
-RCP ;-- setup variables for RCP segment
+RCP ;setup variables for RCP segment
 RCPEND Q
  ;-----
- ;-----
-QPD ;-- setup variables for QPD segment
+QPD ;setup variables for QPD segment
 QPDEND Q
- ;-----
  ;-----
 VSET(INDA) ;SET VISIT VARIABLES
  S X0=^AUPNVIMM(INDA,0)
  S X12=$G(^AUPNVIMM(INDA,12))
  S Z0=$G(^AUTTIMM(+X0,0))
+ ;PATCH 8 CR 08781 - INCLUDE GLOBAL NODE 1 FOR CPT2 CODE
+ S Z1=$G(^AUTTIMM(+X0,1))
+ ;PATCH 8 CR 08781 END
  S V0=$G(^AUPNVSIT(+$P(X0,U,3),0))
  S V21=$G(^AUPNVSIT(+$P(X0,U,3),21))
  S T=$P(V0,U,7)
  Q
  ;-----
- ;-----
 NPI(PRV) ;
  S NPI=$P($G(^VA(200,+PRV,"NPI")),U)
  Q NPI
- ;-----
  ;-----
 TITLE(P) ;GET PROVIDER'S TITLE/PROVIDER CLASS
  Q:'$G(P) ""

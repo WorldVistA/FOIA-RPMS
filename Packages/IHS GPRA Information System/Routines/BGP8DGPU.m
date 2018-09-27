@@ -1,12 +1,12 @@
 BGP8DGPU ; IHS/CMI/LAB - IHS AREA CLIN 05 REPORT DRIVER ;
- ;;8.0;IHS CLINICAL REPORTING;**2**;MAR 12, 2008
+ ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
  ;
  ;
  W:$D(IOF) @IOF
- W !,$$CTR("IHS GPRA Performance Report for a User Selected Date Range",80)
+ W !,$$CTR("IHS GPRA/GPRAMA Performance Report for a User Selected Date Range",80)
 INTRO ;
  D XIT
- W !!,"This will produce a National GPRA report for a year period you specify."
+ W !!,"This will produce a National GPRA/GPRAMA report for a year period you specify."
  W !!,"You will be asked to provide: 1) the reporting period, 2) the baseline"
  W !,"period to compare data to, 3) the Community taxonomy and 4) the patient"
  W !,"population (i.e. AI/AN only, non AI/AN, or both) to determine which"
@@ -17,11 +17,34 @@ INTRO ;
  W !,"configuration, the export file will either be automatically transmitted "
  W !,"directly to the Area or the site will have to send the file manually.",!
  K DIR S DIR(0)="E",DIR("A")="Press enter to continue" D ^DIR K DIR
- S BGP8GPU=1
+ S BGPYGPU=1
  D TAXCHK^BGP8XTCN
-TP ;get time period
+ S X=$$DEMOCHK^BGP8UTL2()
+ I 'X W !!,"Exiting Report....." D PAUSE^BGP8DU,XIT Q
  D XIT
- S BGPRTYPE=1,BGP8RPTH="",BGP8GPU=1
+ST ;
+ W !!
+ S DIR(0)="Y",DIR("A")="Do you want to run the report on a Patient Panel",DIR("B")="N" KILL DA D ^DIR KILL DIR
+ I $D(DIRUT) D XIT Q
+ I 'Y G DP
+ ;get search template name
+ W !!,"Please enter the search template name.  The template will contain a",!,"panel of patients defined by the user.",!
+ S DIC("S")="I $P(^(0),U,4)=2!($P(^(0),U,4)=9000001)" S DIC="^DIBT(",DIC("A")="Enter SEARCH TEMPLATE name: ",DIC(0)="AEMQ" D ^DIC K DIC,DA,DR,DICR
+ I Y=-1 G XIT
+ S BGPSEAT=+Y,BGPBEN=3
+DP ;
+ K DIR
+ S BGPDESGP=""
+ S DIR(0)="S^E:Entire Facility;P:One Designated Provider",DIR("A")="Run the report for",DIR("B")="E" KILL DA D ^DIR KILL DIR
+ I $D(DIRUT) G ST
+ I Y="E" G TP
+ W !!
+ S DIC("A")="Which Designated Provider: ",DIC="^VA(200,",DIC(0)="AEMQ" D ^DIC K DIC,DA
+ I X="^" D XIT Q
+ I Y=-1 W !!,"provider is required, use an '^' to exit." G DP
+ S BGPDESGP=+Y
+TP ;get time period
+ S BGPRTYPE=1,BGPYRPTH="",BGPYGPU=1
  ;
  S (BGPBD,BGPED,BGPTP)=""
  S DIR(0)="S^1:January 1 - December 31;2:April 1 - March 31;3:July 1 - June 30;4:October 1 - September 30;5:User-Defined Report Period",DIR("A")="Enter the date range for your report" KILL DA D ^DIR KILL DIR
@@ -34,7 +57,10 @@ TP ;get time period
  I BGPQTR=2 S BGPBD=($E(BGPPER,1,3)-1)_"0401",BGPED=$E(BGPPER,1,3)_"0331"
  I BGPQTR=3 S BGPBD=($E(BGPPER,1,3)-1)_"0701",BGPED=$E(BGPPER,1,3)_"0630"
  I BGPQTR=4 S BGPBD=($E(BGPPER,1,3)-1)_"1001",BGPED=$E(BGPPER,1,3)_"0930"
- I BGPQTR=5 S BGPBD=$$FMADD^XLFDT(BGPPER,-364),BGPED=BGPPER,BGPPER=$E(BGPED,1,3)_"0000"
+ I BGPQTR=5 D
+ .S D=$$FMADD^XLFDT(BGPPER,1)
+ .I $E(BGPPER,4,7)'=1231 S BGPBD=($E(BGPPER,1,3)-1)_$E(D,4,7),BGPED=BGPPER,BGPPER=$E(BGPED,1,3)_"0000"
+ .I $E(BGPPER,4,7)=1231 S BGPBD=$E(BGPPER,1,3)_$E(D,4,7),BGPED=BGPPER,BGPPER=$E(BGPED,1,3)_"0000"
  I BGPED>DT D  G:BGPDO=1 TP
  .W !!,"You have selected Current Report period ",$$FMTE^XLFDT(BGPBD)," through ",$$FMTE^XLFDT(BGPED),"."
  .W !,"The end date of this report is in the future; your data will not be",!,"complete.",!
@@ -44,9 +70,9 @@ TP ;get time period
  .Q
 BY ;get baseline year
  S BGPVDT=""
- W !!,"Enter the Baseline Year to compare data to.",!,"Use a 4 digit year, e.g. 1999, 2000"
+ W !!,"Enter the Baseline Year to compare data to.",!,"Use a 4 digit year, e.g. 2010"
  S DIR(0)="D^::EP"
- S DIR("A")="Enter Year (e.g. 2000)"
+ S DIR("A")="Enter Year (e.g. 2010)"
  D ^DIR KILL DIR
  I $D(DIRUT) G TP
  I $D(DUOUT) S DIRUT=1 G TP
@@ -64,16 +90,26 @@ BY ;get baseline year
  W !?5,"Baseline Period: ",?31,$$FMTE^XLFDT(BGPBBD)," to ",?31,$$FMTE^XLFDT(BGPBED)
  I BGPPBD=BGPBBD,BGPPED=BGPBED K Y D CHKY I Y K BGPBBD,BGPBED,BGPPBD,BGPPED G BY
 COMM ;
- W !!,"Specify the community taxonomy to determine which patients will be",!,"included in the report.  You should have created this taxonomy using QMAN.",!
+ I $G(BGPSEAT) G COMQ
+ ;W !!,"Specify the community taxonomy to determine which patients will be",!,"included in the report.  You should have created this taxonomy using QMAN.",!
  K BGPTAX
- S BGPTAXI=""
+ S BGPTAXI="",BGPCOMMI=""
  D ^XBFMK
+ K DIR
+ W ! S DIR(0)="Y",DIR("A")="Run Report for One Community",DIR("B")="N" KILL DA D ^DIR KILL DIR
+ I $D(DIRUT) G BY
+ I Y D  G:BGPCOMMI="" COMM  G:BGPCOMMI COMQ
+ .S DIC="^AUTTCOM(",DIC(0)="AEMQ",DIC("A")="Which Community: " D ^DIC K DIC
+ .I Y=-1 Q
+ .S BGPCOMMI=+Y
+ ;
  S DIC("S")="I $P(^(0),U,15)=9999999.05",DIC="^ATXAX(",DIC(0)="AEMQ",DIC("A")="Enter the Name of the Community Taxonomy: "
  S B=$P($G(^BGPSITE(DUZ(2),0)),U,5) I B S DIC("B")=$P(^ATXAX(B,0),U)
  D ^DIC
- I Y=-1 Q
+ I Y=-1 G COMM
  S BGPTAXI=+Y
-COM1 S X=0
+COM1 ;
+ S X=0
  F  S X=$O(^ATXAX(BGPTAXI,21,X)) Q:'X  D
  .S BGPTAX($P(^ATXAX(BGPTAXI,21,X,0),U))=""
  .Q
@@ -81,31 +117,27 @@ COM1 S X=0
  S X=0,G=0
  F  S X=$O(^ATXAX(BGPTAXI,21,X)) Q:'X  D
  .S C=$P(^ATXAX(BGPTAXI,21,X,0),U)
- .I '$D(^AUTTCOM("B",C)) W !!,"***  Warning: Community ",C," is in the taxonomy but does not",!,"exist in the community table.  Please recreate your community taxonomy." S G=1
+ .I '$D(^AUTTCOM("B",C)) W !!,"***  Warning: Community ",C," is in the taxonomy but was not",!,"found in the standard community table." S G=1
  .Q
- I G W !!,"The community taxonomy may not be accurate." D  I BGPQUIT D XIT Q
+ I G D  I BGPQUIT D XIT Q
+ .W !!,"These communities may have been renamed or there may be patients"
+ .W !,"who have been reassigned from this community to a new community and this"
+ .W !,"could reduce your patient population."
  .S BGPQUIT=0
- .S DIR(0)="Y",DIR("A")="Do you wish to continue running the report" KILL DA D ^DIR KILL DIR
+ .S DIR(0)="Y",DIR("A")="Do you want to cancel the report and review the communities" KILL DA D ^DIR KILL DIR
  .I $D(DIRUT) S BGPQUIT=1
- .I 'Y S BGPQUIT=1
+ .I Y S BGPQUIT=1
  .Q
-MFIC K BGPQUIT
- I $P($G(^BGPSITE(DUZ(2),0)),U,8)=1 D  I BGPMFITI="" G COMM
- .S BGPMFITI=""
- .W !!,"Specify the LOCATION taxonomy to determine which patient visits will be"
- .W !,"used to determine whether a patient is in the denominators for the report."
- .W !,"You should have created this taxonomy using QMAN.",!
- .K BGPMFIT
- .S BGPMFITI=""
- .D ^XBFMK
- .S DIC("S")="I $P(^(0),U,15)=9999999.06",DIC="^ATXAX(",DIC(0)="AEMQ",DIC("A")="Enter the Name of the Location/Facility Taxonomy: "
- .S B=$P($G(^BGPSITE(DUZ(2),0)),U,9) I B S DIC("B")=$P(^ATXAX(B,0),U)
- .D ^DIC
- .I Y=-1 Q
- .S BGPMFITI=+Y
+COMQ K BGPQUIT
+ ;
+ ;
 BEN ;
+ S X=0 F  S X=$O(^BGPINDR("GPRA",1,X)) Q:X'=+X  S BGPIND(X)=""
+ S BGPINDG="G"
+ I $G(BGPSEAT) G HOME
  S BGPBEN=""
- S DIR(0)="S^1:Indian/Alaskan Native (Classification 01);2:Not Indian Alaskan/Native (Not Classification 01);3:All (both Indian/Alaskan Natives and Non 01)",DIR("A")="Select Beneficiary Population to include in this report"
+ S DIR(0)="S^1:Indian/Alaskan Native (Classification 01);2:Not Indian Alaskan/Native (Not Classification 01);3:All (both Indian/Alaskan Natives and Non 01)"
+ S DIR("A")="Select Beneficiary Population to include in this report"
  S DIR("B")="1" KILL DA D ^DIR KILL DIR
  I $D(DIRUT) G COMM
  S BGPBEN=Y,BGPBENF=Y(0)
@@ -114,30 +146,37 @@ HOME ;
  I BGPHOME="" W !!,"Home Location not found in Site File!!",!,"PHN Visits counts to Home will be calculated using clinic 11 only!!" H 2 G AI
  W !,"Your HOME location is defined as: ",$P(^DIC(4,BGPHOME,0),U)," asufac:  ",$P(^AUTTLOC(BGPHOME,0),U,10)
 AI ;gather all gpra measures
- S X=0 F  S X=$O(^BGPINDE("GPRA",1,X)) Q:X'=+X  S BGPIND(X)=""
- S BGPINDT="G"
+ S X=0 F  S X=$O(^BGPINDR("GPRA",1,X)) Q:X'=+X  S BGPIND(X)=""
+ S BGPINDG="G"
 EXPORT ;export to area or not?
  S BGPEXPT=""
+ I $G(BGPDESGP) G EISSEX
+ I $D(BGPSEAT) G EISSEX
  W ! S DIR(0)="Y",DIR("A")="Do you wish to export this data to Area" KILL DA D ^DIR KILL DIR
  I $D(DIRUT) G BEN
  S BGPEXPT=Y
 EISSEX ;
  S BGPEXCEL=""
- S BGPUF=""
- I ^%ZOSF("OS")["PC"!(^%ZOSF("OS")["NT")!($P($G(^AUTTSITE(1,0)),U,21)=2) S BGPUF=$S($P($G(^AUTTSITE(1,1)),U,2)]"":$P(^AUTTSITE(1,1),U,2),1:"C:\EXPORT")
- I $P(^AUTTSITE(1,0),U,21)=1 S BGPUF="/usr/spool/uucppublic/"
+ S BGPUF=$$GETDIR^BGP8UTL2()
+ ;I ^%ZOSF("OS")["PC"!(^%ZOSF("OS")["NT")!($P($G(^AUTTSITE(1,0)),U,21)=2) S BGPUF=$S($P($G(^AUTTSITE(1,1)),U,2)]"":$P(^AUTTSITE(1,1),U,2),1:"C:\EXPORT")
+ ;I $P(^AUTTSITE(1,0),U,21)=1 S BGPUF="/usr/spool/uucppublic/"
+ I BGPEXPT,BGPUF="" W:'$D(ZTQUEUED) !!,"Cannot continue.....can't find export directory name. EXCEL file",!,"not written." D PAUSE^BGP8DU,XIT Q
 SUM ;display summary of this report
  W:$D(IOF) @IOF
- W !,$$CTR("SUMMARY OF IHS GPRA PERFORMANCE REPORT TO BE GENERATED")
+ W !,$$CTR("SUMMARY OF IHS GPRA/GPRAMA PERFORMANCE REPORT TO BE GENERATED")
  W !,$$CTR($$RPTVER^BGP8BAN,80)
  W !!,"The date ranges for this report are:"
  W !?5,"Report Period: ",?31,$$FMTE^XLFDT(BGPBD)," to ",?31,$$FMTE^XLFDT(BGPED)
  W !?5,"Previous Year Period: ",?31,$$FMTE^XLFDT(BGPPBD)," to ",?31,$$FMTE^XLFDT(BGPPED)
  W !?5,"Baseline Period: ",?31,$$FMTE^XLFDT(BGPBBD)," to ",?31,$$FMTE^XLFDT(BGPBED)
- W !!,"The COMMUNITY Taxonomy to be used is: ",$P(^ATXAX(BGPTAXI,0),U)
- W !,"The Beneficiary Population is: ",BGPBENF
+ I '$G(BGPSEAT),BGPTAXI W !!,"The COMMUNITY Taxonomy to be used is: ",$P(^ATXAX(BGPTAXI,0),U)
+ I '$G(BGPSEAT),BGPCOMMI W !!,"The COMMUNITY to be included is: ",$P(^AUTTCOM(BGPCOMMI,0),U)
+ I '$G(BGPSEAT) W !,"The Beneficiary Population is: ",BGPBENF
+ I $G(BGPSEAT) W !!,"The Patient Population is: ",$P(^DIBT(BGPSEAT,0),U,1)
  I BGPHOME W !,"The HOME location is: ",$P(^DIC(4,BGPHOME,0),U)," ",$P(^AUTTLOC(BGPHOME,0),U,10)
  I 'BGPHOME W !,"No HOME Location selected."
+ D TEXT^BGP8DSL
+ I $D(DIRUT) G BEN
  D PT^BGP8DSL
  I BGPROT="" G BEN
 ZIS ;call to XBDBQUE
@@ -145,18 +184,19 @@ ZIS ;call to XBDBQUE
  I $G(BGPQUIT) D XIT Q
  I BGPRPT="" D XIT Q
  I BGPEXPT D
- .W !!,"A file will be created called BG08",$P(^AUTTLOC(DUZ(2),0),U,10)_"."_BGPRPT," and will reside",!,"in the ",BGPUF," directory.",!
+ .W !!,"A file will be created called BG180",$P(^AUTTLOC(DUZ(2),0),U,10)_"."_BGPRPT," and will reside",!,"in the ",BGPUF," directory.",!
  .W !,"Depending on your site configuration, this file may need to be manually",!,"sent to your Area Office.",!
  I BGPEXCEL,BGPEXPT D
  .W !,"A file will be created called ",BGPFN,!,"and will reside in the ",BGPUF," directory. This file can be used in Excel.",!
  K IOP,%ZIS I BGPROT="D",BGPDELT="F" D NODEV,XIT Q
  K IOP,%ZIS W !! S %ZIS=$S(BGPDELT'="S":"PQM",1:"PM") D ^%ZIS
- I POP W !,"Report Aborted" S DA=BGPRPT,DIK="^BGPGPDCE(" D ^DIK K DIK D XIT Q
- I POP W !,"Report Aborted" S DA=BGPRPT,DIK="^BGPGPDPE(" D ^DIK K DIK D XIT Q
- I POP W !,"Report Aborted" S DA=BGPRPT,DIK="^BGPGPDBE(" D ^DIK K DIK D XIT Q
+ I POP W !,"Report Aborted" S DA=BGPRPT,DIK="^BGPGPDCR(" D ^DIK K DIK D XIT Q
+ I POP W !,"Report Aborted" S DA=BGPRPT,DIK="^BGPGPDPR(" D ^DIK K DIK D XIT Q
+ I POP W !,"Report Aborted" S DA=BGPRPT,DIK="^BGPGPDBR(" D ^DIK K DIK D XIT Q
  I $D(IO("Q")) G TSKMN
 DRIVER ;
- D ^BGP8D1
+ I '$D(BGPSEAT) D ^BGP8D1
+ I $D(BGPSEAT) D ^BGP8D10
  U IO
  D ^BGP8DP
  D ^%ZISC
@@ -170,7 +210,8 @@ NODEV ;
  Q
  ;
 NODEV1 ;
- D ^BGP8D1
+ I '$D(BGPSEAT) D ^BGP8D1
+ I $D(BGPSEAT) D ^BGP8D10
  D ^BGP8DP
  D ^%ZISC
  I BGPEXPT D GS^BGP8UTL
@@ -181,7 +222,7 @@ TSKMN ;EP ENTRY POINT FROM TASKMAN
  I $G(IO("DOC"))]"" S ZTIO=ZTIO_";"_$G(IO("DOC"))
  I $D(IOM)#2,IOM S ZTIO=ZTIO_";"_IOM I $D(IOSL)#2,IOSL S ZTIO=ZTIO_";"_IOSL
  K ZTSAVE S ZTSAVE("BGP*")=""
- S ZTCPU=$G(IOCPU),ZTRTN="DRIVER^BGP8DGPU",ZTDTH="",ZTDESC="NATIONAL GPRA REPORT 06" D ^%ZTLOAD D XIT Q
+ S ZTCPU=$G(IOCPU),ZTRTN="DRIVER^BGP8DGPU",ZTDTH="",ZTDESC="NATIONAL GPRA GPU REPORT 11" D ^%ZTLOAD D XIT Q
  Q
  ;
 XIT ;
@@ -223,7 +264,7 @@ CHKY ;
  Q
 F ;calendar year
  S (BGPPER,BGPVDT)=""
- W !!,"Enter the Calendar Year for the report END date.  Use a 4 digit",!,"year, e.g. 2008"
+ W !!,"Enter the Calendar Year for the report END date.  Use a 4 digit",!,"year, e.g. 2018"
  S DIR(0)="D^::EP"
  S DIR("A")="Enter Year"
  S DIR("?")="This report is compiled for a period.  Enter a valid date."
@@ -235,14 +276,14 @@ F ;calendar year
  S BGPPER=BGPVDT
  Q
 ENDDATE ;EP
- W !!,"When entering dates, if you do not enter a full 4 digit year (e.g. 2008)"
+ W !!,"When entering dates, if you do not enter a full 4 digit year (e.g. 2018)"
  W !,"will assume a year in the past, if you want to put in a future date,"
  W !,"remember to enter the full 4 digit year.  For example, if today is"
- W !,"January 4, 2008 and you type in 6/30/05 the system will assume the year"
- W !,"as 1905 since that is a date in the past.  You must type 6/30/2008 if you"
+ W !,"January 4, 2010 and you type in 6/30/05 the system will assume the year"
+ W !,"as 1905 since that is a date in the past.  You must type 6/30/2010 if you"
  W !,"want a date in the future."
  S (BGPPER,BGPVDT)=""
- W ! K DIR,X,Y S DIR(0)="D^::EP",DIR("A")="Enter End Date for the Report: (e.g. 11/30/2005)" D ^DIR K DIR S:$D(DUOUT) DIRUT=1
+ W ! K DIR,X,Y S DIR(0)="D^::EP",DIR("A")="Enter End Date for the Report: (e.g. 04/30/2007)" D ^DIR K DIR S:$D(DUOUT) DIRUT=1
  I $D(DIRUT) Q
  S (BGPPER,BGPVDT)=Y
  Q

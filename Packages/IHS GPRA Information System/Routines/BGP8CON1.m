@@ -1,5 +1,5 @@
-BGP8CON1 ; IHS/CMI/LAB - measure AHR.A ; 30 May 2008  9:32 AM
- ;;8.0;IHS CLINICAL REPORTING;**2**;MAR 12, 2008
+BGP8CON1 ;IHS/CMI/LAB - measure logic;
+ ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
  ;
  ;
 BETA ;EP - BETA BLOCKER CONTRAINDICATION/NMI REFUSAL
@@ -20,7 +20,7 @@ BETA ;EP - BETA BLOCKER CONTRAINDICATION/NMI REFUSAL
  I $P(BGPG,U)=1 Q 1_U_"Hypotension dx-Beta Blocker contraindication"  ;has hypotension dx
  S BGPG=$$LASTDX^BGP8UTL1(P,"BGP CMS 2/3 HEART BLOCK DXS",BDATE,EDATE)
  I $P(BGPG,U)=1 Q 1_U_"heart blk dx-Beta Blocker contraindication"  ;has heart block dx
- S BGPG=$$LASTDXI^BGP8UTL1(P,"427.81",BDATE,EDATE)
+ S BGPG=$$LASTDX^BGP8UTL1(P,"BGP SINUS BRADYCARDIA DXS",BDATE,EDATE)
  I $P(BGPG,U)=1 Q 1_U_"sinus bradycardia-Beta Blocker contraindication"
  K BGPG,BGPD
  S X=P_"^ALL DX [BGP COPD DXS BB CONT;DURING "_$$FMTE^XLFDT(BDATE)_"-"_$$FMTE^XLFDT(EDATE) S E=$$START1^APCLDF(X,"BGPG(")
@@ -42,11 +42,15 @@ BETA ;EP - BETA BLOCKER CONTRAINDICATION/NMI REFUSAL
  ..Q
  .Q
  I G Q G
- ;now cpt 8011 BETWEEN NMIB,NMIE
+ ;now cpt 8011 OR G9190 BETWEEN NMIB,NMIE
  S X=$$CPTI^BGP8DU(P,NMIB,NMIE,+$$CODEN^ICPTCOD("G8011"))
- I X Q "1^Beta Blocker contra CPT code G8011: "_$$DATE^BGP8UTL($P(X,U,2))
+ I X Q "1^Beta Blocker Contra CPT code G8011: "_$$DATE^BGP8UTL($P(X,U,2))
  S X=$$TRANI^BGP8DU(P,NMIB,NMIE,+$$CODEN^ICPTCOD("G8011"))
- I X Q "1^Beta Blocker contra TRAN code G8011: "_$$DATE^BGP8UTL($P(X,U,2))
+ I X Q "1^Beta Blocker Contra TRAN code G8011: "_$$DATE^BGP8UTL($P(X,U,2))
+ S X=$$CPTI^BGP8DU(P,NMIB,NMIE,+$$CODEN^ICPTCOD("G9190"))
+ I X Q "1^Beta Blocker Contra CPT code G9190: "_$$DATE^BGP8UTL($P(X,U,2))
+ S X=$$TRANI^BGP8DU(P,NMIB,NMIE,+$$CODEN^ICPTCOD("G9190"))
+ I X Q "1^Beta Blocker Contra TRAN code G9190: "_$$DATE^BGP8UTL($P(X,U,2))
  Q ""
  ;
 ASA ;EP - ASA CONTRAINDICATIONS
@@ -62,7 +66,7 @@ ASA ;EP - ASA CONTRAINDICATIONS
  K BGPMEDS1
  S K=0,R="",BGPG=""
  D GETMEDS^BGP8UTL2(P,BDATE,EDATE,,,,,.BGPMEDS1)
- I '$D(BGPMEDS1) Q ""
+ I '$D(BGPMEDS1) G HEM
  S T=$O(^ATXAX("B","BGP CMS WARFARIN MEDS",0))
  S X=0 F  S X=$O(BGPMEDS1(X)) Q:X'=+X!(BGPG)  S Y=+$P(BGPMEDS1(X),U,4) D
  .Q:'$D(^AUPNVMED(Y,0))
@@ -79,12 +83,14 @@ WAR71 .;
  .Q:'$D(^AUPNVSIT(V,0))
  .;S IS DAYS SUPPLY, J IS DATE DISCONTINUED
  .I J]"" Q:J<BDATE  ;discontinued before beginning date
- I BGPG Q 1_U_"asa contra warfarin rx "_$P(BGPG,U,2)_" "_$P(BGPG,U,3)
- ;now check for dx 459
- K BGPG S BGPG=$$LASTDXI^BGP8UTL1(P,"459.0",$$DOB^AUPNPAT(P),EDATE)
- I BGPG Q 1_U_"asa contra 459.0 "_$$DATE^BGP8UTL($P(BGPG,U,3))
+ I BGPG Q 1_U_"asa Contra warfarin rx "_$P(BGPG,U,2)_" "_$P(BGPG,U,3)
+HEM ;now check for dx 459
+ K BGPG S BGPG=$$LASTDX^BGP8UTL1(P,"BGP HEMORRHAGE DXS",$$DOB^AUPNPAT(P),EDATE)
+ I BGPG Q 1_U_"asa Contra "_$P(BGPG,U,2)_" "_$$DATE^BGP8UTL($P(BGPG,U,3))
+ S X=$$PLTAXND^BGP8DU(P,"BGP HEMORRHAGE DXS",EDATE) I X Q 1_U_"ASA Contra "_$P(X,U,2)_" "_$$DATE^BGP8UTL($P(X,U,3))   ;V17
+ S X=$$IPLSNOND^BGP8DU(P,"PXRM BGP HEMORRHAGE",EDATE) I X Q 1_U_"ASA Contra "_$P(X,U,2)_" "_$$DATE^BGP8UTL($P(X,U,3))_U_$P(X,U,2)   ;V17
  ;
- ;nmi in refusal file for aspirin
+ ;nmi in Refusal file for aspirin
  S BGPG=""
  S T=$O(^ATXAX("B","DM AUDIT ASPIRIN DRUGS",0))
  S X=0 F  S X=$O(^AUPNPREF("AA",P,50,X)) Q:X'=+X  D
@@ -94,18 +100,18 @@ WAR71 .;
  ..I Y>NMIE Q  ;after date
  ..S N=0 F  S N=$O(^AUPNPREF("AA",P,50,X,D,N)) Q:N'=+N  D
  ...Q:$P($G(^AUPNPREF(N,0)),U,7)'="N"
- ...S BGPG=1_U_"asa contra NMI Aspirin:  "_$$VAL^XBDIQ1(9000022,N,.04)_" "_$$DATE^BGP8UTL($P(^AUPNPREF(N,0),U,3))_" "_$$VAL^XBDIQ1(9000022,X,1101)
+ ...S BGPG=1_U_"asa Contra NMI Aspirin:  "_$$VAL^XBDIQ1(9000022,N,.04)_" "_$$DATE^BGP8UTL($P(^AUPNPREF(N,0),U,3))_" "_$$VAL^XBDIQ1(9000022,X,1101)
  ..Q
  .Q
  I BGPG Q BGPG
  ;now check for CPT code G8008
  S X=$$CPTI^BGP8DU(P,NMIB,NMIE,+$$CODEN^ICPTCOD("G8008"))
- I X Q 1_U_"asa contra CPT code G8008: "_$$DATE^BGP8UTL($P(X,U,2))
+ I X Q 1_U_"asa Contra CPT code G8008: "_$$DATE^BGP8UTL($P(X,U,2))
  S X=$$TRANI^BGP8DU(P,NMIB,NMIE,+$$CODEN^ICPTCOD("G8008"))
- I X Q 1_U_"asa contra Tran Code G8008: "_$$DATE^BGP8UTL($P(X,U,2))
+ I X Q 1_U_"asa Contra Tran Code G8008: "_$$DATE^BGP8UTL($P(X,U,2))
  Q ""
  ;
-ACEI ;EP does patient have an ACEI contraidication
+ACEI ;EP does patient have an ACEI Contraidication
  I $G(BDATE)="" S BDATE=$$DOB^AUPNPAT(P)
  I $G(EDATE)="" S EDATE=DT
  S NMIB=$G(NMIB)
@@ -115,9 +121,11 @@ ACEI ;EP does patient have an ACEI contraidication
  ;
  NEW BGPG,BGPC,X,Y,Z,N,E
  K BGPG S Y="BGPG(",X=P_"^LAST DX [BGP CMS AORTIC STENOSIS DXS;DURING "_$$FMTE^XLFDT(BDATE)_"-"_$$FMTE^XLFDT(EDATE) S E=$$START1^APCLDF(X,Y)
- I $D(BGPG(1)) Q 1_U_"ACEI contra POV:  "_$$DATE^BGP8UTL($P(BGPG(1),U))_" ["_$P(BGPG(1),U,2)_"]    "_$$VAL^XBDIQ1(9000010.07,+$P(BGPG(1),U,4),.04)
+ I $D(BGPG(1)) Q 1_U_"ACEI Contra POV:  "_$$DATE^BGP8UTL($P(BGPG(1),U))_" ["_$P(BGPG(1),U,2)_"]    "_$$VAL^XBDIQ1(9000010.07,+$P(BGPG(1),U,4),.04)
+ S X=$$PLTAXND^BGP8DU(P,"BGP CMS AORTIC STENOSIS DXS",EDATE) I X Q 1_U_"ACEI Contra PL: "_$$DATE^BGP8UTL($P(X,U,3))_" ["_$P(X,U,2)_"]"  ;V17
+ S X=$$IPLSNOND^BGP8DU(P,"PXRM BGP MOD SEV AORTIC STEN",EDATE) I X Q 1_U_"ACEI Contra PL: "_$$DATE^BGP8UTL($P(X,U,3))_" ["_$P(X,U,2)_"]"  ;V17   ;V17
  ;
- ;nmi in refusal file for ACEI
+ ;nmi in Refusal file for ACEI
  S BGPG=""
  S T=$O(^ATXAX("B","BGP HEDIS ACEI MEDS",0))
  S X=0 F  S X=$O(^AUPNPREF("AA",P,50,X)) Q:X'=+X  D
@@ -131,7 +139,7 @@ ACEI ;EP does patient have an ACEI contraidication
  ..Q
  .Q
  I BGPG Q BGPG
- ;nmi in refusal file for ACEI
+ ;nmi in Refusal file for ACEI
  S BGPG=""
  S T=$O(^ATXAX("B","BGP HEDIS ARB MEDS",0))
  S X=0 F  S X=$O(^AUPNPREF("AA",P,50,X)) Q:X'=+X  D
@@ -147,7 +155,7 @@ ACEI ;EP does patient have an ACEI contraidication
  I BGPG Q BGPG
  Q ""
  ;
-STATIN ;EP does patient have an STATIN contraidication
+STATIN ;EP does patient have an STATIN Contraidication
  I $G(BDATE)="" S BDATE=$$DOB^AUPNPAT(P)
  I $G(EDATE)="" S EDATE=DT
  S NMIB=$G(NMIB)
@@ -155,11 +163,11 @@ STATIN ;EP does patient have an STATIN contraidication
  I NMIE="" S NMIE=DT
  I NMIB="" S NMIB=$$FMADD^XLFDT($S(NMIE]"":NMIE,1:DT),-365)
  ;
- NEW ED,BD,BGPG,BGPC,X,Y,Z,N,E,T
+ NEW ED,BD,BGPG,BGPC,X,Y,Z,N,E,T,SN,D
  ;
  ;pregnant
- S X=$$PREG^BGP8D7(P,BDATE,EDATE) I X Q 1_U_"contra statin - pregnant"
- ;nmi in refusal file for STATI
+ S X=$$PREG^BGP8D7(P,BDATE,EDATE,0,1,,$G(BGPBDATE),$G(BGPEDATE)) I X Q 1_U_"Contra pregnant"  ;V18.0 CMI/LAB ADDED DATES FOR CURRENTLY PREGNANT
+ ;nmi in Refusal file for STATI
  S BGPG=""
  S T=$O(^ATXAX("B","BGP HEDIS STATIN MEDS",0))
  S X=0 F  S X=$O(^AUPNPREF("AA",P,50,X)) Q:X'=+X  D
@@ -174,12 +182,13 @@ STATIN ;EP does patient have an STATIN contraidication
  .Q
  I BGPG Q BGPG
  ;breastfeeding
- K BGPG S Y="BGPG(",X=P_"^LAST DX V24.1;DURING "_$$FMTE^XLFDT(BDATE)_"-"_$$FMTE^XLFDT(EDATE) S E=$$START1^APCLDF(X,Y)
- I $D(BGPG(1)) Q 1_U_"STATIN contra POV:  "_$$DATE^BGP8UTL($P(BGPG(1),U))_" ["_$P(BGPG(1),U,2)_"]    "_$$VAL^XBDIQ1(9000010.07,+$P(BGPG(1),U,4),.04)
+ K BGPG S Y="BGPG(",X=P_"^LAST DX [BGP BREASTFEEDING DXS;DURING "_$$FMTE^XLFDT(BDATE)_"-"_$$FMTE^XLFDT(EDATE) S E=$$START1^APCLDF(X,Y)
+ I $D(BGPG(1)) Q 1_U_"STATIN Contra POV:  "_$$DATE^BGP8UTL($P(BGPG(1),U))_" ["_$P(BGPG(1),U,2)_"]    "_$$VAL^XBDIQ1(9000010.07,+$P(BGPG(1),U,4),.04)
  ;now check education
  K BGPG
  S Y="BGPG("
  S X=P_"^ALL EDUC;DURING "_$$FMTE^XLFDT(BDATE)_"-"_$$FMTE^XLFDT(EDATE) S E=$$START1^APCLDF(X,Y)
+ S SN=$O(^BGPSNOMR("B","BREASTFEEDING PATIENT ED",0))
  S (X,D)=0,%="",T="" F  S X=$O(BGPG(X)) Q:X'=+X!(%]"")  D
  .S T=$P(^AUPNVPED(+$P(BGPG(X),U,4),0),U)
  .Q:'T
@@ -195,9 +204,11 @@ STATIN ;EP does patient have an STATIN contraidication
  .I T="BF-M" S %=T_" "_$$DATE^BGP8UTL($P(BGPG(X),U)) Q
  .I T="BF-MK" S %=T_" "_$$DATE^BGP8UTL($P(BGPG(X),U)) Q
  .I T="BF-N" S %=T_" "_$$DATE^BGP8UTL($P(BGPG(X),U)) Q
- .;I $P(T,"-")="V24.1" S %=T_U_$P(BGPG(X),U) Q
- I %]"" Q 1_U_"Statin contra - "_%
+ .I $P(T,"-")]"",$D(^BGPSNOMR(SN,11,"B",$P(T,"-"))) S %=T_" "_$$DATE^BGP8UTL($P(BGPG(X),U)) Q
+ I %]"" Q 1_U_"Statin Contra "_%
  ;NOW CHECK ALCOHOL HEPATITIS
- K BGPG S Y="BGPG(",X=P_"^LAST DX 571.1;DURING "_$$FMTE^XLFDT(BDATE)_"-"_$$FMTE^XLFDT(EDATE) S E=$$START1^APCLDF(X,Y)
- I $D(BGPG(1)) Q 1_U_"STATIN contra POV:  "_$$DATE^BGP8UTL($P(BGPG(1),U))_" ["_$P(BGPG(1),U,2)_"]  "_$$VAL^XBDIQ1(9000010.07,+$P(BGPG(1),U,4),.04)
+ K BGPG S Y="BGPG(",X=P_"^LAST DX [BGP ALCOHOL HEPATITIS DXS;DURING "_$$FMTE^XLFDT(BDATE)_"-"_$$FMTE^XLFDT(EDATE) S E=$$START1^APCLDF(X,Y)
+ I $D(BGPG(1)) Q 1_U_"STATIN Contra POV:  "_$$DATE^BGP8UTL($P(BGPG(1),U))_" ["_$P(BGPG(1),U,2)_"]  "_$$VAL^XBDIQ1(9000010.07,+$P(BGPG(1),U,4),.04)
+ S X=$$PLTAXND^BGP8DU(P,"BGP ALCOHOL HEPATITIS DXS",EDATE) I X Q 1_U_"STATIN Contra PL: "_$$DATE^BGP8UTL($P(X,U,3))_"["_$P(X,U,2)_"]"  ;V17
+ S X=$$IPLSNOND^BGP8DU(P,"PXRM BGP ACUTE ETOH HEPATITIS",EDATE) I X Q 1_U_"STATIN Contra PL: "_$$DATE^BGP8UTL($P(X,U,3))_"["_$P(X,U,2)_"]"  ;V17
  Q ""

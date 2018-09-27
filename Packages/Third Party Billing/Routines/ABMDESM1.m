@@ -1,33 +1,25 @@
 ABMDESM1 ; IHS/SD/SDR - Display Summarized Claim Info ; 
- ;;2.6;IHS Third Party Billing;**1,6,8,11,13,14**;NOV 12, 2009;Build 238
+ ;;2.6;IHS Third Party Billing;**1,6,8,11,13,14,23**;NOV 12, 2009;Build 427
  ;
- ; IHS/SD/SDR - V2.5 P2 - 5/9/02 - NOIS HQW-0302-100190
- ;     Modified to display 2nd and 3rd modifiers and units
- ; IHS/SD/SDR - v2.5 p5 - 5/18/04 - Modified to put POS and TOS by line item
- ; IHS/SD/EFG - V2.5 P8 - IM16385
- ;    Added code for misc services if dental visit type
- ; IHS/SD/SDR - V2.5 P8 - IM10618/IM11164
- ;    Prompt/display provider
- ; IHS/SD/SDR - v2.5 p8 - task 6
- ;   Modified to check for ambulance services
- ; IHS/SD/SDR - v2.5 p9 - task 1
- ;    Use new service line provider multiple
- ; IHS/SD/SDR - v2.5 p9 - IM19707
- ;    Make sure ABMP("CLN") is defined before using
- ; IHS/SD/SDR - v2.5 p10 - IM19843
- ;    Added SERVICE TO DATE/TIME
- ; IHS/SD/SDR - v2.5 p11 - NPI
- ; IHS/SD/SDR - v2.5 p12 - IM25331
- ;   Made change to print Taxonomy if NPI ONLY
- ; IHS/SD/SDR,AML - v2.5 p13 - IM25899
- ;   Alignment changes
+ ; IHS/SD/SDR V2.5 P2 5/9/02 - NOIS HQW-0302-100190 Modified to display 2nd and 3rd modifiers and units
+ ; IHS/SD/SDR v2.5 p5 5/18/04 Modified to put POS and TOS by line item
+ ; IHS/SD/EFG V2.5 P8 IM16385 Added code for misc services if dental visit type
+ ; IHS/SD/SDR V2.5 P8 IM10618/IM11164 Prompt/display provider
+ ; IHS/SD/SDR v2.5 p8 task 6 Modified to check for ambulance services
+ ; IHS/SD/SDR v2.5 p9 task 1 Use new service line provider multiple
+ ; IHS/SD/SDR v2.5 p9 IM19707 Make sure ABMP("CLN") is defined before using
+ ; IHS/SD/SDR v2.5 p10 IM19843 Added SERVICE TO DATE/TIME
+ ; IHS/SD/SDR v2.5 p11 NPI
+ ; IHS/SD/SDR v2.5 p12 IM25331 Made change to print Taxonomy if NPI ONLY
+ ; IHS/SD/SDR,AML v2.5 p13 IM25899 Alignment changes
  ;
- ;IHS/SD/SDR - v2.6 CSV
- ;IHS/SD/SDR - abm*2.6*1 - HEAT7884 - display if visit type 731
- ;IHS/SD/SDR - abm*2.6*6 - HEAT28973 - if 55 modifier present use '1' for units when calculating charges
- ;IHS/SD/SDR - abm*2.6*6 - NOHEAT - Swing bed changes
- ;IHS/SD/SDR - 2.6*13 - Added check for new export mode 35
- ;IHS/SD/SDR - 2.6*14 - HEAT161263 - Changed to use $$GET^DIQ so output transform will execute for SNOMED/Provider Narrative
+ ;IHS/SD/SDR v2.6 CSV
+ ;IHS/SD/SDR 2.6*1 HEAT7884 display if visit type 731
+ ;IHS/SD/SDR 2.6*6 HEAT28973 if 55 modifier present use '1' for units when calculating charges
+ ;IHS/SD/SDR 2.6*6 NOHEAT Swing bed changes
+ ;IHS/SD/SDR 2.6*13 Added check for new export mode 35
+ ;IHS/SD/SDR 2.6*14 HEAT161263 Changed to use $$GET^DIQ so output transform will execute for SNOMED/Provider Narrative
+ ;IHS/SD/AML 2.6*23 HEAT247169 Gather line items from 8D and 8H if visit type is 997
  ;
  K ABMS
  ;
@@ -64,7 +56,8 @@ ABMDESM1 ; IHS/SD/SDR - Display Summarized Claim Info ;
  I ABMP("PAGE")'[8 G XIT
 ITEM ;itemized
  I ABMP("VTYP")=998 D ^ABMDESMD,^ABMDESMU,^ABMDESMX,^ABMDESML,^ABMDESMR,ER G XIT
- I ABMP("VTYP")=997 D ^ABMDESMR G XIT
+ ;I ABMP("VTYP")=997 D ^ABMDESMR G XIT  ;abm*2.6*23 IHS/SD/AML HEAT247169
+ I ABMP("VTYP")=997 D ^ABMDESMR,MISC^ABMDESMU G XIT  ;abm*2.6*23 IHS/SD/AML HEAT247169
  I ABMP("VTYP")=996 D ^ABMDESML G XIT
  I ABMP("VTYP")=995 D ^ABMDESMX G XIT
  I $G(ABMP("CLN"))'="",($P($G(^DIC(40.7,ABMP("CLN"),0)),U,2)="A3") D MISC^ABMDESMU,AMB^ABMDESMB G XIT

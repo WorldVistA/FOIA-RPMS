@@ -1,5 +1,5 @@
 APCDEH1 ; IHS/CMI/LAB - UPDATE VISIT W/LIST MAN ;
- ;;2.0;IHS PCC SUITE;**17**;MAY 14, 2009;Build 18
+ ;;2.0;IHS PCC SUITE;**17,20**;MAY 14, 2009;Build 25
  ;
  ;
  ;
@@ -107,7 +107,7 @@ DELPROC ;
  .S APCDMNE=APCDCRIT,APCDMNE("NAME")=$P(^APCDTKW(APCDCRIT,0),U,1)
  .S APCDMODE="M",APCDVLK=$G(APCDVSIT) ;IHS/CMI/LAB - added $G
  .K APCDMOD
- .W !!,"Deleteing ",APCDTEXT,!,"After you select the ",APCDTEXT," that you want to delete, ",!,"you MUST enter an '@' to confirm the desire to delete the item.",!
+ .W !!,"Deleting ",APCDTEXT,!,"After you select the ",APCDTEXT," that you want to delete, ",!,"you MUST enter an '@' to confirm the desire to delete the item.",!
  .D ^APCDEA3
  .Q
  Q

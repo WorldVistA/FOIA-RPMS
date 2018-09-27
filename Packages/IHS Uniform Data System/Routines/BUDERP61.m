@@ -1,0 +1,149 @@
+BUDERP61 ; IHS/CMI/LAB - UDS REPORT PROCESSOR ;
+ ;;12.0;IHS/RPMS UNIFORM DATA SYSTEM;;NOV 22, 2017;Build 75
+ ;
+ ;
+DSLIST1 ;EP
+ D EOJ
+ S BUDDS1L=1
+ D DS1
+ G EN1^BUDERP6B
+DSLIST2 ;EP
+ D EOJ
+ S BUDDS2L=1
+ D DS2
+ G EN1^BUDERP6B
+DS1 ;EP
+ D IN6B^BUDEDU("DS1L")
+ Q
+DS1L ;EP
+ S BUDP=0,BUDQUIT=0,BUDTOT=0
+ D DS1H Q:BUDQUIT
+ I '$D(^XTMP("BUDERP6B",BUDJ,BUDH,"DS1")) W:BUDROT="P" !!,"No patients to report." D:BUDROT="D" S() D:BUDROT="D" S("No patients to report.") Q
+ D DS1L1
+ I BUDROT="P",$Y>(IOSL-3) D DS1H Q:BUDQUIT
+ I BUDROT="P" W !,"TOTAL PATIENTS WITH SEALANT:  ",BUDTOT,!
+ I BUDROT="D" D S(),S("TOTAL PATIENTS WITH SEALANT:  "_BUDTOT)
+ Q
+DS1L1 ;
+ I BUDROT="P",$Y>(IOSL-7) D DS1H Q:BUDQUIT
+ S BUDAGE="" F  S BUDAGE=$O(^XTMP("BUDERP6B",BUDJ,BUDH,"DS1",BUDAGE)) Q:BUDAGE=""!(BUDQUIT)  D
+ .S BUDNAME="" F  S BUDNAME=$O(^XTMP("BUDERP6B",BUDJ,BUDH,"DS1",BUDAGE,BUDNAME)) Q:BUDNAME=""!(BUDQUIT)  D
+ ..S BUDCCOM="" F  S BUDCCOM=$O(^XTMP("BUDERP6B",BUDJ,BUDH,"DS1",BUDAGE,BUDNAME,BUDCCOM)) Q:BUDCCOM=""!(BUDQUIT)  D
+ ...S DFN=0 F  S DFN=$O(^XTMP("BUDERP6B",BUDJ,BUDH,"DS1",BUDAGE,BUDNAME,BUDCCOM,DFN)) Q:DFN'=+DFN!(BUDQUIT)  D
+ ....I BUDROT="P",$Y>(IOSL-3) D DS1H Q:BUDQUIT
+ ....I BUDROT="P" W !,$E($P(^DPT(DFN,0),U,1),1,25),?29,$S($$HRN^AUPNPAT(DFN,BUDSITE)]"":$$HRN^AUPNPAT(DFN,BUDSITE,2),1:$$HRN^AUPNPAT(DFN,DUZ(2),2)),?41,$E(BUDCCOM,1,25),?70,$P(^DPT(DFN,0),U,2),?75,BUDAGE,!
+ ....S BUDTOT=BUDTOT+1
+ ....S BUDALL=^XTMP("BUDERP6B",BUDJ,BUDH,"DS1",BUDAGE,BUDNAME,BUDCCOM,DFN)
+ ....I BUDROT="P" W ?2,$P(BUDALL,U,2),?30,$P(BUDALL,U,3),?50,$P(BUDALL,U,4)
+ ....I BUDROT="D" S X=$P(^DPT(DFN,0),U,1)_U_$S($$HRN^AUPNPAT(DFN,BUDSITE)]"":$$HRN^AUPNPAT(DFN,BUDSITE,2),1:$$HRN^AUPNPAT(DFN,DUZ(2),2))_U_BUDCCOM_U_$P(^DPT(DFN,0),U,2)_U_$$AGE^AUPNPAT(DFN,BUDCCAD) D
+ .....S X=X_U_$P(BUDALL,U,2)_U_$P(BUDALL,U,3)_U_$P(BUDALL,U,4) D S(X)
+ Q
+DS1HD ;
+ D S(),S(),S()
+ D S("***** CONFIDENTIAL PATIENT INFORMATION, COVERED BY THE PRIVACY ACT *****")
+ D S($P(^VA(200,DUZ,0),U,2)_"    "_$$FMTE^XLFDT(DT))
+ D S("***  RPMS Uniform Data System (UDS)  ***")
+ D S("Patient List for Table 6B, Section N, With Dental Sealants")
+ D S($P(^DIC(4,BUDSITE,0),U))
+ S X="Reporting Period: "_$$FMTE^XLFDT(BUDBD)_" to "_$$FMTE^XLFDT(BUDED) D S(X)
+ S X="Population:  "_$S($G(BUDDEN)=1:"Indian/Alaskan Native (Classification 01)",$G(BUDDEN)=2:"Not Indian Alaskan/Native (Not Classification 01)",$G(BUDDEN)=3:"All (both Indian/Alaskan Natives and Non 01)",1:"") D S(X)
+ D HT6B^BUDEDU("DS1L")
+ D S("PATIENT NAME^HRN^COMMUNITY^SEX^AGE^ORAL ASSESSMENT^RISK^SEALANT and DATE")
+ Q
+DS1H ;
+ I BUDROT="D" D DS1HD Q
+ G:'BUDGPG DS1H1
+ K DIR I $E(IOST)="C",IO=IO(0),'$D(ZTQUEUED) W ! S DIR(0)="EO" D ^DIR K DIR I Y=0!(Y="^")!($D(DTOUT)) S BUDQUIT=1 Q
+DS1H1 ;
+ W:$D(IOF) @IOF S BUDGPG=BUDGPG+1
+ W !,"***** CONFIDENTIAL PATIENT INFORMATION, COVERED BY THE PRIVACY ACT *****"
+ W !?3,$P(^VA(200,DUZ,0),U,2),?35,$$FMTE^XLFDT(DT),?70,"Page ",BUDGPG,!
+ W !,$$CTR("***  RPMS Uniform Data System (UDS)  ***",80)
+ W !,$$CTR("Patient List for Table 6B, Section N, With Dental Sealants,",80)
+ W $$CTR($P(^DIC(4,BUDSITE,0),U),80),!
+ S X="Reporting Period: "_$$FMTE^XLFDT(BUDBD)_" to "_$$FMTE^XLFDT(BUDED) W $$CTR(X,80),!
+ S X="Population:  "_$S($G(BUDDEN)=1:"Indian/Alaskan Native (Classification 01)",$G(BUDDEN)=2:"Not Indian Alaskan/Native (Not Classification 01)",$G(BUDDEN)=3:"All (both Indian/Alaskan Natives and Non 01)",1:"") W $$CTR(X,80),!
+ W $TR($J("",80)," ","-")
+ I BUDP=0 D
+ .D HT6B^BUDEDU("DS1L")
+ W !!,"PATIENT NAME",?34,"HRN",?41,"COMMUNITY",?70,"SEX",?75,"AGE"
+ W !?2,"Oral Assess and Date",?30,"Risk",?50,"Sealant and Date"
+ W !,$TR($J("",80)," ","-"),!
+ S BUDP=1
+ Q
+DS2 ;EP
+ D IN6B^BUDEDU("DS2L")
+ Q
+DS2L ;EP
+ S BUDP=0,BUDQUIT=0,BUDTOT=0
+ D DS2H Q:BUDQUIT
+ I '$D(^XTMP("BUDERP6B",BUDJ,BUDH,"DS2")) W:BUDROT="P" !!,"No patients to report." D:BUDROT="D" S() D:BUDROT="D" S("No patients to report.") Q
+ D DS2L1
+ I BUDROT="P",$Y>(IOSL-3) D DS2H Q:BUDQUIT
+ I BUDROT="P" W !,"TOTAL PATIENTS AT RISK W/O SEALANT:  ",BUDTOT,!
+ I BUDROT="D" D S(),S("TOTAL PATIENTS AT RISK W/O SEALANT  "_BUDTOT)
+ Q
+DS2L1 ;
+ I BUDROT="P",$Y>(IOSL-7) D DS2H Q:BUDQUIT
+ S BUDAGE="" F  S BUDAGE=$O(^XTMP("BUDERP6B",BUDJ,BUDH,"DS2",BUDAGE)) Q:BUDAGE=""!(BUDQUIT)  D
+ .S BUDNAME="" F  S BUDNAME=$O(^XTMP("BUDERP6B",BUDJ,BUDH,"DS2",BUDAGE,BUDNAME)) Q:BUDNAME=""!(BUDQUIT)  D
+ ..S BUDCCOM="" F  S BUDCCOM=$O(^XTMP("BUDERP6B",BUDJ,BUDH,"DS2",BUDAGE,BUDNAME,BUDCCOM)) Q:BUDCCOM=""!(BUDQUIT)  D
+ ...S DFN=0 F  S DFN=$O(^XTMP("BUDERP6B",BUDJ,BUDH,"DS2",BUDAGE,BUDNAME,BUDCCOM,DFN)) Q:DFN'=+DFN!(BUDQUIT)  D
+ ....I BUDROT="P",$Y>(IOSL-3) D DS2H Q:BUDQUIT
+ ....I BUDROT="P" W !,$E($P(^DPT(DFN,0),U,1),1,25),?29,$S($$HRN^AUPNPAT(DFN,BUDSITE)]"":$$HRN^AUPNPAT(DFN,BUDSITE,2),1:$$HRN^AUPNPAT(DFN,DUZ(2),2)),?41,$E(BUDCCOM,1,25),?70,$P(^DPT(DFN,0),U,2),?75,BUDAGE,!
+ ....S BUDTOT=BUDTOT+1
+ ....S BUDALL=^XTMP("BUDERP6B",BUDJ,BUDH,"DS2",BUDAGE,BUDNAME,BUDCCOM,DFN)
+ ....W ?2,$P(BUDALL,U,2),?30,$P(BUDALL,U,3),?50,$P(BUDALL,U,4)
+ ....I BUDROT="D" S X=$P(^DPT(DFN,0),U,1)_U_$S($$HRN^AUPNPAT(DFN,BUDSITE)]"":$$HRN^AUPNPAT(DFN,BUDSITE,2),1:$$HRN^AUPNPAT(DFN,DUZ(2),2))_U_BUDCCOM_U_$P(^DPT(DFN,0),U,2)_U_$$AGE^AUPNPAT(DFN,BUDCCAD) D
+ .....S X=X_U_$P(BUDALL,U,2)_U_$P(BUDALL,U,3)_U_$P(BUDALL,U,4) D S(X)
+ Q
+DS2HD ;
+ D S(),S(),S()
+ D S("***** CONFIDENTIAL PATIENT INFORMATION, COVERED BY THE PRIVACY ACT *****")
+ D S($P(^VA(200,DUZ,0),U,2)_"    "_$$FMTE^XLFDT(DT))
+ D S("***  RPMS Uniform Data System (UDS)  ***")
+ D S("Patient List for Table 6B, Section N, Without Dental Sealants")
+ ;D S("Patients 6-9 at Risk without dental sealant on first molar")
+ D S($P(^DIC(4,BUDSITE,0),U))
+ S X="Reporting Period: "_$$FMTE^XLFDT(BUDBD)_" to "_$$FMTE^XLFDT(BUDED) D S(X)
+ S X="Population:  "_$S($G(BUDDEN)=1:"Indian/Alaskan Native (Classification 01)",$G(BUDDEN)=2:"Not Indian Alaskan/Native (Not Classification 01)",$G(BUDDEN)=3:"All (both Indian/Alaskan Natives and Non 01)",1:"") D S(X)
+ D HT6B^BUDEDU("DS2L")
+ D S("PATIENT NAME^HRN^COMMUNITY^SEX^AGE^ASSESSMENT AND DATE^RISK^")
+ Q
+DS2H ;
+ I BUDROT="D" D DS2HD Q
+ G:'BUDGPG DS2H1
+ K DIR I $E(IOST)="C",IO=IO(0),'$D(ZTQUEUED) W ! S DIR(0)="EO" D ^DIR K DIR I Y=0!(Y="^")!($D(DTOUT)) S BUDQUIT=1 Q
+DS2H1 ;
+ W:$D(IOF) @IOF S BUDGPG=BUDGPG+1
+ W !,"***** CONFIDENTIAL PATIENT INFORMATION, COVERED BY THE PRIVACY ACT *****"
+ W !?3,$P(^VA(200,DUZ,0),U,2),?35,$$FMTE^XLFDT(DT),?70,"Page ",BUDGPG,!
+ W !,$$CTR("***  RPMS Uniform Data System (UDS)  ***",80)
+ W !,$$CTR("Patient List for Table 6B, Section N,",80),!,$$CTR("Patients 6-9 at Risk without dental sealant on first molar",80),!
+ W $$CTR($P(^DIC(4,BUDSITE,0),U),80),!
+ S X="Reporting Period: "_$$FMTE^XLFDT(BUDBD)_" to "_$$FMTE^XLFDT(BUDED) W $$CTR(X,80),!
+ S X="Population:  "_$S($G(BUDDEN)=1:"Indian/Alaskan Native (Classification 01)",$G(BUDDEN)=2:"Not Indian Alaskan/Native (Not Classification 01)",$G(BUDDEN)=3:"All (both Indian/Alaskan Natives and Non 01)",1:"") W $$CTR(X,80),!
+ W $TR($J("",80)," ","-")
+ I BUDP=0 D
+ .D HT6B^BUDEDU("DS2L")
+ W !!,"PATIENT NAME",?34,"HRN",?41,"COMMUNITY",?70,"SEX",?75,"AGE"
+ W !?2,"Assessment and Date",?30,"Risk"
+ W !,$TR($J("",80)," ","-"),!
+ S BUDP=1
+ Q
+S(V) ;
+ S BUDDECNT=BUDDECNT+1
+ S ^TMP($J,"BUDDEL",BUDDECNT)=$G(V)
+ Q
+PAUSE ;
+ K DIR S DIR(0)="E",DIR("A")="PRESS ENTER" KILL DA D ^DIR KILL DIR
+ Q
+GENI ;EP
+ D GENI^BUDERP6I
+ Q
+ ;
+CTR(X,Y) ;
+ Q $J("",$S($D(Y):Y,1:IOM)-$L(X)\2)_X
+EOJ ;
+ D EN^XBVK("BUD")
+ Q

@@ -1,5 +1,5 @@
 ABSPOSIH ; IHS/FCS/DRS - NCPDP 5.1 DUR Overrides form ;   [ 06/03/2002  4:40 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**6**;JUN 21, 2001;Build 15
+ ;;1.0;PHARMACY POINT OF SALE;**6,48**;JUN 21, 2001;Build 27
  ; Property of Indian Health Service
  ;
  Q
@@ -66,15 +66,17 @@ CLNDUR(IEN,ENTRY) ;EP - clean up the DUR file of empty entries
  ;
  I $G(OVERDUR)="" D   ;nothing input - delete it
  . D UPDRX(RXI,RXR,OVERDUR)
- . N FDA
+ . N FDA,ZERR  ; /IHS/OIT/RAM ; 12 JUN 17 ; ADD DBS CALL ERROR RETURN VARIABLE
  . S FDA(9002313.51,ENTRY_","_IEN_",",1.13)=OVERDUR
- . D FILE^DIE("","FDA","")
+ . D FILE^DIE("","FDA","ZERR") ; /IHS/OIT/RAM ; 12 JUN 17 ; UPDATE DBS CALL TO ALLOW FOR ERROR RETURN.
+ . I $D(ZERR) D LOG^ABSPOSL2("CLNDUR^ABSPOSIH",.ZERR) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  ;
  Q
  ;
 UPDRX(RXI,RXR,OVERDUR) ; update the prescription with the DUR 5.1 information
  ; and the ABSP Data Input file with the appropriate value
  ;
+ N FDA,ZERR  ; /IHS/OIT/RAM ; 12 JUN 17 ; ADD DBS CALL ERROR RETURN VARIABLE
  ;
  ; OVERDUR set within POSTINIT
  ; RXR - rx refill IEN
@@ -83,11 +85,13 @@ UPDRX(RXI,RXR,OVERDUR) ; update the prescription with the DUR 5.1 information
  ;
  I '+$G(RXR) D    ;NOT a refill
  . S FDA(52,RXI_",",9999999.13)=OVERDUR
- . D FILE^DIE("","FDA","")
+ . D FILE^DIE("","FDA","ZERR") ; /IHS/OIT/RAM ; 12 JUN 17 ; UPDATE DBS CALL TO ALLOW FOR ERROR RETURN.
+ . I $D(ZERR) D LOG^ABSPOSL2("UPDRX+13^ABSPOSIH",.ZERR) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  ;
  I +$G(RXR)  D    ;refill
  . S FDA(52.1,RXR_","_RXI_",",9999999.13)=OVERDUR
- . D FILE^DIE("","FDA","")
+ . D FILE^DIE("","FDA","ZERR") ; /IHS/OIT/RAM ; 12 JUN 17 ; UPDATE DBS CALL TO ALLOW FOR ERROR RETURN.
+ . I $D(ZERR) D LOG^ABSPOSL2("UPDRX+18^ABSPOSIH",.ZERR) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  ;
  Q
  ;

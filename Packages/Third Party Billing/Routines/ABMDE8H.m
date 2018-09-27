@@ -1,15 +1,16 @@
 ABMDE8H ; IHS/ASDST/DMJ - Page 8 - MISC INFO ; 
- ;;2.6;IHS 3P BILLING SYSTEM;**6**;NOV 12, 2009
+ ;;2.6;IHS 3P BILLING SYSTEM;**6,23**;NOV 12, 2009;Build 427
  ;
- ; IHS/SD/SDR - V2.5 P2 - 5/9/02 - NOIS HQW-0302-100190
+ ;IHS/SD/SDR - V2.5 P2 - 5/9/02 - NOIS HQW-0302-100190
  ;     Modified to display 2nd and 3rd modifiers and units
- ; IHS/SD/SDR - V2.5 P8 - IM16018/IM11164 - Prompt/display provider
- ; IHS/SD/SDR - v2.5 p9 - IM16660 - 4-digit revenue codes
- ; IHS/SD/SDR - v2.5 p9 - task 1 - Use new service line provider multiple
- ; IHS/SD/SDR - v2.5 p10 - IM20454 - Fixed so 2nd and 3rd modifiers would be prompted for
- ; IHS/SD/SDR - v2.5 p10 - IM19843 - Added new prompt SERVICE TO DATE/TIME
- ; IHS/SD/SDR - v2.6 CSV
- ; IHS/SD/SDR - abm*2.6*6 - 5010 - Added prompts for DME billing fields
+ ;IHS/SD/SDR - V2.5 P8 - IM16018/IM11164 - Prompt/display provider
+ ;IHS/SD/SDR - v2.5 p9 - IM16660 - 4-digit revenue codes
+ ;IHS/SD/SDR - v2.5 p9 - task 1 - Use new service line provider multiple
+ ;IHS/SD/SDR - v2.5 p10 - IM20454 - Fixed so 2nd and 3rd modifiers would be prompted for
+ ;IHS/SD/SDR - v2.5 p10 - IM19843 - Added new prompt SERVICE TO DATE/TIME
+ ;IHS/SD/SDR - v2.6 CSV
+ ;IHS/SD/SDR - abm*2.6*6 - 5010 - Added prompts for DME billing fields
+ ;IHS/SD/AML 2.6*23 HEAT247169 Added NDC to list of fields to prompt for, and to display on page8H
  ;
 DISP K ABMZ S ABMZ("TITL")="MISC. SERVICES",ABMZ("PG")="8H"
  I $D(ABMP("DDL")),$Y>(IOSL-9) D PAUSE^ABMDE1 G:$D(DUOUT)!$D(DTOUT)!$D(DIROUT) XIT I 1
@@ -25,6 +26,7 @@ MS ; Misc. Services
  I ABMZ("SUB")=43&($P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),1,ABMP("VTYP"),1)),U,4)="Y") S ABMZ("DR")=ABMZ("DR")_";11;12;13;14"   ;abm*2.6*6 5010
  S ABMZ("ITEM")="Misc. Services (HCPCS Code)"
  S ABMZ("DIC")="^ICPT(",ABMZ("X")="X",ABMZ("MAX")=10,ABMZ("TOTL")=0
+ S ABMZ("NDC")=";.19"  ;abm*2.6*23 IHS/SD/AML HEAT247169
  I ^ABMDEXP(ABMMODE(8),0)["UB" S ABMZ("DR")=";W !;.02"_ABMZ("DR")
  D H^ABMDE8X
  D HD G LOOP
@@ -53,6 +55,7 @@ EOP I $Y>(IOSL-5) D PAUSE^ABMDE1,HD
  .S:ABMRPRV="" ABMRPRV=$O(^ABMDCLM(DUZ(2),ABMP("CDFN"),43,ABM,"P","C","R",0))
  .I ABMRPRV'="" D  ;rendering provider on line item
  ..W " ("_$P($G(^VA(200,$P(^ABMDCLM(DUZ(2),ABMP("CDFN"),43,ABM,"P",ABMRPRV,0),U),0)),U)_"-"_$P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),43,ABM,"P",ABMRPRV,0)),U,2)_")"
+ .I $P(ABM("X0"),U,19)'="" W !,?13,"NDC: "_$P(ABM("X0"),U,19)  ;abm*2.6*23 IHS/SD/AML HEAT247169
  .W !
  W ?5,$$GETREV^ABMDUTL($P(ABM("X0"),"^",2))
  W ?10,$P(ABMZ(ABM("I")),U)

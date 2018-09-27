@@ -1,5 +1,5 @@
-BGOVPOV1 ; MSC/IND/DKM - Fix VPOV sequencing (primary first) ;15-Jun-2016 18:44;PLS
- ;;1.1;BGO COMPONENTS;**3,13,19,20**;Mar 20, 2007;Build 1
+BGOVPOV1 ; MSC/IND/DKM - Fix VPOV sequencing (primary first) ;20-Jun-2017 15:26;DU
+ ;;1.1;BGO COMPONENTS;**3,13,19,20,23**;Mar 20, 2007;Build 1
  ; Display routine help
 HELP ;EP
  N LP,X
@@ -201,6 +201,14 @@ QUALLK(PROMPT,SNOMED,TYPE) ;Lookup for normal/abnormal qualifier added P19
  I SEARCH'="" D
  .S IN=SNOMED_U_SEARCH_U_U_1
  .S PROMPT=$$VSBTRMF^BSTSAPI(IN)
+ Q
+FRAC(CODES,CONCT) ;Lookup new problems to see if its a fracture added P23
+ N FRACTURE,FXLST,SNODATA
+ S CODES=""
+ S SNODATA=$$CONC^BSTSAPI(CONCT_"^^^1")
+ S FRACTURE=$P(SNODATA,U,10)
+ S FXLST=$P(SNODATA,U,11)
+ S CODES=FRACTURE_U_FXLST
  Q
  ;IHS/MSC/MGH check for duplicates
  ;INP=DFN ^ SNOMED Concept CT ^ PRIEN

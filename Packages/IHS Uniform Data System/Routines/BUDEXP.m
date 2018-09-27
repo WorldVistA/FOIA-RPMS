@@ -1,5 +1,5 @@
 BUDEXP ; IHS/CMI/LAB - Export to UDS ;
- ;;10.0;IHS/RPMS UNIFORM DATA SYSTEM;;FEB 04, 2016;Build 50
+ ;;12.0;IHS/RPMS UNIFORM DATA SYSTEM;;NOV 22, 2017;Build 75
  ;
  ;
  Q  ;not yet availabe

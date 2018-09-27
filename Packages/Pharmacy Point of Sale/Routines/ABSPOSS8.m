@@ -1,5 +1,5 @@
 ABSPOSS8 ; IHS/FCS/DRS - 9002313.99 ;  
- ;;1.0;PHARMACY POINT OF SALE;**19,39,45,46**;JUN 21, 2001;Build 15
+ ;;1.0;PHARMACY POINT OF SALE;**19,39,45,46,48**;JUN 21, 2001;Build 27
  ;----------------------------------------------------------------------
  ;IHS/SD/RLT 11/7/06 - Patch 19
  ; Force user to run BAS setup option first.  Running other options
@@ -38,6 +38,7 @@ NEW99 ; create new entry in 9002313.99
  S FDA(9002313.99,"+1,",.01)="POINT OF SALE SETUP"
  S FDA(9002313.99,"+1,",951)=30 ; insurance grace period default
 N99A D UPDATE^DIE("","FDA","IEN","MSG")
+ I $D(MSG) D LOG^ABSPOSL2("N99A^ABSPOSS8",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  I '$D(MSG),IEN(1)=1,$D(^ABSP(9002313.99,1,0)) D  Q  ; success
  . ; Insurance base scores - default to Private primary,
  . ; Medicaid secondary, Medicare tertiary, No insurance last

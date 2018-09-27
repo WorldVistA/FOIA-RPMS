@@ -1,5 +1,5 @@
 BGP8PDLS ; IHS/CMI/LAB - IHS gpra print ;
- ;;8.0;IHS CLINICAL REPORTING;**2**;MAR 12, 2008
+ ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
  ;
 START ;
  Q:$G(BGPAREAA)
@@ -17,47 +17,48 @@ START ;
  .S BGPCNT=10
 GO .;
  .S X="**** CONFIDENTIAL PATIENT INFORMATION, COVERED BY THE PRIVACY ACT *****" D S(X,1,1)
- .S X=$P(^BGPINDE(BGPL,0),U,3) D S(X,1,1)
+ .S X=$P(^BGPINDR(BGPL,0),U,3) D S(X,1,1)
  .S X=" " D S(X,1,1)
  .S X="Denominator(s):" D S(X,1,1)
- .S BGPX=0 F  S BGPX=$O(^BGPINDE(BGPL,61,"B",BGPX)) Q:BGPX'=+BGPX  D
- ..S BGPY=0 F  S BGPY=$O(^BGPINDE(BGPL,61,"B",BGPX,BGPY)) Q:BGPY'=+BGPY  D
- ...;I $P(^BGPINDE(BGPL,61,BGPY,0),U,2)'[BGPRTYPE Q  ;not a denom def for this report
- ...;I BGPRTYPE=4,$P(^BGPINDE(BGPL,61,BGPY,0),U,3)'[BGPINDT Q  ;don't display
- ...I '$D(^BGPINDE(BGPL,61,BGPY,11,"B",BGPRTYPE)) Q  ;not this report type
- ...I BGPRTYPE=4,'$D(^BGPINDE(BGPL,61,BGPY,12,"B",BGPINDT)) Q  ;not this measure type on selected
- ...S BGPZ=0 F  S BGPZ=$O(^BGPINDE(BGPL,61,BGPY,1,BGPZ)) Q:BGPZ'=+BGPZ  D
- ....S Y=^BGPINDE(BGPL,61,BGPY,1,BGPZ,0) D S(Y,1,1)
+ .S BGPNODE=$S(BGPRTYPE=1:81,BGPRTYPE=4:61,BGPRTYPE=7:83,BGPRTYPE=9:85,1:61)
+ .S BGPX=0 F  S BGPX=$O(^BGPINDR(BGPIC,BGPNODE,"B",BGPX)) Q:BGPX'=+BGPX  D
+ ..S BGPY=0 F  S BGPY=$O(^BGPINDR(BGPIC,BGPNODE,"B",BGPX,BGPY)) Q:BGPY'=+BGPY  D
+ ...;I $P(^BGPINDR(BGPIC,61,BGPY,0),U,2)'[BGPRTYPE Q  ;not a denom def for this report
+ ...;I '$D(^BGPINDR(BGPIC,61,BGPY,11,"B",BGPRTYPE)) Q
+ ...I BGPRTYPE=4,'$D(^BGPINDR(BGPIC,BGPNODE,BGPY,12,"B",BGPINDG)) Q
+ ...S BGPZ=0 F  S BGPZ=$O(^BGPINDR(BGPIC,BGPNODE,BGPY,1,BGPZ)) Q:BGPZ'=+BGPZ  D
+ ....S Y=^BGPINDR(BGPIC,BGPNODE,BGPY,1,BGPZ,0) D S(Y,1,1)
  ....Q
  ...Q
  ..Q
  .S X=" " D S(X,1,1)
  .S X="Numerator(s):" D S(X,1,1)
- .S BGPX=0 F  S BGPX=$O(^BGPINDE(BGPL,62,"B",BGPX)) Q:BGPX'=+BGPX  D
- ..S BGPY=0 F  S BGPY=$O(^BGPINDE(BGPL,62,"B",BGPX,BGPY)) Q:BGPY'=+BGPY  D
- ...;I $P(^BGPINDE(BGPL,62,BGPY,0),U,2)'[BGPRTYPE Q  ;not a denom def for this report
- ...;I BGPRTYPE=4,BGPINDT'="S",$P(^BGPINDE(BGPL,62,BGPY,0),U,3)'[BGPINDT Q  ;don't display
- ...I '$D(^BGPINDE(BGPL,62,BGPY,11,"B",BGPRTYPE)) Q  ;not this report type
- ...I BGPRTYPE=4,'$D(^BGPINDE(BGPL,62,BGPY,12,"B",BGPINDT)) Q  ;not this measure type on selected
- ...S BGPZ=0 F  S BGPZ=$O(^BGPINDE(BGPL,62,BGPY,1,BGPZ)) Q:BGPZ'=+BGPZ  D
- ....S X=^BGPINDE(BGPL,62,BGPY,1,BGPZ,0) D S(X,1,1)
+ .S BGPNODE=$S(BGPRTYPE=1:82,BGPRTYPE=4:62,BGPRTYPE=7:84,BGPRTYPE=9:86,1:62)
+ .S BGPX=0 F  S BGPX=$O(^BGPINDR(BGPIC,BGPNODE,"B",BGPX)) Q:BGPX'=+BGPX  D
+ ..S BGPY=0 F  S BGPY=$O(^BGPINDR(BGPIC,BGPNODE,"B",BGPX,BGPY)) Q:BGPY'=+BGPY  D
+ ...;I $P(^BGPINDR(BGPIC,62,BGPY,0),U,2)'[BGPRTYPE Q  ;not a denom def for this report
+ ...;I BGPRTYPE=4,BGPINDG'="S",$P(^BGPINDR(BGPIC,62,BGPY,0),U,3)'[BGPINDR Q  ;don't display
+ ...;I '$D(^BGPINDR(BGPIC,62,BGPY,11,"B",BGPRTYPE)) Q  ;not this report type
+ ...I BGPRTYPE=4,'$D(^BGPINDR(BGPIC,BGPNODE,BGPY,12,"B",BGPINDG)) Q
+ ...S BGPZ=0 F  S BGPZ=$O(^BGPINDR(BGPIC,BGPNODE,BGPY,1,BGPZ)) Q:BGPZ'=+BGPZ  D
+ ....S X=^BGPINDR(BGPIC,BGPNODE,BGPY,1,BGPZ,0) D S(X,1,1)
  ....Q
  ...Q
  ..Q
  .S X=" " D S(X,1,1)
  .S BGPNODE=11
- .I BGPRTYPE=1,$O(^BGPINDE(BGPL,54,0)) S BGPNODE=54
- .I BGPRTYPE=7,$O(^BGPINDE(BGPL,56,0)) S BGPNODE=56
+ .I BGPRTYPE=1,$O(^BGPINDR(BGPL,54,0)) S BGPNODE=54
+ .I BGPRTYPE=7,$O(^BGPINDR(BGPL,56,0)) S BGPNODE=56
  .S X="Logic" D S(X,1,1)
- .S BGPX=0 F  S BGPX=$O(^BGPINDE(BGPL,BGPNODE,BGPX)) Q:BGPX'=+BGPX  D
- ..S X=^BGPINDE(BGPL,BGPNODE,BGPX,0) D S(X,1,1)
- .S X=" " D S(X,1,1) S X="Performance Measure Description" D S(X,1,1) S BGPX=0 F  S BGPX=$O(^BGPINDE(BGPL,51,BGPX)) Q:BGPX'=+BGPX  D
- ..S X=^BGPINDE(BGPL,51,BGPX,0) D S(X,1,1)
- .I $O(^BGPINDE(BGPL,52,0)) S X=" " D S(X,1,1) S X="Past Performance and/or Target" D S(X,1,1) S BGPX=0 F  S BGPX=$O(^BGPINDE(BGPL,52,BGPX)) Q:BGPX'=+BGPX  D
- ..S X=^BGPINDE(BGPL,52,BGPX,0) D S(X,1,1)
- .I $O(^BGPINDE(BGPL,55,0)) S X=" " D S(X,1,1) S X="Source" D S(X,1,1) S BGPX=0 F  S BGPX=$O(^BGPINDE(BGPL,55,BGPX)) Q:BGPX'=+BGPX  D
- ..S X=^BGPINDE(BGPL,55,BGPX,0) D S(X,1,1)
- .D H1
+ .S BGPX=0 F  S BGPX=$O(^BGPINDR(BGPL,BGPNODE,BGPX)) Q:BGPX'=+BGPX  D
+ ..S X=^BGPINDR(BGPL,BGPNODE,BGPX,0) D S(X,1,1)
+ .S X=" " D S(X,1,1) S X="Performance Measure Description" D S(X,1,1) S BGPX=0 F  S BGPX=$O(^BGPINDR(BGPL,51,BGPX)) Q:BGPX'=+BGPX  D
+ ..S X=^BGPINDR(BGPL,51,BGPX,0) D S(X,1,1)
+ .I $O(^BGPINDR(BGPL,52,0)) S X=" " D S(X,1,1) S X="Past Performance and/or Target" D S(X,1,1) S BGPX=0 F  S BGPX=$O(^BGPINDR(BGPL,52,BGPX)) Q:BGPX'=+BGPX  D
+ ..S X=^BGPINDR(BGPL,52,BGPX,0) D S(X,1,1)
+ .I $O(^BGPINDR(BGPL,55,0)) S X=" " D S(X,1,1) S X="Source" D S(X,1,1) S BGPX=0 F  S BGPX=$O(^BGPINDR(BGPL,55,BGPX)) Q:BGPX'=+BGPX  D
+ ..S X=^BGPINDR(BGPL,55,BGPX,0) D S(X,1,1)
+ .D:'$G(BGPSUMON) H1
  .S BGPCOM="" F  S BGPCOM=$O(^XTMP("BGP8D",BGPJ,BGPH,"LIST",BGPL,BGPCOM)) Q:BGPCOM=""  D
  ..S BGPSEX="" F  S BGPSEX=$O(^XTMP("BGP8D",BGPJ,BGPH,"LIST",BGPL,BGPCOM,BGPSEX)) Q:BGPSEX=""  D
  ...S BGPAGE="" F  S BGPAGE=$O(^XTMP("BGP8D",BGPJ,BGPH,"LIST",BGPL,BGPCOM,BGPSEX,BGPAGE)) Q:BGPAGE=""  D
@@ -83,7 +84,7 @@ HEADER ;EP
 HEADER1 ;
  W:$D(IOF) @IOF S BGPGPG=BGPGPG+1
  W !?3,$P(^VA(200,DUZ,0),U,2),?35,$$FMTE^XLFDT(DT),?70,"Page ",BGPGPG,!
- W !,$$CTR("***  IHS 2008 Clinical Performance Measure Patient List  ***",80),!
+ W !,$$CTR("***  IHS 2018 Clinical Performance Measure Patient List  ***",80),!
  W $$CTR($P(^DIC(4,DUZ(2),0),U),80),!
  S X="Report Period: "_$$FMTE^XLFDT(BGPBD)_" to "_$$FMTE^XLFDT(BGPED) W $$CTR(X,80),!
  W $$CTR($S(BGPLIST="A":"Entire Patient List",BGPLIST="R":"Random Patient List",1:"Patient List by Provider: "_BGPLPROV),80),!
@@ -92,9 +93,10 @@ HEADER1 ;
 H1 ;
  S X=" " D S(X,1,1)
  S X=$S(BGPLIST="A":"Entire Patient List",BGPLIST="R":"Random Patient List",1:"Patient List by Provider: "_BGPLPROV) D S(X,1,1)
- S X=" " D S(X,1,1) S X="UP=User Pop; AC=Active Clinical; AD=Active Diabetic;" D S(X,1,1) S X="AAD=Active Adult Diabetic; PREG=Pregnant Female;" D S(X,1,1) S X="IMM=Active IMM Pkg Pt; IHD=Active Ischemic Heart Disease" D S(X,1,1)
+ S X=" " D S(X,1,1) S X="UP=User Pop; AC=Active Clinical; UPDM=User Pop Diabetic; AD=Active Diabetic;" D S(X,1,1) S X="AAD=Active Adult Diabetic; PREG=Pregnant Female;" D S(X,1,1) D
+ .S X="IMM=Active IMM Pkg Pt; CHD=Active Coronary Heart Disease;"_$S(BGPRTYPE=1:" HR=High Risk Patient",1:"") D S(X,1,1)
  S X=" " D S(X,1,1)
- S Y=0 F  S Y=$O(^BGPINDE(BGPL,71,Y)) Q:Y'=+Y  S X=^BGPINDE(BGPL,71,Y,0) D S(X,1,1)
+ S Y=0 F  S Y=$O(^BGPINDR(BGPL,71,Y)) Q:Y'=+Y  S X=^BGPINDR(BGPL,71,Y,0) D S(X,1,1)
  S X=" " D S(X,1,1)
  S X="PATIENT NAME" D S(X,1,1) S X="HRN" D S(X,,2) S X="COMMUNITY" D S(X,,3) S X="SEX" D S(X,,4) S X="AGE" D S(X,,5) S X="DENOMINATOR" D S(X,,6) S X="NUMERATOR" D S(X,,7)
  S X=$TR($J("",80)," ","-") D S(X,1,1)

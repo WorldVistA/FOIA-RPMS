@@ -1,5 +1,5 @@
 APCLVLU1 ; IHS/CMI/LAB - GEN RETR UTILITIES ; 27 Aug 2014  10:52 AM
- ;;2.0;IHS PCC SUITE;**2,4,5,7,11**;MAY 14, 2009;Build 58
+ ;;2.0;IHS PCC SUITE;**2,4,5,7,11,20**;MAY 14, 2009;Build 25
 RACESCR ;
  NEW Y,Z
  K Z
@@ -10,7 +10,7 @@ RACEPRT ;
  NEW Z,Y
  D LIST^DIC(2.02,","_DFN_",","@;.01E","P",,,,,,,"Z")
  S Y=0 F  S Y=$O(Z("DILIST",Y)) Q:Y=""  D
- .S APCLPCNT=APCLPCNT+1
+ .;S APCLPCNT=APCLPCNT+1
  .S X($P(Z("DILIST",Y,0),U,1))=""
  .S APCLPCNT=APCLPCNT+1,APCLPRNM(APCLPCNT)=$P(Z("DILIST",Y,0),U,2)
  .S APCLPRNM(APCLPCNT,"I")=$P(Z("DILIST",Y,0),U,1)
@@ -339,3 +339,31 @@ VAUDITOR(V,F) ;EP - returns the last person who marked the visit as reviewed/com
  S Y=$P(^AUPNVCA(L,0),U,5)
  I F="I" Q Y
  I F="E" Q $P(^VA(200,Y,0),U)
+ Q ""
+HOMELP(P,D) ;EP
+ ;GET LAST VALUE WITH A YES BEFORE END OF TIME PERIOD
+ I '$O(^AUPNPAT(P,85,0)) Q "NOT RECORDED"
+ NEW X,Y,Z,L
+ S L=""
+ S X=0 F  S X=$O(^AUPNPAT(P,85,"B",X)) Q:X'=+X  D
+ .Q:X>D
+ .S Y=0 F  S Y=$O(^AUPNPAT(P,85,"B",X,Y)) Q:Y'=+Y  D
+ ..I $P($G(^AUPNPAT(P,85,Y,0)),U,2)="" Q
+ ..S L=Y
+ I L="" Q "NOT RECORDED"
+ I $P(^AUPNPAT(P,85,L,0),U,2)="N" Q "NOT HOMELESS"
+ S Z=""
+ S Z=$$DATE^APCLVLU($P(^AUPNPAT(P,85,L,0),U,1))_" HOMELESS "
+ Q Z
+HOMEL(P,D) ;EP
+ ;GET LAST VALUE WITH A YES BEFORE END OF TIME PERIOD
+ I '$O(^AUPNPAT(P,85,0)) Q "R"
+ S L=""
+ S X=0 F  S X=$O(^AUPNPAT(P,85,"B",X)) Q:X'=+X  D
+ .Q:X>D
+ .S Y=0 F  S Y=$O(^AUPNPAT(P,85,"B",X,Y)) Q:Y'=+Y  D
+ ..I $P($G(^AUPNPAT(P,85,Y,0)),U,2)="" Q
+ ..S L=Y
+ I L="" Q "R"
+ I $P(^AUPNPAT(P,85,L,0),U,2)="N" Q "N"
+ Q "H"

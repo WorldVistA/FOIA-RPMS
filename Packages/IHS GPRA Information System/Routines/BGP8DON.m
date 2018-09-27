@@ -1,16 +1,16 @@
 BGP8DON ; IHS/CMI/LAB - NATL COMP EXPORT 13 Nov 2006 12:31 PM ;
- ;;8.0;IHS CLINICAL REPORTING;**2**;MAR 12, 2008
+ ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
  ;
  ;
  W:$D(IOF) @IOF
  D XIT
- W !,$$CTR("IHS 2008 Other National Measures Report",80)
+ W !,$$CTR("IHS 2018 Other National Measures Report",80)
 CHOICE ;
- W !,"Please select the type of report would you like to run:"
+ W !!,"Please select the type of report would you like to run:"
  W !!?8,"H  Hard-coded Report:  Report with all parameters set to the"
- W !?11,"same as the National GPRA Report (report period of "
- W !?11,"July 1, 2007 - June 30, 2008, baseline period of July 1, 1999"
- W !?11,"- June 30, 2008, and AI/AN patients only)"
+ W !?11,"same as the National GPRA/GPRAMA Report (report period of "
+ W !?11,"Oct 1, 2017 - Sept 30, 2018, baseline period of Oct 1, 2009"
+ W !?11,"- Sept, 2010, and AI/AN patients only)"
  W !!?8,"U  User-defined Report:  You select the report and baseline"
  W !?11,"periods and beneficiary population"
  W !
@@ -22,6 +22,7 @@ CHOICE ;
  S Y=$$UP^XLFSTR(Y) I Y'="U",Y'="H" W !!,"Please enter an H for Hard-coded or a U for User-defined." G CHOICE
  S BGPRTC=Y
 INTRO ;
+ W !,$$CTR("IHS 2018 Other National Measures Report",80)
  I BGPRTC="U" D
  .W !!,"This will produce the Other National Measures (ONM) Report for all"
  .W !,"ONM performance measures for a year period you specify.  You will be "
@@ -37,8 +38,8 @@ INTRO ;
  I BGPRTC="H" D
  .W !!,"This will produce an Other National Measures report.  You will be asked to"
  .W !,"provide the community taxonomy to determine which patients will be included."
- .W !,"This report will be run for the Report Period July 1, 2007 through "
- .W !,"June 30, 2008 with a Baseline Year of July 1, 1999 through June 30, 2000."
+ .W !,"This report will be run for the Report Period Oct 1, 2017 through "
+ .W !,"Sept 30, 2018 with a Baseline Year of Oct 1, 2009 through Sept 30, 2010."
  .W !,"This report will include beneficiary population of American Indian/Alaska"
  .W !,"Native only."
  .W !!,"You can choose to export this data to the Area office.  If you answer yes"
@@ -49,16 +50,19 @@ INTRO ;
  .W !
  K DIR S DIR(0)="E",DIR("A")="Press Enter to Continue" D ^DIR K DIR,DUOUT,DIRUT
  D TAXCHK^BGP8XTCO
+ S X=$$DEMOCHK^BGP8UTL2()
+ I 'X W !!,"Exiting Report....." D PAUSE^BGP8DU,XIT Q
+ST ;
 TP ;get time period
- S BGPRTYPE=7,BGP8RPTH=""
+ S BGPRTYPE=7,BGPYRPTH=""
  S (BGPBD,BGPED,BGPTP)=""
 H I BGPRTC="H" D  G COMM
- .S X=$O(^BGPCTRL("B",2008,0))
+ .S X=$O(^BGPCTRL("B",2018,0))
  .S Y=^BGPCTRL(X,0)
  .S BGPBD=$P(Y,U,8),BGPED=$P(Y,U,9)
  .S BGPPBD=$P(Y,U,10),BGPPED=$P(Y,U,11)
  .S BGPBBD=$P(Y,U,12),BGPBED=$P(Y,U,13)
- .S BGPPER=$P(Y,U,14),BGPQTR=3
+ .S BGPPER=$P(Y,U,14),BGPQTR=4
  .;BEGIN TEST STUFF
  .G NT  ;COMMENT OUT THIS LINE WHEN TESTING IN TEHR
  .W !!,"for testing purposes only, please enter a report year",!
@@ -90,7 +94,10 @@ H1 .S BGPBEN=1,BGPBENF(0)="Indian/Alaskan Native (Classification 01)" W !!,"Bene
  I BGPQTR=2 S BGPBD=($E(BGPPER,1,3)-1)_"0401",BGPED=$E(BGPPER,1,3)_"0331"
  I BGPQTR=3 S BGPBD=($E(BGPPER,1,3)-1)_"0701",BGPED=$E(BGPPER,1,3)_"0630"
  I BGPQTR=4 S BGPBD=($E(BGPPER,1,3)-1)_"1001",BGPED=$E(BGPPER,1,3)_"0930"
- I BGPQTR=5 S BGPBD=$$FMADD^XLFDT(BGPPER,-364),BGPED=BGPPER,BGPPER=$E(BGPED,1,3)_"0000"
+ I BGPQTR=5 D
+ .S D=$$FMADD^XLFDT(BGPPER,1)
+ .I $E(BGPPER,4,7)'=1231 S BGPBD=($E(BGPPER,1,3)-1)_$E(D,4,7),BGPED=BGPPER,BGPPER=$E(BGPED,1,3)_"0000"
+ .I $E(BGPPER,4,7)=1231 S BGPBD=$E(BGPPER,1,3)_$E(D,4,7),BGPED=BGPPER,BGPPER=$E(BGPED,1,3)_"0000"
  I BGPED>DT D  G:BGPDO=1 TP
  .W !!,"You have selected Current Report period ",$$FMTE^XLFDT(BGPBD)," through ",$$FMTE^XLFDT(BGPED),"."
  .W !,"The end date of this report is in the future; your data will not be",!,"complete.",!
@@ -100,9 +107,9 @@ H1 .S BGPBEN=1,BGPBENF(0)="Indian/Alaskan Native (Classification 01)" W !!,"Bene
  .Q
 BY ;get baseline year
  S BGPVDT=""
- W !!,"Enter the Baseline Year to compare data to.",!,"Use a 4 digit year, e.g. 1999, 2000"
+ W !!,"Enter the Baseline Year to compare data to.",!,"Use a 4 digit year, e.g. 2010"
  S DIR(0)="D^::EP"
- S DIR("A")="Enter Year (e.g. 2000)"
+ S DIR("A")="Enter Year (e.g. 2010)"
  D ^DIR KILL DIR
  I $D(DIRUT) G TP
  I $D(DUOUT) S DIRUT=1 G TP
@@ -145,44 +152,34 @@ COM1 S X=0
  .I $D(DIRUT) S BGPQUIT=1
  .I 'Y S BGPQUIT=1
  .Q
-MFIC K BGPQUIT
- I $P($G(^BGPSITE(DUZ(2),0)),U,8)=1 D  I BGPMFITI="" G COMM
- .S BGPMFITI=""
- .W !!,"Specify the LOCATION taxonomy to determine which patient visits will be"
- .W !,"used to determine whether a patient is in the denominators for the report."
- .W !,"You should have created this taxonomy using QMAN.",!
- .K BGPMFIT
- .S BGPMFITI=""
- .D ^XBFMK
- .S DIC("S")="I $P(^(0),U,15)=9999999.06",DIC="^ATXAX(",DIC(0)="AEMQ",DIC("A")="Enter the Name of the Location/Facility Taxonomy: "
- .S B=$P($G(^BGPSITE(DUZ(2),0)),U,9) I B S DIC("B")=$P(^ATXAX(B,0),U)
- .D ^DIC
- .I Y=-1 Q
- .S BGPMFITI=+Y
+ K BGPQUIT
 BEN ;
- I BGPRTC="H" G AI
+ ;I $G(BGPSEAT) G HOME
+ I BGPRTC="H" G HOME
  S BGPBEN=""
  S DIR(0)="S^1:Indian/Alaskan Native (Classification 01);2:Not Indian Alaskan/Native (Not Classification 01);3:All (both Indian/Alaskan Natives and Non 01)",DIR("A")="Select Beneficiary Population to include in this report"
  S DIR("B")="1" KILL DA D ^DIR KILL DIR
  I $D(DIRUT) G COMM
- S BGPBEN=Y,BGPBENF=Y(0)
+ S BGPBEN=Y,BGPBENF(0)=Y(0)
 HOME ;
  S BGPHOME=$P($G(^BGPSITE(DUZ(2),0)),U,2)
  I BGPHOME="" W !!,"Home Location not found in Site File!!",!,"PHN Visits counts to Home will be calculated using clinic 11 only!!" H 2 G AI
  W !,"Your HOME location is defined as: ",$P(^DIC(4,BGPHOME,0),U)," asufac:  ",$P(^AUTTLOC(BGPHOME,0),U,10)
 AI ;gather all gpra measures
- S X=0 F  S X=$O(^BGPINDE("ON",1,X)) Q:X'=+X  S BGPIND(X)=""
- S BGPINDT="O"
+ S X=0 F  S X=$O(^BGPINDR("ON",1,X)) Q:X'=+X  S BGPIND(X)=""
+ S BGPINDG="O"
 EXPORT ;export to area or not?
- S BGPEXPT="",BGPYWCHW=0
+ S BGPEXPT=""  ;,BGPYWCHW=0
+ ;I $D(BGPSEAT) G EISSEX
  S DIR(0)="Y",DIR("A")="Do you wish to export this data to Area" KILL DA D ^DIR KILL DIR
  I $D(DIRUT) G COMM
  S BGPEXPT=Y
 EISSEX ;
  S BGPEXCEL=""
- S BGPUF=""
- I ^%ZOSF("OS")["PC"!(^%ZOSF("OS")["NT")!($P($G(^AUTTSITE(1,0)),U,21)=2) S BGPUF=$S($P($G(^AUTTSITE(1,1)),U,2)]"":$P(^AUTTSITE(1,1),U,2),1:"C:\EXPORT")
- I $P(^AUTTSITE(1,0),U,21)=1 S BGPUF="/usr/spool/uucppublic/"
+ S BGPUF=$$GETDIR^BGP8UTL2()
+ ;I ^%ZOSF("OS")["PC"!(^%ZOSF("OS")["NT")!($P($G(^AUTTSITE(1,0)),U,21)=2) S BGPUF=$S($P($G(^AUTTSITE(1,1)),U,2)]"":$P(^AUTTSITE(1,1),U,2),1:"C:\EXPORT")
+ ;I $P(^AUTTSITE(1,0),U,21)=1 S BGPUF="/usr/spool/uucppublic/"
+ I BGPEXPT,BGPUF="" W:'$D(ZTQUEUED) !!,"Cannot continue.....can't find export directory name. EXCEL file",!,"not written." D PAUSE^BGP8DU,XIT Q
 SUM ;display summary of this report
  W:$D(IOF) @IOF
  W !,$$CTR("SUMMARY OF OTHER NATIONAL MEASURES REPORT TO BE GENERATED")
@@ -191,9 +188,11 @@ SUM ;display summary of this report
  W !?5,"Previous Year Period: ",?31,$$FMTE^XLFDT(BGPPBD)," to ",?31,$$FMTE^XLFDT(BGPPED)
  W !?5,"Baseline Period: ",?31,$$FMTE^XLFDT(BGPBBD)," to ",?31,$$FMTE^XLFDT(BGPBED)
  W !!,"The COMMUNITY Taxonomy to be used is: ",$P(^ATXAX(BGPTAXI,0),U)
- I $G(BGPMFITI) W !!,"The MFI Location Taxonomy to be used is: ",$P(^ATXAX(BGPMFITI,0),U)
+ W !,"The Beneficiary Population is: ",BGPBENF(0)
  I BGPHOME W !,"The HOME location is: ",$P(^DIC(4,BGPHOME,0),U)," ",$P(^AUTTLOC(BGPHOME,0),U,10)
  I 'BGPHOME W !,"No HOME Location selected."
+ D TEXT^BGP8DSL
+ I $D(DIRUT) G BEN
  D PT^BGP8DSL
  I BGPROT="" G BEN
 ZIS ;call to XBDBQUE
@@ -201,13 +200,13 @@ ZIS ;call to XBDBQUE
  I $G(BGPQUIT) D XIT Q
  I BGPRPT="" D XIT Q
  I BGPEXPT D
- .W !!,"A file will be created called BG08",$P(^AUTTLOC(DUZ(2),0),U,10)_".ONM"_BGPRPT," and will reside",!,"in the ",BGPUF," directory.",!
+ .W !!,"A file will be created called BG180",$P(^AUTTLOC(DUZ(2),0),U,10)_".ONM"_BGPRPT," and will reside",!,"in the ",BGPUF," directory.",!
  .W !,"Depending on your site configuration, these files may need to be manually",!,"sent to your Area Office.",!
  K IOP,%ZIS I BGPROT="D",BGPDELT="F" D NODEV,XIT Q
  K IOP,%ZIS W !! S %ZIS=$S(BGPDELT'="S":"PQM",1:"PM") D ^%ZIS
- I POP W !,"Report Aborted" S DA=BGPRPT,DIK="^BGPGPDCE(" D ^DIK K DIK D XIT Q
- I POP W !,"Report Aborted" S DA=BGPRPT,DIK="^BGPGPDPE(" D ^DIK K DIK D XIT Q
- I POP W !,"Report Aborted" S DA=BGPRPT,DIK="^BGPGPDBE(" D ^DIK K DIK D XIT Q
+ I POP W !,"Report Aborted" S DA=BGPRPT,DIK="^BGPGPDCR(" D ^DIK K DIK D XIT Q
+ I POP W !,"Report Aborted" S DA=BGPRPT,DIK="^BGPGPDPR(" D ^DIK K DIK D XIT Q
+ I POP W !,"Report Aborted" S DA=BGPRPT,DIK="^BGPGPDBR(" D ^DIK K DIK D XIT Q
  I $D(IO("Q")) G TSKMN
 DRIVER ;
  D ^BGP8D1
@@ -215,7 +214,6 @@ DRIVER ;
  D ^BGP8DP
  D ^%ZISC
  I BGPEXPT D GS^BGP8UTL
- ;I $G(BGPEXCEL) D EXCELGS^BGP8UTL
  Q
  ;
 NODEV ;
@@ -225,6 +223,7 @@ NODEV ;
  ;
 NODEV1 ;
  D ^BGP8D1
+ ;I $D(BGPSEAT) D ^BGP8D10
  D ^BGP8DP
  D ^%ZISC
  I BGPEXPT D GS^BGP8UTL
@@ -236,7 +235,7 @@ TSKMN ;EP ENTRY POINT FROM TASKMAN
  I $G(IO("DOC"))]"" S ZTIO=ZTIO_";"_$G(IO("DOC"))
  I $D(IOM)#2,IOM S ZTIO=ZTIO_";"_IOM I $D(IOSL)#2,IOSL S ZTIO=ZTIO_";"_IOSL
  K ZTSAVE S ZTSAVE("BGP*")=""
- S ZTCPU=$G(IOCPU),ZTRTN="DRIVER^BGP8DNG",ZTDTH="",ZTDESC="Other National Measures REPORT 08" D ^%ZTLOAD D XIT Q
+ S ZTCPU=$G(IOCPU),ZTRTN="DRIVER^BGP8DON",ZTDTH="",ZTDESC="Other National Measures REPORT 15" D ^%ZTLOAD D XIT Q
  Q
  ;
 XIT ;
@@ -278,7 +277,7 @@ CHKY ;
  Q
 F ;fiscal year
  S (BGPPER,BGPVDT)=""
- W !!,"Enter the year for the report.  Use a 4 digit ",!,"year, e.g. 2008"
+ W !!,"Enter the year for the report.  Use a 4 digit ",!,"year, e.g. 2018"
  S DIR(0)="D^::EP"
  S DIR("A")="Enter year"
  S DIR("?")="This report is compiled for a period.  Enter a valid date."
@@ -291,7 +290,7 @@ F ;fiscal year
  Q
 B ;fiscal year
  S (BGPBPER,BGPVDT)=""
- W !!,"Enter the BASELINE year for the report.  Use a 4 digit ",!,"year, e.g. 2000"
+ W !!,"Enter the BASELINE year for the report.  Use a 4 digit ",!,"year, e.g. 2010"
  S DIR(0)="D^::EP"
  S DIR("A")="Enter BASELINE year"
  S DIR("?")="This report is compiled for a period.  Enter a valid date."
@@ -303,14 +302,14 @@ B ;fiscal year
  S BGPBPER=BGPVDT
  Q
 ENDDATE ;EP
- W !!,"When entering dates, if you do not enter a full 4 digit year (e.g. 2008)"
+ W !!,"When entering dates, if you do not enter a full 4 digit year (e.g. 2018)"
  W !,"will assume a year in the past, if you want to put in a future date,"
  W !,"remember to enter the full 4 digit year.  For example, if today is"
- W !,"January 4, 2008 and you type in 6/30/05 the system will assume the year"
- W !,"as 1905 since that is a date in the past.  You must type 6/30/2008 if you"
+ W !,"January 4, 2010 and you type in 6/30/10 the system will assume the year"
+ W !,"as 1910 since that is a date in the past.  You must type 6/30/2010 if you"
  W !,"want a date in the future."
  S (BGPPER,BGPVDT)=""
- W ! K DIR,X,Y S DIR(0)="D^::EP",DIR("A")="Enter End Date for the Report: (e.g. 11/30/2005)" D ^DIR K DIR S:$D(DUOUT) DIRUT=1
+ W ! K DIR,X,Y S DIR(0)="D^::EP",DIR("A")="Enter End Date for the Report: (e.g. 11/30/2018)" D ^DIR K DIR S:$D(DUOUT) DIRUT=1
  I $D(DIRUT) Q
  S (BGPPER,BGPVDT)=Y
  Q

@@ -1,11 +1,17 @@
 ABME5L12 ; IHS/ASDST/DMJ - Header 
- ;;2.6;IHS Third Party Billing System;**6,8,9,10,11**;NOV 12, 2009;Build 133
+ ;;2.6;IHS Third Party Billing System;**6,8,9,10,11,22,23,25**;NOV 12, 2009;Build 444
  ;Header Segments
+ ;IHS/SD/SDR 2.6*22 HEAT335246 check new parameter for itemized but with the flat rate on first line, zeros for the rest
+ ;IHS/SD/AML 2.6*23 HEAT247169 if the subfile is 43 and there's a NDC print segments LIN and CTP for medication
+ ;IHS/SD/SDR 2.6*25 CR10008 commented out code that writes purchased service provider loop; piece 19 of array is used for something else, and we don't
+ ;   capture the purchased service provider at this time anyway.
  ;
 EP ;START HERE
  S ABMLXCNT=0
  K ABM
  D ^ABMEHGRV
+ S ABMITMZ=$P($G(^ABMNINS(DUZ(2),ABMP("INS"),1,ABMP("VTYP"),0)),"^",12)  ;abm*2.6*22 IHS/SD/SDR HEAT335246
+ I +ABMITMZ&($P($G(^ABMNINS(DUZ(2),ABMP("INS"),0)),U,14)="Y")&(+$G(ABMP("FLAT"))'=0) D START^ABMEHGR4  ;abm*2.6*22 IHS/SD/SDR HEAT335246
  S ABMI=0
  F  S ABMI=$O(ABMRV(ABMI)) Q:'+ABMI  D
  .S ABMJ=-1
@@ -87,7 +93,7 @@ LOOP ;
  .I $P($P(ABMRV(ABMI,ABMJ,ABMK),U,9)," ")'="" D
  ..D EP^ABME5LIN
  ..D WR^ABMUTL8("LIN")
- .I +$P(ABMRV(ABMI,ABMJ,ABMK),U,5) D
+ .I +$P(ABMRV(ABMI,ABMJ,ABMK),U,5)!($P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),0)),U,14)="Y") D  ;abm*2.6*22 IHS/SD/SDR HEAT335246
  ..D EP^ABME5CTP
  ..D WR^ABMUTL8("CTP")
  .;I $P(ABMRV(ABMI,ABMJ,ABMK),U,13)'="" D  ;abm*2.6*10 HEAT78446
@@ -95,6 +101,15 @@ LOOP ;
  ..;D EP^ABME5REF("XZ",$P(ABMRV(ABMI,ABMJ,ABMK),U,13))  ;abm*2.6*10 HEAT78446
  ..D EP^ABME5REF("XZ",$P(ABMRV(ABMI,ABMJ,ABMK),U,28))  ;abm*2.6*10 HEAT78446
  ..D WR^ABMUTL8("REF")
+ ;start new abm*2.6*23 IHS/SD/AML HEAT247169
+ ;add NDC for page 8H
+ I ABMI=43 D
+ .I $P(ABMRV(ABMI,ABMJ,ABMK),U,19)'="" D
+ ..D EP^ABME5LIN
+ ..D WR^ABMUTL8("LIN")
+ ..D EP^ABME5CTP
+ ..D WR^ABMUTL8("CTP")
+ ;end new abm*2.6*23 IHS/SD/AML HEAT247169
  ;
  ; Loop 2420A - Rendering Physician
  S ABMLOOP="2420A"
@@ -117,13 +132,15 @@ LOOP ;
  ;
  ; Loop 2420B - Purchased Service Physician Name
  S ABMLOOP="2420B"
- I $P($G(ABMRV(ABMI,ABMJ,ABMK)),U,19) D
- .S ABM("PRV")=$P(ABMRV(ABMI,ABMJ,ABMK),U,19)
- .Q:ABM("PRV")=$O(ABMP("PRV","P",0))
- .D EP^ABME5NM1("QB",ABM("PRV"))
- .D WR^ABMUTL8("NM1")
- .;D EP^ABME5REF("EI",9999999.06,DUZ(2))
- .;D WR^ABMUTL8("REF")
+ ;abm*2.6*25 IHS/SD/SDR 12/18/17 - note about below code.  Should be changed from p19 since that is being used for something else.
+ ;  that is what is causing the error to occur, but we don't capture a purchased service provider at this time.
+ ;I $P($G(ABMRV(ABMI,ABMJ,ABMK)),U,19) D  ;abm*2.6*25 IHS/SD/SDR CR10008
+ ;.S ABM("PRV")=$P(ABMRV(ABMI,ABMJ,ABMK),U,19)
+ ;.Q:ABM("PRV")=$O(ABMP("PRV","P",0))
+ ;.D EP^ABME5NM1("QB",ABM("PRV"))
+ ;.D WR^ABMUTL8("NM1")
+ ;.;D EP^ABME5REF("EI",9999999.06,DUZ(2))
+ ;.;D WR^ABMUTL8("REF")
  ;
  ; Loop 2420C - Service Facility Location
  S ABMLOOP="2420C"

@@ -1,8 +1,10 @@
 ABMDF28S ; IHS/SD/SDR - PRINT UB-04 ;  
- ;;2.6;IHS 3P BILLING SYSTEM;**21**;NOV 12, 2009;Build 379
+ ;;2.6;IHS 3P BILLING SYSTEM;**21,23**;NOV 12, 2009;Build 427
  ;new routine abm*2.6*21
  ;IHS/SD/SDR-2.6*21 HEAT240744 - Added routine to resort line items for dialysis billing for Medi-Cal.  All Z6004 CPTs should be reported as 1 line item
  ; with all dates, total units for all Z6004s, and a total $$.
+ ;IHS/SD/SDR 2.6*23 HEAT247169 If there's an NDC on the line item add it to the description
+ ;IHS/SD/SDR 2.6*23 HEAT347035 Make T1015 print on the top line for Medi-Cal
  ;
 COMPILE ;EP
  K I,J,K
@@ -115,19 +117,59 @@ PGCNT ;EP
  Q
  ;start new abm*2.6*21 HEAT205579
 T1015 ;EP
- I (($P($G(^AUTNINS(ABMP("INS"),0)),U)="ARBOR HEALTH PLAN")&($D(ABMRV))) D
- .S ABMIS=$O(ABMRV(0))
- .S ABMJS=$O(ABMRV(ABMIS,""))
- .S ABMKS=$O(ABMRV(ABMIS,ABMJS,""))
+ ;start old abm*2.6*23 IHS/SD/SDR HEAT347035
+ ;I (($P($G(^AUTNINS(ABMP("INS"),0)),U)="ARBOR HEALTH PLAN")&($D(ABMRV))) D
+ ;.S ABMIS=$O(ABMRV(0))
+ ;.S ABMJS=$O(ABMRV(ABMIS,""))
+ ;.S ABMKS=$O(ABMRV(ABMIS,ABMJS,""))
+ ;.S ABMI=0
+ ;.F  S ABMI=$O(ABMRV(ABMI)) Q:'ABMI  D
+ ;..S ABMJ=""
+ ;..F  S ABMJ=$O(ABMRV(ABMI,ABMJ)) Q:$G(ABMJ)=""  D
+ ;...S ABMK=""
+ ;...F  S ABMK=$O(ABMRV(ABMI,ABMJ,ABMK)) Q:'ABMK  D
+ ;....I $P($G(ABMRV(ABMI,ABMJ,ABMK)),U,2)'="T1015" Q
+ ;....S ABMTMP("TMP")=$G(ABMRV(ABMIS,ABMJS,ABMKS))
+ ;....S ABMRV(ABMIS,ABMJS,ABMKS)=$G(ABMRV(ABMI,ABMJ,ABMK))
+ ;....S ABMRV(ABMI,ABMJ,ABMK)=$G(ABMTMP("TMP"))
+ ;end old start new abm*2.6*23 IHS/SD/SDR HEAT347035
+ I ($D(ABMRV))&(($P($G(^AUTNINS(ABMP("INS"),0)),U)="ARBOR HEALTH PLAN")!($$RCID^ABMUTLP(ABMP("INS"))["61044")) D
+ .S ABMF=0
+ .S (ABMIS,ABMJS,ABMKS)=1
  .S ABMI=0
  .F  S ABMI=$O(ABMRV(ABMI)) Q:'ABMI  D
  ..S ABMJ=""
  ..F  S ABMJ=$O(ABMRV(ABMI,ABMJ)) Q:$G(ABMJ)=""  D
  ...S ABMK=""
  ...F  S ABMK=$O(ABMRV(ABMI,ABMJ,ABMK)) Q:'ABMK  D
+ ....M ABMTMP(ABMIS,ABMJS,ABMKS)=ABMRV(ABMI,ABMJ,ABMK)
+ ....S ABMIS=ABMIS+1,ABMJS=ABMJS+1,ABMKS=ABMKS+1
+ ....I $P($G(ABMRV(ABMI,ABMJ,ABMK)),U,2)'="T1015" S ABMF=1 Q
+ .I ABMF=0 Q  ;no T1015 on claim
+ .K ABMRV
+ .M ABMRV=ABMTMP
+ .S ABMI=0
+ .F  S ABMI=$O(ABMRV(ABMI)) Q:'ABMI  D
+ ..S ABMJ=""
+ ..F  S ABMJ=$O(ABMRV(ABMI,ABMJ)) Q:$G(ABMJ)=""  D
+ ...S ABMK=""
+ ...F  S ABMK=$O(ABMRV(ABMI,ABMJ,ABMK)) Q:$G(ABMK)=""  D
  ....I $P($G(ABMRV(ABMI,ABMJ,ABMK)),U,2)'="T1015" Q
- ....S ABMTMP("TMP")=$G(ABMRV(ABMIS,ABMJS,ABMKS))
- ....S ABMRV(ABMIS,ABMJS,ABMKS)=$G(ABMRV(ABMI,ABMJ,ABMK))
- ....S ABMRV(ABMI,ABMJ,ABMK)=$G(ABMTMP("TMP"))
+ ....S ABMTMP("TMP")=$G(ABMRV(ABMI,ABMJ,ABMK))
+ ....S ABMRV(ABMI,ABMJ,ABMK)=$G(ABMRV(1,1,1))
+ ....S ABMRV(1,1,1)=$G(ABMTMP("TMP"))
+ ;end new abm*2.6*23 IHS/SD/SDR HEAT347035
  Q
  ;end new abm*2.6*21 HEAT205579
+ ;start new abm*2.6*23 IHS/SD/SDR HEAT247169
+NDC ;EP
+ K I,J,L
+ S I=0
+ F  S I=$O(ABMRV(I)) Q:'I  D
+ .S J=" "
+ .F  S J=$O(ABMRV(I,J)) Q:($G(J)="")  D
+ ..S L=0
+ ..F  S L=$O(ABMRV(I,J,L)) Q:'L  D
+ ...I $P($G(ABMRV(I,J,L)),U,19)'="" S $P(ABMRV(I,J,L),U,9)=$P(ABMRV(I,J,L),U,19)_" "_$P(ABMRV(I,J,L),U,9)
+ Q
+ ;end new abm*2.6*23 IHS/SD/SDR HEAT247169

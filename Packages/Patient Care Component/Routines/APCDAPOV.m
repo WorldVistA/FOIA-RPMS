@@ -1,5 +1,5 @@
 APCDAPOV ; IHS/CMI/LAB - POV LOOKUP ; 13 Feb 2014  2:26 PM
- ;;2.0;IHS PCC SUITE;**10,11,13**;MAY 14, 2009;Build 9
+ ;;2.0;IHS PCC SUITE;**10,11,13,20**;MAY 14, 2009;Build 25
  ;
 START ;
  S (APCDLOOK,APCDTNQP)=""
@@ -46,14 +46,30 @@ LEX ;EP - called from input template
  S DIC("A")=$S($G(APCDTDIA)]"":APCDTDIA_": ",1:"Enter PURPOSE OF VISIT: ")
  I APCDIMP=1 D LOOK^LEXA(X,"ICD",999,"ICD",$P(APCDD,"."))
  I APCDIMP=30 D LOOK^LEXA(X,"10D",999,"10D",$P(APCDD,"."))
- I 'LEX D  G LEX
+ I 'LEX D  G:%="" LEX G:% LEXN
  .S X=0 F  S X=$O(LEX("HLP",X)) Q:X'=+X  W !,LEX("HLP",X)
+ .;now check fileman V2.0 PATCH 20 CR#554
+ .W !!,"now trying secondary fileman lookup..."
+ .S %="" S X=APCDUINP,DIC="^ICD9(",DIC(0)="MEQ",DIC("S")="D ^AUPNSICD" D ^DIC K DIC
+ .S %="" I $P(Y,U)'=-1 S %=+Y
  ;display all codes and call reader
  S APCDANS=""
  D GETANS
- I APCDY="^" W ! G LEX
- I APCDY="" W ! G LEX
- I '$G(APCDY) W ! G LEX
+ I APCDY="^" W ! D  G:%="" LEX G:% LEXN
+ .;now check fileman
+ .;W !!,"now trying fileman lookup..."
+ .S %="" ;S X=APCDUINP,DIC="^ICD9(",DIC(0)="QME" D ^DIC K DIC
+ .;S %="" I $P(Y,U)'=-1 S %=+Y
+ I APCDY="" W ! D  G:%="" LEX G:% LEXN
+ .;now check fileman
+ .;W !!,"now trying fileman lookup..."
+ .S %="" ;S X=APCDUINP,DIC="^ICD9(",DIC(0)="MEQ" D ^DIC K DIC
+ .;S %="" I $P(Y,U)'=-1 S %=+Y
+ I '$G(APCDY) W ! D  G:%="" LEX G:% LEXN
+ .;now check fileman
+ .;W !!,"now trying fileman lookup..."
+ .S %="" ;S X=APCDUINP,DIC="^ICD9(",DIC(0)="MEQ" D ^DIC K DIC
+ .;S %="" I $P(Y,U)'=-1 S %=+Y
  I APCDIMP=1 S Y=$$ICDONE^LEXU($P(^TMP("LEXHIT",$J,APCDY),U,1),$P(APCDD,"."))
  I APCDIMP=30 S Y=$$ONE^LEXU($P(^TMP("LEXHIT",$J,APCDY),U,1),$P(APCDD,"."),"10D")
  K DO,^TMP("LEXSCH",$J)
@@ -159,7 +175,7 @@ READ ;
  I Y="" S APCDY="" Q
  S APCDY=+Y
  Q
-OLD ;
+OLD ;EP - called from CPV input template
  I $G(APCDTDIA)["PROBLEM" D START^APCDAPRB Q
  S APCDTPCC=""
  X:$D(^DD(9000010.07,.01,12.1)) ^DD(9000010.07,.01,12.1) S DIC="^ICD9(",DIC(0)="AEMQ",DIC("A")="Enter PURPOSE of VISIT: " D ^DIC K DIC

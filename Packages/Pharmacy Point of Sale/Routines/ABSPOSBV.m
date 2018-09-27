@@ -1,5 +1,5 @@
 ABSPOSBV ; IHS/FCS/DRS - ILC A/R billing interface ;   
- ;;1.0;PHARMACY POINT OF SALE;;JUN 21, 2001
+ ;;1.0;PHARMACY POINT OF SALE;**48**;JUN 21, 2001;Build 27
  Q
  ;
 VCPT() ;EP - from ABSPOSQB
@@ -8,7 +8,7 @@ VCPT() ;EP - from ABSPOSQB
  N CPTIEN S CPTIEN=$$CPTIEN^ABSPOS57
  I 'CPTIEN S CPTIEN=$$NEWCPT I 'CPTIEN Q ""
  ; Now that it exists in the charge file, you can create VCPT
- N VCPTIEN,FDA,IEN,MSG,FN,PLUS1 S FN=9002301,PLUS1="+1,"
+ N VCPTIEN,FDA,IEN,MSG,FN,PLUS1 S FN=9002301,PLUS1="+1," ; /IHS/OIT/RAM ; 9 JUN 17 ; FILE NUMBER 9002301 _DOESN'T EVEN EXIST..._
  ; The .01 field points to the charge file
  S FDA(FN,PLUS1,.01)=CPTIEN
  ;
@@ -41,13 +41,14 @@ VCPT() ;EP - from ABSPOSQB
  I $D(^DD(FN,59.2)) D  ; Sitka didn't have this field on 06/21/2000
  . S FDA(FN,PLUS1,59.2)=$P(^ABSCPT(9002300,CPTIEN,0),U,6) ; REV CODE
  D UPDATE^DIE("S","FDA","IEN","MSG")
+ I $D(MSG) D LOG^ABSPOSL2("VCPT^ABSPOSBV",.MSG) ; /IHS/OIT/RAM ; 9 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  I $D(MSG) D
  . D LOG^ABSPOSL("Failed to create VCPT entry!")
  . D LOGARRAY("FDA"),LOGARRAY("IEN"),LOGARRAY("MSG")
  Q $G(IEN(1))
 LOGARRAY(X) D LOGARRAY^ABSPOSL(X) Q
 NEWCPT() ; create new CPT entry based on ^ABSPTL(IEN57,...)
- N FDA,MSG,FN,PLUS1 S FN=9002300,PLUS1="+1,"
+ N FDA,MSG,FN,PLUS1 S FN=9002300,PLUS1="+1,"  ;; /IHS/OIT/RAM ; 9 JUN 17 ; FILE NUMBER 9002300 _DOESN'T EVEN EXIST..._
  D LOG^ABSPOSL("Creating new CPT code for IEN57="_IEN57)
  I $$TYPE=1 D
  . S FDA(FN,PLUS1,.01)=$$NDC^ABSPOS57 ; CODE
@@ -65,6 +66,7 @@ NEWCPT() ; create new CPT entry based on ^ABSPTL(IEN57,...)
  . D IMPOSS^ABSPOSUE("P","TI","New charge file entry for supply items not yet implemented",,"NEWCPT",$T(+0))
  E  D IMPOSS^ABSPOSUE("P","TI","Unaccounted-for $$TYPE="_$$TYPE,,"NEWCPT",$T(+0))
 NEW8 D UPDATE^DIE("S","FDA","IEN","MSG")
+ I $D(MSG) D LOG^ABSPOSL2("NEW8^ABSPOSBV",.MSG) ; /IHS/OIT/RAM ; 9 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  I $D(MSG) D  G NEW8:$$IMPOSS^ABSPOSUE("FM","TRI","UPDATE^DIE failed",.MSG,"NEWCPT",$T(+0))
  . D LOG^ABSPOSL("Failed to create a new CPT code!")
  . D LOGARRAY("FDA"),LOGARRAY("IEN"),LOGARRAY("MSG")

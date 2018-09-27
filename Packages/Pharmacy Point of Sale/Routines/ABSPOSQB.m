@@ -1,5 +1,5 @@
 ABSPOSQB ; IHS/FCS/DRS - POS background, Part 1 ;   [ 08/20/2002  9:01 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**1,3,23,46**;JUN 21, 2001;Build 15
+ ;;1.0;PHARMACY POINT OF SALE;**1,3,23,46,48**;JUN 21, 2001;Build 27
  ;
  ;IHS/DSD/lwj 10/09/01 on behalf of David Slauenwhite - change 
  ; consist of one line be altered in the "C" subroutine.
@@ -207,8 +207,8 @@ P N PRICING S PRICING=$G(^ABSPT(IEN59,5))
  ; The 9002313.59 entry has all the data it should have at this point.
  ; Store whatever data were just determined in this routine.
  ;
-FILE1 I $D(FDA) D
- . D FILE^DIE("","FDA","MSG")
+FILE1 I $D(FDA) D FILE^DIE("","FDA","MSG")  ; /IHS/OIT/RAM ; 12 JUN 17 ; REMOVED A CONFUSING "DOUBLE-DO" HERE.
+ I $D(MSG) D LOG^ABSPOSL2("F^ABSPOSBX",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  I $D(MSG) D  G FILE99
  . D LOG^ABSPOSL("Error in D FILE^DIE at tag FILE1^"_$T(+0))
  . D LOGMSG ; failure - log returned diagnostics

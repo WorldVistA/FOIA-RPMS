@@ -1,5 +1,5 @@
 BMCRLU1 ; IHS/PHXAO/TMJ - GEN RETR UTILITIES ;     [ 11/28/2006  1:23 PM ]
- ;;4.0;REFERRED CARE INFO SYSTEM;**3**;JAN 09, 2006;Build 51
+ ;;4.0;REFERRED CARE INFO SYSTEM;**3,12**;JAN 09, 2006;Build 92
  ;BMC 4.0*3 11/30/06 IHS/OIT/FCJ PRNT POL #
  ;
 MCR ;display all current medicare data
@@ -86,3 +86,9 @@ RRR(P,D) ;EP Railroad Retirement
  . I $P(^AUPNRRE(P,11,I,0),U,2)]"",$P(^(0),U,2)<D Q
  . S Y=1
  Q Y
+ ;BMC*3.1*12;IHS/OIT/FCJ FACREQ NEW
+FACREQ(R) ;EP return facility requesting referral
+ N BMCF,BMCFDA
+ S BMCFDA=0,BMCF=""
+ S BMCF=$E($P(^BMCREF(R,0),U,2),1,6),BMCFDA=$O(^AUTTLOC("C",BMCF,BMCFDA))
+ Q BMCFDA

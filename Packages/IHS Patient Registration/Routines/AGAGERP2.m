@@ -1,5 +1,7 @@
 AGAGERP2 ;VNGT/IHS/DLS - Patient Age Specific Report ; April 29, 2010
- ;;7.1;PATIENT REGISTRATION;**8,9**;AUG 25, 2005
+ ;;7.1;PATIENT REGISTRATION;**8,9,12**;AUG 25, 2005;Build 1
+ ;
+ ;IHS/OIT/NKD AG*7.1*12 INSURER TYPE
  ;
 PRINT ; Print the report
  I $D(^TMP("AGAGERP",$J))<11 W !,"No Records Found!" H 2 Q
@@ -305,7 +307,8 @@ AGARNO ;  Get Alternate Resource Information
  I ARNOTYP="D" D
  . S PLAN=$P(AGINS(ARNO),U,12)
  . I PLAN'="" D
- . . S ARPLNTYP=$$GET1^DIQ(9999999.18,PLAN,.21,"I")
+ . . ;S ARPLNTYP=$$GET1^DIQ(9999999.18,PLAN,.21,"I")
+ . . S ARPLNTYP=$$INSTYP^AGUTL(PLAN)  ;IHS/OIT/NKD AG*7.1*12
  . . I ARPLNTYP="K" D
  . . . S ARNAME=$$GET1^DIQ(9999999.18,PLAN,.01)
  . . . S ARNOTYP="K"

@@ -1,5 +1,5 @@
 AUMSCBU  ;IHS/OIT/NKD - SCB UPDATE - UTILITY 12/07/2012 ;
- ;;17.0;TABLE MAINTENANCE;**1**;AUG 18,2016;Build 1
+ ;;18.0;TABLE MAINTENANCE;**1**;AUG 14,2017;Build 1
  ; 03/12/14 - Modified Inactivate processing for Education tables
  ; 05/28/14 - Added Tribe pre-routine for Inactivate processing
  ;          - Corrected condition to trigger Patient Current Community change
@@ -8,6 +8,7 @@ AUMSCBU  ;IHS/OIT/NKD - SCB UPDATE - UTILITY 12/07/2012 ;
  ;          - Added Clinic report
  ; 12/22/15 - Added Health Factor tag for New processing
  ; 08/22/16 - Modified Inactivate processing for Patient Status Code
+ ; 12/04/17 - Removed Health Factor IEN restriction
  ;
  Q
  ; CUSTOM PRE-ROUTINES
@@ -169,8 +170,9 @@ LOCNEW ; EP - LOCATION - CREATE INSTITUTION AND LOCATION ENTRIES
  ; IHS/OIT/NKD AUM*16.0*1 - ADDED HEALTH FACTORS NEW
 HFNEW ; EP - HEALTH FACTORS - CREATE HEALTH FACTOR ENTRY
  N FDA,NEWIEN,ERR,DINUM
- F DINUM=+$P($G(^AUTTHF(0)),U,3):1:100000 Q:'$D(^AUTTHF(DINUM))  I DINUM>99999 D ERR^AUMSCBD("SYSTEM ERROR - DINUM FOR HEALTH FACTOR TOO BIG") Q
- Q:DINUM>99999
+ ;F DINUM=+$P($G(^AUTTHF(0)),U,3):1:100000 Q:'$D(^AUTTHF(DINUM))  I DINUM>99999 D ERR^AUMSCBD("SYSTEM ERROR - DINUM FOR HEALTH FACTOR TOO BIG") Q
+ F DINUM=+$P($G(^AUTTHF(0)),U,3):1 Q:'$D(^AUTTHF(DINUM))  ;IHS/OIT/NKD AUM*18.0*1 REMOVED IEN RESTRICTION
+ ;Q:DINUM>99999
  S FDA(9999999.64,"+1,",.01)=P1
  S FDA(9999999.64,"+1,",.03)=$S('P3A:DINUM,1:P3A)
  S FDA(9999999.64,"+1,",.1)=P4

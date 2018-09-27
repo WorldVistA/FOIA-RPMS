@@ -1,5 +1,5 @@
 BGP8GLST ; IHS/CMI/LAB - GUI CMS REPORT ;
- ;;8.0;IHS CLINICAL REPORTING;**2**;MAR 12, 2008
+ ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
  ;
  ;
 EP(BGPRET,BGPUSER,BGPDUZ2,BGPOPTN,BGPDIR,BGPRTIME) ;EP - called from GUI to produce LIST OF FILES
@@ -14,7 +14,7 @@ EP(BGPRET,BGPUSER,BGPDUZ2,BGPOPTN,BGPDIR,BGPRTIME) ;EP - called from GUI to prod
  ;  passed as ien if error occurred, display the filename back to the user
  ;  if they chose to export to area
  ;
- ;  I put the list of files in the BGPGUIE global in field 1100 as an output
+ ;  I put the list of files in the BGPGUIR global in field 1100 as an output
  ;create entry in gui output file
  ;queue report to run with/GUIR
  D EP1
@@ -38,7 +38,7 @@ EP1 ;
  ;create entry in GUI file
  D ^XBFMK
  S X=BGPUSER_$$NOW^XLFDT
- S DIC="^BGPGUIE(",DIC(0)="L",DIADD=1,DLAYGO=90534.08,DIC("DR")=".02////"_BGPUSER_";.03////"_$S(BGPRTIME]"":BGPRTIME,1:$$NOW^XLFDT)_";.05///"_BGPOPTN_";.06///R"
+ S DIC="^BGPGUIR(",DIC(0)="L",DIADD=1,DLAYGO=90560.19,DIC("DR")=".02////"_BGPUSER_";.03////"_$S(BGPRTIME]"":BGPRTIME,1:$$NOW^XLFDT)_";.05///"_BGPOPTN_";.06///R"
  K DD,D0,DO D FILE^DICN K DLAYGO,DIADD,DD,D0,DO
  I Y=-1 S BGPRET=0_"^UNABLE TO CREATE ENTRY IN GUI OUTPUT FILE" Q
  S BGPGIEN=+Y
@@ -50,13 +50,14 @@ EP1 ;
 TSKMN ;
  S ZTIO=""
  K ZTSAVE S ZTSAVE("*")=""
- S ZTCPU=$G(IOCPU),ZTRTN="AOLST^BGP8GLST",ZTDTH=$S(BGPRTIME]"":BGPRTIME,1:$$NOW^XLFDT),ZTDESC="GUI 06 UPLOAD FILE LIST" D ^%ZTLOAD Q
+ S ZTCPU=$G(IOCPU),ZTRTN="AOLST^BGP8GLST",ZTDTH=$S(BGPRTIME]"":BGPRTIME,1:$$NOW^XLFDT),ZTDESC="GUI 15 UPLOAD FILE LIST" D ^%ZTLOAD
+ D UPLOG^BGP8GUA(BGPGIEN,ZTSK)
  Q
 AOLST ;
- K BGPLIST S BGPLIST="",X=$$LIST^%ZISH(BGPDIR,"BG08*",.BGPLIST)
- I $O(BGPLIST(""))="" S ^BGPGUIE(BGPGIEN,11,C,0)="There are no files in that directory." D ENDLOG,XIT Q
- S X=0,C=0 F  S X=$O(BGPLIST(X)) Q:X'=+X  S C=C+1,^BGPGUIE(BGPGIEN,11,C,0)=BGPLIST(X)
- S ^BGPGUIE(BGPGIEN,11,0)="^90534.0811^"_C_"^"_C_"^"_DT
+ K BGPLIST S BGPLIST="",X=$$LIST^%ZISH(BGPDIR,"BG180*",.BGPLIST)
+ I $O(BGPLIST(""))="" S ^BGPGUIR(BGPGIEN,11,C,0)="There are no files in that directory." D ENDLOG,XIT Q
+ S X=0,C=0 F  S X=$O(BGPLIST(X)) Q:X'=+X  S C=C+1,^BGPGUIR(BGPGIEN,11,C,0)=BGPLIST(X)
+ S ^BGPGUIR(BGPGIEN,11,0)="^90560.1911^"_C_"^"_C_"^"_DT
  K ^TMP($J,"BGPGUI")
  D ENDLOG
  D XIT
@@ -77,7 +78,7 @@ XIT ;
  L -^BGPDATA
  Q
 ENDLOG ;-- UPDATE LOG AT END
- S DIE="^BGPGUIE(",DA=BGPGIEN,DR=".04////"_$$NOW^XLFDT_";.06///C"
+ S DIE="^BGPGUIR(",DA=BGPGIEN,DR=".04////"_$$NOW^XLFDT_";.06///C"
  D ^DIE
  K DIE,DR,DA
  Q

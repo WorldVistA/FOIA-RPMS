@@ -1,5 +1,5 @@
-PSGSICHK ;BIR/CML3-CHECKS SPECIAL INSTRUCTIONS ;06-Feb-2013 08:22;MGH
- ;;5.0; INPATIENT MEDICATIONS ;**3,9,26,29,44,49,59,1013,110,139,146,160,175,201,185,1015**;16 DEC 97;Build 62
+PSGSICHK ;BIR/CML3-CHECKS SPECIAL INSTRUCTIONS ;19-Oct-2017 12:55;PT
+ ;;5.0; INPATIENT MEDICATIONS ;**3,9,26,29,44,49,59,1013,110,139,146,160,175,201,185,1015,1022**;16 DEC 97;Build 20
  ;
  ; Reference to ^PS(50.605 is supported by DBIA 696.
  ; Reference to EN^PSOORDRG is supported by DBIA 2190.
@@ -182,21 +182,30 @@ ALGC2 ;
  .S GMRADRCL(GMRACL)=GMRACL_U_GMRANM_" ("_GMRALOC_")"
  .;IHS/MSC/MGH added for reaction data patch 1014
  .S J=0 F  S J=$O(^TMP("GMRAOC",$J,"APC",GMRACL,"REAC",J)) Q:'+J  D
- ..S GMRAREAC(J)=$G(^TMP("GMRAOC",$J,"APC",GMRACL,"REAC",J))
+ ..S GMRAREAC(GMRACL,J)=$G(^TMP("GMRAOC",$J,"APC",GMRACL,"REAC",J))
  .;END MOD
  .S RET=RET+1
  Q:'RET  K ^TMP("GMRAOC",$J)
+ ;IHS/GDIT/MSC/MGH fix for reactions patch 1022
  S CLCHK="",CT="" F  S CT=$O(GMRADRCL(CT)) Q:CT=""  D
- .I $E(PSCLASS,1,LEN)=$E(CT,1,LEN) S CLCHK=$G(CLCHK)+1,^TMP($J,"PSJDRCLS",CLCHK)=CT_" "_$P(GMRADRCL(CT),"^",2)
+ .I $E(PSCLASS,1,LEN)=$E(CT,1,LEN) D
+ ..S CLCHK=$G(CLCHK)+1,^TMP($J,"PSJDRCLS",CLCHK)=CT_" "_$P(GMRADRCL(CT),"^",2)
+ ..S K=0 F  S K=$O(GMRAREAC(CT,K)) Q:'+K  D
+ ...I K=1 S ^TMP($J,"PSODRCLS","REAC",K)="Reactions: "_$G(GMRAREAC(CT,K))
+ ...E  S ^TMP($J,"PSODRCLS","REAC",K)=$G(GMRAREAC(CT,K))
 CLASSDSP ;
  I '$D(^TMP($J,"PSJDRCLS")) Q
  W $C(7),!,"A Drug-Allergy Reaction exists for this medication and/or class!",!
  W !,"Drug: "_$P($G(^PSDRUG(PSJDD,0)),"^")
  S CT="" F  S CT=$O(^TMP($J,"PSJDRCLS",CT)) Q:CT=""  W !,"Drug Class: "_^TMP($J,"PSJDRCLS",CT)
  ;IHS/MSC/MGH added patch 1014 for reactions
- S K=0 F  S K=$O(GMRAREAC(K)) Q:'+K  D
- .I K=1 W !?6,"Reactions: "_$G(GMRAREAC(K))
- .E  W !?19,$G(GMRAREAC(K))
+ ;IHS/GDIT/MSC/MGH fix for reactions patch 1022
+ S K=0 F  S K=$O(^TMP($J,"PSODRCLS","REAC",K)) Q:K=""  D
+ .I K=1 W !?6,"Reactions: "_$G(^TMP($J,"PSODRCLS","REAC",K))
+ .E  W !?19,$G(^TMP($J,"PSODRCLS","REAC",K))
+ .;S K=0 F  S K=$O(GMRAREAC(K)) Q:'+K  D
+ .;I K=1 W !?6,"Reactions: "_$G(GMRAREAC(K))
+ .;E  W !?19,$G(GMRAREAC(K))
  ;END MOD
  K ^TMP($J,"PSJDRCLS")
  S DIR("?",1)="Answer 'YES' if you DO want to enter a reaction for this medication,"

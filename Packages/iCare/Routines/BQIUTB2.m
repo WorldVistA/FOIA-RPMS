@@ -1,5 +1,5 @@
 BQIUTB2 ;PRXM/HC/ALA-Get Reminders List and Help ; 15 Feb 2007  5:35 PM
- ;;2.3;ICARE MANAGEMENT SYSTEM;**3,4**;Apr 18, 2012;Build 66
+ ;;2.7;ICARE MANAGEMENT SYSTEM;;Dec 19, 2017;Build 23
  ;
  Q
  ;
@@ -109,7 +109,7 @@ FLTR(DATA) ;EP - Get list of filters
  S IEN=0
  F  S IEN=$O(^BQI(90506.3,IEN)) Q:'IEN  D
  . ; If vfile entry is flagged 'Do not display or extract', quit
- . I +$$GET1^DIQ(90506.3,IEN_",",.05,"I") Q
+ . I $$GET1^DIQ(90506.3,IEN_",",.05,"I")=1 Q
  . S II=II+1
  . S VALUE=IEN_U_$P(^BQI(90506.3,IEN,0),U,1)
  . S FN=0
@@ -127,9 +127,12 @@ FLTR(DATA) ;EP - Get list of filters
  Q
  ;
 IPCAT(DATA) ;EP - Get the table of IPC categories
- NEW IEN,TEXT,CAT2,CAT1,SBN,SBN
+ NEW IEN,TEXT,CAT2,CAT1,SBN,SBN,CRIPC
  S II=0
  S @DATA@(II)="T00010IEN^T00030CAT1^T00030CAT2"_$C(30)
+ S CRIPC=$P($G(^BQI(90508,1,11)),U,1)
+ ;S CRIPC="IPCMH"
+ ;
  S IEN=0
  F  S IEN=$O(^BQI(90506.8,IEN)) Q:'IEN  D
  . I $P(^BQI(90506.8,IEN,0),U,3)'="C" Q
@@ -138,11 +141,11 @@ IPCAT(DATA) ;EP - Get the table of IPC categories
  . I CAT2'="" S TEXT=CAT2,CAT2=CAT1
  . I CAT2="" S TEXT=CAT1
  . ; If inactive
- . I $P(^BQI(90506.8,IEN,0),"^",2)=1 Q
  . I '$D(^BQI(90506.8,"AC",IEN)) S II=II+1,@DATA@(II)=IEN_"^"_TEXT_"^"_CAT2_$C(30) Q
  . S SBN=""
  . F  S SBN=$O(^BQI(90506.8,"AC",IEN,SBN)) Q:SBN=""  D
  .. I $P(^BQI(90506.8,SBN,0),"^",2)=1 Q
+ .. I $P(^BQI(90506.8,SBN,0),U,5)'=CRIPC Q
  .. S CAT1=$P(^BQI(90506.8,SBN,0),"^",1)
  .. S CAT2=$$GET1^DIQ(90506.8,SBN_",",.04,"E")
  .. I CAT2'="" S TEXT=CAT2,CAT2=CAT1

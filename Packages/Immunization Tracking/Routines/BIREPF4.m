@@ -1,12 +1,14 @@
 BIREPF4 ;IHS/CMI/MWR - REPORT, FLU IMM; OCT 15, 2010
- ;;8.5;IMMUNIZATION;**13**;AUG 01,2016
+ ;;8.5;IMMUNIZATION;**15**;SEP 30,2017
  ;;* MICHAEL REMILLARD, DDS * CIMARRON MEDICAL INFORMATICS, FOR IHS *
  ;;  INFLUENZA IMM REPORT, GATHER/STORE PATIENTS.
  ;;  PATCH 1: Exclude patients whose Inactive Date=Not in Register.  CHKSET+31
  ;;  PATCH 2: Filter for Active Clinical, all ages, using $$ACTCLIN^BIUTL6 call.
  ;;           CHKSET+39
  ;;  PATCH 5: Begin Flu Report on July 1.  CHKSET+107
- ;;  PATCH 13: Reincorporate Flu High Risk check with  value of "4".  CHKSET+41
+ ;;  PATCH 13: Reincorporate Flu High Risk check with a value of "4".  CHKSET+41
+ ;;  PATCH 15: Reincorporate Flu High Risk check with a value of "4".  CHKSET+46
+ ;;            Update list of CVX's that count as Flu refusal.  CHKSET+87
  ;
  ;
  ;----------
@@ -84,7 +86,12 @@ CHKSET(BIDFN,BICC,BIHCF,BICM,BIBEN,BIAGRP,BIQDT,BIFH,BIYEAR,BIUP) ;EP
  ;---> Reincorporate Flu High Risk check with new parameter value of "4".
  ;---> Note: Third parameter=1 (retrieve Flu risk only).
  ;D:BIAGRP=4 RISK^BIDX(BIDFN,$E(BIQDT,1,3)_"0901",1,.BIRISKI)
- D:BIAGRP=4 RISK^BIDX(BIDFN,$E(BIQDT,1,3)_"0901",4,.BIRISKI)
+ ;
+ ;
+ ;********** PATCH 15, v8.5, SEP 30,2017, IHS/CMI/MWR
+ ;---> Return Flu High Risk Value for ages >18 yrs and <50 yrs.
+ ;D:BIAGRP=4 RISK^BIDX(BIDFN,$E(BIQDT,1,3)_"0901",4,.BIRISKI)
+ D:BIAGRP=4 RISKF^BIDX(BIDFN,$E(BIQDT,1,3)_"0901",.BIRISKI)
  ;**********
  ;
  ;
@@ -120,7 +127,13 @@ CHKSET(BIDFN,BICC,BIHCF,BICM,BIBEN,BIAGRP,BIQDT,BIFH,BIYEAR,BIUP) ;EP
  ;---> Add refusals, if any.
  N Z D CONTRA^BIUTL11(BIDFN,.Z,1) I $O(Z(0)) D
  .;---> If this refusal is for an Influenza vaccine, count it.
- .N I F I=15,16,88,111,123,135 I $D(Z(I)) S BITMP("REFUSALS",BIDFN)=""
+ .;
+ .;********** PATCH 15, v8.5, SEP 30,2017, IHS/CMI/MWR
+ .;---> Update list of CVX's that count as Flu refusal.
+ .;N I F I=15,16,88,111,123,135 I $D(Z(I)) S BITMP("REFUSALS",BIDFN)=""
+ .N I F I=15,16,88,111,123,125,126,127,128,135,140,141 I $D(Z(I)) S BITMP("REFUSALS",BIDFN)=""
+ .F I=144,149,150,151,153,155,158,161,166,168,171,185,186 I $D(Z(I)) S BITMP("REFUSALS",BIDFN)=""
+ .;**********
  ;
  ;---> Set BIHX=to a valid Immunization History.
  N BIHX S BIHX=$P(BIRETVAL,BI31,1)

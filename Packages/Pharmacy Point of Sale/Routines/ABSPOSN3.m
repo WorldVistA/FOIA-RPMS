@@ -1,5 +1,5 @@
 ABSPOSN3 ; IHS/FCS/DRS - NCPDP Fms F ILC A/R ;  [ 09/12/2002  10:16 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**3,10**;JUN 21, 2001;Build 15
+ ;;1.0;PHARMACY POINT OF SALE;**3,10**;JUN 21, 2001;Build 27
  ;----------------------------------------------------------------------
  ;IHS/SD/lwj 03/10/04 patch 10
  ; Routine adjusted to call ABSPFUNC to retrieve
@@ -118,7 +118,7 @@ PHARINFO(PHARINFO,F57IEN) ;EP
  S PHARINFO("Phone")=$P(Y,"/",Z)
  S PHARINFO("Representative")=$P(X,"/",Z)
  I PHARINFO("Phone")="",DUZ(2)=1859 D
- . S PHARINFO("Phone")="(907) 966-8433"
+ . S PHARINFO("Phone")="(999) 999-9999"
  ;
  S X=$P(^ABSP(9002313.56,PHARM,0),U,2)
  I X="" S X=$P(^ABSP(9002313.56,PHARM1,0),U,2)

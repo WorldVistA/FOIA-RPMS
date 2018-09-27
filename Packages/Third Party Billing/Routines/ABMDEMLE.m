@@ -1,5 +1,5 @@
 ABMDEMLE ; IHS/ASDST/DMJ - Edit Utility - FOR MULTIPLES ;
- ;;2.6;IHS 3P BILLING SYSTEM;**3,6,8,9,10,11,13,14,15,18,21**;NOV 12, 2009;Build 379
+ ;;2.6;IHS 3P BILLING SYSTEM;**3,6,8,9,10,11,13,14,15,18,21,23**;NOV 12, 2009;Build 427
  ;
  ; IHS/SD/SDR - v2.5 p5 - 5/18/04 - Modified to put POS and TOS by line item
  ; IHS/SD/SDR - v2.5 p6 - 7/9/04 - IM14079 and IM14121 - Edited code for TOS
@@ -23,6 +23,7 @@ ABMDEMLE ; IHS/ASDST/DMJ - Edit Utility - FOR MULTIPLES ;
  ;IHS/SD/AML - 2.6*21 - HEAT197195 - Removed dot so POA would be editable on page 5A.
  ;IHS/SD/SDR - 2.6*21 - HEAT233742 - Updated check for CPT Narrative prompt.  Wasnt' including Surgical (21) or Ambulance (47) because the range
  ;   wasn't inclusive.  Changed >21 to >20 and <47 to <48.
+ ;IHS/SD/AML 2.6*23 HEAT247169 - Add .19 for NDC to list of editable fields if subfile is 43
  ;
 E1 ; Edit Multiple
  I ABMZ("NUM")=0 W *7,!!,"There are no entries to edit, you must first ADD an entry.",! K DIR S DIR(0)="E" D ^DIR K DIR Q
@@ -92,6 +93,7 @@ E2 W !!!,"[",+Y,"]  ",$P(ABMZ(+Y),U) S ABMX("Y")=+Y
  .I Y>0 S ABMZ("DR")=ABMZ("DR")_";.06////"_$P(Y(0),U) Q
  .W !,*7,"No match was found in the PRESCRIPTION FILE for this Drug and Patient!",!
  I ABMZ("SUB")=39 D 39^ABMDEML
+ I ABMZ("SUB")=43 S ABMZ("DR")=ABMZ("DR")_";.19"  ;abm*2.6*23 IHS/SD/AML HEAT247169
  I ABMZ("SUB")=43&($P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),1,ABMP("VTYP"),1)),U,4)="Y") S ABM("DR")=$S($G(ABM("DR")):ABM("DR")_";11;12;13;14",1:"11;12;13;14")  ;abm*2.6*6 5010
  S DA(1)=ABMP("CDFN"),DA=$P(ABMZ(ABMX("Y")),U,2),DIE="^ABMDCLM(DUZ(2),"_DA(1)_","_ABMZ("SUB")_",",DR=$E(ABMZ("DR"),2,200) D ^DIE K DR
  S DR=".17///M" D ^DIE

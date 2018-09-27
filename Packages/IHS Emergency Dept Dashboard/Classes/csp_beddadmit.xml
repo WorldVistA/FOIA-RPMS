@@ -1,0 +1,2815 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2018-09-27 12:54:35">
+<Class name="csp.beddadmit">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeChanged>64672,29652.773647</TimeChanged>
+<TimeCreated>64672,29652.70897</TimeCreated>
+<GeneratedBy>/csp/foia_goldb/BEDDAdmit.csp</GeneratedBy>
+
+<Method name="CheckLock">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	
+ 	Set objid=$G(%session.Data("OBJECTID"))
+ 	If objid="" {
+ 		Quit "Unable to locate BEDD visit"
+ 	}
+ 	Set dfn=$G(%session.Data("DFN"))
+ 	If dfn="" {
+ 		Quit "Unable to locate patient DFN"
+ 	}
+ 	
+ 	Set edvst=##class(BEDD.EDVISIT).%OpenId(objid)
+ 	
+ 	// Check to see if record is locked if it is not locked or
+ 	// if this user has it locked then go to the edit page
+ 	If (+edvst.RecLock=0)||((+edvst.RecLock=1)&&(edvst.RecLockUser=%session.Data("DUZ"))) {
+ 		Set edvst.RecLock=1,edvst.RecLockDT=$H,edvst.RecLockUser=%session.Data("DUZ")
+ 	
+ 		//BEDD*2.0*1;Added setting of new RecLockSite property
+ 		Set edvst.RecLockSite=$G(%session.Data("SITE"))
+ 		Set save=edvst.%Save()
+ 		Set edvst=""
+ 		Set %session.Data("DFN")=dfn
+ 		Set %session.Data("OBJECTID")=objid
+ 		Set %session.Data("EDVISITID")=objid
+ 		
+ 		Quit ""
+ 
+ 	}
+ 	Else {
+ 		Set uien=edvst.RecLockUser,editdt=edvst.RecLockDT,myLock=edvst.RecLock 
+ 		Set edvst="",user="No Such User"
+ 		Set:uien]"" user=$$GET1^DIQ(200,uien_",",".01","I"),lock=1
+ 		Set ErrorMessage = "RECORD IS BEING UPDATED BY "_user_" "_($$HTE^XLFDT(editdt,"5Z"))
+  
+ 		Quit ErrorMessage
+ 	}
+ 	
+ 
+]]></Implementation>
+</Method>
+
+<Method name="ClearSession">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set %session.Data("tPatientDFN")=""
+ 	Set %session.Data("tNewVisit")=""
+ 	Set %session.Data("tVIEN")=""
+ 	Set %session.Data("tAdmitDtTm")=""
+ 	Set %session.Data("tVisitType")=""
+ 	Set %session.Data("tClinic")=""
+ 	Set %session.Data("tPCmp")=""
+ 	Set %session.Data("tTransferYN")=""
+ 	Set %session.Data("tTransferFrom")=""
+ 	Set %session.Data("tModeTransport")=""
+ 	Set %session.Data("tAttendantYN")=""
+ 	Set %session.Data("tArrivalMeans")=""
+ 	Set %session.Data("tAmbulanceNumber")=""
+ 	Set %session.Data("tBillingNumber")=""
+ 	Set %session.Data("tAmbulanceCompany")=""
+ 	Set %session.Data("OBJECTID")=""
+ 	Set %session.Data("DFN")=""
+ 	Set %session.Data("tLabelPrinter")=""
+ 	Set %session.Data("tLabelCopies")=""
+ 	Set %session.Data("tRoutingPrinter")=""
+ 	Set %session.Data("tRoutingCopies")=""
+ 	Set %session.Data("tMRecPrinter")=""
+ 	Set %session.Data("tMRecCopies")=""
+ 	Set %session.Data("tPRoutingPrinter")=""
+ 	Set %session.Data("tPRoutingCopies")=""
+ 	Set %session.Data("tEmbCardPrinter")=""
+ 	Set %session.Data("tEmbCardCopies")=""
+ 	
+ 
+]]></Implementation>
+</Method>
+
+<Method name="ExistingVisit">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>tDFN:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	If (+tDFN=0) {
+ 		Quit 0
+ 	}
+ 	Set %session.Data("tNewVisit")=""
+ 	If (+$P($Get(^AMERADM(+tDFN,0)),"^")=+tDFN),($P($Get(^AMERADM(+tDFN,0)),"^",2)>0) {
+ 		Set %session.Data("tNewVisit")=1
+ 		Quit 1
+ 	}
+ 	Quit 0
+ 
+]]></Implementation>
+</Method>
+
+<Method name="MyAdate">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>rawDtTm:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set val=$$ADATE^BEDDADM(rawDtTm)
+ 	QUIT val
+ 
+]]></Implementation>
+</Method>
+
+<Method name="Now">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Quit $P($NOW(),",",2)
+ 
+]]></Implementation>
+</Method>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body bgcolor=""#3399CC"" onload=""LoadPage()"">"
+	Write !,!,"	"
+	Write "<form name=""form"">"
+	Write !,..InsertHiddenFields(""),!
+	Write !,"	",!
+	Write "	"
+	Write "<input type=""hidden"" id=""tPatientDFN"">"
+	Write !,"	"
+	Write "<input type=""hidden"" id=""tNewVisit"">"
+	Write !,"	"
+	Write "<input type=""hidden"" id=""tVIEN"">"
+	Write !,"	"
+	Write "<input type=""hidden"" id=""tNow"" value='"_(tNow)_"'>"
+	Write !,"	"
+	Write "<input type=""hidden"" id=""tPrintMRec"" value='"_(tPrintMRec)_"'>"
+	Write !,"	"
+	Write "<input type=""hidden"" id=""tPrintPRouting"" value='"_(tPrintPRouting)_"'>"
+	Write !,"	"
+	Write "<input type=""hidden"" id=""tPrintEmbCard"" value='"_(tPrintEmbCard)_"'>"
+	Write !,!,"	<b><font size=6>Admit Patient to Dashboard</font></b>",!
+	Write "	<br>",!
+	Write "	"
+	Write "<div style=color:#00FF00;border-color:#000000;>"
+	Write !,"		"
+	Write "<div style=""border: solid 1px black;width:60%;"">"
+	Write !,"			<table>",!
+	Write "				<tr>",!
+	Write "					<td>",!
+	Write "						<label for=""tLookup"" style=""font-weight:bold;align:center"">*Patient Lookup</label>",!
+	Write "						"
+	Write "<input type=""text"" title=""Enter the patient name (Last,First), DOB, HRN, or lastname initial followed by last 4 digits of SSN and then hit the TAB key"" style=""align:center"" name=""PtSearch"" id=""PtSearch"" size=55 onblur=""HandleLeftSearch(event)"">"
+	Write !,!,"						&nbsp; &nbsp; &nbsp; &nbsp;",!
+	Write "					</td>",!
+	Write "					<td>",!
+	Write "						"
+	Write "<input type=""button"" name=""btnSearch"" style=""font-weight:bold;align:center;width:80px;height:40px"" value=""Search"" onclick=""Search()"">"
+	Write " ",!
+	Write !,"						&nbsp;",!
+	Write "					</td>",!
+	Write "					<td>",!
+	Write "						"
+	Write "<span style=""display:inline-block"">"
+	Write !,"							<label for=""tMaxReturn"" style=""font-weight:bold;align:center"">Results</label>",!
+	Write "							"
+	Write "<input type=""hidden"" id=""iMaxResults"" value='"_(iMaxResults)_"' style=""color: #000000; font-family: Tahoma; align:center; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"								"
+	Write "<select id=""tMaxResults"" name=""tMaxResults"">"
+	Write !,"									"
+	Write "<option value=""25"">"
+	Write " 25</option>",!
+	Write "									"
+	Write "<option value=""50"">"
+	Write " 50</option>",!
+	Write "									"
+	Write "<option value=""100"">"
+	Write " 100</option>",!
+	Write "									"
+	Write "<option value=""200"">"
+	Write " 200</option>",!
+	Write "									"
+	Write "<option value=""500"">"
+	Write " 500</option>",!
+	Write "								"
+	Write "</select>"
+	Write !,"						"
+	Write "</span>"
+	Write "				",!
+	Write "					</td>",!
+	Write "				</tr>	",!
+	Write "			</table>",!
+	Write "			<table>			",!
+	Write "				<tr>",!
+	Write "					<td style=""width: 400px"">",!
+	Write "						<label for=""tSResults"" style=""font-weight:bold;display:block;color:#000000;border-width:medium;width=50%;"">*Select Patient:</label>",!
+	Write "						"
+	Write "<select name=""tSResults"" title=""Hold down ALT while hitting the DOWN arrow to see patient list. Release ALT key and use UP/Down to navigate to desired patient and hit ENTER"" id=""tSResults"" width=""20"" onchange=""SelectedPatient()"">"
+	Write "		",!
+	Write "							"
+	Write "</select>"
+	Write !,"					</td>",!
+	Write "				</tr>",!
+	Write "			</table>",!
+	Write "		"
+	Write "</div>"
+	Write !,"		",!
+	Write "		<table>",!
+	Write "			<tr>",!
+	Write "				<td>",!
+	Write "					"
+	Write "<span style=""display:inline-block"">"
+	Write !,"						<label for=""tAdmitDtTm"" style=""display:block"">*Admission Date/Time:</label>",!
+	Write "						"
+	Write "<input type=""text"" id=""tAdmitDtTm"" name=""tAdmitDtTm"" size=""24"" title=""Enter the admission date and time using any of the following formats: mm/dd/ccyy@hhmm, mmdd@hhmm, T@hhmm, N for Now"" value='"_(tAdmitDtTm)_"' onchange=""doADateCheck()"" style=""color: #000000; font-family: Tahoma; font-weight: normal; font-size: 14px; vertical-align: top; background-color: #FFFFFF;""/>"
+	Write !,"					"
+	Write "</span>"
+	Write !,"				</td>",!
+	Write "				<td>				",!
+	Write "					&nbsp; &nbsp; &nbsp; &nbsp;",!
+	Write "					",!
+	Write "					"
+	Write "<input type=""hidden"" name=""dVisitType"" id=""dVisitType"" value='"_(dVisitType)_"' readonly/>"
+	Write "	",!
+	Write "					"
+	Write "<span style=""display:inline-block"">"
+	Write !,"						<label for=""tVisitType"" style=""display:block"">*Visit Type</label>",!
+	Write "						"
+	Write "<input type=""hidden"" id=""iVisitType"" value='"_(iVisitType)_"' style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"							"
+	Write "<select id=""tVisitType"" name=""tVisitType"">"
+	Write !,"								"
+	Do BLDVTYP^BEDDADM(.aVisitType)
+	Set iVType=$O(aVisitType(""))
+	While(+iVType'=0) {
+	&html<<option value="#($P(aVisitType(iVType),"^"))#"> #($P(aVisitType(iVType),"^",2))#  </option>>
+	Set iVType=$O(aVisitType(iVType))
+	}
+	Write !,"							"
+	Write "</select>"
+	Write !,"					"
+	Write "</span>"
+	Write "				",!
+	Write "				</td>",!
+	Write "				<td>",!
+	Write "					&nbsp; &nbsp; &nbsp; &nbsp;",!
+	Write "					"
+	Write "<span style=""display:inline-block"">"
+	Write !,"						<label for=""Clinic"" style=""display:block"">*Clinic Type</label>",!
+	Write "						"
+	Write "<input type=""hidden"" id=""dClinic"" value='"_(dClinic)_"' style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"								"
+	Write "<select id=""tClinic"" name=""tClinic"">"
+	Write !,"									"
+	Do CLIN^BEDDUTID(.clin)
+	Set clin=$O(clin(""))
+	While (+clin'=0) {
+	&html<<option value="#($P(clin(clin),"^"))#"> #($P(clin(clin),"^",2))#  </option>>
+	Set clin=$O(clin(clin))
+	}
+	Write !,"								"
+	Write "</select>"
+	Write !,"					"
+	Write "</span>"
+	Write "			",!
+	Write "				</td>",!
+	Write "			</tr>",!
+	Write "		</table>",!
+	Write "		<table>",!
+	Write "			<tr>",!
+	Write "				<td>",!
+	Write "					"
+	Write "<span style=""display:inline-block"">"
+	Write !,"						<label for=""tPCmp"" style=""display:block"">*Presenting Complaint:</label>",!
+	Write "						"
+	Write "<textarea id=""tPCmp"" name=""tPCmp"" maxlength=""240"" cols=""80"" rows=""3"" style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; vertical-align: top; background-color: #FFFFFF;"">"
+	Write (tPCmp)
+	Write "</textarea>"
+	Write !,"					"
+	Write "</span>"
+	Write !,"				</td>",!
+	Write "			<tr>",!
+	Write "		</table>",!
+	Write "		",!
+	Write "		<table>",!
+	Write "			<tr>",!
+	Write "				<td> "
+	Write "<input type=""button"" name=""btnSave/Close"" id=""btnSaveClose"" style=""width:120px;height:25px"" value=""Save/Close"" onclick=""bSaveClose()"">"
+	Write " </td>   	",!
+	Write "				<td> "
+	Write "<input type=""button"" name=""btnSave/Edit"" id=""btnSaveEdit"" style=""width:120px;height:25px"" value=""Save/Edit"" onclick=""bSaveEdit()"">"
+	Write " </td>   	",!
+	Write "				<td> "
+	Write "<input type=""button"" name=""btnCancel"" style=""width:120px;height:25px"" value=""Cancel"" onclick=""bCancelAdmit()"">"
+	Write " </td>   	",!
+	Write "			</tr>",!
+	Write "		</table>",!
+	Write "		",!
+	Write "		"
+	Write "<div style=""color: #000000;"">"
+	Write !,"			Transfers:	",!
+	Write "		"
+	Write "</div>"
+	Write "		",!
+	Write "		"
+	Write "<div style=""border: solid 1px black;width:50%;"">"
+	Write "		",!
+	Write "			<table>		",!
+	Write "				<tr>",!
+	Write "					<td>",!
+	Write "						"
+	Write "<span style=""display:inline-block"">"
+	Write !,"							<label for=""tTransferYN"" style=""display:block"">*Transfer from another facility:</label>",!
+	Write "							"
+	Write "<input type=""hidden"" id=""iTransferYN"" value='"_(iTransferYN)_"' style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"								"
+	Write "<select id=""tTransferYN"" name=""tTransferYN"" onchange=""TransferYNChange()"">"
+	Write !,"									"
+	Write "<option value=""0"">"
+	Write " No</option>",!
+	Write "									"
+	Write "<option value=""1"">"
+	Write " Yes</option>",!
+	Write "								"
+	Write "</select>"
+	Write !,"						"
+	Write "</span>"
+	Write "				",!
+	Write "					</td>",!
+	Write "					<td>	",!
+	Write "						&nbsp; &nbsp; &nbsp; &nbsp;	",!
+	Write "						"
+	Write "<span style=""display:inline-block"">"
+	Write !,"							<label for=""tTransferFrom"" style=""display:block"">Transferred from:</label>",!
+	Write "							"
+	Write "<input type=""hidden"" id=""iTransferFrom"" value='"_(iTransferFrom)_"' style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"								"
+	Write "<select id=""tTransferFrom"" name=""tTransferFrom"" disabled>"
+	Write !,"									"
+	Do BLDTFRM^BEDDADM(.aTransferFrom)
+	&html<<option> </option>>
+	Set iTFrom=$O(aTransferFrom(""))
+	While(+iTFrom'=0) {
+	&html<<option value="#($P(aTransferFrom(iTFrom),"^"))#"> #($P(aTransferFrom(iTFrom),"^",2))#  </option>>
+	Set iTFrom=$O(aTransferFrom(iTFrom))
+	}
+	Write !,"								"
+	Write "</select>"
+	Write !,"						"
+	Write "</span>"
+	Write "				",!
+	Write "					</td>",!
+	Write "				</tr>			",!
+	Write "				<tr>		",!
+	Write "					<td>				",!
+	Write "						"
+	Write "<input type=""hidden"" name=""dModeTransport"" id=""dModeTransport"" value='"_(dModeTransport)_"' readonly/>"
+	Write "	",!
+	Write "						"
+	Write "<span style=""display:inline-block"">"
+	Write !,"							<label for=""tModeTransport"" style=""display:block"">Mode of transport to the ER:</label>",!
+	Write "							"
+	Write "<input type=""hidden"" id=""iModeTransport"" value='"_(iModeTransport)_"' style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"								"
+	Write "<select id=""tModeTransport"" name=""tModeTransport"" disabled>"
+	Write !,"									"
+	Do BLDMTRN^BEDDADM(.aModeTransport)
+	&html<<option> </option>>
+	Set iMTrans=$O(aModeTransport(""))
+	While(+iMTrans'=0) {
+	&html<<option value="#($P(aModeTransport(iMTrans),"^"))#"> #($P(aModeTransport(iMTrans),"^",2))#  </option>>
+	Set iMTrans=$O(aModeTransport(iMTrans))
+	}
+	Write !,"								"
+	Write "</select>"
+	Write !,"						"
+	Write "</span>"
+	Write "				",!
+	Write "					</td>						",!
+	Write "					<td>					",!
+	Write "						&nbsp; &nbsp; &nbsp; &nbsp;						",!
+	Write "						"
+	Write "<input type=""hidden"" name=""dAttendantYN"" id=""dAttendantYN"" value='"_(dAttendantYN)_"' readonly/>"
+	Write !,"						"
+	Write "<span style=""display:inline-block"">"
+	Write !,"							<label for=""tAttendantYN"" style=""display:block"">Medical attendant present during transfer:</label>",!
+	Write "							"
+	Write "<input type=""hidden"" id=""iAttendantYN"" value='"_(iAttendantYN)_"' style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"								"
+	Write "<select id=""tAttendantYN"" name=""tAttendantYN"" disabled>"
+	Write !,"									"
+	Write "<option value=""0"">"
+	Write " No</option>",!
+	Write "									"
+	Write "<option value=""1"">"
+	Write " Yes</option>",!
+	Write "								"
+	Write "</select>"
+	Write !,"						"
+	Write "</span>"
+	Write "				",!
+	Write "					</td>	",!
+	Write "				</tr>	",!
+	Write "				<tr>",!
+	Write "					<td>		",!
+	Write "					</td>",!
+	Write "				</tr>",!
+	Write "			</table>",!
+	Write "		"
+	Write "</div>"
+	Write "		",!
+	Write "		"
+	Write "<div style=""color: #000000;"">"
+	Write !,"			Means of Arrival:	",!
+	Write "		"
+	Write "</div>"
+	Write "		",!
+	Write "		"
+	Write "<div style=""border: solid 1px black;width:50%;"">"
+	Write "		",!
+	Write "			<table>		",!
+	Write "				<tr>",!
+	Write "					<td>					",!
+	Write "						"
+	Write "<input type=""hidden"" name=""dArrivalMeans"" id=""dArrivalMeans"" value='"_(dArrivalMeans)_"' readonly/>"
+	Write "	",!
+	Write "						"
+	Write "<span style=""display:inline-block"">"
+	Write !,"							<label for=""tModeTransport"" style=""display:block"">Mode of transport to the ER:</label>",!
+	Write "							"
+	Write "<input type=""hidden"" id=""iArrivalMeans"" value='"_(iArrivalMeans)_"' style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"								"
+	Write "<select id=""tArrivalMeans"" name=""tArrivalMeans"" disabled onchange=""ArrivalChange()"">"
+	Write !,"									"
+	Do BLDTMOD^BEDDADM(.aArrivalMeans)
+	&html<<option> </option>>
+	Set iAMTrans=$O(aArrivalMeans(""))
+	While(+iAMTrans'=0) {
+	&html<<option value="#($P(aArrivalMeans(iAMTrans),"^"))#"> #($P(aArrivalMeans(iAMTrans),"^",2))#  </option>>
+	Set iAMTrans=$O(aArrivalMeans(iAMTrans))
+	}
+	Write !,"								"
+	Write "</select>"
+	Write !,"						"
+	Write "</span>"
+	Write "					",!
+	Write "					</td>",!
+	Write "					",!
+	Write "					<td>",!
+	Write "						&nbsp; &nbsp; &nbsp; &nbsp;						",!
+	Write "						"
+	Write "<span style=""display:inline-block"">"
+	Write !,"							<label for=""tAmbulanceNumber"" style=""display:block"">Ambulance Number:</label>",!
+	Write "							"
+	Write "<input type=""text"" id=""tAmbulanceNumber"" name=""tAmbulanceNumber"" size=""30"" value='"_(tAmbulanceNumber)_"' style=""color: #000000; font-family: Tahoma; font-weight: normal; font-size: 14px; vertical-align: top; background-color: #FFFFFF;""/>"
+	Write !,"						"
+	Write "</span>"
+	Write !,"					</td>",!
+	Write "				</tr>",!
+	Write "				<tr>",!
+	Write "					<td>",!
+	Write "						"
+	Write "<span style=""display:inline-block"">"
+	Write !,"							<label for=""tBillingNumber"" style=""display:block"">HRCN/Billing Number:</label>",!
+	Write "							"
+	Write "<input type=""text"" id=""tBillingNumber"" name=""tBillingNumber"" size=""30"" value='"_(tBillingNumber)_"' style=""color: #000000; font-family: Tahoma; font-weight: normal; font-size: 14px; vertical-align: top; background-color: #FFFFFF;""/>"
+	Write !,"						"
+	Write "</span>"
+	Write !,"					</td>",!
+	Write "					<td>	",!
+	Write "						&nbsp; &nbsp; &nbsp; &nbsp;	",!
+	Write "						"
+	Write "<span style=""display:inline-block"">"
+	Write !,"							<label for=""t"" style=""display:block"">Ambulance Company:</label>",!
+	Write "							"
+	Write "<input type=""hidden"" id=""iAmbulanceCompany"" value='"_(iAmbulanceCompany)_"' style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"								"
+	Write "<select id=""tAmbulanceCompany"" name=""tAmbulanceCompany"" disabled>"
+	Write !,"									"
+	Do BLDACMP^BEDDADM(.aAmbComp)
+	&html<<option> </option>>
+	Set iAComp=$O(aAmbComp(""))
+	While(+iAComp'=0) {
+	&html<<option value="#($P(aAmbComp(iAComp),"^"))#"> #($P(aAmbComp(iAComp),"^",2))#  </option>>
+	Set iAComp=$O(aAmbComp(iAComp))
+	}
+	Write !,"								"
+	Write "</select>"
+	Write !,"						"
+	Write "</span>"
+	Write "				",!
+	Write "					</td>",!
+	Write "				</tr>",!
+	Write "			</table>",!
+	Write "		"
+	Write "</div>"
+	Write !,"		",!
+	Write "		"
+	Write "<div style=""color: #000000;"">"
+	Write !,"			Print Options:	",!
+	Write "		"
+	Write "</div>"
+	Write "		",!
+	Write "		"
+	Write "<div style=""border: solid 1px black;width:60%;"">"
+	Write !,"			<table>",!
+	Write "				<tr>",!
+	Write "					<td>",!
+	Write "						"
+	Write "<input type=""checkbox"" name=""cLabelPrint"" id=""cLabelPrint"" value=""Print Labels"" onclick=""checkPrintLabels()"">"
+	Write "Print Labels 						",!
+	Write "					</td>   	",!
+	Write "					<td>	",!
+	Write "						&nbsp; &nbsp; &nbsp; &nbsp;	",!
+	Write "						"
+	Write "<span style=""display:inline-block"">"
+	Write !,"							<label for=""t"" style=""display:block;display:inline-block;align:center"">Number of copies:</label>",!
+	Write "							"
+	Write "<input type=""hidden"" id=""iLabelCopy"" value='"_(tLabelCopy)_"' style=""color: #000000; font-family: Tahoma; display:inline-block; align:center; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"								",!
+	Write "								"
+	Write "<select id=""tLabelCopy"" name=""tLabelCopy"" style=""display:inline-block;width:50; align:center"" disabled>"
+	Write !,"									"
+	Set iCopy=0
+	While(iCopy<51) {
+	&html<<option value="#(iCopy)#"> #(iCopy)#  </option>>
+	Set iCopy=iCopy+1
+	}
+	Write !,"								"
+	Write "</select>"
+	Write !,"						"
+	Write "</span>"
+	Write "				",!
+	Write "					</td>",!
+	Write "					<td>	",!
+	Write "						&nbsp; &nbsp; &nbsp; &nbsp;	",!
+	Write "						"
+	Write "<span style=""display:inline-block"">"
+	Write !,"							<label for=""t"" style=""display:block;display:inline-block;align:center"">Printer:</label>",!
+	Write "							"
+	Write "<input type=""hidden"" id=""tPrintLabel"" value='"_(tPrintLabel)_"'>"
+	Write !,"							"
+	Write "<input type=""hidden"" id=""iLabelPrinter"" value='"_(tLabelPrinter)_"' style=""color: #000000; font-family: Tahoma; display:inline-block; align:center; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"								",!
+	Write "								"
+	Write "<select id=""tLabelPrinter"" name=""tLabelPrinter"" style=""display:inline-block; align:center"" disabled>"
+	Write !,"									"
+	Kill dvList 
+	Do DVLIST^BEDDADM(.dvList)
+	Set iDev=$O(dvList(""))
+	While(+iDev'=0) {
+	&html<<option value="#($P(dvList(iDev),"^"))#"> #($P(dvList(iDev),"^",2))# </option>>
+	Set iDev=$O(dvList(iDev))
+	}
+	Write "								",!
+	Write "								"
+	Write "</select>"
+	Write !,"						"
+	Write "</span>"
+	Write "				",!
+	Write "					</td>",!
+	Write "				</tr>",!
+	Write "				<tr>",!
+	Write "					<td>",!
+	Write "						"
+	Write "<input type=""checkbox"" name=""cRoutingPrint"" id=""cRoutingPrint"" value=""Print Routing Slip"" onclick=""checkPrintRouting()"">"
+	Write "Print Routing Slip						",!
+	Write "					</td>   	",!
+	Write "					<td>	",!
+	Write "						&nbsp; &nbsp; &nbsp; &nbsp;	",!
+	Write "						"
+	Write "<span style=""display:inline-block"">"
+	Write !,"							<label for=""t"" style=""display:block;display:inline-block;align:center"">Number of copies:</label>",!
+	Write "							"
+	Write "<input type=""hidden"" id=""iRoutingCopy"" value='"_(tRoutingCopy)_"' style=""color: #000000; font-family: Tahoma; display:inline-block; align:center; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"								",!
+	Write "								"
+	Write "<select id=""tRoutingCopy"" name=""tRoutingCopy"" style=""display:inline-block;width:50; align:center"" disabled>"
+	Write !,"									"
+	Set iCopy=0
+	While(iCopy<5) {
+	&html<<option value="#(iCopy)#"> #(iCopy)#  </option>>
+	Set iCopy=iCopy+1
+	}
+	Write !,"								"
+	Write "</select>"
+	Write !,"						"
+	Write "</span>"
+	Write "				",!
+	Write "					</td>",!
+	Write "					<td>	",!
+	Write "						&nbsp; &nbsp; &nbsp; &nbsp;	",!
+	Write "						"
+	Write "<span style=""display:inline-block"">"
+	Write !,"							<label for=""t"" style=""display:block;display:inline-block;align:center"">Printer:</label>",!
+	Write "							"
+	Write "<input type=""hidden"" id=""tPrintRouting"" value='"_(tPrintRouting)_"'>"
+	Write !,"							"
+	Write "<input type=""hidden"" id=""iRoutingPrinter"" value='"_(tRoutingPrinter)_"' style=""color: #000000; font-family: Tahoma; display:inline-block; align:center; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"								",!
+	Write "								"
+	Write "<select id=""tRoutingPrinter"" name=""tRoutingPrinter"" style=""display:inline-block; align:center"" disabled>"
+	Write !,"									"
+	Kill dvList 
+	Do DVLIST^BEDDADM(.dvList)
+	Set iDev=$O(dvList(""))
+	While(+iDev'=0) {
+	&html<<option value="#($P(dvList(iDev),"^"))#"> #($P(dvList(iDev),"^",2))# </option>>
+	Set iDev=$O(dvList(iDev))
+	}
+	Write "								",!
+	Write "								"
+	Write "</select>"
+	Write !,"						"
+	Write "</span>"
+	Write "				",!
+	Write "					</td>",!
+	Write !,"				</tr>",!
+	Write "				"
+	If '(tPrintMRec="1") Goto %csp00001 ;{
+	Write !,"					<tr>",!
+	Write "						<td>",!
+	Write "							"
+	Write "<input type=""checkbox"" name=""cMedRecPrint"" id=""cMedRecPrint"" value=""Print Med-Rec Worksheet"" onclick=""checkPrintMRec()"">"
+	Write "Print Med-Rec Worksheet 						",!
+	Write "						</td>   	",!
+	Write "						<td>	",!
+	Write "							&nbsp; &nbsp; &nbsp; &nbsp;	",!
+	Write "							"
+	Write "<span style=""display:inline-block"">"
+	Write !,"								<label for=""t"" style=""display:block;display:inline-block;align:center"">Number of copies:</label>",!
+	Write "								"
+	Write "<input type=""hidden"" id=""iMedRecCopy"" value='"_(tMedRecCopy)_"' style=""color: #000000; font-family: Tahoma; display:inline-block; align:center; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"							",!
+	Write "									"
+	Write "<select id=""tMedRecCopy"" name=""tMedRecCopy"" style=""display:inline-block;width:50; align:center"" disabled>"
+	Write !,"										"
+	Set iCopy=0
+	While(iCopy<5) {
+	&html<<option value="#(iCopy)#"> #(iCopy)#  </option>>
+	Set iCopy=iCopy+1
+	}
+	Write !,"									"
+	Write "</select>"
+	Write !,"							"
+	Write "</span>"
+	Write "	",!
+	Write "						</td>",!
+	Write "						<td>	",!
+	Write "							&nbsp; &nbsp; &nbsp; &nbsp;	",!
+	Write "							"
+	Write "<span style=""display:inline-block"">"
+	Write !,"								<label for=""t"" style=""display:block;display:inline-block;align:center"">Printer:</label>",!
+	Write "								"
+	Write "<input type=""hidden"" id=""iMedRecPrinter"" value='"_(tMedRecPrinter)_"' style=""color: #000000; font-family: Tahoma; display:inline-block; align:center; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"							",!
+	Write "									"
+	Write "<select id=""tMedRecPrinter"" name=""tMedRecPrinter"" style=""display:inline-block; align:center"" disabled>"
+	Write !,"										"
+	Kill dvList 
+	Do DVLIST^BEDDADM(.dvList)
+	Set iDev=$O(dvList(""))
+	While(+iDev'=0) {
+	&html<<option value="#($P(dvList(iDev),"^"))#"> #($P(dvList(iDev),"^",2))# </option>>
+	Set iDev=$O(dvList(iDev))
+	}
+	Write "								",!
+	Write "									"
+	Write "</select>"
+	Write !,"							"
+	Write "</span>"
+	Write "				",!
+	Write "						</td>",!
+	Write "					</tr>",!
+	Write "				"
+%csp00001	;}
+	Write "			",!
+	Write "				"
+	If '(tPrintPRouting="1") Goto %csp00002 ;{
+	Write !,"					<tr>",!
+	Write "						<td>",!
+	Write "							"
+	Write "<input type=""checkbox"" name=""cPRoutingPrint"" id=""cPRoutingPrint"" value=""Print Patient Routing Slip"" onclick=""checkPrintPRouting()"">"
+	Write "Print BEDD Routing Slip						",!
+	Write "						</td>   	",!
+	Write "						<td>	",!
+	Write "							&nbsp; &nbsp; &nbsp; &nbsp;	",!
+	Write "							"
+	Write "<span style=""display:inline-block"">"
+	Write !,"								<label for=""t"" style=""display:block;display:inline-block;align:center"">Number of copies:</label>",!
+	Write "								"
+	Write "<input type=""hidden"" id=""iPRoutingCopy"" value='"_(tPRoutingCopy)_"' style=""color: #000000; font-family: Tahoma; display:inline-block; align:center; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write "	",!
+	Write "									",!
+	Write "									"
+	Write "<select id=""tPRoutingCopy"" name=""tPRoutingCopy"" style=""display:inline-block;width:50; align:center"" disabled>"
+	Write !,"										"
+	Set iCopy=0
+	While(iCopy<5) {
+	&html<<option value="#(iCopy)#"> #(iCopy)#  </option>>
+	Set iCopy=iCopy+1
+	}
+	Write !,"									"
+	Write "</select>"
+	Write !,"							"
+	Write "</span>"
+	Write "				",!
+	Write "						</td>",!
+	Write "					",!
+	Write "						<td>	",!
+	Write "							&nbsp; &nbsp; &nbsp; &nbsp;	",!
+	Write "							"
+	Write "<span style=""display:inline-block"">"
+	Write !,"								<label for=""t"" style=""display:block;display:inline-block;align:center"">Printer:</label>",!
+	Write "								"
+	Write "<input type=""hidden"" id=""iPRoutingPrinter"" value='"_(tPRoutingPrinter)_"' style=""color: #000000; font-family: Tahoma; display:inline-block; align:center; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"								",!
+	Write "									"
+	Write "<select id=""tPRoutingPrinter"" name=""tPRoutingPrinter"" style=""display:inline-block; align:center"" disabled>"
+	Write !,"										"
+	Kill dvList 
+	Do DVLIST^BEDDADM(.dvList)
+	Set iDev=$O(dvList(""))
+	While(+iDev'=0) {
+	&html<<option value="#($P(dvList(iDev),"^"))#"> #($P(dvList(iDev),"^",2))# </option>>
+	Set iDev=$O(dvList(iDev))
+	}
+	Write "								",!
+	Write "									"
+	Write "</select>"
+	Write !,"							"
+	Write "</span>"
+	Write "				",!
+	Write "						</td>",!
+	Write "					</tr>",!
+	Write "				"
+%csp00002	;}
+	Write "			",!
+	Write "				"
+	If '(tPrintEmbCard="1") Goto %csp00003 ;{
+	Write !,"					<tr>",!
+	Write "						<td>",!
+	Write "							"
+	Write "<input type=""checkbox"" name=""cEmbCardPrint"" id=""cEmbCardPrint"" value=""Print Embossed Card"" onclick=""checkPrintEmbCard()"">"
+	Write "Print Embossed Card						",!
+	Write "						</td>   	",!
+	Write "						<td>	",!
+	Write "							&nbsp; &nbsp; &nbsp; &nbsp;	",!
+	Write "							"
+	Write "<span style=""display:inline-block"">"
+	Write !,"								<label for=""t"" style=""display:block;display:inline-block;align:center"">Number of copies:</label>",!
+	Write "								"
+	Write "<input type=""hidden"" id=""iEmbCardCopy"" value='"_(tEmbCardCopy)_"' style=""color: #000000; font-family: Tahoma; display:inline-block; align:center; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"								",!
+	Write "									"
+	Write "<select id=""tEmbCardCopy"" name=""tEmbCardCopy"" style=""display:inline-block;width:50; align:center"" disabled>"
+	Write !,"										"
+	Set iCopy=0
+	While(iCopy<6) {
+	&html<<option value="#(iCopy)#"> #(iCopy)#  </option>>
+	Set iCopy=iCopy+1
+	}
+	Write !,"									"
+	Write "</select>"
+	Write !,"							"
+	Write "</span>"
+	Write "				",!
+	Write "						</td>",!
+	Write "						<td>	",!
+	Write "							&nbsp; &nbsp; &nbsp; &nbsp;	",!
+	Write "							"
+	Write "<span style=""display:inline-block"">"
+	Write !,"								<label for=""t"" style=""display:block;display:inline-block;align:center"">Printer:</label>",!
+	Write "								"
+	Write "<input type=""hidden"" id=""iEmbCardPrinter"" value='"_(tEmbCardPrinter)_"' style=""color: #000000; font-family: Tahoma; display:inline-block; align:center; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"								",!
+	Write "									"
+	Write "<select id=""tEmbCardPrinter"" name=""tEmbCardPrinter"" style=""display:inline-block; align:center"" disabled>"
+	Write !,"										"
+	Kill dvList 
+	Do DVLIST^BEDDADM(.dvList)
+	Set iDev=$O(dvList(""))
+	While(+iDev'=0) {
+	&html<<option value="#($P(dvList(iDev),"^"))#"> #($P(dvList(iDev),"^",2))# </option>>
+	Set iDev=$O(dvList(iDev))
+	}
+	Write "								",!
+	Write "									"
+	Write "</select>"
+	Write !,"							"
+	Write "</span>"
+	Write "				",!
+	Write "						</td>",!
+	Write "					</tr>",!
+	Write "				"
+%csp00003	;}
+	Write "								",!
+	Write "			</table>",!
+	Write "		"
+	Write "</div>"
+	Write "		",!
+	Write "		",!
+	Write "		<table>",!
+	Write "			<tr>",!
+	Write "				<td> "
+	Write "<input type=""button"" name=""btnSave/Close"" id=""btnSaveClose1"" style=""width:120px;height:25px"" value=""Save/Close"" onclick=""bSaveClose()"">"
+	Write " </td>   	",!
+	Write "				<td> "
+	Write "<input type=""button"" name=""btnSave/Edit"" id=""btnSaveEdit1"" style=""width:120px;height:25px"" value=""Save/Edit"" onclick=""bSaveEdit()"">"
+	Write " </td>   	",!
+	Write "				<td> "
+	Write "<input type=""button"" name=""btnCancel"" style=""width:120px;height:25px"" value=""Cancel"" onclick=""bCancelAdmit()"">"
+	Write " </td>   	",!
+	Write "			</tr>",!
+	Write "		</table>",!
+	Write "	"
+	Write "</div>"
+	Write !,"	",!
+	Write "	"
+	Write "</form>"
+	Write "	",!
+	Write "</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<!-- BEDDAdmit.csp - BEDD ED Admit Page -->"
+	Write !,"<!-- ;;2.0;IHS EMERGENCY DEPT DASHBOARD;**2**;Apr 02, 2014 -->"
+	Write !,!
+	Do ..OnPageHTML()
+	Write !,!,"<script language=""javascript"" type=""text/javascript"">"
+	Write !,!,"function ArrivalChange() {",!
+	Write !,"	var x1 = document.getElementById(""tAmbulanceCompany"");	",!
+	Write "	var x2 = document.getElementById(""tArrivalMeans"");",!
+	Write "	var x3 = document.getElementById(""tBillingNumber"");",!
+	Write "	var x4 = document.getElementById(""tAmbulanceNumber"");",!
+	Write "	",!
+	Write "	var tAmbulanceYN = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".gettAmbulanceYN"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',x2.value);",!
+	Write !,"	//If Ambulance Transport Mode, allow further field entry",!
+	Write "	if (tAmbulanceYN == 1) {",!
+	Write "		x1.removeAttribute('disabled');",!
+	Write "		x3.removeAttribute('disabled');",!
+	Write "		x4.removeAttribute('disabled');	",!
+	Write "	}",!
+	Write "	",!
+	Write "	else {",!
+	Write "		x1.disabled = true;",!
+	Write "		x1.value = """";",!
+	Write "		x3.disabled = true;",!
+	Write "		x3.value = """";",!
+	Write "		x4.disabled = true;",!
+	Write "		x4.value = """";",!
+	Write "	}",!
+	Write "}",!
+	Write !,"//Cancel without saving",!
+	Write "function bCancelAdmit() {",!
+	Write "		",!
+	Write "		//Clear Session variables",!
+	Write "		"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".ClearSession"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"');",!
+	Write "		",!
+	Write "		//Return to Dashboard",!
+	Write "		location.replace(""BEDD.csp"");",!
+	Write "		",!
+	Write "}	",!
+	Write !,"//Create visit and exit back to the dashboard",!
+	Write "function bSaveClose() {",!
+	Write "	",!
+	Write "	submitOK=""true"";",!
+	Write "	",!
+	Write "	//Check admit date/time",!
+	Write "	var adt = document.getElementById('tAdmitDtTm');",!
+	Write "	var tlen = adt.value.length;",!
+	Write "	if (adt.value=="""") {",!
+	Write "		alert(""Admission Date/Time is Required"");",!
+	Write "		submitOK=""false"";",!
+	Write "	}",!
+	Write "	",!
+	Write "	if (adt.value.length>0) {",!
+	Write "		if (adt.value.length<11) {",!
+	Write "			alert(""Both Admit Date and Time are Required"");",!
+	Write "			submitOK=""false"";",!
+	Write "		}",!
+	Write "		if (adt.value.length>10) {",!
+	Write "			var mess = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".getDtChk"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',adt.value,"""",""F"") ;",!
+	Write "			if (mess==""F"") {",!
+	Write "				alert(""Future Admit Date/Time is not allowed"");",!
+	Write "				submitOK=""false"";",!
+	Write "			}",!
+	Write "		}",!
+	Write "	}",!
+	Write "	",!
+	Write "	//Presenting complaint",!
+	Write "	var adt = document.getElementById('tPCmp');",!
+	Write "	var tlen = adt.value.length;",!
+	Write "	if (adt.value=="""") {",!
+	Write "		alert(""Presenting Complaint is Required"");",!
+	Write "		submitOK=""false"";",!
+	Write "	}",!
+	Write "	",!
+	Write "	//Is Means of Arrival required",!
+	Write "	var x2 = document.getElementById(""tTransferYN"");",!
+	Write "	",!
+	Write "	//Populate if no transfer",!
+	Write "	if (x2.value == 0) {",!
+	Write "		var am = document.getElementById(""tArrivalMeans"") ;",!
+	Write "		if (am.value=="""") {",!
+	Write "			alert(""Means of Arrival - Mode of Transport to the ER"");",!
+	Write "			submitOK=""false"";",!
+	Write "		}	",!
+	Write "	}",!
+	Write "	",!
+	Write "	if (submitOK==""true"") {",!
+	Write "	",!
+	Write "		//Save session variables",!
+	Write "		SaveSessionVar();",!
+	Write "		",!
+	Write "		//Create/update the admit",!
+	Write "		var status = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".VisitSave"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"');",!
+	Write "		",!
+	Write "		//Check if visit created",!
+	Write "		if (status == 1) {",!
+	Write "		",!
+	Write "			//Return to Dashboard",!
+	Write "			location.replace(""BEDD.csp"");",!
+	Write "		}",!
+	Write "		else {",!
+	Write "			alert(status);",!
+	Write "		}",!
+	Write "	}",!
+	Write "}",!
+	Write !,"//Create visit and edit",!
+	Write "function bSaveEdit() {",!
+	Write "	",!
+	Write "	submitOK=""true"";",!
+	Write "	",!
+	Write "	//Check admit date/time",!
+	Write "	var adt = document.getElementById('tAdmitDtTm');",!
+	Write "	var tlen = adt.value.length;",!
+	Write "	if (adt.value=="""") {",!
+	Write "		alert(""Admission Date/Time is Required"");",!
+	Write "		submitOK=""false"";",!
+	Write "	}",!
+	Write "	",!
+	Write "	if (adt.value.length>0) {",!
+	Write "		if (adt.value.length<11) {",!
+	Write "			alert(""Both Admit Date and Time are Required"");",!
+	Write "			submitOK=""false"";",!
+	Write "		}",!
+	Write "		if (adt.value.length>10) {",!
+	Write "			var mess = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".getDtChk"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',adt.value,"""",""F"") ;",!
+	Write "			if (mess==""F"") {",!
+	Write "				alert(""Future Admit Date/Time is not allowed"");",!
+	Write "				submitOK=""false"";",!
+	Write "			}",!
+	Write "		}",!
+	Write "	}",!
+	Write "	",!
+	Write "	//Presenting complaint",!
+	Write "	var adt = document.getElementById('tPCmp');",!
+	Write "	var tlen = adt.value.length;",!
+	Write "	if (adt.value=="""") {",!
+	Write "		alert(""Presenting Complaint is Required"");",!
+	Write "		submitOK=""false"";",!
+	Write "	}",!
+	Write "	",!
+	Write "	//Is Means of Arrival required",!
+	Write "	var x2 = document.getElementById(""tTransferYN"");",!
+	Write "	",!
+	Write "	//Populate if no transfer",!
+	Write "	if (x2.value == 0) {",!
+	Write "		var am = document.getElementById(""tArrivalMeans"") ;",!
+	Write "		if (am.value=="""") {",!
+	Write "			alert(""Means of Arrival - Mode of Transport to the ER"");",!
+	Write "			submitOK=""false"";",!
+	Write "		}	",!
+	Write "	}",!
+	Write "	",!
+	Write "	if (submitOK==""true"") {",!
+	Write "	",!
+	Write "		//Save session variables",!
+	Write "		SaveSessionVar();",!
+	Write "		",!
+	Write "		//Create/update the admit",!
+	Write "		var status = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".VisitSave"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"');",!
+	Write "		//Check if visit created",!
+	Write "		if (status == 1) {",!
+	Write "			",!
+	Write "			//Check if locked",!
+	Write "			var check = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".CheckLock"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"');",!
+	Write "	",!
+	Write "			//If success go to edit page",!
+	Write "			if (check == """") {",!
+	Write "				self.document.location.replace = ""BEDDEDIT1.csp?OBJID="_(%session.Data("OBJECTID"))_"&DFN="_(%session.Data("DFN"))_""" ;",!
+	Write "			return true;",!
+	Write "			}",!
+	Write "			else {",!
+	Write "			alert(check);",!
+	Write "			location.replace='BEDD.csp'",!
+	Write "			}",!
+	Write !,"	",!
+	Write "			//Return to Dashboard",!
+	Write "			//self.document.location.replace = ""BEDDEDIT1.csp?OBJID="_(%session.Data("OBJECTID"))_"&DFN="_(%session.Data("DFN"))_""" ;",!
+	Write "			//self.document.location.replace = ""BEDDLCKIT.csp?OBJID="_(%session.Data("OBJECTID"))_"&DFN="_(%session.Data("DFN"))_""" ;",!
+	Write !,"		}			",!
+	Write "		else {",!
+	Write "			alert(status);",!
+	Write "		}",!
+	Write "	}",!
+	Write "}",!
+	Write !,"function checkPrintEmbCard() {",!
+	Write "	var cECP = document.getElementById(""cEmbCardPrint"");",!
+	Write "	var tECC = document.getElementById(""tEmbCardCopy"");",!
+	Write "	var tECP = document.getElementById(""tEmbCardPrinter"");		",!
+	Write "		",!
+	Write "	if (cECP.checked == true) {",!
+	Write "		tECC.removeAttribute('disabled');",!
+	Write "		tECP.removeAttribute('disabled');",!
+	Write "		DefEmbCardCopy();",!
+	Write "		DefEmbCardPrinter();",!
+	Write "	}",!
+	Write "	",!
+	Write "	if (cECP.checked == false) {",!
+	Write "		tECC.disabled = true;",!
+	Write "		tECC.value = """";",!
+	Write "		tECP.disabled = true;	",!
+	Write "		tECP.value = """";",!
+	Write "	}	",!
+	Write "}",!
+	Write !,"function checkPrintLabels() {",!
+	Write "	var cLP = document.getElementById(""cLabelPrint"");",!
+	Write "	var tLC = document.getElementById(""tLabelCopy"");",!
+	Write "	var tLP = document.getElementById(""tLabelPrinter"");		",!
+	Write "		",!
+	Write "	if (cLP.checked == true) {",!
+	Write "		tLC.removeAttribute('disabled');",!
+	Write "		tLP.removeAttribute('disabled');",!
+	Write "		DefLabelCopy();",!
+	Write "		DefLabelPrinter()",!
+	Write "	}",!
+	Write "	",!
+	Write "	if (cLP.checked == false) {",!
+	Write "		tLC.disabled = true;",!
+	Write "		tLC.value = """";",!
+	Write "		tLP.disabled = true;	",!
+	Write "		tLP.value = """";",!
+	Write "	}	",!
+	Write "}",!
+	Write !,"function checkPrintMRec() {",!
+	Write "	var cMP = document.getElementById(""cMedRecPrint"");",!
+	Write "	var tMC = document.getElementById(""tMedRecCopy"");",!
+	Write "	var tMP = document.getElementById(""tMedRecPrinter"");		",!
+	Write "		",!
+	Write "	if (cMP.checked == true) {",!
+	Write "		tMC.removeAttribute('disabled');",!
+	Write "		tMP.removeAttribute('disabled');",!
+	Write "		DefMedRecCopy();",!
+	Write "		DefMedRecPrinter();",!
+	Write "	}",!
+	Write "	",!
+	Write "	if (cMP.checked == false) {",!
+	Write "		tMC.disabled = true;",!
+	Write "		tMC.value = """";",!
+	Write "		tMP.disabled = true;	",!
+	Write "		tMP.value = """";",!
+	Write "	}	",!
+	Write "}",!
+	Write !,"function checkPrintPRouting() {",!
+	Write "	var cPRP = document.getElementById(""cPRoutingPrint"");",!
+	Write "	var tPRC = document.getElementById(""tPRoutingCopy"");",!
+	Write "	var tPRP = document.getElementById(""tPRoutingPrinter"");		",!
+	Write "		",!
+	Write "	if (cPRP.checked == true) {",!
+	Write "		tPRC.removeAttribute('disabled');",!
+	Write "		tPRP.removeAttribute('disabled');",!
+	Write "		DefPRoutingCopy();",!
+	Write "		DefPRoutingPrinter();",!
+	Write "	}",!
+	Write "	",!
+	Write "	if (cPRP.checked == false) {",!
+	Write "		tPRC.disabled = true;",!
+	Write "		tPRC.value = """";",!
+	Write "		tPRP.disabled = true;	",!
+	Write "		tPRP.value = """";",!
+	Write "	}	",!
+	Write "}",!
+	Write "	",!
+	Write "function checkPrintRouting() {",!
+	Write "	var cRP = document.getElementById(""cRoutingPrint"");",!
+	Write "	var tRC = document.getElementById(""tRoutingCopy"");",!
+	Write "	var tRP = document.getElementById(""tRoutingPrinter"");		",!
+	Write "		",!
+	Write "	if (cRP.checked == true) {",!
+	Write "		tRC.removeAttribute('disabled');",!
+	Write "		tRP.removeAttribute('disabled');",!
+	Write "		DefRoutingCopy();",!
+	Write "		DefRoutingPrinter();",!
+	Write "	}",!
+	Write "	",!
+	Write "	if (cRP.checked == false) {",!
+	Write "		tRC.disabled = true;",!
+	Write "		tRC.value = """";",!
+	Write "		tRP.disabled = true;	",!
+	Write "		tRP.value = """";",!
+	Write "	}	",!
+	Write "}",!
+	Write !,"function DefArrivalMeans() {",!
+	Write "	var x1 = document.getElementById(""tArrivalMeans"") ;",!
+	Write "	var dArrivalMeans = document.getElementById(""dArrivalMeans"").value ;",!
+	Write "	for (i=0; i<x1.options.length; i++){",!
+	Write "		if (x1.options[i].value == dArrivalMeans) {",!
+	Write "			x1.selectedIndex = i ;",!
+	Write "			}",!
+	Write "		}",!
+	Write " }",!
+	Write " ",!
+	Write "function DefClinic() {",!
+	Write !,"	var x1 = document.getElementById(""tClinic"") ;",!
+	Write "	var dClinic = document.getElementById(""dClinic"").value ;",!
+	Write "	for (i=0; i<x1.options.length; i++){",!
+	Write "		if (x1.options[i].value == dClinic) {",!
+	Write "			x1.selectedIndex = i ;",!
+	Write "			}",!
+	Write "		}",!
+	Write "}	",!
+	Write !,"function DefEmbCardCopy() {",!
+	Write "	 var x1 = document.getElementById(""tEmbCardCopy"");",!
+	Write "	 var x2 = document.getElementById(""iEmbCardCopy"");",!
+	Write "	for (i=0; i<x1.options.length; i++){",!
+	Write "		if (x1.options[i].value == x2.value) {",!
+	Write "			x1.selectedIndex = i ;",!
+	Write "		}",!
+	Write "	}",!
+	Write " }",!
+	Write " ",!
+	Write " function DefEmbCardPrinter() {",!
+	Write "	var x1 = document.getElementById(""tEmbCardPrinter"");",!
+	Write "	var x2 = document.getElementById(""iEmbCardPrinter"");",!
+	Write "	var dIEN = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".getDeviceIEN"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',x2.value) ;",!
+	Write "	for (i=0; i<x1.options.length; i++){",!
+	Write "		if (x1.options[i].value == dIEN) {",!
+	Write "			x1.selectedIndex = i ;",!
+	Write "		}",!
+	Write "	}",!
+	Write " } ",!
+	Write " ",!
+	Write " function DefLabelCopy() {",!
+	Write "	var x1 = document.getElementById(""tLabelCopy"");",!
+	Write "	var x2 = document.getElementById(""iLabelCopy"");",!
+	Write "	for (i=0; i<x1.options.length; i++){",!
+	Write "		if (x1.options[i].value == x2.value) {",!
+	Write "			x1.selectedIndex = i ;",!
+	Write "		}",!
+	Write "	}",!
+	Write " }",!
+	Write " ",!
+	Write " function DefLabelPrinter() {",!
+	Write "	var x1 = document.getElementById(""tLabelPrinter"");",!
+	Write "	var x2 = document.getElementById(""iLabelPrinter"");",!
+	Write "	var dIEN = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".getDeviceIEN"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',x2.value) ;",!
+	Write "	for (i=0; i<x1.options.length; i++){",!
+	Write "		if (x1.options[i].value == dIEN) {",!
+	Write "			x1.selectedIndex = i ;",!
+	Write "		}",!
+	Write "	}",!
+	Write " }",!
+	Write " ",!
+	Write " function DefMedRecCopy() {",!
+	Write "	 var x1 = document.getElementById(""tMedRecCopy"");",!
+	Write "	 var x2 = document.getElementById(""iMedRecCopy"");",!
+	Write "	for (i=0; i<x1.options.length; i++){",!
+	Write "		if (x1.options[i].value == x2.value) {",!
+	Write "			x1.selectedIndex = i ;",!
+	Write "		}",!
+	Write "	}",!
+	Write " }",!
+	Write " ",!
+	Write " function DefMedRecPrinter() {",!
+	Write "	var x1 = document.getElementById(""tMedRecPrinter"");",!
+	Write "	var x2 = document.getElementById(""iMedRecPrinter"");",!
+	Write "	var dIEN = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".getDeviceIEN"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',x2.value) ;",!
+	Write "	for (i=0; i<x1.options.length; i++){",!
+	Write "		if (x1.options[i].value == dIEN) {",!
+	Write "			x1.selectedIndex = i ;",!
+	Write "		}",!
+	Write "	}",!
+	Write " }",!
+	Write !,"function DefModeTransport() {",!
+	Write "	var x1 = document.getElementById(""tModeTransport"") ;",!
+	Write "	var iModeTransport = document.getElementById(""iModeTransport"").value ;",!
+	Write "	for (i=0; i<x1.options.length; i++){",!
+	Write "		if (x1.options[i].value == iModeTransport) {",!
+	Write "			x1.selectedIndex = i ;",!
+	Write "			}",!
+	Write "		}",!
+	Write !," }",!
+	Write !," function DefPRoutingCopy() {",!
+	Write "	 var x1 = document.getElementById(""tPRoutingCopy"");",!
+	Write "	 var x2 = document.getElementById(""iPRoutingCopy"");",!
+	Write "	 for (i=0; i<x1.options.length; i++){",!
+	Write "		if (x1.options[i].value == x2.value) {",!
+	Write "			x1.selectedIndex = i ;",!
+	Write "		}",!
+	Write "	}",!
+	Write " }",!
+	Write "  ",!
+	Write " function DefPRoutingPrinter() {",!
+	Write "	var x1 = document.getElementById(""tPRoutingPrinter"");",!
+	Write "	var x2 = document.getElementById(""iPRoutingPrinter"");",!
+	Write "	var dIEN = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".getDeviceIEN"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',x2.value) ;",!
+	Write "	for (i=0; i<x1.options.length; i++){",!
+	Write "		if (x1.options[i].value == dIEN) {",!
+	Write "			x1.selectedIndex = i ;",!
+	Write "		}",!
+	Write "	}",!
+	Write " } ",!
+	Write " ",!
+	Write " function DefRoutingCopy() {",!
+	Write "	 var x1 = document.getElementById(""tRoutingCopy"");",!
+	Write "	 var x2 = document.getElementById(""iRoutingCopy"");",!
+	Write "	for (i=0; i<x1.options.length; i++){",!
+	Write "		if (x1.options[i].value == x2.value) {",!
+	Write "			x1.selectedIndex = i ;",!
+	Write "		}",!
+	Write "	}",!
+	Write "}",!
+	Write " ",!
+	Write "function DefRoutingPrinter() {",!
+	Write "	var x1 = document.getElementById(""tRoutingPrinter"");",!
+	Write "	var x2 = document.getElementById(""iRoutingPrinter"");",!
+	Write "	var dIEN = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".getDeviceIEN"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',x2.value) ;",!
+	Write "	for (i=0; i<x1.options.length; i++){",!
+	Write "		if (x1.options[i].value == dIEN) {",!
+	Write "			x1.selectedIndex = i ;",!
+	Write "		}",!
+	Write "	}",!
+	Write " } ",!
+	Write " ",!
+	Write "function DefTransferYN() {",!
+	Write "	var x1 = document.getElementById(""tTransferYN"") ;",!
+	Write "	var iTransferYN = document.getElementById(""iTransferYN"").value ;",!
+	Write "	for (i=0; i<x1.options.length; i++){",!
+	Write "		if (x1.options[i].value == iTransferYN) {",!
+	Write "			x1.selectedIndex = i ;",!
+	Write "			}",!
+	Write "		}",!
+	Write " }",!
+	Write !,"function DefVType() {",!
+	Write !,"	var x1 = document.getElementById(""tVisitType"") ;",!
+	Write "	var dVisitType = document.getElementById(""dVisitType"").value ;",!
+	Write "	for (i=0; i<x1.options.length; i++){",!
+	Write "		if (x1.options[i].value == dVisitType) {",!
+	Write "			x1.selectedIndex = i ;",!
+	Write "			}",!
+	Write "		}",!
+	Write "}	",!
+	Write !,"function doADateCheck()	{",!
+	Write "	var my_info = document.getElementById(""tAdmitDtTm"");",!
+	Write "	var my_datetm = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".MyAdate"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',my_info.value) ;",!
+	Write "	",!
+	Write "	//Check for future dates",!
+	Write "	if (my_datetm==""-1"") {",!
+	Write "		alert(""Future date/time is not allowed"");",!
+	Write "		my_info.value="""";",!
+	Write "		my_info.focus();",!
+	Write "	}",!
+	Write "	if (my_datetm!=""-1"") {",!
+	Write "		my_info.value=my_datetm;	",!
+	Write "	}",!
+	Write "}",!
+	Write !,"//Enable printing for existing patients",!
+	Write "function enablePrintExisting() {",!
+	Write !,"	//Print Labels - Enable but leave unchecked",!
+	Write "	var x6 = document.getElementById(""cLabelPrint"");",!
+	Write "	x6.removeAttribute('disabled');",!
+	Write "	x6.checked = false;",!
+	Write !,"	var x7 = document.getElementById(""tLabelCopy"");",!
+	Write "	x7.disabled = true;",!
+	Write "	x7.value = """";",!
+	Write "	var x7a = document.getElementById(""tLabelPrinter"");",!
+	Write "	x7a.disabled = true;",!
+	Write "	x7a.value = """";",!
+	Write "	",!
+	Write "	//Print Routing Slip",!
+	Write "	var x8 = document.getElementById(""cRoutingPrint"");",!
+	Write "	x8.removeAttribute('disabled');",!
+	Write "	var x8a = document.getElementById(""tPrintRouting"");",!
+	Write "	x8.checked = false;",!
+	Write !,"	var x9 = document.getElementById(""tRoutingCopy"");",!
+	Write "	x9.disabled = true;",!
+	Write "	x9.value = """";",!
+	Write "	var x9a = document.getElementById(""tRoutingPrinter"");",!
+	Write "	x9a.disabled = true;",!
+	Write "	x9a.value = """";",!
+	Write "	",!
+	Write "	//Print Med-Rec",!
+	Write "	var pMRec = document.getElementById(""tPrintMRec"");",!
+	Write "	if (pMRec.value == 1) {",!
+	Write "		var x10 = document.getElementById(""cMedRecPrint"");",!
+	Write "		x10.removeAttribute('disabled');",!
+	Write "		x10.checked = false;",!
+	Write "		var x11 = document.getElementById(""tMedRecCopy"");",!
+	Write "		x11.disabled = true;",!
+	Write "		x11.value = """";",!
+	Write "		var x11a = document.getElementById(""tMedRecPrinter"");",!
+	Write "		x11a.disabled = true;",!
+	Write "		x11a.value = """";",!
+	Write "	}",!
+	Write "	",!
+	Write "	//Print Patient Routing Slip",!
+	Write "	var pPR = document.getElementById(""tPrintPRouting"");",!
+	Write "	if (pPR.value == 1) {",!
+	Write "		var x12 = document.getElementById(""cPRoutingPrint"");",!
+	Write "		x12.removeAttribute('disabled');",!
+	Write "		x12.checked = false;",!
+	Write "		var x13 = document.getElementById(""tPRoutingCopy"");",!
+	Write "		x13.disabled = true;",!
+	Write "		x13.value = """";",!
+	Write "		var x13a = document.getElementById(""tPRoutingPrinter"");",!
+	Write "		x13a.disabled = true;",!
+	Write "		x13a.value = """";",!
+	Write "	}",!
+	Write "	",!
+	Write "	//Print Embossed Card",!
+	Write "	var pEmbCard = document.getElementById(""tPrintEmbCard"");",!
+	Write "	if (pEmbCard.value == 1) {",!
+	Write "		var x14 = document.getElementById(""cEmbCardPrint"");",!
+	Write "		x14.removeAttribute('disabled');",!
+	Write "		x14.checked = false;",!
+	Write "		var x15 = document.getElementById(""tEmbCardCopy"");",!
+	Write "		x15.disabled = true;",!
+	Write "		x15.value = """";",!
+	Write "		var x15a = document.getElementById(""tEmbCardPrinter"");",!
+	Write "		x15a.disabled = true;",!
+	Write "		x15a.value = """";",!
+	Write "	}",!
+	Write !,!,!,"	",!
+	Write "	",!
+	Write "}",!
+	Write !,"//Get existing visit admit date and time",!
+	Write "function gettAdmitDtTm(tDFN) {",!
+	Write !,"	var tAdmitDtTm = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".gettAdmitDtTm"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',tDFN);	",!
+	Write "	var x1 = document.getElementById(""tAdmitDtTm"");	",!
+	Write "	x1.value = tAdmitDtTm;	",!
+	Write "	x1.removeAttribute('disabled');",!
+	Write "	",!
+	Write "}",!
+	Write !,"//Get existing Ambulance Company",!
+	Write "function gettAmbulanceCompany(tDFN) {",!
+	Write !,"	var iAmbulanceCompany = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".gettAmbulanceCompany"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',tDFN);",!
+	Write "	var x1 = document.getElementById(""tAmbulanceCompany"");	",!
+	Write "	var x2 = document.getElementById(""tArrivalMeans"");",!
+	Write "	var tAmbulanceYN = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".gettAmbulanceYN"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',x2.value);",!
+	Write !,"	//If Ambulance Transport Mode, allow further field entry",!
+	Write "	if (tAmbulanceYN == 1) {",!
+	Write "	",!
+	Write "		x1.removeAttribute('disabled');",!
+	Write "		for (i=0; i<x1.options.length; i++){",!
+	Write "			",!
+	Write "			if (x1.options[i].value == iAmbulanceCompany) {",!
+	Write "				x1.selectedIndex = i ;",!
+	Write "			}",!
+	Write "		}	",!
+	Write "	}",!
+	Write "	",!
+	Write "	else {",!
+	Write "		x1.disabled = true;",!
+	Write "		x1.value = """";",!
+	Write "	}",!
+	Write "}",!
+	Write !,"//Get existing Ambulance Number",!
+	Write "function gettAmbulanceNumber(tDFN) {",!
+	Write !,"	var tAmbulanceNumber = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".gettAmbulanceNumber"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',tDFN);",!
+	Write "	var x1 = document.getElementById(""tAmbulanceNumber"");	",!
+	Write "	var x2 = document.getElementById(""tArrivalMeans"");",!
+	Write "	var tAmbulanceYN = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".gettAmbulanceYN"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',x2.value);",!
+	Write !,"	//If Ambulance Transport Mode, allow further field entry",!
+	Write "	if (tAmbulanceYN == 1) {",!
+	Write "	",!
+	Write "		x1.removeAttribute('disabled');",!
+	Write "		x1.value = tAmbulanceNumber;",!
+	Write "	",!
+	Write "	}",!
+	Write "	",!
+	Write "	else {",!
+	Write "		x1.disabled = true;",!
+	Write "		x1.value = """";",!
+	Write "	}",!
+	Write "}",!
+	Write !,"//Get existing Arrival Means",!
+	Write "function gettArrivalMeans(tDFN) {",!
+	Write !,"	var iArrivalMeans = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".gettArrivalMeans"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',tDFN);",!
+	Write "	var x1 = document.getElementById(""tArrivalMeans"");	",!
+	Write "	var x2 = document.getElementById(""tTransferYN"");",!
+	Write "	",!
+	Write "	//Populate if no transfer",!
+	Write "	if (x2.value == 0) {",!
+	Write "		x1.removeAttribute('disabled');",!
+	Write "	",!
+	Write "		for (i=0; i<x1.options.length; i++){",!
+	Write "			",!
+	Write "			if (x1.options[i].value == iArrivalMeans) {",!
+	Write "				x1.selectedIndex = i ;",!
+	Write "			}",!
+	Write "		}",!
+	Write "	}",!
+	Write "	else {",!
+	Write "		x1.disabled = true;",!
+	Write "		x1.value = """";",!
+	Write "	}	",!
+	Write "}",!
+	Write !,"//Get existing Transfer Attendant YN",!
+	Write "function gettAttendantYN(tDFN) {",!
+	Write !,"	var iAttendantYN = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".gettAttendantYN"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',tDFN);",!
+	Write "	var x1 = document.getElementById(""tAttendantYN"");	",!
+	Write "	var x2 = document.getElementById(""tTransferYN"");",!
+	Write "	",!
+	Write "	//Populate if transfer",!
+	Write "	if (x2.value == 1) {",!
+	Write "		x1.removeAttribute('disabled');",!
+	Write "	",!
+	Write "		for (i=0; i<x1.options.length; i++){",!
+	Write "			if (x1.options[i].value == iAttendantYN) {",!
+	Write "				x1.selectedIndex = i ;",!
+	Write "			}",!
+	Write "		}",!
+	Write "	}",!
+	Write "	else {",!
+	Write "		x1.disabled = true;",!
+	Write "		x1.value = """";",!
+	Write "	}	",!
+	Write "}",!
+	Write !,"//Get existing Ambulance Billing Number",!
+	Write "function gettBillingNumber(tDFN) {",!
+	Write !,"	var tBillingNumber = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".gettBillingNumber"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',tDFN);",!
+	Write "	var x1 = document.getElementById(""tBillingNumber"");	",!
+	Write "	var x2 = document.getElementById(""tArrivalMeans"");",!
+	Write "	var tAmbulanceYN = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".gettAmbulanceYN"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',x2.value);",!
+	Write !,"	//If Ambulance Transport Mode, allow further field entry",!
+	Write "	if (tAmbulanceYN == 1) {",!
+	Write "	",!
+	Write "		x1.removeAttribute('disabled');",!
+	Write "		x1.value = tBillingNumber;",!
+	Write "	",!
+	Write "	}",!
+	Write "	",!
+	Write "	else {",!
+	Write "		x1.disabled = true;",!
+	Write "		x1.value = """";",!
+	Write "	}",!
+	Write "}",!
+	Write !,"//Get existing visit type",!
+	Write "function gettClinic(tDFN) {",!
+	Write !,"	var iClinic = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".gettClinic"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',tDFN);",!
+	Write "	var x1 = document.getElementById(""tClinic"");	",!
+	Write "	x1.removeAttribute('disabled');",!
+	Write "	",!
+	Write "	for (i=0; i<x1.options.length; i++){",!
+	Write "		if (x1.options[i].value == iClinic) {",!
+	Write "			x1.selectedIndex = i ;",!
+	Write "		}",!
+	Write "	}	",!
+	Write "}",!
+	Write !,"//Get existing Transferred Mode of Transport",!
+	Write "function gettModeTransport(tDFN) {",!
+	Write !,"	var iModeTransport = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".gettModeTransport"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',tDFN);",!
+	Write "	var x1 = document.getElementById(""tModeTransport"");	",!
+	Write "	var x2 = document.getElementById(""tTransferYN"");",!
+	Write "	",!
+	Write "	//Populate if transfer",!
+	Write "	if (x2.value == 1) {",!
+	Write "		x1.removeAttribute('disabled');",!
+	Write "	",!
+	Write "		for (i=0; i<x1.options.length; i++){",!
+	Write "			if (x1.options[i].value == iModeTransport) {",!
+	Write "				x1.selectedIndex = i ;",!
+	Write "			}",!
+	Write "		}",!
+	Write "	}",!
+	Write "	else {",!
+	Write "		x1.disabled = true;",!
+	Write "		x1.value = """";",!
+	Write "	}	",!
+	Write "}",!
+	Write !,"//Get existing presenting complaint",!
+	Write "function gettPCmp(tDFN) {",!
+	Write !,"	var tPCmp = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".gettPCmp"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',tDFN);",!
+	Write "	var x1 = document.getElementById(""tPCmp"");	",!
+	Write "	x1.removeAttribute('disabled');",!
+	Write "	x1.value = tPCmp	",!
+	Write !,"}",!
+	Write !,"//Get existing Transferred From",!
+	Write "function gettTransferFrom(tDFN) {",!
+	Write !,"	var iTransferFrom = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".gettTransferFrom"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',tDFN);",!
+	Write "	var x1 = document.getElementById(""tTransferFrom"");	",!
+	Write "	var x2 = document.getElementById(""tTransferYN"");",!
+	Write "	",!
+	Write "	//Populate if transfer",!
+	Write "	if (x2.value == 1) {",!
+	Write "		x1.removeAttribute('disabled');",!
+	Write "	",!
+	Write "		for (i=0; i<x1.options.length; i++){",!
+	Write "			if (x1.options[i].value == iTransferFrom) {",!
+	Write "				x1.selectedIndex = i ;",!
+	Write "			}",!
+	Write "		}",!
+	Write "	}",!
+	Write "	else {",!
+	Write "		x1.disabled = true;",!
+	Write "		x1.value = """";",!
+	Write "	}	",!
+	Write "}",!
+	Write !,"//Get existing Transferred YN",!
+	Write "function gettTransferYN(tDFN) {",!
+	Write !,"	var iTransferYN = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".gettTransferYN"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',tDFN);",!
+	Write "	var x1 = document.getElementById(""tTransferYN"");	",!
+	Write "	x1.removeAttribute('disabled');",!
+	Write "	",!
+	Write "	for (i=0; i<x1.options.length; i++){",!
+	Write "		if (x1.options[i].value == iTransferYN) {",!
+	Write "			x1.selectedIndex = i ;",!
+	Write "		}",!
+	Write "	}	",!
+	Write "}",!
+	Write !,"//Get existing visit type",!
+	Write "function gettVisitType(tDFN) {",!
+	Write !,"	var iVisitType = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".gettVisitType"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',tDFN);",!
+	Write "	var x1 = document.getElementById(""tVisitType"");	",!
+	Write "	x1.removeAttribute('disabled');",!
+	Write "	",!
+	Write "	for (i=0; i<x1.options.length; i++){",!
+	Write "		if (x1.options[i].value == iVisitType) {",!
+	Write "			x1.selectedIndex = i ;",!
+	Write "		}",!
+	Write "	}	",!
+	Write "}",!
+	Write !,"//Allows search to be initiated on ""ENTER""",!
+	Write "function HandleLeftSearch(e) {",!
+	Write "	var tSearch = document.getElementById(""PtSearch"");",!
+	Write "	if (tSearch.value.length>0) {",!
+	Write "		Search();",!
+	Write "		var curList=document.getElementById(""tSResults"");",!
+	Write "		if (curList.length > 0) {",!
+	Write "			curList.focus();",!
+	Write "		}",!
+	Write "	}",!
+	Write "}",!
+	Write !,"function LoadPage() {",!
+	Write "		",!
+	Write "	//Make sure user is logged in",!
+	Write !,"	//Get user",!
+	Write "	var user = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".ReturnDUZ"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"') ;",!
+	Write "	if (user == 0) {",!
+	Write "		location.replace='BEDDLogin.csp';",!
+	Write "		return true;",!
+	Write "	}",!
+	Write "	",!
+	Write "	//Get selection value",!
+	Write "	var tSResults = document.getElementById(""tSResults"");",!
+	Write !,"	//If no patient selected, clear session variables and reset page",!
+	Write "	"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".ClearSession"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"');",!
+	Write "	ResetPage();",!
+	Write "	var tSearch = document.getElementById(""PtSearch"");",!
+	Write "	tSearch.focus();",!
+	Write "}",!
+	Write !,"//Disable fields on page load",!
+	Write "function ResetDisable() {",!
+	Write !,"	//Admission Date/Time",!
+	Write "	var x1 = document.getElementById(""tAdmitDtTm"");	",!
+	Write "	x1.disabled = true;",!
+	Write "	x1.value = """";",!
+	Write "	",!
+	Write "	//Visit Type",!
+	Write "	var x2 = document.getElementById(""tVisitType"");	",!
+	Write "	x2.disabled = true;",!
+	Write "	x2.value = """";",!
+	Write "	",!
+	Write "	//Clinic",!
+	Write "	var x2a = document.getElementById(""tClinic"");",!
+	Write "	x2a.disabled = true;",!
+	Write "	x2a.value = """";",!
+	Write "	",!
+	Write "	//Presenting Complaint",!
+	Write "	var x3 = document.getElementById(""tPCmp"");	",!
+	Write "	x3.disabled = true;",!
+	Write "	x3.value = """";",!
+	Write !,"	//Transferred From YN",!
+	Write "	var x4 = document.getElementById(""tTransferYN"");	",!
+	Write "	x4.disabled = true;",!
+	Write "	x4.value = """";",!
+	Write !,"	//Transferred From",!
+	Write "	var x5 = document.getElementById(""tTransferFrom"");	",!
+	Write "	x5.disabled = true;",!
+	Write "	x5.value = """";",!
+	Write "	",!
+	Write "	//Mode of Transport to the ER",!
+	Write "	var x6 = document.getElementById(""tModeTransport"");	",!
+	Write "	x6.disabled = true;",!
+	Write "	x6.value = """";",!
+	Write !,"	//Medical Attendant Present",!
+	Write "	var x6 = document.getElementById(""tAttendantYN"");	",!
+	Write "	x6.disabled = true;",!
+	Write "	x6.value = """";",!
+	Write !,"	//Means of Arrival",!
+	Write "	var x7 = document.getElementById(""tArrivalMeans"");	",!
+	Write "	x7.disabled = true;",!
+	Write "	x7.value = """";",!
+	Write "	",!
+	Write "	//Ambulance Number",!
+	Write "	var x8 = document.getElementById(""tAmbulanceNumber"");",!
+	Write "	x8.disabled = true;",!
+	Write "	x8.value = """";",!
+	Write "	",!
+	Write "	//Ambulance Billing Number",!
+	Write "	var x9 = document.getElementById(""tBillingNumber"");",!
+	Write "	x9.disabled = true;",!
+	Write "	x9.value = """";",!
+	Write "	",!
+	Write "	//Ambulance Company",!
+	Write "	var x10 = document.getElementById(""tAmbulanceCompany"");",!
+	Write "	x10.disabled = true;",!
+	Write "	x10.value = """";",!
+	Write !,"	//Hidden DFN",!
+	Write "	var x11 = document.getElementById(""tPatientDFN"");",!
+	Write "	x11.value = """";",!
+	Write "	",!
+	Write "	//Hidden New Visit",!
+	Write "	var x12 = document.getElementById(""tNewVisit"");",!
+	Write "	x12.value = """";",!
+	Write "	",!
+	Write "	//Hidden Visit IEN",!
+	Write "	var x13 = document.getElementById(""tVIEN"");",!
+	Write "	x13.value = """";",!
+	Write "	",!
+	Write "	//Save/Close",!
+	Write "	var x14 = document.getElementById(""btnSaveClose"");",!
+	Write "	x14.disabled = true;",!
+	Write "	var x14a = document.getElementById(""btnSaveClose1"");",!
+	Write "	x14a.disabled = true;",!
+	Write "	",!
+	Write "	//Save/Edit",!
+	Write "	var x15 = document.getElementById(""btnSaveEdit"");",!
+	Write "	x15.disabled = true;",!
+	Write "	var x15a = document.getElementById(""btnSaveEdit1"");",!
+	Write "	x15a.disabled = true;",!
+	Write "	",!
+	Write "	//Labels",!
+	Write "	var x16 = document.getElementById(""cLabelPrint"");",!
+	Write "	x16.disabled = true;",!
+	Write "	x16.value = """";",!
+	Write "	var x17 = document.getElementById(""tLabelCopy"");",!
+	Write "	x17.disabled = true;",!
+	Write "	x17.value = """";",!
+	Write "	var x17a = document.getElementById(""tLabelPrinter"");",!
+	Write "	x17a.disabled = true;",!
+	Write "	x17a.value = """";",!
+	Write "	",!
+	Write "	//Routing Slip",!
+	Write "	var x18 = document.getElementById(""cRoutingPrint"");",!
+	Write "	x18.disabled = true;",!
+	Write "	x18.value = """";",!
+	Write "	var x19 = document.getElementById(""tRoutingCopy"");",!
+	Write "	x19.disabled = true;",!
+	Write "	x19.value = """";",!
+	Write "	var x19a = document.getElementById(""tRoutingPrinter"");",!
+	Write "	x19a.disabled = true;",!
+	Write "	x19a.value = """";",!
+	Write !,"	//Med-Rec",!
+	Write "	var pMRec = document.getElementById(""tPrintMRec"");",!
+	Write "	if (pMRec.value == 1) {",!
+	Write "		var x20 = document.getElementById(""cMedRecPrint"");",!
+	Write "		x20.disabled = true;",!
+	Write "		x20.value = """";",!
+	Write "		var x21 = document.getElementById(""tMedRecCopy"");",!
+	Write "		x21.disabled = true;",!
+	Write "		x21.value = """";",!
+	Write "		var x21a = document.getElementById(""tMedRecPrinter"");",!
+	Write "		x21a.disabled = true;",!
+	Write "		x21a.value = """";",!
+	Write "	}",!
+	Write !,"	//Patient Routing Slip",!
+	Write "	var pPR = document.getElementById(""tPrintPRouting"");",!
+	Write "	if (pPR.value == 1) {",!
+	Write "		var x22 = document.getElementById(""cPRoutingPrint"");",!
+	Write "		x22.disabled = true;",!
+	Write "		x22.value = """";",!
+	Write "		var x23 = document.getElementById(""tPRoutingCopy"");",!
+	Write "		x23.disabled = true;",!
+	Write "		x23.value = """";",!
+	Write "		var x23a = document.getElementById(""tPRoutingPrinter"");",!
+	Write "		x23a.disabled = true;",!
+	Write "		x23a.value = """";",!
+	Write "	}",!
+	Write "	",!
+	Write "	//Patient Embossed Card",!
+	Write "	var pEmbCard = document.getElementById(""tPrintEmbCard"");",!
+	Write "	if (pEmbCard.value == 1) {",!
+	Write "		var x24 = document.getElementById(""cEmbCardPrint"");",!
+	Write "		x24.disabled = true;",!
+	Write "		x24.value = """";",!
+	Write "		var x25 = document.getElementById(""tEmbCardCopy"");",!
+	Write "		x25.disabled = true;",!
+	Write "		x25.value = """";",!
+	Write "		var x25a = document.getElementById(""tEmbCardPrinter"");",!
+	Write "		x25a.disabled = true;",!
+	Write "		x25a.value = """";",!
+	Write "	}",!
+	Write "}",!
+	Write !,"function ResetEnableNew() {",!
+	Write "	",!
+	Write "	//Enable Admission Date and Time",!
+	Write "	var x1 = document.getElementById(""tAdmitDtTm"");",!
+	Write "	x1.removeAttribute('disabled');",!
+	Write "	x1.value = """";",!
+	Write "	",!
+	Write "	//Visit Type",!
+	Write "	var x2 = document.getElementById(""tVisitType"");	",!
+	Write "	x2.removeAttribute('disabled');",!
+	Write "	",!
+	Write "	//Clinic",!
+	Write "	var x2a = document.getElementById(""tClinic"");",!
+	Write "	x2a.removeAttribute('disabled');",!
+	Write "	",!
+	Write "	//Presenting Complaint",!
+	Write "	var x3 = document.getElementById(""tPCmp"");	",!
+	Write "	x3.removeAttribute('disabled');",!
+	Write "	",!
+	Write "	//Enable Transferred From",!
+	Write "	var x4 = document.getElementById(""tTransferYN"");",!
+	Write "	x4.removeAttribute('disabled');",!
+	Write "	",!
+	Write "	//Means of Arrival",!
+	Write "	var x5 = document.getElementById(""tArrivalMeans"");	",!
+	Write "	x5.removeAttribute('disabled');",!
+	Write "	",!
+	Write "	//Print Labels",!
+	Write "	var x6 = document.getElementById(""cLabelPrint"");",!
+	Write "	x6.removeAttribute('disabled');",!
+	Write "	var x6a = document.getElementById(""tPrintLabel"");",!
+	Write "	x6.checked = false;",!
+	Write "	if (x6a.value==1) {",!
+	Write "		x6.checked = true;",!
+	Write "	}",!
+	Write "	var x7 = document.getElementById(""tLabelCopy"");",!
+	Write "	var x7a = document.getElementById(""tLabelPrinter"");",!
+	Write "	if (x6a.value==1) {",!
+	Write "		x7.removeAttribute('disabled');",!
+	Write "		x7a.removeAttribute('disabled');",!
+	Write "		DefLabelCopy();",!
+	Write "		DefLabelPrinter()",!
+	Write "	}",!
+	Write "	",!
+	Write "	//Print Routing Slip",!
+	Write "	var x8 = document.getElementById(""cRoutingPrint"");",!
+	Write "	x8.removeAttribute('disabled');",!
+	Write "	var x8a = document.getElementById(""tPrintRouting"");",!
+	Write "	x8.checked = false;",!
+	Write "	if (x8a.value==1) {",!
+	Write "		x8.checked = true;",!
+	Write "	}",!
+	Write "	var x9 = document.getElementById(""tRoutingCopy"");",!
+	Write "	var x9a = document.getElementById(""tRoutingPrinter"");",!
+	Write "	if (x8a.value==1) {",!
+	Write "		x9.removeAttribute('disabled');",!
+	Write "		x9a.removeAttribute('disabled');",!
+	Write "		DefRoutingCopy();",!
+	Write "		DefRoutingPrinter();",!
+	Write "	}",!
+	Write "	",!
+	Write "	//Print Med-Rec",!
+	Write "	var pMRec = document.getElementById(""tPrintMRec"");",!
+	Write "	if (pMRec.value == 1) {",!
+	Write "		var x10 = document.getElementById(""cMedRecPrint"");",!
+	Write "		x10.removeAttribute('disabled');",!
+	Write "		x10.checked = true;",!
+	Write "		var x11 = document.getElementById(""tMedRecCopy"");",!
+	Write "		x11.removeAttribute('disabled');",!
+	Write "		var x11a = document.getElementById(""tMedRecPrinter"");",!
+	Write "		x11a.removeAttribute('disabled');",!
+	Write "		DefMedRecCopy();",!
+	Write "		DefMedRecPrinter();",!
+	Write "	}",!
+	Write "	",!
+	Write "	//Print Patient Routing Slip",!
+	Write "	var pPR = document.getElementById(""tPrintPRouting"");",!
+	Write "	if (pPR.value == 1) {",!
+	Write "		var x12 = document.getElementById(""cPRoutingPrint"");",!
+	Write "		x12.removeAttribute('disabled');",!
+	Write "		x12.checked = true;",!
+	Write "		var x13 = document.getElementById(""tPRoutingCopy"");",!
+	Write "		x13.removeAttribute('disabled');",!
+	Write "		var x13a = document.getElementById(""tPRoutingPrinter"");",!
+	Write "		x13a.removeAttribute('disabled');",!
+	Write "		DefPRoutingCopy();",!
+	Write "		DefPRoutingPrinter();",!
+	Write "	}",!
+	Write "	",!
+	Write "	//Print Embossed Card",!
+	Write "	var pEmbCard = document.getElementById(""tPrintEmbCard"");",!
+	Write "	if (pEmbCard.value == 1) {",!
+	Write "		var x14 = document.getElementById(""cEmbCardPrint"");",!
+	Write "		x14.removeAttribute('disabled');",!
+	Write "		x14.checked = true;",!
+	Write "		var x15 = document.getElementById(""tEmbCardCopy"");",!
+	Write "		x15.removeAttribute('disabled');",!
+	Write "		var x15a = document.getElementById(""tEmbCardPrinter"");",!
+	Write "		x15a.removeAttribute('disabled');",!
+	Write "		DefEmbCardCopy();",!
+	Write "		DefEmbCardPrinter();",!
+	Write "	}",!
+	Write "}",!
+	Write !,"//Default Max Results to 50",!
+	Write "function ResetMaxResults() {",!
+	Write "	var x1 = document.getElementById(""tMaxResults"") ;",!
+	Write "	var iMaxResults = document.getElementById(""iMaxResults"").value ;",!
+	Write "	for (i=0; i<x1.options.length; i++){",!
+	Write "		if (x1.options[i].value == iMaxResults) {",!
+	Write "			x1.selectedIndex = i ;",!
+	Write "			}",!
+	Write "		}",!
+	Write " }",!
+	Write !,"function ResetPage() {",!
+	Write !,"	//Maximum Results",!
+	Write "	ResetMaxResults();	",!
+	Write "	",!
+	Write "	//Disable fields",!
+	Write "	ResetDisable()",!
+	Write "	",!
+	Write "}",!
+	Write !,"function SaveSessionVar() {",!
+	Write "	",!
+	Write "	//Admission Date/Time",!
+	Write "	var x1 = document.getElementById(""tAdmitDtTm"").value; ",!
+	Write "	",!
+	Write "	//Visit Type",!
+	Write "	var x2 = document.getElementById(""tVisitType"").value;",!
+	Write "	",!
+	Write "	//Clinic",!
+	Write "	var x15 = document.getElementById(""tClinic"").value; ",!
+	Write "	",!
+	Write "	//Presenting Complaint",!
+	Write "	var x3 = document.getElementById(""tPCmp"").value; ",!
+	Write !,"	//Transferred From YN",!
+	Write "	var x4 = document.getElementById(""tTransferYN"").value; ",!
+	Write !,"	//Transferred From",!
+	Write "	var x5 = document.getElementById(""tTransferFrom"").value; ",!
+	Write "	",!
+	Write "	//Mode of Transport to the ER",!
+	Write "	var x6 = document.getElementById(""tModeTransport"").value; ",!
+	Write !,"	//Medical Attendant Present",!
+	Write "	var x7 = document.getElementById(""tAttendantYN"").value; ",!
+	Write !,"	//Means of Arrival",!
+	Write "	var x8 = document.getElementById(""tArrivalMeans"").value; ",!
+	Write "	",!
+	Write "	//Ambulance Number",!
+	Write "	var x9 = document.getElementById(""tAmbulanceNumber"").value;",!
+	Write "	",!
+	Write "	//Ambulance Billing Number",!
+	Write "	var x10 = document.getElementById(""tBillingNumber"").value;",!
+	Write "	",!
+	Write "	//Ambulance Company",!
+	Write "	var x11 = document.getElementById(""tAmbulanceCompany"").value;",!
+	Write !,"	//Hidden DFN",!
+	Write "	var x12 = document.getElementById(""tPatientDFN"").value;",!
+	Write "	",!
+	Write "	//Hidden New Visit",!
+	Write "	var x13 = document.getElementById(""tNewVisit"").value;",!
+	Write "	",!
+	Write "	//Hidden Visit IEN",!
+	Write "	var x14 = document.getElementById(""tVIEN"").value;",!
+	Write "	",!
+	Write "	//Save",!
+	Write "	"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".SaveSessionVar"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15) ;",!
+	Write "	",!
+	Write "	//Label Printer",!
+	Write "	var LBP = document.getElementById(""tLabelPrinter"").value;",!
+	Write "	",!
+	Write "	//Label Copies",!
+	Write "	var LBC = document.getElementById(""tLabelCopy"").value;",!
+	Write "	",!
+	Write "	"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".SavePrintLabel"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',LBP,LBC);",!
+	Write "	",!
+	Write "	//Routing Printer",!
+	Write "	var RTP = document.getElementById(""tRoutingPrinter"").value;",!
+	Write "	",!
+	Write "	//Routing Copies",!
+	Write "	var RTC = document.getElementById(""tRoutingCopy"").value;",!
+	Write "	",!
+	Write "	"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".SavePrintRouting"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',RTP,RTC);",!
+	Write "	",!
+	Write "	//MRec enabled?",!
+	Write "	var pMRec = document.getElementById(""tPrintMRec"");",!
+	Write "	if (pMRec.value == 1) {",!
+	Write "	",!
+	Write "		//MRec Printer",!
+	Write "		var MRP = document.getElementById(""tMedRecPrinter"").value;",!
+	Write !,"		//MRec Copies",!
+	Write "		var MRC = document.getElementById(""tMedRecCopy"").value;",!
+	Write !,"		"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".SavePrintMRec"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',MRP,MRC);",!
+	Write "		",!
+	Write "	}",!
+	Write "	",!
+	Write "	//Print Patient Routing Slip?",!
+	Write "	var pPR = document.getElementById(""tPrintPRouting"");",!
+	Write "	if (pPR.value == 1) {",!
+	Write !,"		//PRouting Printer",!
+	Write "		var PRP = document.getElementById(""tPRoutingPrinter"").value;",!
+	Write "	",!
+	Write "		//PRouting Copies",!
+	Write "		var PRC = document.getElementById(""tPRoutingCopy"").value;",!
+	Write "		",!
+	Write "		"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".SavePrintPRouting"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',PRP,PRC);",!
+	Write "	}	",!
+	Write "	",!
+	Write "	//Patient Embossed Card",!
+	Write "	var pEmbCard = document.getElementById(""tPrintEmbCard"");",!
+	Write "	if (pEmbCard.value == 1) {",!
+	Write !,"		//EmbCard Printer",!
+	Write "		var ECP = document.getElementById(""tEmbCardPrinter"").value;",!
+	Write "	",!
+	Write "		//EmbCard Copies",!
+	Write "		var ECC = document.getElementById(""tEmbCardCopy"").value;",!
+	Write "		",!
+	Write "		"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".SavePrintEmbCard"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',ECP,ECC);",!
+	Write "	}",!
+	Write "	",!
+	Write "}",!
+	Write !,"function Search() {",!
+	Write !,"	var x1 = document.getElementById(""PtSearch"");",!
+	Write "	var x2 = document.getElementById(""tMaxResults"");",!
+	Write "	",!
+	Write "	//Clear out current list",!
+	Write "	var curList=document.getElementById(""tSResults"");",!
+	Write "	while(curList.length > 0) {",!
+	Write "   		curList.remove(0);",!
+	Write "  	}",!
+	Write "	",!
+	Write "	//Perform the search",!
+	Write "	"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".getPatients"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',x1.value,x2.value) ;",!
+	Write !,"	//No results",!
+	Write "	if (curList.length == 0) {",!
+	Write "		alert(""No results returned. Please try another search"");",!
+	Write "	}",!
+	Write "}",!
+	Write !,"function SelectedPatient() {",!
+	Write "	",!
+	Write "	//Clear session variables",!
+	Write "	"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".ClearSession"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"');",!
+	Write "	",!
+	Write "	//Retrieve Selection",!
+	Write "	var Selected = document.form.tSResults.selectedIndex;	",!
+	Write "   	var tDFN = document.form.tSResults.options[Selected].value;",!
+	Write "	",!
+	Write "	//Patient Selected",!
+	Write "	var tPatientDFN = document.getElementById(""tPatientDFN"");",!
+	Write "	",!
+	Write "	if (tDFN>0) {",!
+	Write "		",!
+	Write "		//Set hidden field",!
+	Write "		tPatientDFN.value = tDFN;",!
+	Write !,"		//Existing ER Visit?",!
+	Write "		var tNewVisit = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".ExistingVisit"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',tDFN);",!
+	Write "		var x1 = document.getElementById(""tNewVisit"");",!
+	Write "		",!
+	Write "		//New Visit",!
+	Write "		if (tNewVisit == 0) {",!
+	Write "			ResetEnableNew();",!
+	Write "			DefVType();",!
+	Write "			DefClinic();	",!
+	Write "			DefTransferYN();",!
+	Write "			DefArrivalMeans();",!
+	Write "		}",!
+	Write "		",!
+	Write "		//Enable Save/Close",!
+	Write "		var sc = document.getElementById(""btnSaveClose"");",!
+	Write "		sc.removeAttribute('disabled');",!
+	Write "		var sc1 = document.getElementById(""btnSaveClose1"");",!
+	Write "		sc1.removeAttribute('disabled');",!
+	Write "		",!
+	Write "		//Enable Save/Edit",!
+	Write "		var se = document.getElementById(""btnSaveEdit"");",!
+	Write "		se.removeAttribute('disabled');",!
+	Write "		var se1 = document.getElementById(""btnSaveEdit1"");",!
+	Write "		se1.removeAttribute('disabled');",!
+	Write "		",!
+	Write "		//Existing Visit",!
+	Write "		x1.value = tNewVisit",!
+	Write "		if (tNewVisit == 1) {",!
+	Write "			var answer = confirm (""This patient is currently admitted to the ER. Do you want to edit his/her admission data?"")",!
+	Write "				if (answer) {",!
+	Write "		",!
+	Write "					//Admission Date and Time",!
+	Write "					gettAdmitDtTm(tDFN);",!
+	Write "				",!
+	Write "					//Visit Type",!
+	Write "					gettVisitType(tDFN);",!
+	Write "					",!
+	Write "					//Clinic",!
+	Write "					gettClinic(tDFN);",!
+	Write "					",!
+	Write "					//Presenting Complaint",!
+	Write "					gettPCmp(tDFN);",!
+	Write "					",!
+	Write "					//Transferred From YN",!
+	Write "					gettTransferYN(tDFN);",!
+	Write "					",!
+	Write "					//Transferred From",!
+	Write "					gettTransferFrom(tDFN);",!
+	Write "					",!
+	Write "					//Transferred Mode of Transport",!
+	Write "					gettModeTransport(tDFN);",!
+	Write "					",!
+	Write "					//Transfer Attendant YN",!
+	Write "					gettAttendantYN(tDFN);",!
+	Write "					",!
+	Write "					//Arrival Means",!
+	Write "					gettArrivalMeans(tDFN);",!
+	Write "					",!
+	Write "					//Ambulance Number",!
+	Write "					gettAmbulanceNumber(tDFN);",!
+	Write "					",!
+	Write "					//Ambulance Billing Number",!
+	Write "					gettBillingNumber(tDFN);",!
+	Write "					",!
+	Write "					//Ambulance Company",!
+	Write "					gettAmbulanceCompany(tDFN);",!
+	Write "					",!
+	Write "					//Enable Print Options",!
+	Write "					enablePrintExisting()",!
+	Write "					",!
+	Write "				}",!
+	Write "				",!
+	Write "				else {",!
+	Write "					tPatientDFN.value = """";",!
+	Write "					document.form.tSResults.selectedIndex = """";",!
+	Write "					ResetDisable();",!
+	Write "				}",!
+	Write "		}",!
+	Write !,"		//Put focus to admit date and time",!
+	Write "		var tAdm = document.getElementById(""tAdmitDtTm"");",!
+	Write "		tAdm.focus();",!
+	Write "	}",!
+	Write "	",!
+	Write "	//No Patient Selected",!
+	Write "	if (tDFN == 0) {",!
+	Write "		tPatientDFN.value = """";",!
+	Write "		ResetDisable();",!
+	Write "	}	",!
+	Write "}",!
+	Write !,"function TransferYNChange() {",!
+	Write !,"	//Get the value",!
+	Write "	var x1 = document.getElementById(""tTransferYN"");",!
+	Write "	",!
+	Write "	//If Yes",!
+	Write "	if (x1.value == 1) {	",!
+	Write "		var x2 = document.getElementById(""tTransferFrom"");",!
+	Write "		x2.removeAttribute('disabled');",!
+	Write "		var x3 = document.getElementById(""tModeTransport"");",!
+	Write "		x3.removeAttribute('disabled');",!
+	Write "		var dModeTransport = document.getElementById(""dModeTransport"").value ;",!
+	Write "			for (i=0; i<x3.options.length; i++){",!
+	Write "				if (x3.options[i].value == dModeTransport) {",!
+	Write "					x3.selectedIndex = i ;",!
+	Write "				}",!
+	Write "			}",!
+	Write "		var x4 = document.getElementById(""tAttendantYN"");",!
+	Write "		x4.removeAttribute('disabled');",!
+	Write "		var dAttendantYN = document.getElementById(""dAttendantYN"").value ;",!
+	Write "			for (i=0; i<x4.options.length; i++){",!
+	Write "				if (x4.options[i].value == dAttendantYN) {",!
+	Write "					x4.selectedIndex = i ;",!
+	Write "				}",!
+	Write "			}",!
+	Write "		var x5 = document.getElementById(""tArrivalMeans"");",!
+	Write "		x5.disabled = true;",!
+	Write "		x5.value = """";",!
+	Write "		",!
+	Write "		var x6 = document.getElementById(""tAmbulanceNumber"");",!
+	Write "		x6.disabled = true;",!
+	Write "		x6.value = """";",!
+	Write "		",!
+	Write "		var x7 = document.getElementById(""tBillingNumber"");",!
+	Write "		x7.disabled = true;",!
+	Write "		x7.value = """";",!
+	Write "		",!
+	Write "		var x8 = document.getElementById(""tAmbulanceCompany"");",!
+	Write "		x8.disabled = true;",!
+	Write "		x8.value = """";",!
+	Write "	}",!
+	Write "	else {",!
+	Write "		var x2 = document.getElementById(""tTransferFrom"");	",!
+	Write "		x2.disabled = true;",!
+	Write "		x2.value = """";",!
+	Write "		var x3 = document.getElementById(""tModeTransport"");",!
+	Write "		x3.disabled = true;",!
+	Write "		x3.value = """";",!
+	Write "		var x4 = document.getElementById(""tAttendantYN"");",!
+	Write "		x4.disabled = true;",!
+	Write "		x4.value = """";",!
+	Write "		var x5 = document.getElementById(""tArrivalMeans"");",!
+	Write "		x5.removeAttribute('disabled');",!
+	Write "		var dArrivalMeans = document.getElementById(""dArrivalMeans"").value ;",!
+	Write "			for (i=0; i<x5.options.length; i++){",!
+	Write "				if (x5.options[i].value == dArrivalMeans) {",!
+	Write "					x5.selectedIndex = i ;",!
+	Write "				}",!
+	Write "			}",!
+	Write "	}",!
+	Write "}",!
+	Write !,"</script>"
+	Write !,!,!,!,"<!--Clear out Admit Session Variables -->"
+	Write !,!,!,"<!--Check if selected patient is in ER-->"
+	Write !,!,!,!,!,!,!,"<!--Retrieve list of patient -->"
+	Write !,!,!,"<!--Retrieve existing visit admit date and time-->"
+	Write !,!,!,"<!--Retrieve existing Ambulance Company-->"
+	Write !,!,!,"<!--Retrieve existing Ambulance Number-->"
+	Write !,!,!,"<!--Retrieve whether ambulance type-->"
+	Write !,!,!,"<!--Retrieve existing Arrival Means-->"
+	Write !,!,!,"<!--Retrieve existing Transfer Attendant-->"
+	Write !,!,!,"<!--Retrieve existing Ambulance Billing Number-->"
+	Write !,!,!,"<!--Retrieve existing clinic-->"
+	Write !,!,!,!,"<!--Retrieve existing Transfer Transport Mode-->"
+	Write !,!,!,!,"<!--Retrieve existing presenting complaint-->"
+	Write !,!,!,"<!--Retrieve existing Transfer From-->"
+	Write !,!,!,"<!--Retrieve existing TransferYN-->"
+	Write !,!,!,"<!--Retrieve existing visit type-->"
+	Write !,!,!,"<!-- Convert Admit Date/Time -->"
+	Write !,!,!,"<!-- Return Current date/time -->"
+	Write !,!,!,"<!-- Return the user DUZ value -->"
+	Write !,!,!,!,!,!,!,!,!,!,!,!,!,!,!,"<!--Create/Update the visit-->"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,!,!,!
+	Set U="^"
+	Set duz=%session.Data("DUZ")
+	Set site=%session.Data("SITE")
+	Do LOADSYS^BEDDUTW(.beddsys,site)
+	Set timeout=$G(beddsys("TimeOut"))
+	Set objid=$Get(%session.Data("OBJECTID"))
+	//Max Results
+	Set iMaxResults=50
+	//Admit Date-Time
+	Set tAdmitDtTm=""
+	//Presenting Complaint
+	Set tPCmp=""
+	//Visit Type - Default to Unschedule
+	Set iVisitType=""
+	Set dVisitType=$$DEFVTYP^BEDDADM()
+	//Transfer from YN
+	Set iTransferYN=0
+	//Transferred from
+	Set iTransferFrom=""
+	//Mode of Transport
+	Set iModeTransport=""
+	Set dModeTransport=$$DEFMTRN^BEDDADM()
+	//Medical Attendant
+	Set iAttendantYN=""
+	Set dAttendantYN=0
+	//Means of Arrival
+	Set iArrivalMeans=""
+	Set dArrivalMeans=$$DEFTMOD^BEDDADM()
+	//Ambulance Number
+	Set tAmbulanceNumber=""
+	//Ambulance Billing Number
+	Set tBillingNumber=""
+	//Ambulance Company
+	Set iAmbulanceCompany=""
+	//Get current system time
+	Set tNow=$P($NOW(),",",2)
+	//Default Label setting
+	Set tPrintLabel=$S($D(beddsys("defLabel")):1,1:0)
+	//Default Routing setting
+	Set tPrintRouting=$S($D(beddsys("defRouting")):1,1:0)
+	//Print MedRec
+	Set tPrintMRec=$S($D(beddsys("MRec")):1,1:0)
+	//Print PRouting
+	Set tPrintPRouting=$S($D(beddsys("PRouting")):1,1:0)
+	//Print Embossed Card
+	Set tPrintEmbCard=$S($D(beddsys("EmbCard")):1,1:0)
+	//Label Copies
+	Set tLabelCopy=$G(beddsys("LabelCopies"))
+	//Label Printer
+	Set tLabelPrinter=$G(beddsys("LabelPrinter"))
+	//Routing Copies
+	Set tRoutingCopy=$G(beddsys("RoutingCopies"))
+	//Routing Printer
+	Set tRoutingPrinter=$G(beddsys("RoutingPrinter"))
+	//Med-Rec Copies
+	Set tMedRecCopy=$G(beddsys("MRecCopies"))
+	//Med-Rec Printer
+	Set tMedRecPrinter=$G(beddsys("MRecPrinter"))
+	//Patient Routing Slip
+	Set tPRoutingCopy=$G(beddsys("PRoutingCopies"))
+	//Patient Routing Slip Printer
+	Set tPRoutingPrinter=$G(beddsys("PRoutingPrinter"))
+	//Embossed Card
+	Set tEmbCardCopy=$G(beddsys("EmbCardCopies"))
+	//Embossed Card Printer
+	Set tEmbCardPrinter=$G(beddsys("EmbCardPrinter"))
+	//Default clinic
+	Set dClinic=30
+	Write !,!,"<META HTTP-EQUIV=""Refresh"" CONTENT="""_( timeout )_"; URL=BEDD.csp"">"
+	Write !,!,"<TITLE>	BEDD Admit </TITLE>",!
+	Write !,(..HyperEventHead(0,0))
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+ 	Set U="^"
+ 	//
+ 	//Check for access information
+ 	If ('$D(%session.Data("DUZ"))) {
+ 		Set %response.Redirect="BEDDLogin.csp"
+ 	}
+  	Quit 1
+  	
+ 
+]]></Implementation>
+</Method>
+
+<Method name="ReturnDUZ">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set user=$Get(%session.Data("DUZ"))
+ 	If (user<1) {
+ 		Set user=0
+ 	}
+ 
+ 	Quit user
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="SavePrintEmbCard">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>x1:%String,x2:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 
+ 	Set %session.Data("tEmbCardPrinter")=x1
+ 	Set %session.Data("tEmbCardCopies")=x2
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="SavePrintLabel">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>x1:%String,x2:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 
+ 	Set %session.Data("tLabelPrinter")=x1
+ 	Set %session.Data("tLabelCopies")=x2
+ 
+]]></Implementation>
+</Method>
+
+<Method name="SavePrintMRec">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>x1:%String,x2:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 
+ 	Set %session.Data("tMRecPrinter")=x1
+ 	Set %session.Data("tMRecCopies")=x2
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="SavePrintPRouting">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>x1:%String,x2:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 
+ 	Set %session.Data("tPRoutingPrinter")=x1
+ 	Set %session.Data("tPRoutingCopies")=x2
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="SavePrintRouting">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>x1:%String,x2:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 
+ 	Set %session.Data("tRoutingPrinter")=x1
+ 	Set %session.Data("tRoutingCopies")=x2
+ 	
+ 
+]]></Implementation>
+</Method>
+
+<Method name="SaveSessionVar">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>x1:%String,x2:%String,x3:%String,x4:%String,x5:%String,x6:%String,x7:%String,x8:%String,x9:%String,x10:%String,x11:%String,x12:%String,x13:%String,x14:%String,x15:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set %session.Data("tAdmitDtTm")=x1
+ 	Set %session.Data("tVisitType")=x2
+ 	Set %session.Data("tPCmp")=x3
+ 	Set %session.Data("tTransferYN")=x4
+ 	Set %session.Data("tTransferFrom")=x5
+ 	Set %session.Data("tModeTransport")=x6
+ 	Set %session.Data("tAttendantYN")=x7
+ 	Set %session.Data("tArrivalMeans")=x8
+ 	Set %session.Data("tAmbulanceNumber")=x9
+ 	Set %session.Data("tBillingNumber")=x10
+ 	Set %session.Data("tAmbulanceCompany")=x11
+ 	Set %session.Data("tPatientDFN")=x12
+ 	Set %session.Data("tNewVisit")=x13
+ 	Set %session.Data("tVIEN")=x14
+ 	Set %session.Data("tClinic")=x15
+ 	Quit
+ 	
+ 
+]]></Implementation>
+</Method>
+
+<Method name="VisitSave">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set bedd("tAdmitDtTm")=%session.Data("tAdmitDtTm")
+ 	Set bedd("tVisitType")=%session.Data("tVisitType")
+ 	Set bedd("tPCmp")=%session.Data("tPCmp")
+ 	Set bedd("tTransferYN")=%session.Data("tTransferYN")
+ 	Set bedd("tTransferFrom")=%session.Data("tTransferFrom")
+ 	Set bedd("tModeTransport")=%session.Data("tModeTransport")
+ 	Set bedd("tAttendantYN")=%session.Data("tAttendantYN")
+ 	Set bedd("tArrivalMeans")=%session.Data("tArrivalMeans")
+ 	Set bedd("tAmbulanceNumber")=%session.Data("tAmbulanceNumber")
+ 	Set bedd("tBillingNumber")=%session.Data("tBillingNumber")
+ 	Set bedd("tAmbulanceCompany")=%session.Data("tAmbulanceCompany")
+ 	Set bedd("tPatientDFN")=%session.Data("tPatientDFN")
+ 	Set bedd("tNewVisit")=%session.Data("tNewVisit")
+ 	Set bedd("tVIEN")=%session.Data("tVIEN")
+ 	Set bedd("tClinic")=%session.Data("tClinic")
+ 	
+ 	//Perform the save
+ 	Set OBJECTID = $$SAVEADM^BEDDADM(.bedd,%session.Data("DUZ"))
+ 
+ 	//Save DFN and OBJECTID for possible later use
+ 	Set %session.Data("DFN")=""
+ 	If +%session.Data("tPatientDFN") {
+ 		Set %session.Data("DFN")=%session.Data("tPatientDFN")
+ 	}
+ 		
+ 	Set %session.Data("OBJECTID")=""
+ 	If +OBJECTID {
+ 		Set %session.Data("OBJECTID")=OBJECTID
+ 	}
+ 	
+ 	If +OBJECTID=-1 {
+ 		Set tEMessage = $P(OBJECTID,"^",2)
+ 		If tEMessage="" {
+ 			Set tEMessage="Unable to create/update visit"
+ 		}
+ 		Quit tEMessage
+ 	}
+ 	
+ 	//Perform printing
+ 	
+ 	//Labels
+ 	If $G(%session.Data("DFN"))]"",$G(%session.Data("tLabelPrinter"))]"" {
+ 		D LABEL^BEDDPRT(%session.Data("DUZ"),%session.Data("DFN"),%session.Data("tLabelPrinter"),$G(%session.Data("tLabelCopies")))
+ 	}
+ 
+ 	//Routing Slip
+ 	If $G(%session.Data("DFN"))]"",$G(%session.Data("tRoutingPrinter"))]"" {
+ 		D ROUTE^BEDDPRT(%session.Data("DUZ"),%session.Data("DFN"),%session.Data("tRoutingPrinter"),$G(%session.Data("tRoutingCopies")))
+ 	}
+ 
+ 	//Med-Rec
+ 	If $G(%session.Data("DFN"))]"",$G(%session.Data("tMRecPrinter"))]"" {
+ 		D MREC^BEDDPRT(%session.Data("DUZ"),%session.Data("DFN"),%session.Data("tMRecPrinter"),$G(%session.Data("tMRecCopies")))
+ 	}
+ 
+ 	//Patient Routing Slip
+ 	If $G(%session.Data("DFN"))]"",$G(%session.Data("tPRoutingPrinter"))]"" {
+ 		D PROUTE^BEDDPRT(%session.Data("DUZ"),%session.Data("DFN"),%session.Data("tPRoutingPrinter"),$G(%session.Data("tPRoutingCopies")))
+ 	}
+ 
+ 	//Embossed Card
+ 	If $G(%session.Data("DFN"))]"",$G(%session.Data("tEmbCardPrinter"))]"" {
+ 		D EMBCARD^BEDDPRT(%session.Data("DUZ"),%session.Data("DFN"),%session.Data("tEmbCardPrinter"),$G(%session.Data("tEmbCardCopies")))
+ 	}
+ 
+ 	//Custom Printing
+ 	If $G(%session.Data("DFN"))]"" {
+ 		Set NEWVISIT = 0
+ 		If $G(%session.Data("tNewVisit"))=0 {
+ 			S NEWVISIT=1
+ 		}
+ 		D CUSTOM^BEDDPRT(%session.Data("DUZ"),%session.Data("DFN"),NEWVISIT)
+ 	}
+ 	Quit 1
+ 
+]]></Implementation>
+</Method>
+
+<Method name="getDeviceIEN">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>tDevice:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+  Quit $$DVIEN^BEDDADM(tDevice)
+ 
+]]></Implementation>
+</Method>
+
+<Method name="getDtChk">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>date:%String,admdt:%String,chk:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ Quit $$DTCHK^BEDDUTIU(date,admdt,chk)
+ 
+]]></Implementation>
+</Method>
+
+<Method name="getPatients">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>Search:%String,Max:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set tDUZ=%session.Data("DUZ")
+ 	
+ 	Kill BEDD
+ 	
+ 	Do FND^BEDDPLKP(.BEDD,Search,tDUZ,Max)
+ 	Set U="^",cnt=0
+ 	Set tPatient=$O(BEDD(""))
+ 	If (tPatient]"") {
+ 		// Clear out the search results
+ 		&js<
+ 			CSPPage.document.form.tSResults.options.length=0;
+ 			CSPPage.document.form.tSResults.options[0]=new Option(" ", " ", false, false);
+ 			>		
+ 	}
+ 	While tPatient]"" {
+ 		Set zz=BEDD(tPatient)
+ 		Set dfn=$p(zz,U)
+ 		Set desc=$p(zz,U,2)
+ 		Set cnt=cnt+1
+ 		// Put this data into the page
+ 		&js<
+ 			CSPPage.document.form.tSResults.options[#(cnt)#]=new Option("#(desc)#", "#(dfn)#", false, false);
+ 		>
+ 		Set tPatient=$O(BEDD(tPatient))
+ 	}
+ 	Quit
+ 
+]]></Implementation>
+</Method>
+
+<Method name="gettAdmitDtTm">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>tDFN:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	If (+tDFN=0) {
+ 		Quit ""
+ 	}
+ 	 
+ 	//Set up DUZ
+ 	D DUZ^XUP($Get(%session.Data("DUZ")))
+ 
+ 	//Retrieve value
+ 	Quit $$FMTE^BEDDUTIL($$GET1^DIQ(9009081,tDFN_",",1,"I"))
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="gettAmbulanceCompany">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>tDFN:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	If (+tDFN=0) {
+ 		Quit ""
+ 	}
+ 	 
+ 	//Set up DUZ
+ 	D DUZ^XUP($Get(%session.Data("DUZ")))
+ 
+ 	//Retrieve value
+ 	Quit $$GET1^DIQ(9009081,tDFN_",",15,"I")
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="gettAmbulanceNumber">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>tDFN:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	If (+tDFN=0) {
+ 		Quit ""
+ 	}
+ 	 
+ 	//Set up DUZ
+ 	D DUZ^XUP($Get(%session.Data("DUZ")))
+ 
+ 	//Retrieve value
+ 	Quit $$GET1^DIQ(9009081,tDFN_",",12,"I")
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="gettAmbulanceYN">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>tAmbulance:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	 
+ 	//Set up DUZ
+ 	D DUZ^XUP($Get(%session.Data("DUZ")))
+ 
+ 	//Retrieve value
+ 	Set tName=$$GET1^DIQ(9009083,tAmbulance_",",.01,"E")
+ 	I tName["AMBULANCE" {
+ 		Quit 1
+ 	}
+ 	Else  {
+ 		Quit 0
+ 	}
+ 		
+ 
+]]></Implementation>
+</Method>
+
+<Method name="gettArrivalMeans">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>tDFN:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	If (+tDFN=0) {
+ 		Quit ""
+ 	}
+ 	 
+ 	//Set up DUZ
+ 	D DUZ^XUP($Get(%session.Data("DUZ")))
+ 
+ 	//Retrieve value
+ 	Quit +$$GET1^DIQ(9009081,tDFN_",",6,"I")
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="gettAttendantYN">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>tDFN:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	If (+tDFN=0) {
+ 		Quit ""
+ 	}
+ 	 
+ 	//Set up DUZ
+ 	D DUZ^XUP($Get(%session.Data("DUZ")))
+ 
+ 	//Retrieve value
+ 	Quit +$$GET1^DIQ(9009081,tDFN_",",2.4,"I")
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="gettBillingNumber">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>tDFN:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	If (+tDFN=0) {
+ 		Quit ""
+ 	}
+ 	 
+ 	//Set up DUZ
+ 	D DUZ^XUP($Get(%session.Data("DUZ")))
+ 
+ 	//Retrieve value
+ 	Quit $$GET1^DIQ(9009081,tDFN_",",13,"I")
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="gettClinic">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>tDFN:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	If (+tDFN=0) {
+ 		Quit ""
+ 	}
+ 	 
+ 	//Set up DUZ
+ 	D DUZ^XUP($Get(%session.Data("DUZ")))
+ 
+ 	//Retrieve value
+ 	Quit $$GCLINIC^BEDDADM(tDFN)
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="gettModeTransport">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>tDFN:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	If (+tDFN=0) {
+ 		Quit ""
+ 	}
+ 	 
+ 	//Set up DUZ
+ 	D DUZ^XUP($Get(%session.Data("DUZ")))
+ 
+ 	//Retrieve value
+ 	Quit $$GET1^DIQ(9009081,tDFN_",",2.3,"I")
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="gettPCmp">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>tDFN:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	If (+tDFN=0) {
+ 		Quit ""
+ 	}
+ 	 
+ 	//Set up DUZ
+ 	D DUZ^XUP($Get(%session.Data("DUZ")))
+ 
+ 	//Retrieve value
+ 	Quit $$GET1^DIQ(9009081,tDFN_",",23,"E")
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="gettTransferFrom">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>tDFN:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	If (+tDFN=0) {
+ 		Quit ""
+ 	}
+ 	 
+ 	//Set up DUZ
+ 	D DUZ^XUP($Get(%session.Data("DUZ")))
+ 
+ 	//Retrieve value
+ 	Quit $$GET1^DIQ(9009081,tDFN_",",2.2,"I")
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="gettTransferYN">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>tDFN:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	If (+tDFN=0) {
+ 		Quit ""
+ 	}
+ 	 
+ 	//Set up DUZ
+ 	D DUZ^XUP($Get(%session.Data("DUZ")))
+ 
+ 	//Retrieve value
+ 	Quit $$GET1^DIQ(9009081,tDFN_",",2.1,"I")
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="gettVisitType">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>tDFN:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	If (+tDFN=0) {
+ 		Quit ""
+ 	}
+ 	 
+ 	//Set up DUZ
+ 	D DUZ^XUP($Get(%session.Data("DUZ")))
+ 
+ 	//Retrieve value
+ 	Quit $$GET1^DIQ(9009081,tDFN_",",3,"I")
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>D:\intersystems\E3IHS\CSP\foia_goldb\BEDDAdmit.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/foia_goldb/BEDDAdmit.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>64671,78188</Default>
+</Parameter>
+</Class>
+</Export>

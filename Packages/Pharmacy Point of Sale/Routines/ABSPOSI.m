@@ -1,5 +1,5 @@
 ABSPOSI ; IHS/FCS/DRS - Data entry w/ScreenMan ;   [ 09/12/2002  10:10 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**3,6,23**;JUN 21, 2001;Build 15
+ ;;1.0;PHARMACY POINT OF SALE;**3,6,23,48**;JUN 21, 2001;Build 27
  ; This calls ScreenMan for an entry in file 9002313.51
  ;------------------------------------------------
  ;IHS/SD/lwj  7/17/03  patch 6
@@ -111,6 +111,7 @@ NEWREC(NMULT,NINS,ORIGIN) ;EP - from ABSPOSIV - a new PEC/MIS INPUT record
  . . ; ex:          +3002,+3000,+999999, for 2nd ins in 3rd presc
  N STOP F  D  Q:STOP
  . D UPDATE^DIE("E","FDA","IEN","MSG")
+ . I $D(MSG) D LOG^ABSPOSL2("NEWREC^ABSPOSI",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  . I '$D(MSG),$G(IEN(999999)) S STOP=1 Q
  . D ZWRITE^ABSPOS("MSG","IEN")
  . S STOP='$$IMPOSS^ABSPOSUE("FM","TRI","UPDATE^DIE failed",,"NEWREC",$T(+0))
@@ -131,6 +132,7 @@ INIT(IEN) ;EP - from ABSPOSIV - initialize record IEN
  . F I=1:1:1 S FDA(FN,IEN,I/100+100)=$P(Y,U,I)
  N STOP F  D  Q:STOP
  . D FILE^DIE("","FDA","MSG")
+ . I $D(MSG) D LOG^ABSPOSL2("INIT^ABSPOSI",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  . I '$D(MSG) S STOP=1 Q
  . D ZWRITE^ABSPOS("MSG")
  . S STOP='$$IMPOSS^ABSPOSUE("FM","TRI","FILE^DIE failed",,"INIT",$T(+0))
@@ -151,8 +153,8 @@ DELETE(IEN)        ; delete record IEN
  N FDA,MSG,FN S FN=$$FN,IEN=IEN_","
  S FDA(FN,IEN,.01)="@"
  D FILE^DIE("E","FDA","MSG")
- I $D(MSG) D ZWRITE^ABSPOS("MSG")
- I $D(MSG) Q 0
+ I $D(MSG) D LOG^ABSPOSL2("DELETE^ABSPOSI",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
+ I $D(MSG) D ZWRITE^ABSPOS("MSG") Q 0 ; /IHS/OIT/RAM ; CONSOLIDATE TWO LINES INTO ONE FOR CLARITY. 
  Q 1
 GENINSTR ; general instructions, in the FORM-level pre-action for Block 2C
  N AR

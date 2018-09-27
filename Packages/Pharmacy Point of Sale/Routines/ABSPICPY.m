@@ -1,5 +1,5 @@
 ABSPICPY ; IHS/OIT/CASSevern/Pieran ran 9/19/2011 - Copy Insurance default Profiles
- ;;1.0;PHARMACY POINT OF SALE;**42,46**;JUN 21, 2001;Build 15
+ ;;1.0;PHARMACY POINT OF SALE;**42,46,48,49**;JUN 21, 2001;Build 27
  ;
  ; This routine will be called when creating a new ABSP INSURER so that a "sane" set of defaults can be loaded for a good chance at working without modification.
  ; Basically we will prompt the user as to whether it's a Medicaid, Medicare or Commercial insurer...go to the appropriate table and add the defaults stored in that table.
@@ -14,20 +14,23 @@ EN(ABSPINS) ;EP
  ;. I ((+INP>0)&&(+INP<4))||(INP="^") S OK=1	;They must enter a 1, 2, 3 or "^" otherwise prompt again. 
  ;. ELSE  W !,"That is not a valid choice, please enter ""1"", ""2"", ""3"", or ""^"""
  ;Instead of prompting them...we'll get the insurance type off the main insurer file
- ;M and R are Medicare
+ ;M** and R are Medicare
  ;D is Medicaid
  ;P is private, but for the purposes of this copy program, we'll treat any value that isn't M, R or D as private
- S TYP=$P(^AUTNINS(ABSPINS,2),"^")
- S TYP=$S(TYP="D":1,TYP="M":2,TYP="R":2,TYP="MD":2,TYP="HM":2,1:3)
+ ; S TYP=$P($G(^AUTNINS(ABSPINS,2)),"^")
+ S TYP=$$INSTYP^AGUTL(ABSPINS) ; USE NEW API TO GET INSURER TYPE.
+ S TYP=$S(TYP="D":1,TYP="M":2,TYP="R":2,TYP="MD":2,TYP="MH":2,TYP="MC":2,TYP="MMC":2,1:3) ; SET UP DEFAULTS DEPENDING ON INSURER TYPE.
  D PROCESS(ABSPINS,TYP)
  Q
 PROCESS(ABSPINS,TYP) ;Process the INSURER here
- N INS,ABSPSPEC,ABSPSPSG,ABSPSPFL
+ N INS,ABSPSPEC,ABSPSPSG,ABSPSPFL,ZERR  ; /IHS/OIT/RAM ; 9 JUN 17 ; ADD DBS CALL ERROR RETURN VARIABLE
  D DEFCOPY(ABSPINS) ;The defaults get loaded regardless of insurance type
  D:TYP=1 CAIDCOPY(ABSPINS)
  D:TYP=2 CARECOPY(ABSPINS)
  D:TYP=3 PRIVCOPY(ABSPINS)
- D:$D(INS(1)) UPDATE^DIE("E","INS(1)")
+ ; D:$D(INS(1)) UPDATE^DIE("E","INS(1)")
+ D:$D(INS(1)) UPDATE^DIE("E","INS(1)",,"ZERR") ; /IHS/OIT/RAM ; 9 JUN 17 ; UPDATE DBS CALL TO ALLOW FOR ERROR RETURN.
+ I $D(ZERR) D LOG^ABSPOSL2("PROCESS^ABSPICPY",.ZERR) ; /IHS/OIT/RAM ; 9 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  D:$D(ABSPSPEC) POPSPEC(ABSPINS,.ABSPSPEC)
  D:$D(ABSPSPSG) POPSEG(ABSPINS,.ABSPSPSG)
  D:$D(ABSPSPFL) POPFLD(ABSPINS,.ABSPSPFL)
@@ -171,7 +174,7 @@ PRIVTAB ;;TYPE;NCPDP FIELD #;COMMENT;VALUE
 POPSPEC(ABSPINS,ABSPSPEC) ;Now populate the Special Code stuff
  ;This has already been run...don't add duplicate entries.
  Q:$D(^ABSPEI(ABSPINS,210))
- N NCPDPCD,INS,STRING
+ N NCPDPCD,INS,STRING,ZERR  ; /IHS/OIT/RAM ; 9 JUN 17 ; ADD DBS CALL ERROR RETURN VARIABLE
  S NCPDPCD=""
  F  S NCPDPCD=$O(ABSPSPEC(NCPDPCD)) Q:NCPDPCD=""  D
  . ;These are the fields that can't be overriden
@@ -179,23 +182,29 @@ POPSPEC(ABSPINS,ABSPSPEC) ;Now populate the Special Code stuff
  . S STRING=$TR(ABSPSPEC(NCPDPCD),"^","|") ;Fileman won't store this string with a ^ (caret) in it
  . S INS(1,9002313.42,"+1,"_ABSPINS_",",.01)=NCPDPCD
  . S INS(1,9002313.42,"+1,"_ABSPINS_",",.02)=STRING
- . D UPDATE^DIE("E","INS(1)")
+ . ; D UPDATE^DIE("E","INS(1)")
+ . D UPDATE^DIE("E","INS(1)",,"ZERR") ; /IHS/OIT/RAM ; 9 JUN 17 ; UPDATE DBS CALL TO ALLOW FOR ERROR RETURN.
+ . I $D(ZERR) D LOG^ABSPOSL2("POPSPEC^ABSPICPY",.ZERR) ; /IHS/OIT/RAM ; 9 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  Q
 POPSEG(ABSPINS,ABSPSPSG) ;Next we populate the suppressed segments
  ;This has already been run...don't add duplicate entries.
  Q:$D(^ABSPEI(ABSPINS,221))
- N SEGCD,INS
+ N SEGCD,INS,ZERR  ; /IHS/OIT/RAM ; 9 JUN 17 ; ADD DBS CALL ERROR RETURN VARIABLE
  S SEGCD=""
  F  S SEGCD=$O(ABSPSPSG(SEGCD)) Q:SEGCD=""  D
  . S INS(1,9002313.48,"+1,"_ABSPINS_",",.01)=SEGCD
- . D UPDATE^DIE("","INS(1)") ;On this one we are using the Internal value
+ . ; D UPDATE^DIE("","INS(1)") ;On this one we are using the Internal value
+ . D UPDATE^DIE("","INS(1)",,"ZERR") ; /IHS/OIT/RAM ; 9 JUN 17 ; UPDATE DBS CALL TO ALLOW FOR ERROR RETURN.
+ . I $D(ZERR) D LOG^ABSPOSL2("POPSEG^ABSPICPY",.ZERR) ; /IHS/OIT/RAM ; 9 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  Q
 POPFLD(ABSPINS,ABSPSPFL) ;Next we populate the suppressed fields
  ;This has already been run...don't add duplicate entries.
  Q:$D(^ABSPEI(ABSPINS,220))
- N NCPDPCD
+ N NCPDPCD,ZERR  ; /IHS/OIT/RAM ; 9 JUN 17 ; ADD DBS CALL ERROR RETURN VARIABLE
  S NCPDPCD=""
  F  S NCPDPCD=$O(ABSPSPFL(NCPDPCD)) Q:NCPDPCD=""  D
  . S INS(1,9002313.46,"+1,"_ABSPINS_",",.01)=NCPDPCD
- . D UPDATE^DIE("E","INS(1)")
+ . ; D UPDATE^DIE("E","INS(1)")
+ . D UPDATE^DIE("E","INS(1)",,"ZERR") ; /IHS/OIT/RAM ; 9 JUN 17 ; UPDATE DBS CALL TO ALLOW FOR ERROR RETURN.
+ . I $D(ZERR) D LOG^ABSPOSL2("POPFLD^ABSPICPY",.ZERR) ; /IHS/OIT/RAM ; 9 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  Q

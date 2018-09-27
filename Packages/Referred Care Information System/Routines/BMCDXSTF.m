@@ -1,5 +1,5 @@
 BMCDXSTF ; IHS/PHXAO/TMJ - Stuff Dx & CPT if Site Parameters Request stuffing ;   
- ;;4.0;REFERRED CARE INFO SYSTEM;**8,9**;JAN 09, 2006;Build 51
+ ;;4.0;REFERRED CARE INFO SYSTEM;**8,9**;JAN 09, 2006;Build 92
  ;IHS/ITSC/FCJ Killed DIADD var, was not allowing
  ;       lookup on the Prov. Nar file
  ;BMC*4.0*8 CSV added a space to the .9999 code now checking for ".9999 " for ICD9

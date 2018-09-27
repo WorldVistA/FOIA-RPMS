@@ -1,5 +1,5 @@
 BMCRC32 ; IHS/OIT/FCJ - LIST APPROVED REFERRALS W/O PRINTED C32 ;   
- ;;4.0;REFERRED CARE INFO SYSTEM;**7,9**;JAN 09, 2006;Build 51
+ ;;4.0;REFERRED CARE INFO SYSTEM;**7,9**;JAN 09, 2006;Build 92
  ;BMC*4.0*7 NEW ROUTINE
  ;
  ; This routine prints a list of approved Referrals that a C32 has not be printed for

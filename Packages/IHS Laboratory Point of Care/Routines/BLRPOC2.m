@@ -1,5 +1,5 @@
-BLRPOC2 ;IHS/MSC/PLS - EHR POC Component support, part 2 ; 17-Oct-2014 09:22 ; MKK
- ;;5.2;IHS LABORATORY;**1029,1031,1033,1034**;NOV 01, 1997;Build 88
+BLRPOC2 ;IHS/MSC/PLS - EHR POC Component support, part 2 ; 13-Oct-2017 14:04 ;  MKK
+ ;;5.2;IHS LABORATORY;**1029,1031,1033,1034,1041**;NOV 01, 1997;Build 23
  ;
  ; IHS/OIT/MKK
  ;      Entries from BLRPOC were moved to this routine due to the BLRPOC routine
@@ -37,8 +37,6 @@ SAVER ; EP -
  NEW LRTST,LRUNKNOW,LRURG,LRURINE,LRUSI,LRVF,LRVF,LRVIDO,LRVIDOF,LRWLC,LRWLO
  NEW PNLINPNL,PNM,RES,RET,XQY,XQY0,ZTQUEUED
  ;
- D ENTRYAUD^BLRUTIL("SAVER^BLRPOC2 0.0","ARY")    ; IHS/MSC/MKK - LR*5.2*1033
- ;
  S LRNOLABL="" ; SUPPRESS LABEL PRINTING
  I $G(^LAB(69.9,1,"RO"))=""  S RES="0^Rollover has never been run. Please contact National Lab User Support." G END
  I $P($G(^LAB(69.9,1,"RO")),U,2) S RES="0^Accessioning is currently running, please wait a few minutes and try again." G END
@@ -54,8 +52,6 @@ SAVER ; EP -
  S LRSAMP=+$G(ARY("COL"))
  S LRSPEC=+$P(^LAB(62,LRSAMP,0),U,2)
  S LRDFN=$$GETPAT^BLRPOC(DFN)
- ;
- D ENTRYAUD^BLRUTIL("SAVER^BLRPOC2 2.0")    ; IHS/MSC/MKK - LR*5.2*1034
  ;
  I 'LRDFN D  G END
  . S RES="0^Failed to find patient in Lab Data File"
@@ -79,8 +75,6 @@ SAVER ; EP -
  ;S LRORDR="P" ; this will make the software error, due to the ,1) node not being defined.
  D NOW^%DTC S LRNT=%
  ;
- D ENTRYAUD^BLRUTIL("SAVER^BLRPOC2 5.0")    ; IHS/MSC/MKK - LR*5.2*1034
- ;
  D ORDER^LROW2
  D ^LRORDST  ; Create order and accession
  N LRSPEC,LRSAMP
@@ -103,9 +97,9 @@ SAVER ; EP -
  .S LRNG5=$P(LRSPEC0,"!",5),LRNG5=$$REFRES^BLRPOC(LRNG5),$P(LRSPEC0,"!",5)=LRNG5
  .S LRNG2=$P(LRSPEC0,"!",2),LRNG2=$$REFRES^BLRPOC(LRNG2),$P(LRSPEC0,"!",2)=LRNG2
  .S LRNG3=$P(LRSPEC0,"!",3),LRNG3=$$REFRES^BLRPOC(LRNG3),$P(LRSPEC0,"!",3)=LRNG3
- . ;
- . D REVAL(LRTRES,.LRTFLG)         ; IHS/MSC/MKK - LR*5.2*1031
- . ;
+ .;
+ .D REVAL(LRTRES,.LRTFLG)         ; IHS/MSC/MKK - LR*5.2*1031
+ .;
  .S UCUM=$P(LRSPEC0,"!",7) I UCUM=+UCUM S UCUM=$P(^BLRUCUM(UCUM,0),U,1),$P(LRSPEC0,"!",7)=UCUM
  .D BLDARY^BLRPOC(LRFNODE,LRSPEC0,LRTRES,LRTFLG)
  ;
@@ -121,8 +115,6 @@ SAVER ; EP -
  ;
  ; Merge array into LSRB as it is done in LRVRPOC
  M LRSB=LRARY
- ;
- D ENTRYAUD^BLRUTIL("SAVER^BLRPOC2 5.0","LRARY") ; IHS/MSC/MKK - LR*5.2*1033
  ;
  ; Call the test function as is done in LRVRPOC
  D TEST^LRVR1
@@ -178,6 +170,21 @@ LRHACK31 ; EP
  Q
  ;
 REVAL(LRTRES,LRTFLG) ; EP - Re-validate abnormal flag
+ ; ----- BEGIN IHS/MSC/MKK - LR*5.2*1041
+ ; Qualitative flag for POC tests
+ NEW QUALFLAG
+ S QUALFLAG=0
+ D
+ . NEW LRDL,LRFLG,LRSB,LRSPEC,LRTS,X
+ . S LRDL=$G(LRTRES)
+ . S LRSB=$G(LRFNODE)
+ . S LRSPEC=$P($G(H8),U)
+ . S LRTS=$G(LRTIEN)
+ . I $L(LRDL),$L(LRSB),$L(LRSPEC),$L(LRTS) D
+ .. S X=$$QUALCHEK^BLRQUALU()
+ .. I $G(LRFLG)="A*" S QUALFLAG=1,LRTFLG=$G(LRFLG)
+ Q:QUALFLAG
+ ; ----- END IHS/MSC/MKK - LR*5.2*1041
  ;
  ; Take into account results that begin with ">" or "<"
  S:$E(LRTRES)=">" LRTRES=$P(LRTRES,">",2)+1
@@ -194,11 +201,7 @@ REVAL(LRTRES,LRTFLG) ; EP - Re-validate abnormal flag
  ;
  ; ----- BEGIN IHS/MSC/MKK - LR*5.2*1033
 SIGNSYMP ; EP - Sign or Symptom for Incoming POC test
- D ENTRYAUD^BLRUTIL("SIGNSYMP^BLRPOC2 0.0","ARY")
- ;
  NEW ARYSYMP,ERRS,FDA,ICD,ICDCNT,ICDSTR,IENS,IN,OUT,PROVNARR,SNOMED,STR,VARS
- ;
- D ENTRYAUD^BLRUTIL("SIGNSYMP^BLRPOC2 1.0","ARY")
  ;
  S PROVNARR=$P($G(ARY("SYMP")),"^")
  S ICDSTR=$P($G(ARY("SYMP")),"^",2)
@@ -218,13 +221,9 @@ SIGNSYMP ; EP - Sign or Symptom for Incoming POC test
  . S PROVNARR=$P(STR,"^",4)
  . S ICDSTR=$P(STR,"^",5)
  ;
- D ENTRYAUD^BLRUTIL("SIGNSYMP^BLRPOC2 4.0") ; IHS/MSC/MKK - LR*5.2*1034
- ;
  Q:$L(PROVNARR)<1&($L(ICDSTR)<1)&($L(SNOMED)<1)    ; Skip if nothing to store
  ;
  S IENS=$O(^LRO(69,LRODT,1,LRSN,2,"B",+ARY("ORDTST"),0))_","_LRSN_","_LRODT_","
- ;
- D ENTRYAUD^BLRUTIL("SIGNSYMP^BLRPOC2 5.0")
  ;
  S:$L(PROVNARR) FDA(69.03,IENS,9999999.1)=PROVNARR
  S:$L(SNOMED) FDA(69.03,IENS,9999999.2)=SNOMED
@@ -268,8 +267,6 @@ SIGNSYMP ; EP - Sign or Symptom for Incoming POC test
  . S FDA(9009026.31,"?+1,"_ORDIEN_",",.01)=ICDIEN
  . S:$L(F60PTR) FDA(9009026.31,"?+1,"_ORDIEN_",",1)=F60PTR      ; IHS/MSC/MKK - LR*5.2*1034
  . D UPDATE^DIE(,"FDA",,"ERRS")
- ;
- D ENTRYAUD^BLRUTIL("SAVER^BLRPOC2 0.0","ARY")    ; IHS/MSC/MKK - LR*5.2*1033
  ;
  ; Store the Accession number
  NEW LRUID

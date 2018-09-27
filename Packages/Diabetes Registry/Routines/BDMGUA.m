@@ -1,5 +1,5 @@
 BDMGUA ; cmi/anch/maw - BDM DMS GUI Utilities ; 11 Feb 2010  7:45 AM
- ;;2.0;BDM DIABETES MANAGEMENT SYSTEM;**1,3,5,6,7,8,9,10**;JUN 14, 2007;Build 12
+ ;;2.0;BDM DIABETES MANAGEMENT SYSTEM;**1,3,5,6,7,8,9,10,11**;JUN 14, 2007;Build 30
  ;
  ;
  ;
@@ -8,7 +8,7 @@ DEBUG(BDMRET,BDMSTR) ;-- debug
  D DEBUG^%Serenji("TAXCHK^BDMGUA(.BDMRET,.BDMSTR)")
  Q
  ;
-DELPT(BDMRET,BDMSTR) ;-- delete a patient and data from dms
+DELPT(BDMRET,BDMSTR) ;-- delete a patient/data from dms
  S X="MERR^BDMGU",@^%ZOSF("TRAP")
  N P,BDMPAT,BDMGREF,BDMI,BDMX
  S P="|"
@@ -31,7 +31,7 @@ DELPT(BDMRET,BDMSTR) ;-- delete a patient and data from dms
  S BDMRET=""
  Q
  ;
-TAXCHKO(BDMRET) ;-- check taxonomies for Audit
+TAXCHKO(BDMRET) ;-- check taxonomies
  S X="MERR^BDMGU",@^%ZOSF("TRAP")
  N BDMI,BDMJ,BDMDATA,BDMDA
  S BDMI=0
@@ -73,7 +73,7 @@ TAXCHK(RETVAL,BDMSTR) ;-- check taxonomies
  K ^XTMP("BDMTAX",$J)
  Q
  ;
-UPDTAX(BDMRET,BDMSTR) ;update taxonomies based on option selected
+UPDTAX(BDMRET,BDMSTR) ;update taxonomies
  S X="MERR^BDMGU",@^%ZOSF("TRAP")
  N P,BDMOPT,BDMI
  S P="|"
@@ -134,6 +134,10 @@ UPDTAX(BDMRET,BDMSTR) ;update taxonomies based on option selected
  . D INIT^BDMPETS
  I BDMOPT="Upd DM Audit 17" D
  . D INIT^BDMDETS
+ I BDMOPT="Upd DM Audit P 18" D
+ . D INIT^BDMPFTS
+ I BDMOPT="Upd DM Audit 18" D
+ . D INIT^BDMDFTS
  N BDMDA,BDMT
  S BDMDA=0 F  S BDMDA=$O(BDMTAX("IDX",BDMDA)) Q:'BDMDA  D
  . N BDMN,BDMFL,BDMRO,BDMFLT,BDMPAN
@@ -175,7 +179,7 @@ CHTDATA(BDMRET,BDMSTR) ;-- get lab, bp or wt data for chart
  S ^BDMTMP($J,BDMI+1)=$C(31)
  Q
  ;
-WEIGHT(BD,ED,PIEN,PAT,CHT,INST,LAB,EL) ;-- get the chartable weights
+WEIGHT(BD,ED,PIEN,PAT,CHT,INST,LAB,EL) ;-- get the chartable wts
  S ^BDMTMP($J,BDMI)="T00020Begin Date^T00020End Date^T00020Date^T00004Weight^T00030Patient^T00007Chart"_$C(30)
  N BDMDA,BDMEDA,BDMMST,BDMCNT
  S BDMCNT=0
@@ -233,7 +237,7 @@ BP(BD,ED,PIEN,PAT,CHT,INST,LAB,EL) ;-- get the chartable bps
  K ^TMP($J,"BDMGUI")
  Q
  ;
-LAB(BD,ED,PIEN,PAT,CHT,INST,LAB,EL) ;-- get the chartable labss
+LAB(BD,ED,PIEN,PAT,CHT,INST,LAB,EL) ;-- get the chartable labs
  S ^BDMTMP($J,BDMI)="T00020Begin Date^T00020End Date^T00020Date^T00004Lab Value^T00030Abnormal^T00007Chart"_$C(30)
  N BDMDA,BDMEDA,BDMCNT
  S BDMCNT=0
@@ -261,7 +265,7 @@ LAB(BD,ED,PIEN,PAT,CHT,INST,LAB,EL) ;-- get the chartable labss
  K ^TMP($J,"BDMGUI")
  Q
  ;
-ASTMP(BDMRET,BDMSTR) ;-- add entries from search template
+ASTMP(BDMRET,BDMSTR) ;-- add entries search template
  S X="MERR^BDMGU",@^%ZOSF("TRAP")
  N P,BDMRGE,BDMST,BDMRG,BDMGLB,BDMU,BDMTRNE,BDMTRN
  S P="|"
@@ -283,7 +287,7 @@ ASTMP(BDMRET,BDMSTR) ;-- add entries from search template
  S ^BDMTMP($J,2)=$C(31)_$G(BDMERR)
  Q
  ;
-DELRPT(RETVAL,BDMSTR) ;-- delete a report out of the DMS GUI REPORT OUTPUT file
+DELRPT(RETVAL,BDMSTR) ;-- delete a report
  S X="MERR^BDMGU",@^%ZOSF("TRAP")
  N P,R,I
  S P="|",R="~"
@@ -304,7 +308,7 @@ DELRPT(RETVAL,BDMSTR) ;-- delete a report out of the DMS GUI REPORT OUTPUT file
  S ^BDMTMP($J,2)=$C(31)_BDMERR
  Q
  ;
-PRB(BDMRET,BDMSTR) ;-- return a list of problems by patient
+PRB(BDMRET,BDMSTR) ;-- return a list of problems
  S X="MERR^BDMGU",@^%ZOSF("TRAP")
  N BDMDA,BDMI,BDMERR,BDMDATA,BDMPAT,BDMPIEN,P,BDMDX,BDMDLM,BDMCL,BDMNAR,BDMFAC,BDMNMBR,BDMDE,BDMST,BDMON,BDMULM,BDMENT,BDMUENT
  N BDMOEN,BDMFACA,BDMFACE,BDMFAC,BDMPOVD,BDMDEL
@@ -345,7 +349,7 @@ PRB(BDMRET,BDMSTR) ;-- return a list of problems by patient
  S ^BDMTMP($J,BDMI+1)=$C(31)_$G(BDMERR)
  Q
  ;
-NOTES(BDMRET,BDMSTR) ;-- get problem list notes
+NOTES(BDMRET,BDMSTR) ;-- get pl notes
  S X="MERR^BDMGU",@^%ZOSF("TRAP")
  N P,BDMDA,BDMIEN,BDMI
  S P="|"
@@ -372,7 +376,7 @@ NOTES(BDMRET,BDMSTR) ;-- get problem list notes
  S ^BDMTMP($J,BDMI+1)=$C(31)_$G(BDMERR)
  Q
  ;
-ADDPRB(BDMRET,BDMSTR) ;-- add a problem to the problem list
+ADDPRB(BDMRET,BDMSTR) ;-- add a problem
  S X="MERR^BDMGU",@^%ZOSF("TRAP")
  N P,BDMPAT,BDMDX,BDMDLM,BDMCL,BDMNAR,BDMFAC,BDMDE,BDMST,BDMON
  S P="|"
@@ -399,7 +403,7 @@ DELPR(BDMRET,BDMSTR) ;-- delete a problem
  S BDMRET=$$DELPROB^BDMPROB(BDMIEN,BDMREA,BDMOTH)
  Q
  ;
-VC(RETVAL,BDMSTR) ;-- get version number to see if client matches
+VC(RETVAL,BDMSTR) ;-- get version number
  N P
  S P="|"
  K ^BDMTMP($J)

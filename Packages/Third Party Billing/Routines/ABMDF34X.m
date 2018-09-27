@@ -1,9 +1,10 @@
 ABMDF34X ; IHS/SD/SDR - ADA-2012 FORM ;   
- ;;2.6;IHS 3P BILLING SYSTEM;**11,13,21**;NOV 12, 2009;Build 379
+ ;;2.6;IHS 3P BILLING SYSTEM;**11,13,21,22**;NOV 12, 2009;Build 418
  ;IHS/SD/SDR - 2.6*13 - VMBP - RQMT_95 - Added code to populated remarks box 35 (line 41)
  ;IHS/SD/SDR - 2.6*21 - HEAT166874 - fix for programming error so test claim will print correctly
  ;IHS/SD/SDR - 2.6*21 - HEAT205579 - Made T1015 print first for ARBOR HEALTH PLAN
  ;IHS/SD/SDR - 2.6*21 - HEAT284071 - Added check for FL override for ADA-2012
+ ;IHS/SD/SDR 2.6*22 HEAT313777 Added check for new parameter that will allow/not allow decimal to print in dollar amounts
  ;************************************************************************************
  ;
 MARG ;Set left and top margins
@@ -69,7 +70,9 @@ FRMT ;
  ;
  I ABM("LTH")["$" D  Q
  .S ABM("LTH")=$P(ABM("LTH"),"$")
- .S ABM("FLD")=$TR($FN(+ABM("FLD"),"",2),".")
+ .;S ABM("FLD")=$TR($FN(+ABM("FLD"),"",2),".")  ;abm*2.6*22 IHS/SD/SDR HEAT313777
+ .S ABM("FLD")=$FN(+ABM("FLD"),"",2)  ;abm*2.6*22 IHS/SD/SDR HEAT313777
+ .S ABM("FLD")=$S($P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),1,ABMP("VTYP"),1)),U,22)="Y":ABM("FLD"),1:$TR(ABM("FLD"),"."))  ;abm*2.6*22 IHS/SD/SDR HEAT313777
  .S ABM("RT")=ABM("LTH")-$L(ABM("FLD"))+1
  .I ABM("RT")>1 D
  ..S ABM("BLNK")=""

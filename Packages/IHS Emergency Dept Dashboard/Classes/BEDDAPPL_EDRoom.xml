@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2017-10-16 11:40:34">
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2018-09-27 12:54:34">
 <Class name="BEDDAPPL.EDRoom">
 <Description>
 BEDDAPPL.EDRoom Class App Screen</Description>
 <CompileAfter>%ZEN.Generator,BEDDAPPL.EDMenu</CompileAfter>
 <Super>%ZEN.Component.page</Super>
-<TimeChanged>63019,76955.786718</TimeChanged>
+<TimeChanged>64399,61446.69009</TimeChanged>
 <TimeCreated>61957,73514.572067</TimeCreated>
 <DependsOn>%ZEN.Generator,BEDDAPPL.EDMenu</DependsOn>
 
@@ -129,6 +129,15 @@ Create a new entry</Description>
 <Language>javascript</Language>
 <ClientMethod>1</ClientMethod>
 <Implementation><![CDATA[
+	// Get DUZ
+ 	var wAccess=zenPage.getDUZ();
+
+	if (wAccess == 0) {
+		alert("User has been logged out");
+		document.location.href='BEDDLogin.csp';
+		return true;
+	}
+
 	var controller = zenPage.getComponentById('roomData');
 	controller.createNewObject();
 ]]></Implementation>
@@ -173,6 +182,15 @@ save roommodel to database</Description>
 <Language>javascript</Language>
 <ClientMethod>1</ClientMethod>
 <Implementation><![CDATA[
+	// Get DUZ
+ 	var wAccess=zenPage.getDUZ();
+
+	if (wAccess == 0) {
+		alert("User has been logged out");
+		document.location.href='BEDDLogin.csp';
+		return true;
+	}
+
   // validate and save form
   var form = zenPage.getComponentById('roomForm');
   form.save();
@@ -191,6 +209,15 @@ cancel the current action</Description>
 <Language>javascript</Language>
 <ClientMethod>1</ClientMethod>
 <Implementation><![CDATA[
+	// Get DUZ
+ 	var wAccess=zenPage.getDUZ();
+
+	if (wAccess == 0) {
+		alert("User has been logged out");
+		document.location.href='BEDDLogin.csp';
+		return true;
+	}
+
 	var form = zenPage.getComponentById('roomForm');
 	form.reset();
 
@@ -208,6 +235,15 @@ Delete current item from database</Description>
 <Language>javascript</Language>
 <ClientMethod>1</ClientMethod>
 <Implementation><![CDATA[
+	// Get DUZ
+ 	var wAccess=zenPage.getDUZ();
+
+	if (wAccess == 0) {
+		alert("User has been logged out");
+		document.location.href='BEDDLogin.csp';
+		return true;
+	}
+
 	if (confirm("Are you sure you want to delete this room?")) {
 		var controller = zenPage.getComponentById('roomData');
 		controller.deleteId(controller.getModelId());
@@ -215,6 +251,79 @@ Delete current item from database</Description>
 		var table = zenPage.getComponentById('roomTable');
 		table.executeQuery(true);
 	}
+]]></Implementation>
+</Method>
+
+<Method name="pSetup">
+<Language>javascript</Language>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[
+
+	// Switch to Setup page
+ 	var wAccess=zenPage.getDUZ();
+
+	if (wAccess > 0) {
+		document.location.href='BEDDAPPL.EDSystem.cls';
+	}
+	
+	if (wAccess == 0) {
+		document.location.href='BEDDLogin.csp';
+	}
+	
+	return true;
+]]></Implementation>
+</Method>
+
+<Method name="pRoom">
+<Language>javascript</Language>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[
+
+	// Switch to Rooms page
+ 	var wAccess=zenPage.getDUZ();
+
+	if (wAccess > 0) {
+		document.location.href='BEDDAPPL.EDRoom.cls';
+	}
+	
+	if (wAccess == 0) {
+		document.location.href='BEDDLogin.csp';
+	}
+	
+	return true;
+]]></Implementation>
+</Method>
+
+<Method name="pWarn">
+<Language>javascript</Language>
+<ClientMethod>1</ClientMethod>
+<Implementation><![CDATA[
+
+	// Switch to Warnings page
+ 	var wAccess=zenPage.getDUZ();
+
+	if (wAccess > 0) {
+		document.location.href='BEDDAPPL.EDWarning.cls';
+	}
+	
+	if (wAccess == 0) {
+		document.location.href='BEDDLogin.csp';
+	}
+	
+	return true;
+]]></Implementation>
+</Method>
+
+<Method name="getDUZ">
+<ReturnType>%Integer</ReturnType>
+<ZenMethod>1</ZenMethod>
+<Implementation><![CDATA[
+	If $G(%session.Data("DUZ")) {
+		Q %session.Data("DUZ")
+	}
+
+  	else
+     {Q 0}
 ]]></Implementation>
 </Method>
 </Class>

@@ -1,6 +1,7 @@
 AGELA ; IHS/ASDS/EFG - Add/Edit Eligibility Display ;  
- ;;7.1;PATIENT REGISTRATION;**11**;AUG 25,2005;Build 1
+ ;;7.1;PATIENT REGISTRATION;**11,12**;AUG 25,2005;Build 1
  ;IHS/OIT/NKD AG*7.1*11 MU2 UNKNOWN SEX
+ ;IHS/OIT/NKD AG*7.1*12 INSURER TYPE
  ;
  ;ALLOW PROPER EXIT FROM PRIVATE SCREEN AFTER DELETING ENTRY
  Q:$G(AGELP("PH"))=""
@@ -92,7 +93,8 @@ DATA W !,"1) Policy Holder.: ",$E($P(^AUPN3PPH(AGELP("PH"),0),U),1,20) S AGEL("P
  I $P($G(^AUPN3PPH(AGELP("PH"),0)),U,5)]"",$D(^AUTTPIC($P(^(0),U,5),0)) W $E($P(^(0),U),1,17)
  W !?2,$P(AGINS,U,6)             ;insurer phone
  W ?23,"Ins. Type: "
- W:$G(AGELP("INS"))'="" $P($G(^AUTNINS(AGELP("INS"),2)),U)
+ ;W:$G(AGELP("INS"))'="" $P($G(^AUTNINS(AGELP("INS"),2)),U)
+ W:$G(AGELP("INS"))'="" $$INSTYP^AGUTL(AGELP("INS"))  ;IHS/OIT/NKD AG*7.1*12
  I '$G(AGEL("IN")) S AGEL("IN")=$G(AGELP("INS"))
  S AGPRVIN0=$G(^AUPNPRVT(DFN,11,AGEL("IN"),0))
  W ?40,"|12)  CCopy: "
@@ -109,7 +111,8 @@ E2 ;
 MEM W !,"----Policy Members----PC-----Member #------HRN-----"
  W "Rel----------From/Thru-------"
  Q:$G(AGELP("INS"))=""
- S AGEL("DIC")=$S($P(^AUTNINS(AGELP("INS"),2),U)="D":"MCD",1:"PRVT")_"^AGELA1"
+ ;S AGEL("DIC")=$S($P(^AUTNINS(AGELP("INS"),2),U)="D":"MCD",1:"PRVT")_"^AGELA1"
+ S AGEL("DIC")=$S($$INSTYP^AGUTL(AGELP("INS"))="D":"MCD",1:"PRVT")_"^AGELA1"  ;IHS/OIT/NKD AG*7.1*12
  D @AGEL("DIC")
  S AGELP("FLDS")=AGEL("I")+11
  W !

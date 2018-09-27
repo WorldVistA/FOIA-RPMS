@@ -1,5 +1,5 @@
-BGP8DEMO ; IHS/CMI/LAB - demo patient search template ; 
- ;;9.0;IHS CLINICAL REPORTING;;JUL 1, 2009
+BGP8DEMO ; IHS/CMI/LAB - demo patient search template ;
+ ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
  ;
  ;
  ;
@@ -49,7 +49,7 @@ EOJ ;EP
  Q
  ;; ;
 EN ;EP -- main entry point for 
- D EN^VALM("BGP 08 DEMO SEARCH TEMPLATE")
+ D EN^VALM("BGP 18 DEMO SEARCH TEMPLATE")
  D CLEAR^VALM1
  D FULL^VALM1
  W:$D(IOF) @IOF

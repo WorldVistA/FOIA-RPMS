@@ -1,5 +1,5 @@
 BMCFPRNP ; IHS/OIT/FCJ - PRINT PHYSICIAN CONSULT LETTER ;   [ 10/31/2006  2:40 PM ]
- ;;4.0;REFERRED CARE INFO SYSTEM;**2,9**;JAN 09, 2006;Build 51
+ ;;4.0;REFERRED CARE INFO SYSTEM;**2,9**;JAN 09, 2006;Build 92
  ;Consultation Letter to recieve information back from the consult visit
  ;letter to be sent with patient
  ;BMC*4.0*9 ;IHS.OIT.FCJ ICD-10 CHANGES

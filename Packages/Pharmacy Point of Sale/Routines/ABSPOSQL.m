@@ -1,5 +1,5 @@
 ABSPOSQL ; IHS/FCS/DRS - Process responses ;   [ 10/07/2002  8:20 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**3,29,31,32**;JUN 21, 2001;Build 15
+ ;;1.0;PHARMACY POINT OF SALE;**3,29,31,32,48**;JUN 21, 2001;Build 27
  ;
  ;-----------------------------------------------------
  ;IHS/SD/lwj 10/07/02 NCPDP 5.1 changes
@@ -102,8 +102,9 @@ RESPONSE(DIALOUT) ;EP - ABSPOSQ4
  . ;
  . D KILLRESP ; kill the scratch response
  . ; Save a copy of the received packet, too
- . N WP,I F I=1:100:$L(RESPREC) S WP(I/100+1,0)=$E(RESPREC,I,I+99)
- . D WP^DIE(9002313.03,RESPIEN_",",9999,"","WP")
+ . N WP,I,ZERR F I=1:100:$L(RESPREC) S WP(I/100+1,0)=$E(RESPREC,I,I+99)
+ . D WP^DIE(9002313.03,RESPIEN_",",9999,"","WP","ZERR") ; /IHS/OIT/RAM ; 12 JUN 17 ; UPDATE DBS CALL TO ALLOW FOR ERROR RETURN.
+ . I $D(ZERR) D LOG^ABSPOSL2("RESPONSE+72^ABSPOSQL",.ZERR) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  . D ULRESP ; unlock the response
  . Q
  Q

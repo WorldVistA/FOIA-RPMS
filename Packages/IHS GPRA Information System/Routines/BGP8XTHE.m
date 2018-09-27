@@ -1,10 +1,10 @@
 BGP8XTHE ; IHS/CMI/LAB - TAXONOMY CHECK FOR FY07 HEDIS REPORT ;
- ;;8.0;IHS CLINICAL REPORTING;**2**;MAR 12, 2008
+ ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
  ;
  ;
  D HOME^%ZIS
  W:$D(IOF) @IOF
- W !!,"Checking for Taxonomies to support the 2008 HEDIS Report. ",!,"Please enter the device for printing.",!
+ W !!,"Checking for Taxonomies to support the 2018 HEDIS Report. ",!,"Please enter the device for printing.",!
 ZIS ;
  S XBRC="",XBRP="TAXCHK^BGP8XTHE",XBNS="",XBRX="XIT^BGP8XTHE"
  D ^XBDBQUE
@@ -18,12 +18,12 @@ GUICHK ;EP - gui tax check
  NEW A,BGPX,I,Y,Z,J,BGPY,BGPT
  K A
  ;S T="TAXS" F J=1:1 S Z=$T(@T+J),BGPX=$P(Z,";;",2),Y=$P(Z,";;",3) Q:BGPX=""  D
- S BGPT="" F  S BGPT=$O(^BGPTAXE("B",BGPT)) Q:BGPT=""  D
- .S BGPY=$O(^BGPTAXE("B",BGPT,0))
- .Q:'$D(^BGPTAXE(BGPY,12,"B",3))
- .;I $P(^BGPTAXE(BGPY,0),U,2)'="L" S BGPX=$O(^ATXAX("B",BGPT,0))
- .;I $P(^BGPTAXE(BGPY,0),U,2)="L" S BGPX=$O(^ATXLAB("B",BGPT,0))
- .S BGPTYPE=$P(^BGPTAXE(BGPY,0),U,2),Y=$G(^BGPTAXE(BGPY,11,1,0))
+ S BGPT="" F  S BGPT=$O(^BGPTAXR("B",BGPT)) Q:BGPT=""  D
+ .S BGPY=$O(^BGPTAXR("B",BGPT,0))
+ .Q:'$D(^BGPTAXR(BGPY,12,"B",3))
+ .;I $P(^BGPTAXR(BGPY,0),U,2)'="L" S BGPX=$O(^ATXAX("B",BGPT,0))
+ .;I $P(^BGPTAXR(BGPY,0),U,2)="L" S BGPX=$O(^ATXLAB("B",BGPT,0))
+ .S BGPTYPE=$P(^BGPTAXR(BGPY,0),U,2),Y=$G(^BGPTAXR(BGPY,11,1,0))
  .I BGPTYPE'="L" D
  ..I '$D(^ATXAX("B",BGPT)) S A(BGPT)=Y_"^is Missing" Q
  ..S I=$O(^ATXAX("B",BGPT,0))

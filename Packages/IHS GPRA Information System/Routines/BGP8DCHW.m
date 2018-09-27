@@ -1,17 +1,16 @@
-BGP8DCHW ; IHS/CMI/LAB - calc measures 29 Apr 2008 7:38 PM ;
- ;;8.0;IHS CLINICAL REPORTING;**2**;MAR 12, 2008
+BGP8DCHW ; IHS/CMI/LAB - calc measures 29 Apr 2007 7:38 PM ;
+ ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
  ;
 GEN ;EP
  Q:'BGPACTCL
- I '$D(^AUPNVSIT("AC",DFN)) Q
+ I '$D(^AUPNVSIT("AC",DFN)) Q ""
  K ^TMP($J,"A")
- S A="^TMP($J,""A"",",B=DFN_"^ALL VISITS;DURING "_$$FMTE^XLFDT(BGPBD)_"-"_$$FMTE^XLFDT(BGPED),E=$$START1^APCLDF(B,A)
- I '$D(^TMP($J,"A",1)) Q
+ S A="^TMP($J,""A"",",B=DFN_"^ALL VISITS;DURING "_$$FMTE^XLFDT(BGPBBD)_"-"_$$FMTE^XLFDT(BGPED),E=$$START1^APCLDF(B,A)
+ I '$D(^TMP($J,"A",1)) Q ""
  S (X,G)=0 F  S X=$O(^TMP($J,"A",X)) Q:X'=+X  S V=$P(^TMP($J,"A",X),U,5) D
  .Q:'$D(^AUPNVSIT(V,0))
  .Q:'$P(^AUPNVSIT(V,0),U,9)
  .Q:$P(^AUPNVSIT(V,0),U,11)
- .Q:$$AGE^AUPNPAT(DFN,$P($P(^AUPNVSIT(V,0),U),"."))>65
  .Q:'$D(^AUPNVMSR("AD",V))
  .S M=0,W="",H="" F  S M=$O(^AUPNVMSR("AD",V,M)) Q:M'=+M  D
  ..S T=$P($G(^AUPNVMSR(M,0)),U)
@@ -20,7 +19,7 @@ GEN ;EP
  ..I T="WT" S W=$P(^AUPNVMSR(M,0),U,4)
  ..I T="HT" S H=$P(^AUPNVMSR(M,0),U,4)
  .I W="",H="" Q  ;no ht or wt so skip visit
- .I $$AGE^AUPNPAT(DFN,$P($P(^AUPNVSIT(V,0),U),"."))<19,(H=""!(W="")) Q  ;under 19 and not both
+ .I $$AGE^AUPNPAT(DFN,BGPED)<19,(H=""!(W="")) Q  ;under 19 and not both
  .D SET
  Q
  ;
@@ -32,7 +31,7 @@ SET ;
  S $P(R,U,2)=$P(^AUTTLOC(DUZ(2),0),U,10)
  S $P(R,U,3)=$P($G(^AUTTLOC($P(^AUTTSITE(1,0),U),1)),U,3)
  S $P(R,U,4)=$$DATE(DT)
- S $P(R,U,5)=$$DATE(BGPBD)
+ S $P(R,U,5)=$$DATE(BGPBBD)
  S $P(R,U,6)=$$DATE(BGPED)
  S $P(R,U,7)=$$UID(DFN)
  S $P(R,U,8)=$$DATE($P(^DPT(DFN,0),U,3))
@@ -46,7 +45,7 @@ SET ;
  S $P(R,U,15)=$S(BGPHTV]"":I,1:"")
  S I=BGPWTV*.45359,I=$J(I,6,2),I=$$STRIP^XLFSTR(I," ")
  S $P(R,U,16)=$S(BGPWTV]"":I,1:"")
- S ^BGPGPDCE(BGPRPT,88888,BGPCHWC,0)=R
+ S ^BGPGPDCA(BGPRPT,88888,BGPCHWC,0)=R
  Q
 UID(BGPA) ;PEP-Given DFN return unique patient record id.
  ; BGPA can be DFN, but is not required if DFN or DA exists.

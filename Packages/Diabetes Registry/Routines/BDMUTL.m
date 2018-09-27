@@ -1,8 +1,8 @@
 BDMUTL ; IHS/CMI/LAB - Area Database Utility Routine ; 14 Sep 2015  12:41 PM
- ;;2.0;DIABETES MANAGEMENT SYSTEM;**5,8,9,10**;JUN 14, 2007;Build 12
+ ;;2.0;DIABETES MANAGEMENT SYSTEM;**5,8,9,10,11**;JUN 14, 2007;Build 30
  ;
 SNOMED(YR,LIST,SMC) ;EP - is snomed code smc on the list for the year
- I 'YR S YR=2016
+ I 'YR S YR=2018
  I LIST="" Q ""
  I SMC="" Q ""
  NEW YRI,LISTI
@@ -144,7 +144,7 @@ BUILDSML(Y) ;EP - BUILD SNOMED LISTS FROM SUBSETS
  .K ^TMP($J,"SUB")
  .S DIK="^BDMSNME(" D IXALL^DIK
  .Q
- ;
+ Q
  ;
 ICDDX(C,D,S,I) ;PEP - CHECK FOR ICD10
  I $T(ICDDX^ICDEX)]"" Q $$ICDDX^ICDEX(C,$G(D),,$G(I))
@@ -189,3 +189,53 @@ PLCL(P,BDMY,A,ED,S,BD) ;EP - is DX on problem list 1 or 0
  .I 'G I $P(^AUPNPROB(X,0),U,8)>ED!($P(^AUPNPROB(X,0),U,8)<BD) Q
  .S N=$$VAL^XBDIQ1(9000011,X,80001) I N]"",$D(^BDMSNME(BDMY,11,T,11,"B",N)) S I=1_U_N_U_$P(^AUPNPROB(X,0),U,3)
  Q I
+PLTAXND(P,A,E)  ;EP - is dx on problem list as NOT DELETED
+  ;P is dfn
+  ;a is taxonomy name
+  I $G(P)="" Q ""
+  I $G(A)="" Q ""
+  S E=$G(E)
+  NEW T S T=$O(^ATXAX("B",A,0))
+  I 'T Q ""  ;bad taxonomy??
+  NEW X,Y,I,D
+  S (X,Y,I)=0
+  F  S X=$O(^AUPNPROB("AC",P,X)) Q:X'=+X!(I)  D
+  .Q:'$D(^AUPNPROB(X,0))
+  .Q:$P(^AUPNPROB(X,0),U,12)="D"
+  .S Y=$P(^AUPNPROB(X,0),U)
+  .I E,$P(^AUPNPROB(X,0),U,13)>E Q  ;if there is a doo and it is after report period skip
+  .I E,$P(^AUPNPROB(X,0),U,8)>E Q  ;entered after report period, skip
+  .Q:'$$ICD^BGP8UTL2(Y,T,9)
+  .S D=$P(^AUPNPROB(X,0),U,13)
+  .I 'D S D=$P(^AUPNPROB(X,0),U,3)
+  .S I=1_U_"Problem List: "_$$VAL^XBDIQ1(9000011,X,.01)_U_D
+  .Q
+  Q I
+PLTAXID(P,A,B,E)  ;EP - is dx on problem list as either active or inactive?
+ ;P is dfn
+ ;a is taxonomy name
+ I $G(P)="" Q ""
+ I $G(A)="" Q ""
+ S E=$G(E)
+ S B=$G(B)
+ NEW T S T=$O(^ATXAX("B",A,0))
+ I 'T Q ""  ;bad taxonomy??
+ NEW X,Y,I,D,M,O
+ S (X,Y,I)=0
+ F  S X=$O(^AUPNPROB("AC",P,X)) Q:X'=+X!(I)  D
+ .Q:'$D(^AUPNPROB(X,0))
+ .Q:$P(^AUPNPROB(X,0),U,12)="D"
+ .Q:$P(^AUPNPROB(X,0),U,12)="I"
+ .S Y=$P(^AUPNPROB(X,0),U)
+ .S O=$P(^AUPNPROB(X,0),U,13)
+ .S M=$P(^AUPNPROB(X,0),U,3)
+ .S D=$P(^AUPNPROB(X,0),U,8)
+ .I D'<B,D'>E G CHK
+ .I O,O'<B,O'>E G CHK
+ .I M,M'<B,M'>E G CHK
+ .Q
+CHK .;
+ .Q:'$$ICD^BGP8UTL2(Y,T,9)
+ .S I=1_U_"Problem List: "_$$VAL^XBDIQ1(9000011,X,.01)_U_$S(O="":M,1:O)_U_X
+ .Q
+  Q I

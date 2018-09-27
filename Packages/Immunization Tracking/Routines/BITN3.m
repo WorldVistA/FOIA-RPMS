@@ -1,12 +1,12 @@
 BITN3 ;IHS/CMI/MWR - BUILD ^BITN GLOBAL THIRD PART.
- ;;8.5;IMMUNIZATION;**14**;AUG 01,2017
+ ;;8.5;IMMUNIZATION;**15**;SEP 30,2017
  ;;* MICHAEL REMILLARD, DDS * CIMARRON MEDICAL INFORMATICS, FOR IHS *
  ;;  UTILITY: BUILD STANDARD ^BITN GLOBAL.
  ;
  ;
  ;----------
 TABLE ; EP
- ;;260;;INFLUENZA, Injectable, Quadravalent^FLU-IIV4^158^^^^1^0^10^Flu-IIV4^90688^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185^3150807^^^^1
+ ;;260;;INFLUENZA, Injectable, Quadravalent^FLU-IIV4^158^^^^1^0^10^Flu-IIV4^90688^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185,186^3150807^^^^1
  ;;260a;;FluLaval Quadrivalent^^^^^^^^^^^^^Influenza, injectable, quadrivalent
  ;;261;;Rho(D)-IG^Rho(D)-IG^156^^^^1^0^12
  ;;261a;;^^^^^^^^^^^^^Rho(D) Immune globulin- IV or IM
@@ -14,9 +14,9 @@ TABLE ; EP
  ;;262a;;^^^^^^^^^^^^^Rho(D) Immune globulin - IM
  ;;263;;Rho(D) - Unspecified formulation^Rho(D),NOS^159^^^^1^^12
  ;;263a;;^^^^^^^^^^^^^Rho(D) Unspecified formulation
- ;;264;;INFLUENZA A monovalent (H5N1), ADJUVANTED-2013^H5N1,adj^160^^^^1^0^10^^^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185
+ ;;264;;INFLUENZA A monovalent (H5N1), ADJUVANTED-2013^H5N1,adj^160^^^^1^0^10^^^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185,186
  ;;264a;;FLU^^Flu^^^^^^^^^^^Influenza A monovalent (H5N1), adjuvanted, National stockpile 2013
- ;;265;;INFLUENZA, injectable,quadrivalent, preservative free, pediatric^FLU-PEDIV4^161^^^^0^0^10^Flu-PedIV4^^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185^3150807^^^0^1^.25
+ ;;265;;INFLUENZA, injectable,quadrivalent, preservative free, pediatric^FLU-PEDIV4^161^^^^0^0^10^Flu-PedIV4^^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185,186^3150807^^^0^1^.25
  ;;265a;;^^^^^^^^^^^^^Influenza, injectable,quadrivalent, preservative free, pediatric
  ;;266;;Meningococcal B, recombinant (Trumenba)^Men-B,Trmb^162^^^^0^0^16^^^32,103,108,114,136,147,148,162,163,164,167^3160809^^^0^1^.5
  ;;266a;;Trumenba^^MENING^^^^^^^^^^^Meningococcal B vaccine, fully recombinant (Trumenba)
@@ -26,17 +26,17 @@ TABLE ; EP
  ;;268a;;MENING^^^^^^^^^^^^^meningococcal B, unspecified formulation
  ;;269;;HPV9^HPV-9v^165^^^^0^0^17^^^62,118,137,165^3161202^^^0^1^.5
  ;;269a;;^^^^^^^^^^^^^Human Papillomavirus 9-valent vaccine
- ;;270;;INFLUENZA, intradermal, quadrivalent, preservative free^FLU-DERM4^166^^^^0^0^10^Flu-Derm4^^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185^3150807^^^0^1^.1
+ ;;270;;INFLUENZA, intradermal, quadrivalent, preservative free^FLU-DERM4^166^^^^0^0^10^Flu-Derm4^^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185,186^3150807^^^0^1^.1
  ;;270a;;^^^^^^^^^^^^^influenza, intradermal, quadrivalent, preservative free, injectable
  ;;271;;Meningococcal, unknown serogroups^Mening,NOS^167^^^^1^0^16^^^32,103,108,114,136,147,148,162,163,164,167^^^^^1
  ;;271a;;MENING^^^^^^^^^^^^^Meningococcal vaccine of unknown formulation and unknown serogroups
- ;;272;;INFLUENZA, Trivalent, adjuvanted^FLU-IIV3ad^168^^^^1^0^10^^^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185^3150807^^^^1^.5
+ ;;272;;INFLUENZA, Trivalent, adjuvanted^FLU-IIV3ad^168^^^^1^0^10^^^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185,186^3150807^^^^1^.5
  ;;272a;;^^^^^^^^^^^^^Seasonal trivalent influenza vaccine, adjuvanted, preservative free
  ;;273;;HEP A, LIVE ATTENUATED^HEP A-LIVE^169^^^^1^0^9^^^31,83,84,85,52,104,169^^^^0^1
  ;;273a;;^^^^^^^^^^^^^Hep A, live attenuated-IM
  ;;274;;DTAP/IPV/HIB - non-US^PEDIACEL^170^^^^1^0^14^^^20,106,107,110,46,47,48,49,50,17,51,120,170^^^^0^1^^^^133^107^124
  ;;274a;;^^^^^^^^^^^^^DTaP-Hib-IPV
- ;;275;;Influenza, injectable, MDCK, preservative free, quadrivalent^FLU-ccIIV4^171^^^^0^0^10^^^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185^3150807^^^^^.5
+ ;;275;;Influenza, injectable, MDCK, preservative free, quadrivalent^FLU-ccI4pf^171^^^^0^0^10^^^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185,186^3150807^^^^^.5
  ;;275a;;^^^^^^^^^^^^^Influenza, injectable, Madin Darby Canine Kidney, preservative free, quadrivalnt
  ;;276;;Cholera, WC-rBS^CholeraWCr^172^^^^1^0^12^^^26,172,173,174^^^^0^0
  ;;276a;;^^^^^^^^^^^^^Cholera, WC-rBS
@@ -64,5 +64,7 @@ TABLE ; EP
  ;;287a;;^^^^^^^^^^^^^Yellow fever vaccine alternative formulation
  ;;288;;Yellow fever, unspecified formulation^YFever,NOS^184^^^^1^^12^^^37,183,184^^^^^1
  ;;288a;;^^^^^^^^^^^^^Yellow fever vaccine, unspecified formulation
- ;;289;;influenza, recombinant, quadrivalent,injectable, preservative free^Flu-RIV4^185^^^^0^^10^^^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185^3150807^^^^1^.5
+ ;;289;;influenza, recombinant, quadrivalent,injectable, preservative free^Flu-RIV4^185^^^^0^^10^^^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185,186^3150807^^^^1^.5
  ;;289a;;^^^^^^^^^^^^^influenza, recombinant, quadrivalent,injectable, preservative free
+ ;;290;;Influenza, injectable, MDCK, quadrivalent^FLU-ccI4^186^^^^0^0^10^^^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185,186^3150807^^^0^1^.5
+ ;;290a;;^^^^^^^^^^^^^Influenza, injectable, Madin Darby Canine Kidney, quadrivalent

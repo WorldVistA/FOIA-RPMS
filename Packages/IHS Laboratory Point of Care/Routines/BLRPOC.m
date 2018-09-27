@@ -1,5 +1,5 @@
-BLRPOC ;IHS/MSC/PLS - EHR POC Component support ; 17-Dec-2015 15:37 ; MKK
- ;;5.2;IHS LABORATORY;**1025,1026,1027,1030,1031,1038**;NOV 01, 1997;Build 6
+BLRPOC ;IHS/MSC/PLS - EHR POC Component support ; 13-Oct-2017 14:04 ;  MKK
+ ;;5.2;IHS LABORATORY;**1025,1026,1027,1030,1031,1038,1041**;NOV 01, 1997;Build 23
  ;
  Q
  ;
@@ -92,6 +92,20 @@ VALIDATE(DATA,TSTIEN,COLIEN,RES,DFN) ; EP
  S LRFLG=""                       ; Initialize flag every time
  ; ----- END IHS/MSC/MKK - LR*5.2*1031
  ;
+ ; ----- BEGIN IHS/MSC/MKK - LR*5.2*1041 -- Qualitative flag
+ NEW QUALFLAG
+ S QUALFLAG=0
+ D
+ . NEW LRDL,LRSB,LRTS,X
+ . S LRDL=LRDAT
+ . S LRSB=LRFIEN
+ . S LRTS=$O(^LAB(60,"C","CH;"_LRSB_";1",0))
+ . I $L(LRDL),$L(LRSB),$L(LRSPEC),$L(LRTS) D
+ .. S X=$$QUALCHEK^BLRQUALU()
+ .. I $G(LRFLG)="A*" S QUALFLAG=1
+ I QUALFLAG G VRET Q
+ ; ----- END IHS/MSC/MKK - LR*5.2*1041
+ ;
  S LRNG4=$P(LRSPEC0,U,4),LRNG4=$$REFRES(LRNG4)
  S LRNG5=$P(LRSPEC0,U,5),LRNG5=$$REFRES(LRNG5)
  S LRNG2=$P(LRSPEC0,U,2),LRNG2=$$REFRES(LRNG2)
@@ -105,8 +119,12 @@ VALIDATE(DATA,TSTIEN,COLIEN,RES,DFN) ; EP
 VRET ; S DATA(0)=1_U_$S(LRFLG="H":"1:H",LRFLG="H*":"2:H",LRFLG="L":"1:L",LRFLG="L*":"2:L",1:0)_U_$G(LRDAT(0))_U_$G(LRDAT) Q
  ; ----- BEGIN IHS/OIT/MKK - LR*5.2*1030
  S RES=OLDRES                ; IHS/MSC/MKK - LR*5.2*1031 - Reset RESULT to original value
- S DATA=1,DATA(0)=1_U_$S(LRFLG="H":"1:H",LRFLG="H*":"2:H",LRFLG="L":"1:L",LRFLG="L*":"2:L",1:0)_U_$G(LRDAT(0))_U_$G(LRDAT)
+ ; S DATA=1,DATA(0)=1_U_$S(LRFLG="H":"1:H",LRFLG="H*":"2:H",LRFLG="L":"1:L",LRFLG="L*":"2:L",1:0)_U_$G(LRDAT(0))_U_$G(LRDAT)
  ; ----- END IHS/OIT/MKK - LR*5.2*1030
+ ;
+ ; ----- BEGIN IHS/MSC/MKK - LR*5.2*1041
+ S DATA=1,DATA(0)=1_U_$S(LRFLG="A*":"1:A",LRFLG="H":"1:H",LRFLG="H*":"2:H",LRFLG="L":"1:L",LRFLG="L*":"2:L",1:0)_U_$G(LRDAT(0))_U_$G(LRDAT)
+ ; ----- END IHS/MSC/MKK - LR*5.2*1041
  Q
 VALERR(DATA,ERRARY) ; EP
  N HLP
@@ -132,131 +150,6 @@ NEWPAT(DFN) ;EP
  L -^LR(0)
  S:LRDFN<1 LRDFN=0
  Q LRDFN
- ;
-TEST ; EP
- ; S ARY("CD")=$$NOW^XLFDT()
- ; S ARY("ORDTST")="111^INSULIN",ARY("TST",1)="111^INSULIN"
- ; S ARY("COL")="139^BLOOD",ARY("LOC")="5^CHART REVIEW"
- ; S ARY("PRV")="1^USER,DEMO",ARY("NOO")="1^WRITTEN"
- ; S ARY("URG")="9^ROUTINE",ARY("RES",1)="5.1"
- ; S ARY("SYMP")="HYPERTENSION^990",ARY("COM",1)="TEST LINE 1"
- ; S ARY("COM",2)="TEST LINE 2",ARY("COM",3)="TEST LINE 3"
- ;
- ; ----- BEGIN IHS/MSC/MKK - LR*5.2*1038
- ; Interactively TEST Point-Of-Care
- NEW ARY,CSI,CSD,DFN,SITESPEC,STR,STR1,TESTY
- ;
- W !!,"Single Test POC Test."
- S ARY("CD")=$$NOW^XLFDT
- ;
- Q:$$GETYVAL(60,.TESTY)<1
- S ARY("ORDTST")=$G(TESTY)
- S ARY("TST",1)=$G(TESTY)
- ;
- S SITESPEC=$O(^LAB(60,+TESTY,1,0))
- S ARY("CM")=$$GET1^DIQ(61,SITESPEC,.01,"I")_U_$$GET1^DIQ(61,SITESPEC,.01)
- S CSI=+$$GET1^DIQ(60,+TESTY,9,"I") ; Collection Sample IEN
- I CSI<1 D
- . S CSI=+$O(^LAB(60,+TESTY,3,0))
- . S CSI=+$G(^LAB(60,+TESTY,3,CSI,0))
- S ARY("COL")=CSI_U_$$GET1^DIQ(62,CSI,.01)
- ;
- Q:$$GETYVAL(44,.Y)<1
- S ARY("LOC")=$G(Y)
- ;
- Q:$$GETYVAL(200,.Y)<1
- S ARY("PRV")=$G(Y)
- ;
- Q:$$GETYVAL(100.02,.Y)<1
- S ARY("NOO")=$G(Y)
- ;
- Q:$$GETYVAL(62.05,.Y)<1
- S ARY("URG")=$G(Y)
- ;
- D ^XBFMK
- S DIR(0)="FO",DIR("A")="RESULT TEXT/NUMBER"
- D ^DIR
- I +$G(DIRUT) D INVALENT  Q
- S ARY("RES",1)=$G(Y)
- ;
- S ARY("CMT",1)="Testing POC Code from TEST^BLRPOC entry."
- ;
- Q:$$GETYVAL(2,.Y)<1
- S DFN=+$G(Y)
- ;
- S STR=$$CHKITOUT^BLRSGNSU(DFN,$$DT^XLFDT)
- Q:STR=""
- S STR1=$P(STR,U,2)
- ; MSC/MKK - LR*5.2*1735 - Comment out next line
- ; I $$UP^XLFSTR(STR1)["(DISORDER" S STR1=$$TRIM^XLFSTR($P(STR1,"("),"LR"," ")
- ; ARY("SYMP")=SNOMED Descriptive Text^ICD Indication code^SNOMED Concept ID
- S ARY("SYMP")=STR1_U_$P(STR,U,3)_U_$P(STR,U)
- ;
- W !!,"Before SAVE call.",!
- D ARRYDUMP("ARY")
- D PRESSKEY^BLRGMENU(9)
- ;
- W !,"DFN:",DFN," - ",$P(Y,U,2),!
- ;
- D SAVE(.RET,DFN,.ARY)
- ;
- W !,"After SAVE Call.",!
- W ?4,"RET:",RET,!!
- Q
- ;
- ; Original TEST code follows
- S ARY("CD")=$$NOW^XLFDT()
- S ARY("ORDTST")="111^INSULIN"
- S ARY("TST",1)="111^INSULIN"
- ;S ARY("TST",2)="177^POTASSIUM"
- S ARY("COL")="139^BLOOD"
- ;S ARY("LOC")="13^GENERAL"
- S ARY("LOC")="5^CHART REVIEW"
- S ARY("PRV")="1^USER,DEMO"
- S ARY("NOO")="1^WRITTEN"
- S ARY("URG")="9^ROUTINE"
- S ARY("RES",1)="5.1"
- S ARY("SYMP")="HYPERTENSION^990"
- S ARY("COM",1)="TEST LINE 1"
- S ARY("COM",2)="TEST LINE 2"
- S ARY("COM",3)="TEST LINE 3"
- ;S ARY("ORDTST")="111^INSULIN"
- ;S ARY("CMT",0)=0
- ;S ARY("COL")="139^BLOOD"
- ;S ARY("NOO")="8^ELECTRONICALLY ENTERED"
- ;S ARY("PRV")="1^USER,DEMO"
- ;S ARY("SYMP")="HYPERTENSION"
- ;S ARY("TST",1)="111^INSULIN"
- ;S ARY("RES",1)="17^L*"
- ;S ARY("LOC")="5^CHART REVIEW"
- Q
- ;
-GETYVAL(FNUM,YVAL) ; EP
- D ^XBFMK
- S DIR(0)="PO^"_FNUM_":EMZ"
- D ^DIR
- I +$G(DIRUT) D INVALENT  Q 0
- ;
- S YVAL=$G(Y)
- Q 1
- ;
-INVALENT ; EP - Invalid Entry Prompt
- W !,?4,"No/Quit Entry.  Routine Ends."
- D PRESSKEY^BLRGMENU(9)
- Q
- ;
-ARRYDUMP(ARRY) ; EP - "Dump" the array
- NEW STR1
- ;
- S STR1=$Q(@ARRY@(""))
- W !,?5,ARRY,!
- W ?10,STR1,"=",@STR1,!
- F  S STR1=$Q(@STR1)  Q:STR1=""  D
- . W ?10,STR1,"=",@STR1,!
- Q
- ;
- ; ----- END IHS/MSC/MKK - LR*5.2*1038
- ;
  ;
  ; Resolve the reference range in the event that the range is a $S statement.
 REFRES(VAL) ; EP

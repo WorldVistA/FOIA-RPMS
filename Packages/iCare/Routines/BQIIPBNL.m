@@ -1,8 +1,8 @@
 BQIIPBNL ;VNGT/HS/ALA-IPC Bundle Logic ; 24 Jun 2011  11:53 AM
- ;;2.3;ICARE MANAGEMENT SYSTEM;**3,4**;Apr 18, 2012;Build 66
+ ;;2.7;ICARE MANAGEMENT SYSTEM;;Dec 19, 2017;Build 23
  ;
  ;
-EN(CRSN,BNIEN,BQDATE,CODE) ;EP - do the bundle for monthly update
+EN(CRSN,BNIEN,BQDATE,CODE,BQFROM,BQTHRU) ;EP - do the bundle for monthly update
  ; Input
  ;   CRSN  - Current IPC IEN
  ;   BNIEN - Bundle IEN
@@ -10,6 +10,7 @@ EN(CRSN,BNIEN,BQDATE,CODE) ;EP - do the bundle for monthly update
  ;   BQI(90508,1,22,CRN,1,MSN,1
  ;
  NEW TDEN,TNUM,CNT,CD,BQIDOD,NA,YES,NO,NDA
+ S BQDATE=$G(BQDATE,""),BQFROM=$G(BQFROM,""),BQTHRU=$G(BQTHRU,"")
  S TDEN=0,TNUM=0,CNT=0
  K XX
  D BUN(CRSN,BNIEN,.XX)
@@ -20,7 +21,7 @@ EN(CRSN,BNIEN,BQDATE,CODE) ;EP - do the bundle for monthly update
  . I $P(^VA(200,PRV,0),U,13)'="" Q
  . S DFN="",PCT=0,TP=0
  . F  S DFN=$O(^AUPNPAT("AK",PRV,DFN)) Q:DFN=""  D
- .. ;B:PRV=877
+ .. ;B:PRV=2911
  .. I '$$HRN^BQIUL1(DFN) Q
  .. S VAL=$$PAT(DFN,.XX)
  .. I VAL="N/A"!(VAL="{D}") Q
@@ -38,14 +39,18 @@ EN(CRSN,BNIEN,BQDATE,CODE) ;EP - do the bundle for monthly update
  ... I NUM="",DEN="" S BCT=BCT+1,NA=NA+1 Q
  ... I DEN'="",NUM="" S NO=NO+1 Q
  ... I DEN'="",NUM'="" S BCT=BCT+1,YES=YES+1
- .. I NDA S NO=NO+1
+ .. I NDA S NA=NA+1
  .. I 'NO S PCT=PCT+1
  .. Q
  .. S PCT=$S(BCT=CNT:PCT+1,1:PCT)
- . D STORP^BQIIPUTL(PRV,CODE,BQDATE,TP,PCT)
+ . I '$G(WEEK) D STORP^BQIIPUTL(PRV,CODE,BQDATE,TP,PCT)
+ . I $G(WEEK)=1 D STORPW^BQIIPUTL(PRV,CODE,BQFROM,BQTHRU,TP,PCT)
+ . I $G(DEBUG)=1 W !,PRV,"|",CODE,"|",PCT,"/",TP
  . S TDEN=TDEN+TP,TNUM=TNUM+PCT
  S FAC=$$HME^BQIGPUTL()
- D STORF^BQIIPUTL(FAC,CODE,BQDATE,TDEN,TNUM)
+ I '$G(WEEK) D STORF^BQIIPUTL(FAC,CODE,BQDATE,TDEN,TNUM)
+ I $G(WEEK)=1 D STORFW^BQIIPUTL(FAC,CODE,BQFROM,BQTHRU,TDEN,TNUM)
+ I $G(DEBUG)=1 W !,FAC,"|",CODE,"|",TNUM,"/",TDEN
  Q
  ;
 BUN(CRSN,BNIEN,XX) ;EP - Get values for bundle
@@ -70,8 +75,13 @@ PAT(DFN,XX) ;EP - See if patient meets bundle criteria
  . I NUM="",DEN="" S BCT=BCT+1,NA=NA+1 Q
  . I DEN'="",NUM="" S NO=NO+1 Q
  . I DEN'="",NUM'="" S BCT=BCT+1,YES=YES+1
- I NDA Q "NO"
+ I NDA Q "N/A"
  I NA=CNT Q "N/A"
  I YES=CNT Q "YES"
  I 'NO Q "YES"
  Q "NO"
+ ;
+PT(DFN,IPCN,CDN) ;EP
+ D BUN(IPCN,CDN,.XX)
+ S VAL=$$PAT(DFN,.XX)
+ Q VAL

@@ -1,5 +1,5 @@
 AUPNVMSR ; IHS/CMI/LAB - EDITS FOR AUPNVMSR (MEASUREMENTS:9000010.04) 24-MAY-1993 ; 30 Sep 2010  2:16 PM
- ;;2.0;IHS PCC SUITE;**2,5,7,8,10,15,16,17**;MAY 14, 2009;Build 18
+ ;;2.0;IHS PCC SUITE;**2,5,7,8,10,15,16,17,20**;MAY 14, 2009;Build 25
  ;;
  ;;BJPC patch 1
  ;; - PF changed to 50-1000
@@ -406,8 +406,16 @@ OUT(IEN,VAL) ;EP called from output transform
  I $P(^AUTTMSR(%,0),U)="CDR" D  Q VAL
  .I $P(VAL,".",1)="" S VAL="0"_VAL
  I $P(^AUTTMSR(%,0),U)'="VC"&($P(^AUTTMSR(%,0),U)'="VU") Q VAL
- S VAL=$S($P(^AUPNVMSR(IEN,0),U,6):$P(^AUPNVMSR(IEN,0),U,6),1:"20")_"/"_$P(VAL,"/")_"-"_$S($P(^AUPNVMSR(IEN,0),U,6):$P(^AUPNVMSR(IEN,0),U,6),1:"20")_"/"_$P(VAL,"/",2)
+ NEW X
+ S X=VAL
+ S VAL=$S($P(^AUPNVMSR(IEN,0),U,6):$P(^AUPNVMSR(IEN,0),U,6),1:"20")_"/"_$P(X,"/")_"-"_$S($P(^AUPNVMSR(IEN,0),U,6):$P(^AUPNVMSR(IEN,0),U,6),1:"20")_"/"_$P(X,"/",2) D
+ .S:$P(X,"/",3)]"" VAL=VAL_"-"_$S($P(^AUPNVMSR(IEN,0),U,6):$P(^AUPNVMSR(IEN,0),U,6),1:"20")_"/"_$P(X,"/",3)
  Q VAL
+VCVU(VAL,DEN) ;EP - CALLED FROM MEASUREMENT PANEL
+ NEW A
+ S A=$S(DEN:DEN,1:"20")_"/"_$P(VAL,"/")_"-"_$S(DEN:DEN,1:"20")_"/"_$P(VAL,"/",2) D
+ .S:$P(VAL,"/",3)]"" A=A_"-"_$S(DEN:DEN,1:"20")_"/"_$P(VAL,"/",3)
+ Q A
 HELP ;EP - HELP FOR VARIOUS TYPES
  D ^AUPNVMS2
  Q

@@ -1,5 +1,5 @@
 BQIIPTVW ;VNGT/HS/ALA-IPC Tabs View ; 10 Aug 2011  10:52 AM
- ;;2.3;ICARE MANAGEMENT SYSTEM;;Apr 18, 2012;Build 59
+ ;;2.7;ICARE MANAGEMENT SYSTEM;;Dec 19, 2017;Build 23
  ;
  ;
 RET(DATA,TYPE) ; EP -- BQI GET IPC PREFS
@@ -14,7 +14,7 @@ RET(DATA,TYPE) ; EP -- BQI GET IPC PREFS
  ;Assumes
  ;  DUZ - User who signed onto iCare
  ;
- NEW UID,II,PARMS,TYP,MIEN
+ NEW UID,II,PARMS,TYP,MIEN,DZ
  S UID=$S($G(ZTSK):"Z"_ZTSK,1:$J)
  S DATA=$NA(^TMP("BQIIPTVW",UID))
  K @DATA
@@ -24,20 +24,18 @@ RET(DATA,TYPE) ; EP -- BQI GET IPC PREFS
  ;
  S @DATA@(II)="T00001TYPE^T03200PARMS"_$C(30)
  ;
- S TYPE=$G(TYPE,"")
+ S TYPE=$G(TYPE,""),DZ=DUZ
  ;
  ;Return Patient Detail
  ;
  S MIEN=0,PARMS=""
  I TYPE=""!(TYPE="PD") D
  . S TYP="PD"
- . S MIEN=$O(^BQICARE(DUZ,8,"B",TYP,""))
- . ;
+ . S MIEN=$O(^BQICARE(DZ,8,"B",TYP,""))
  . ;No preferences on file - use default
  . I MIEN="" D  Q
  .. S PARMS=$$DCAT(PARMS)
  .. S II=II+1,@DATA@(II)=TYP_"^"_PARMS_$C(30)
- . ;
  . ;Preferences defined - pull values
  . I MIEN'="" D GET(TYP,MIEN)
  ;
@@ -46,13 +44,47 @@ RET(DATA,TYPE) ; EP -- BQI GET IPC PREFS
  S MIEN=0,PARMS=""
  I TYPE=""!(TYPE="DP") D
  . S TYP="DP"
- . S MIEN=$O(^BQICARE(DUZ,8,"B",TYP,""))
- . ;
+ . S MIEN=$O(^BQICARE(DZ,8,"B",TYP,""))
  . ;No preferences on file - use default
  . I MIEN="" D  Q
  .. S PARMS=$$DCAT(PARMS)
  .. S II=II+1,@DATA@(II)=TYP_"^"_PARMS_$C(30)
- . ;
+ . ;Preferences defined - pull values
+ . I MIEN'="" D GET(TYP,MIEN)
+ ;
+ ;Return Team Aggregated
+ S MIEN=0,PARMS=""
+ I TYPE=""!(TYPE="TA") D
+ . S TYP="TA"
+ . S MIEN=$O(^BQICARE(DZ,8,"B",TYP,""))
+ . ;No preferences on file - use default
+ . I MIEN="" D  Q
+ .. S PARMS=$$DAGG(PARMS)
+ .. S II=II+1,@DATA@(II)=TYP_"^"_PARMS_$C(30)
+ . ;Preferences defined - pull values
+ . I MIEN'="" D GET(TYP,MIEN)
+ ;
+ ;Return Provider Aggregated
+ S MIEN=0,PARMS=""
+ I TYPE=""!(TYPE="PA") D
+ . S TYP="PA"
+ . S MIEN=$O(^BQICARE(DZ,8,"B",TYP,""))
+ . ;No preferences on file - use default
+ . I MIEN="" D  Q
+ .. S PARMS=$$DAGG(PARMS)
+ .. S II=II+1,@DATA@(II)=TYP_"^"_PARMS_$C(30)
+ . ;Preferences defined - pull values
+ . I MIEN'="" D GET(TYP,MIEN)
+ ;
+ ; Return Facility Aggregated
+ S MIEN=0,PARMS=""
+ I TYPE=""!(TYPE="FA") D
+ . S TYP="FA"
+ . S MIEN=$O(^BQICARE(DZ,8,"B",TYP,""))
+ . ;No preferences on file - use default
+ . I MIEN="" D  Q
+ .. S PARMS=$$DAGG(PARMS)
+ .. S II=II+1,@DATA@(II)=TYP_"^"_PARMS_$C(30)
  . ;Preferences defined - pull values
  . I MIEN'="" D GET(TYP,MIEN)
  ;
@@ -63,9 +95,9 @@ GET(TYPE,MIEN) ;EP - Pull the individual definition
  ;
  NEW PIEN,PARMS
  S PIEN=0,PARMS=""
- F  S PIEN=$O(^BQICARE(DUZ,8,MIEN,1,PIEN)) Q:'PIEN  D
+ F  S PIEN=$O(^BQICARE(DZ,8,MIEN,1,PIEN)) Q:'PIEN  D
  . NEW DA,IENS,NAME,VALUE
- . S DA(2)=DUZ,DA(1)=MIEN,DA=PIEN,IENS=$$IENS^DILF(.DA)
+ . S DA(2)=DZ,DA(1)=MIEN,DA=PIEN,IENS=$$IENS^DILF(.DA)
  . S NAME=$$GET1^DIQ(90505.171,IENS,.01,"E")
  . ;
  . ;Try pulling an individual value first
@@ -77,9 +109,9 @@ GET(TYPE,MIEN) ;EP - Pull the individual definition
  . ;If no individual definition, check for multiple values
  . NEW PMIEN,VALSTR
  . S PMIEN=0,VALSTR=""
- . F  S PMIEN=$O(^BQICARE(DUZ,8,MIEN,1,PIEN,1,PMIEN)) Q:'PMIEN  D
+ . F  S PMIEN=$O(^BQICARE(DZ,8,MIEN,1,PIEN,1,PMIEN)) Q:'PMIEN  D
  .. NEW DA,IENS
- .. S DA(3)=DUZ,DA(2)=MIEN,DA(1)=PIEN,DA=PMIEN,IENS=$$IENS^DILF(.DA)
+ .. S DA(3)=DZ,DA(2)=MIEN,DA(1)=PIEN,DA=PMIEN,IENS=$$IENS^DILF(.DA)
  .. S VALUE=$$GET1^DIQ(90505.1711,IENS,.02,"E")
  .. I VALUE="" S VALUE=$$GET1^DIQ(90505.1711,IENS,.01,"E")
  .. S VALSTR=VALSTR_$S(VALSTR]"":$C(29),1:"")_VALUE
@@ -88,8 +120,10 @@ GET(TYPE,MIEN) ;EP - Pull the individual definition
  . S PARMS=PARMS_VALSTR
  . K VALSTR
  ;
- S PARMS=$$DCAT(PARMS)  ;Add CAT values, if needed
+ I TYPE="PD"!(TYPE="DP") S PARMS=$$DCAT(PARMS)  ;Add CAT values, if needed
+ E  S PARMS=$$DAGG(PARMS)
  ;
+ S PARMS=$$TKO^BQIUL1(PARMS,$C(28))
  S II=II+1,@DATA@(II)=TYPE_"^"_PARMS_$C(30)
  Q
  ;
@@ -110,12 +144,12 @@ UPD(DATA,TYPE,PNRESET,PARMS) ;  EP -- BQI SET IPC PREFS
  ;Assumes
  ;  DUZ - User who signed onto iCare
  ;
- NEW UID,II,TYPN,QFL,BQ,ERROR
+ NEW UID,II,TYPN,QFL,BQ,ERROR,DZ
  S UID=$S($G(ZTSK):"Z"_ZTSK,1:$J)
  S DATA=$NA(^TMP("BQIIPTVW",UID))
  K @DATA
  ;
- S II=0,TYPE=$G(TYPE,""),PNRESET=$G(PNRESET,"")
+ S II=0,TYPE=$G(TYPE,""),PNRESET=$G(PNRESET,""),DZ=DUZ
  ;
  I TYPE="" S BMXSEC="RPC Failed: No Type of Preferences passed in" Q
  ;
@@ -133,7 +167,7 @@ UPD(DATA,TYPE,PNRESET,PARMS) ;  EP -- BQI SET IPC PREFS
  ;
  S @DATA@(II)="I00010RESULT"_$C(30)
  ;
- S TYPN=$O(^BQICARE(DUZ,8,"B",TYPE,""))
+ S TYPN=$O(^BQICARE(DZ,8,"B",TYPE,""))
  ;
  ;Clean out all the previous parameters
  I TYPN'="" D DEL(TYPN,PNRESET)
@@ -141,8 +175,9 @@ UPD(DATA,TYPE,PNRESET,PARMS) ;  EP -- BQI SET IPC PREFS
  ;If no previous, add new entry
  I TYPN="" D
  . NEW DA,DIC,DLAYGO,X,Y
- . S DA(1)=DUZ,X=$S(TYPE="PD":"Patient Detail",TYPE="DP":"Panel Detail",1:"IPC"),DIC(0)="LNZ",DLAYGO=90505.17
- . I $G(^BQICARE(DUZ,8,0))="" S ^BQICARE(DUZ,8,0)="^90505.17S^^"
+ . S DA(1)=DZ,X=$S(TYPE="PD":"Patient Detail",TYPE="DP":"Panel Detail",TYPE="TA":"Team Aggregated",TYPE="PA":"Provider Aggregated",TYPE="FA":"Facility Aggregated",1:"IPC")
+ . S DIC(0)="LNZ",DLAYGO=90505.17
+ . I $G(^BQICARE(DZ,8,0))="" S ^BQICARE(DZ,8,0)="^90505.17S^^"
  . S DIC="^BQICARE("_DA(1)_",8,"
  . D ^DIC S TYPN=+Y I TYPN=-1 K DO,DD D FILE^DICN S TYPN=+Y
  ;
@@ -152,9 +187,9 @@ UPD(DATA,TYPE,PNRESET,PARMS) ;  EP -- BQI SET IPC PREFS
  . N PDATA,NAME,VALUE,PDA,DA,IENS
  . S PDATA=$P(PARMS,$C(28),BQ) Q:PDATA=""
  . S NAME=$P(PDATA,"=",1),VALUE=$P(PDATA,"=",2,99)
- . D NPM(TYPN,NAME,.PDA) I QFL Q
- . ;
- . S DA(2)=DUZ,DA(1)=TYPN,DA=PDA
+ . D NPM(TYPN,NAME,.PDA,.DZ) I QFL Q
+ . I $G(DZ)="" S DZ=DUZ
+ . S DA(2)=DZ,DA(1)=TYPN,DA=PDA
  . S IENS=$$IENS^DILF(.DA)
  . ;
  . ;Single value
@@ -176,24 +211,26 @@ UPD(DATA,TYPE,PNRESET,PARMS) ;  EP -- BQI SET IPC PREFS
  ;
 DEL(TYPN,PNRESET) ; EP - Delete the previous User preferences for the Type
  ;
+ I $G(DZ)="" S DZ=DUZ
  I PNRESET="Y" D  Q
  . NEW DA,DIK
- . S DA(2)=DUZ,DA(1)=TYPN,DA=0,DIK="^BQICARE("_DA(2)_",8,"_DA(1)_",1,"
- . F  S DA=$O(^BQICARE(DUZ,8,TYPN,1,DA)) Q:'DA  D ^DIK
+ . S DA(2)=DZ,DA(1)=TYPN,DA=0,DIK="^BQICARE("_DA(2)_",8,"_DA(1)_",1,"
+ . F  S DA=$O(^BQICARE(DZ,8,TYPN,1,DA)) Q:'DA  D ^DIK
  ;
  ;Delete all but panel
  NEW PARM
- S PARM=0 F  S PARM=$O(^BQICARE(DUZ,8,TYPN,1,PARM)) Q:'PARM  D
+ S PARM=0 F  S PARM=$O(^BQICARE(DZ,8,TYPN,1,PARM)) Q:'PARM  D
  . NEW IEN,DA,DIK,PRM
- . S DA(2)=DUZ,DA(1)=TYPN,DA=PARM,IEN=$$IENS^DILF(.DA)
+ . S DA(2)=DZ,DA(1)=TYPN,DA=PARM,IEN=$$IENS^DILF(.DA)
  . S PRM=$$GET1^DIQ(90505.171,IEN,".01","I") Q:PRM="PANEL"
- . S DA(2)=DUZ,DA(1)=TYPN,DA=PARM,DIK="^BQICARE("_DA(2)_",8,"_DA(1)_",1,"
+ . S DA(2)=DZ,DA(1)=TYPN,DA=PARM,DIK="^BQICARE("_DA(2)_",8,"_DA(1)_",1,"
  . D ^DIK
  Q
  ;
-NPM(TYPN,NAME,PDA) ;EP - Add new parameter
+NPM(TYPN,NAME,PDA,DZ) ;EP - Add new parameter
  NEW DA,IENS,DIC,DLAYGO,X,DLAYGO
- S DA(2)=DUZ,DA(1)=TYPN,X=NAME,DIC="^BQICARE("_DA(2)_",8,"_DA(1)_",1,"
+ I $G(DZ)="" S DZ=DUZ
+ S DA(2)=DZ,DA(1)=TYPN,X=NAME,DIC="^BQICARE("_DA(2)_",8,"_DA(1)_",1,"
  I '$D(^BQICARE(DA(2),8,DA(1),1,0)) S ^BQICARE(DA(2),8,DA(1),1,0)="^90505.171^^"
  S DLAYGO=90505.171,DIC(0)="L",DIC("P")=DLAYGO
  K DO,DD D FILE^DICN
@@ -211,7 +248,8 @@ NRC(IENS,VALUE,ERROR) ;EP - New single record
  ;
 NML(TYPN,PDA,MVAL,ERROR) ; EP - New multiple record
  NEW DA,IENS,DLAYGO,DIC,Y,IENS,BQIUPD,ERROR
- S DA(3)=DUZ,DA(2)=TYPN,DA(1)=PDA,X=MVAL
+ I $G(DZ)="" S DZ=DUZ
+ S DA(3)=DZ,DA(2)=TYPN,DA(1)=PDA,X=MVAL
  S DLAYGO=90505.1711,DIC(0)="L",DIC("P")=DLAYGO
  S DIC="^BQICARE("_DA(3)_",8,"_DA(2)_",1,"_DA(1)_",1,"
  K DO,DD D FILE^DICN
@@ -225,16 +263,27 @@ NML(TYPN,PDA,MVAL,ERROR) ; EP - New multiple record
  ;
 DCAT(PARM) ; Add all categories if not present in return parameters
  ;
- N IEN,VALUE,CAT
+ NEW IEN,VALUE,CAT,CRIPC
  ;
  S PARM=$G(PARM,"")
- I PARM["CAT=" G XDCAT
  ;
  ;Get the list of codes - Now pulling from 90506.8
- S VALUE="",CAT=0 F  S CAT=$O(^BQI(90506.8,CAT)) Q:'CAT  D
- . I $P(^BQI(90506.8,CAT,0),U,2)=1 Q
- . S VALUE=VALUE_$S(VALUE="":"",1:$C(29))_CAT
- ;
- S PARM=PARM_$S(PARM="":"",1:$C(28))_"CAT="_VALUE
+ S CRIPC=$P($G(^BQI(90508,1,11)),U,1)
+ I PARM'["VERSION" S PARM=PARM_$S(PARM="":"",1:$C(28))_"VERSION="_CRIPC
+ I PARM'["CAT" D
+ . S VALUE="",CAT=0 F  S CAT=$O(^BQI(90506.8,CAT)) Q:'CAT  D
+ .. I $P(^BQI(90506.8,CAT,0),U,2)=1 Q
+ .. I $P(^BQI(90506.8,CAT,0),U,5)'=CRIPC Q
+ .. S VALUE=VALUE_$S(VALUE="":"",1:$C(29))_CAT
+ . S PARM=PARM_$S(PARM="":"",1:$C(28))_"CAT="_VALUE
  ;
 XDCAT Q PARM
+ ;
+DAGG(PARM) ; Add default
+ S PARM=$G(PARM,"")
+ S CRIPC=$P($G(^BQI(90508,1,11)),U,1)
+ I PARM'["VERSION" S PARM=PARM_$S(PARM="":"",1:$C(28))_"VERSION="_CRIPC
+ I PARM'["VIEW" S PARM=PARM_$S(PARM="":"",1:$C(28))_"VIEW=MONTHLY"
+ I PARM'["TMFRAME" S PARM=PARM_$S(PARM="":"",1:$C(28))_"TMFRAME=This Calendar Year"
+ ;
+XDAGG Q PARM

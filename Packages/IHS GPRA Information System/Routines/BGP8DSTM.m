@@ -1,15 +1,15 @@
-BGP8DSTM ; IHS/CMI/LAB - national patient list 20 Dec 2004 9:24 AM ; 07 Mar 2008  2:31 PM
- ;;8.0;IHS CLINICAL REPORTING;**2**;MAR 12, 2008
+BGP8DSTM ; IHS/CMI/LAB - national patient list 20 Dec 2004 9:24 AM 07 Mar 2010 2:31 PM ;
+ ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
  ;
  ;
  ;
  W:$D(IOF) @IOF
- W !,$$CTR("IHS GPRA Performance Patient Search Template Creation",80)
+ W !,$$CTR("IHS GPRA/GPRAMA Performance Patient Search Template Creation",80)
  W !,$$CTR($$RPTVER^BGP8BAN,80)
 INTRO ;
  D XIT
  W !!,"This will produce a search template of patients who either met or did not meet"
- W !,"a National GPRA Report performance measure.  You will be asked to select "
+ W !,"a National GPRA/GPRAMA Report performance measure.  You will be asked to select "
  W !,"one performance measure topic and then to choose which performance "
  W !,"measure numerators you would like to create a search template for."
  W !,"For example, you can create a search template of all patients who"
@@ -19,12 +19,14 @@ INTRO ;
  W !,"patients, and the Report Period and Baseline Year.",!
  K DIR S DIR(0)="E",DIR("A")="Press enter to continue" D ^DIR K DIR
  D TAXCHK^BGP8XTCN
+ S X=$$DEMOCHK^BGP8UTL2()
+ I 'X W !!,"Exiting Report....." D PAUSE^BGP8DU,XIT Q
 TP ;get time period
  D XIT
- S BGPRTYPE=1,BGP8RPTH="",BGPNPL=1,BGPINDT="G",BGP8GPU=1,BGP8NPLT=1
+ S BGPRTYPE=1,BGPYRPTH="",BGPNPL=1,BGPINDG="G",BGPYGPU=1,BGPYNPLT=1
 SI ;
  K DIRUT
- K BGPIND
+ K BGPIND,BGPSTALL
  D EN^BGP8DSI
  I '$D(BGPIND) W !!,"No measures selected." H 3 D XIT Q
  K DIRUT ;I $D(DIRUT) W !!,"user typed '^' to exit."  H 3 D XIT Q
@@ -34,21 +36,21 @@ SI1 ;NOW SELECT ONE OR MORE W/IN THE TOPIC
  K BGPLIST,BGPX,BGPY,BGPINDL S BGPQ=0
  S BGPIND=0 F  S BGPIND=$O(BGPIND(BGPIND)) Q:BGPIND'=+BGPIND!(BGPQ)!($D(DIRUT))  D
  .S BGPCR=$S(BGPRTYPE=7:"AON",1:"AN")
- .K BGPX S BGPO=0,X=0,BGPC=0 F  S BGPO=$O(^BGPNPLE("AN",BGPIND,BGPO)) Q:BGPO'=+BGPO!($D(DIRUT))  D
- ..S X=$O(^BGPNPLE(BGPCR,BGPIND,BGPO,0))
- ..;I BGPRTYPE=1,$P(^BGPNPLE(X,0),U,4)'="N" Q
- ..;I BGPRTYPE=7,$P(^BGPNPLE(X,0),U,4)'="O" Q
+ .K BGPX S BGPO=0,X=0,BGPC=0 F  S BGPO=$O(^BGPNPLR("AN",BGPIND,BGPO)) Q:BGPO'=+BGPO!($D(DIRUT))  D
+ ..S X=$O(^BGPNPLR(BGPCR,BGPIND,BGPO,0))
+ ..;I BGPRTYPE=1,$P(^BGPNPLR(X,0),U,4)'="N" Q
+ ..;I BGPRTYPE=7,$P(^BGPNPLR(X,0),U,4)'="O" Q
  ..S BGPX(BGPO,X)="",BGPC=BGPC+1
  .;display the choices
- .W !!!,"Please select one or more of these report choices within the",!,IORVON,$P(^BGPINDE(BGPIND,0),U,3),IORVOFF," performance measure topic.",!
- .K BGPY S X=0,BGPC=0,BGPO=0 F  S BGPO=$O(BGPX(BGPO)) Q:BGPO'=+BGPO!($D(DIRUT))  S X=0 F  S X=$O(BGPX(BGPO,X)) Q:X'=+X!($D(DIRUT))  S BGPC=BGPC+1 W !?5,BGPC,")",?9,$P(^BGPNPLE(X,0),U,3) S BGPY(BGPC)=X
+ .W !!!,"Please select one or more of these report choices within the",!,IORVON,$P(^BGPINDR(BGPIND,0),U,3),IORVOFF," performance measure topic.",!
+ .K BGPY S X=0,BGPC=0,BGPO=0 F  S BGPO=$O(BGPX(BGPO)) Q:BGPO'=+BGPO!($D(DIRUT))  S X=0 F  S X=$O(BGPX(BGPO,X)) Q:X'=+X!($D(DIRUT))  S BGPC=BGPC+1 W !?5,BGPC,")",?9,$P(^BGPNPLR(X,0),U,3) S BGPY(BGPC)=X
  .S DIR(0)="L^1:"_BGPC,DIR("A")="Which item(s)"
  .D ^DIR K DIR S:$D(DUOUT) DIRUT=1
  .I Y="" W !,"No REPORTS selected for this topic." Q
  .I $D(DIRUT) W !,"No REPORTs selected for this topic." Q
  .S BGPANS=Y,BGPC="" F BGPI=1:1 S BGPC=$P(BGPANS,",",BGPI) Q:BGPC=""  S BGPINDL(BGPIND,BGPY(BGPC))=""
  .;get report type
- .K BGPNPLT,BGPQUIT
+ .K BGPNPLR,BGPQUIT
  .S BGPI=0 F  S BGPI=$O(BGPINDL(BGPI)) Q:BGPI'=+BGPI!($D(BGPQUIT))  D
  ..S BGPII=0 F  S BGPII=$O(BGPINDL(BGPI,BGPII)) Q:BGPII'=+BGPII!($D(BGPQUIT))  D
  ...D STMP
@@ -69,7 +71,10 @@ TP1 S (BGPBD,BGPED,BGPTP)=""
  I BGPQTR=2 S BGPBD=($E(BGPPER,1,3)-1)_"0401",BGPED=$E(BGPPER,1,3)_"0331"
  I BGPQTR=3 S BGPBD=($E(BGPPER,1,3)-1)_"0701",BGPED=$E(BGPPER,1,3)_"0630"
  I BGPQTR=4 S BGPBD=($E(BGPPER,1,3)-1)_"1001",BGPED=$E(BGPPER,1,3)_"0930"
- I BGPQTR=5 S BGPBD=$$FMADD^XLFDT(BGPPER,-364),BGPED=BGPPER,BGPPER=$E(BGPED,1,3)_"0000"
+ I BGPQTR=5 D
+ .S D=$$FMADD^XLFDT(BGPPER,1)
+ .I $E(BGPPER,4,7)'=1231 S BGPBD=($E(BGPPER,1,3)-1)_$E(D,4,7),BGPED=BGPPER,BGPPER=$E(BGPED,1,3)_"0000"
+ .I $E(BGPPER,4,7)=1231 S BGPBD=$E(BGPPER,1,3)_$E(D,4,7),BGPED=BGPPER,BGPPER=$E(BGPED,1,3)_"0000"
  I BGPED>DT D  G:BGPDO=1 TP1
  .W !!,"You have selected Current Report period ",$$FMTE^XLFDT(BGPBD)," through ",$$FMTE^XLFDT(BGPED),"."
  .W !,"The end date of this report is in the future; your data will not be",!,"complete.",!
@@ -79,9 +84,9 @@ TP1 S (BGPBD,BGPED,BGPTP)=""
  .Q
 BY ;get baseline year
  S BGPVDT=""
- W !!,"Enter the Baseline Year to compare data to.",!,"Use a 4 digit year, e.g. 1999, 2000"
+ W !!,"Enter the Baseline Year to compare data to.",!,"Use a 4 digit year, e.g. 2010"
  S DIR(0)="D^::EP"
- S DIR("A")="Enter Year (e.g. 2000)"
+ S DIR("A")="Enter Year (e.g. 2010)"
  D ^DIR KILL DIR
  I $D(DIRUT) G TP
  I $D(DUOUT) S DIRUT=1 G TP
@@ -128,20 +133,8 @@ COM1 ;
  .I $D(DIRUT) S BGPQUIT=1
  .I Y S BGPQUIT=1
  .Q
-MFIC K BGPQUIT
- I $P($G(^BGPSITE(DUZ(2),0)),U,8)=1 D  I BGPMFITI="" G COMM
- .S BGPMFITI=""
- .W !!,"Specify the LOCATION taxonomy to determine which patient visits will be"
- .W !,"used to determine whether a patient is in the denominators for the report."
- .W !,"You should have created this taxonomy using QMAN.",!
- .K BGPMFIT
- .S BGPMFITI=""
- .D ^XBFMK
- .S DIC("S")="I $P(^(0),U,15)=9999999.06",DIC="^ATXAX(",DIC(0)="AEMQ",DIC("A")="Enter the Name of the Location/Facility Taxonomy: "
- .S B=$P($G(^BGPSITE(DUZ(2),0)),U,9) I B S DIC("B")=$P(^ATXAX(B,0),U)
- .D ^DIC
- .I Y=-1 Q
- .S BGPMFITI=+Y
+ K BGPQUIT
+ ;
 BEN ;
  S BGPBEN=""
  S DIR(0)="S^1:Indian/Alaskan Native (Classification 01);2:Not Indian Alaskan/Native (Not Classification 01);3:All (both Indian/Alaskan Natives and Non 01)",DIR("A")="Select Beneficiary Population to include in this report"
@@ -154,19 +147,16 @@ HOME ;
  ;W !,"Your HOME location is defined as: ",$P(^DIC(4,BGPHOME,0),U)," asufac:  ",$P(^AUTTLOC(BGPHOME,0),U,10)
 SUM ;display summary of this report
  W:$D(IOF) @IOF
- W !,$$CTR("SUMMARY OF NATIONAL GPRA SEARCH TEMPLATE TO BE GENERATED")
+ W !,$$CTR("SUMMARY OF NATIONAL GPRA/GPRAMA SEARCH TEMPLATE TO BE GENERATED")
  W !,$$CTR($$RPTVER^BGP8BAN,80)
  W !!,"The date ranges for this report are:"
  W !?5,"Report Period: ",?31,$$FMTE^XLFDT(BGPBD)," to ",?31,$$FMTE^XLFDT(BGPED)
  W !?5,"Previous Year Period: ",?31,$$FMTE^XLFDT(BGPPBD)," to ",?31,$$FMTE^XLFDT(BGPPED)
  W !?5,"Baseline Period: ",?31,$$FMTE^XLFDT(BGPBBD)," to ",?31,$$FMTE^XLFDT(BGPBED)
  W !!,"The COMMUNITY Taxonomy to be used is: ",$P(^ATXAX(BGPTAXI,0),U)
- I $G(BGPMFITI) W !!,"The MFI Location Taxonomy to be used is: ",$P(^ATXAX(BGPMFITI,0),U)
- ;I BGPHOME W !,"The HOME location is: ",$P(^DIC(4,BGPHOME,0),U)," ",$P(^AUTTLOC(BGPHOME,0),U,10)
- ;I 'BGPHOME W !,"No HOME Location selected."
  W !,"Search templates to be generated: "
  S X=0 F  S X=$O(BGPINDL(X)) Q:X'=+X  S Y=0 F  S Y=$O(BGPINDL(X,Y)) Q:Y'=+Y  D
- .W !?2,$P(^BGPNPLE(Y,0),U,3),":  ",$P(^DIBT(BGPINDL(X,Y,"TEMP"),0),U)
+ .W !?2,$P(^BGPNPLR(Y,0),U,3),":  ",$P(^DIBT(BGPINDL(X,Y,"TEMP"),0),U)
  D PT^BGP8DSL
  I BGPROT="" G COMM
 ZIS ;call to XBDBQUE
@@ -175,9 +165,9 @@ ZIS ;call to XBDBQUE
  I BGPRPT="" D XIT Q
  K IOP,%ZIS I BGPROT="D",BGPDELT="F" D NODEV,XIT Q
  K IOP,%ZIS W !! S %ZIS=$S(BGPDELT'="S":"PQM",1:"PM") D ^%ZIS
- I POP W !,"Report Aborted" S DA=BGPRPT,DIK="^BGPGPDCE(" D ^DIK K DIK D XIT Q
- I POP W !,"Report Aborted" S DA=BGPRPT,DIK="^BGPGPDPE(" D ^DIK K DIK D XIT Q
- I POP W !,"Report Aborted" S DA=BGPRPT,DIK="^BGPGPDBE(" D ^DIK K DIK D XIT Q
+ I POP W !,"Report Aborted" S DA=BGPRPT,DIK="^BGPGPDCR(" D ^DIK K DIK D XIT Q
+ I POP W !,"Report Aborted" S DA=BGPRPT,DIK="^BGPGPDPR(" D ^DIK K DIK D XIT Q
+ I POP W !,"Report Aborted" S DA=BGPRPT,DIK="^BGPGPDBR(" D ^DIK K DIK D XIT Q
  I $D(IO("Q")) G TSKMN
 DRIVER ;
  D ^BGP8D1
@@ -203,7 +193,7 @@ TSKMN ;EP ENTRY POINT FROM TASKMAN
  I $G(IO("DOC"))]"" S ZTIO=ZTIO_";"_$G(IO("DOC"))
  I $D(IOM)#2,IOM S ZTIO=ZTIO_";"_IOM I $D(IOSL)#2,IOSL S ZTIO=ZTIO_";"_IOSL
  K ZTSAVE S ZTSAVE("BGP*")=""
- S ZTCPU=$G(IOCPU),ZTRTN="DRIVER^BGP8NPL",ZTDTH="",ZTDESC="NATIONAL GPRA REPORT 06" D ^%ZTLOAD D XIT Q
+ S ZTCPU=$G(IOCPU),ZTRTN="DRIVER^BGP8NPL",ZTDTH="",ZTDESC="NATIONAL GPRA/GPRAMA REPORT 06" D ^%ZTLOAD D XIT Q
  Q
  ;
 XIT ;
@@ -245,7 +235,7 @@ CHKY ;
  Q
 F ;calendar year
  S (BGPPER,BGPVDT)=""
- W !!,"Enter the Calendar Year for the report END date.  Use a 4 digit",!,"year, e.g. 2008"
+ W !!,"Enter the Calendar Year for the report END date.  Use a 4 digit",!,"year, e.g. 2018"
  S DIR(0)="D^::EP"
  S DIR("A")="Enter Year"
  S DIR("?")="This report is compiled for a period.  Enter a valid date."
@@ -257,26 +247,28 @@ F ;calendar year
  S BGPPER=BGPVDT
  Q
 ENDDATE ;
- W !!,"When entering dates, if you do not enter a full 4 digit year (e.g. 2008)"
+ W !!,"When entering dates, if you do not enter a full 4 digit year (e.g. 2018)"
  W !,"will assume a year in the past, if you want to put in a future date,"
  W !,"remember to enter the full 4 digit year.  For example, if today is"
- W !,"January 4, 2008 and you type in 6/30/05 the system will assume the year"
- W !,"as 1905 since that is a date in the past.  You must type 6/30/2008 if you"
+ W !,"January 4, 2010 and you type in 6/30/05 the system will assume the year"
+ W !,"as 1905 since that is a date in the past.  You must type 6/30/2010 if you"
  W !,"want a date in the future."
  S (BGPPER,BGPVDT)=""
  W ! K DIR,X,Y S DIR(0)="D^::EP",DIR("A")="Enter End Date for the Report: (e.g. 11/30/2005)" D ^DIR K DIR S:$D(DUOUT) DIRUT=1
  I $D(DIRUT) Q
  S (BGPPER,BGPVDT)=Y
  Q
-STMP ;
+STMP ;EP
 EN1 ;EP Help
  K BGPQUIT S BGPSTMP=""
  W !!!,"Enter a search template name for the following list of patients:"
- S X=0 F  S X=$O(^BGPNPLE(BGPII,11,X)) Q:X'=+X  W !?3,^BGPNPLE(BGPII,11,X,0)
+ S X=0 F  S X=$O(^BGPNPLR(BGPII,11,X)) Q:X'=+X  W !?3,^BGPNPLR(BGPII,11,X,0)
 EN2 K DIC,DLAYGO S DLAYGO=.401,DIC="^DIBT(",DIC(0)="AELMQZ",DIC("A")="Patient Search Template: ",DIC("S")="I $P(^(0),U,4)=9000001&($P(^(0),U,5)=DUZ)"
  D ^DIC K DIC,DLAYGO
  I +Y<1 W !!,"No Search Template selected." H 2 S BGPQUIT=1 Q
  S BGPSTMP=+Y,BGPSNAM=$P(^DIBT(BGPSTMP,0),U)
+ I $D(BGPSTALL(BGPSNAM)) W !!,"That template has already been chosen, you can't use the same template twice," W !,"please select again." G STMP
+ S BGPSTALL(BGPSNAM)=""
 DUP I '$P(Y,U,3) D  I Q K BGPSTMP,Y G EN2
  .S Q=""
  .W !
@@ -298,23 +290,24 @@ DUP I '$P(Y,U,3) D  I Q K BGPSTMP,Y G EN2
  Q
  ;
 CT ;EP - create search templates and write message
- W !
- I '$G(BGPDELIM) D HEADER^BGP8DPH
- I '$G(BGPDELIM) W !,$$REPEAT^XLFSTR("-",80)
- I $G(BGPDELIM) S X=" " D S^BGP8NPLD(X,1,1) S X=" " D S^BGP8NPLD(X,1,1)
- S X=0 F  S X=$O(^XTMP("BGP8DNP",BGPJ,BGPH,"LIST",X)) Q:X'=+X  D
- .S Y=0 F  S Y=$O(^XTMP("BGP8DNP",BGPJ,BGPH,"LIST",X,Y)) Q:Y'=+Y  D
- ..S T=$G(BGPINDL(X,Y,"TEMP"))
- ..I T="" Q
- ..I '$D(^DIBT(T,0)) Q
- ..L +^DIBT(T):10 I '$T Q
- ..S C=0
- ..S P=0 F  S P=$O(^XTMP("BGP8DNP",BGPJ,BGPH,"LIST",X,Y,P)) Q:P'=+P  D
- ...S C=C+1
- ...S ^DIBT(T,1,P)=""
- ...Q
- ..L -^DIBT(T)
- ..I '$G(BGPDELIM) W !!,"Search template: ",$P(^DIBT(T,0),U)," created with ",C," members." Q
- ..S X="Search template: "_$P(^DIBT(T,0),U)_" created with "_C_" members." D S^BGP8NPLD(X,1,1)
- .Q
+ D W^BGP8DP("",0,1,BGPPTYPE)
+ I BGPPTYPE="P" D HEADER^BGP8DPH
+ ;I BGPPTYPEW !,$$REPEAT^XLFSTR("-",80)
+ I BGPPTYPE="D" D W^BGP8DP(" ",0,2,BGPPTYPE)  ;S X=" " D S^BGP8NPLD(X,1,1) S X=" " D S^BGP8NPLD(X,1,1)
+ S BGPORD=$P($G(^BGPINDR(BGPIC,12)),U,6)
+ S O=0 F  S O=$O(^XTMP("BGP8DNP",BGPJ,BGPH,"LIST",O)) Q:O'=+O  D
+ .S X=0 F  S X=$O(^XTMP("BGP8DNP",BGPJ,BGPH,"LIST",O,X)) Q:X'=+X  D
+ ..S Y=0 F  S Y=$O(^XTMP("BGP8DNP",BGPJ,BGPH,"LIST",O,X,Y)) Q:Y'=+Y  D
+ ...S T=$G(BGPINDL(X,Y,"TEMP"))
+ ...I T="" Q
+ ...I '$D(^DIBT(T,0)) Q
+ ...L +^DIBT(T):10 I '$T Q
+ ...S C=0
+ ...S P=0 F  S P=$O(^XTMP("BGP8DNP",BGPJ,BGPH,"LIST",O,X,Y,P)) Q:P'=+P  D
+ ....S C=C+1
+ ....S ^DIBT(T,1,P)=""
+ ....Q
+ ...L -^DIBT(T)
+ ...D W^BGP8DP("Search template: "_$P(^DIBT(T,0),U)_" created with "_C_" members.",0,2,BGPPTYPE)
+ D W^BGP8DP("",0,1,BGPPTYPE)
  Q

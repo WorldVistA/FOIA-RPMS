@@ -1,5 +1,5 @@
-BLRRLEVT ;cmi/anch/maw - BLR Reference Lab Event ; 27-Jul-2015 06:30 ; MAW
- ;;5.2;IHS LABORATORY;**1027,1030,1031,1033,1034,1035,1036,1039**;NOV 01, 1997;Build 38
+BLRRLEVT ;cmi/anch/maw - BLR Reference Lab Event ; 13-Oct-2017 14:04 ; MAW
+ ;;5.2;IHS LABORATORY;**1027,1030,1031,1033,1034,1035,1036,1039,1041**;NOV 01, 1997;Build 23
  ;
  Q
  ;
@@ -133,7 +133,8 @@ ACC ;EP - cmi/flag/maw added the following for ref lab accessions
  . Q:'+$G(^BLRSITE($S($G(BLRALTDZ):BLRALTDZ,1:DUZ(2)),"RL"))
  . S LRDUZ(2)=BLRALTDZ
  Q:BLRPHASE'="A"  ;quit if not an accession
- Q:$G(BLROPT)="ADDACC"  ;p1034 dont hit event driver if adding a test
+ ;Q:$G(BLROPT)="ADDACC"  ;p1034 dont hit event driver if adding a test
+ I $G(BLROPT)="ADDACC",$G(BLRAGUI) Q  ;p1041 
  S BLRRL("ALTDUZ2")=$G(BLRALTDZ)  ;cmi/maw 5/29/2007 setup alternate duz2 if they select the prompt in blrsite to look at ordering location
  I $G(BLRALTDZ),$P($G(^BLRSITE(BLRALTDZ,"RL")),U,10)="D" K BLRALTDZ,BLRRL("ALTDUZ2")  ;don't need variables if they use a true multidivisional site
  I $G(BLRALTDZ),$P($G(^BLRSITE(BLRALTDZ,"RL")),U,10)="" K BLRALTDZ,BLRRL("ALTDUZ2")  ;don't need variables if they use a true multidivisional site

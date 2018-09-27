@@ -1,11 +1,11 @@
-BGP8BAN ; IHS/CMI/LAB - BANNER FOR CRS 08 ; 13 Aug 2008  11:31 AM
- ;;8.0;IHS CLINICAL REPORTING;**2,3**;MAR 12, 2008
+BGP8BAN ;IHS/CMI/LAB - BANNER FOR CRS;
+ ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
  ;
  ;
 BANNER ;EP
 V ; GET VERSION
  NEW BGPV,BGPL,BGPJ,BGPX
- S BGPV="8.0, Patch 3"
+ S BGPV="18.0"  ;V71. CHANGE
  I $G(BGPTEXT)="" S BGPTEXT="TEXT",BGPL=3 G PRINT
  S BGPTEXT="TEXT"_BGPTEXT
  F BGPJ=1:1 S BGPX=$T(@BGPTEXT+BGPJ),BGPX=$P(BGPX,";;",2) Q:BGPX="QUIT"!(BGPX="")  S BGPL=BGPJ
@@ -16,7 +16,7 @@ SITE W !!,$$CTR($$LOC,80)
  K BGPTEXT
  Q
 RPTVER() ;EP
- Q "CRS 2008, Version 8.0 Patch 3"
+ Q "CRS 2018, Version 18.0"  ;V18.0
 TEXT ;
  ;;****************************************************
  ;;**    IHS/RPMS CLINICAL REPORTING SYSTEM (CRS)    **
@@ -25,92 +25,106 @@ TEXT ;
  ;
 TEXTN ;
  ;;*********************************
- ;;**      IHS/RPMS CRS 2008      **
+ ;;**      IHS/RPMS CRS 2018      **
  ;;**    National GPRA Reports    **
  ;;*********************************
  ;;QUIT
  ;
 TEXTL ;
  ;;******************************************************
- ;;**                IHS/RPMS CRS 2008                 **
+ ;;**                IHS/RPMS CRS 2018                 **
  ;;**   Reports for Local Use: IHS Clinical Measures   **
  ;;******************************************************
  ;;QUIT
  ;
 TEXTO ;
  ;;*********************************
- ;;**      IHS/RPMS CRS 2008      **
+ ;;**      IHS/RPMS CRS 2018      **
  ;;**    Other National Reports   **
- ;;*********************************
- ;;QUIT
- ;
-TEXTC ;
- ;;*********************************
- ;;**      IHS/RPMS CRS 2008      **
- ;;**    CMS Performance Report   **
  ;;*********************************
  ;;QUIT
  ;
 TEXT6 ;
  ;;*********************************
- ;;**      IHS/RPMS CRS 2008      **
+ ;;**      IHS/RPMS CRS 2018      **
  ;;**  Clinical Reporting System  **
  ;;*********************************
  ;;QUIT
  ;
+TEXTA ;;
+ ;;***************************
+ ;;**   IHS/RPMS CRS 2018   **
+ ;;**   Report Automation   **
+ ;;***************************
+ ;;QUIT
+ ;
 TEXTR ;
  ;;**************************
- ;;**   IHS/RPMS CRS 2008  **
+ ;;**   IHS/RPMS CRS 2018  **
  ;;**     Reports Menu     **
  ;;**************************
  ;;QUIT
 TEXTX ;;
  ;;***************************
- ;;**   IHS/RPMS CRS 2008   **
+ ;;**   IHS/RPMS CRS 2018   **
  ;;**  Area Office Options  **
  ;;***************************
  ;;QUIT
  ;
 TEXTS ;;
  ;;**************************
- ;;**   IHS/RPMS CRS 2008  **
+ ;;**   IHS/RPMS CRS 2018  **
  ;;**       Setup Menu     **
  ;;**************************
  ;;QUIT
  ;
 TEXTT ;;
  ;;***************************
- ;;**   IHS/RPMS CRS 2008   **
+ ;;**   IHS/RPMS CRS 2018   **
  ;;**  Taxonomy Setup Menu  **
  ;;***************************
  ;;QUIT
  ;
 TEXTZ ;;
  ;;***************************
- ;;**   IHS/RPMS CRS 2008   **
+ ;;**   IHS/RPMS CRS 2018   **
  ;;**  Taxonomy Check Menu  **
  ;;***************************
  ;;QUIT
  ;
 TEXTU ;;
  ;;*****************************
- ;;**    IHS/RPMS CRS 2008    **
+ ;;**    IHS/RPMS CRS 2018    **
  ;;**  Taxonomy Reports Menu  **
  ;;*****************************
  ;;QUIT
  ;;
 TEXTG ;;
  ;;*********************************
- ;;**      IHS/RPMS CRS 2008      **
+ ;;**      IHS/RPMS CRS 2018      **
  ;;**  Lab Taxonomy Reports Menu  **
  ;;*********************************
  ;;QUIT
+ ;;
+TEXTP ;;
+ ;;**************************************
+ ;;**        IHS/RPMS CRS 2018         **
+ ;;**  Patient Education Reports Menu  **
+ ;;**************************************
+ ;;QUIT
 TEXTM ;;
  ;;****************************************
- ;;**          IHS/RPMS CRS 2008         **
+ ;;**          IHS/RPMS CRS 2018         **
  ;;**  Medication Taxonomy Reports Menu  **
  ;;****************************************
  ;;QUIT
+TEXTMU ;
+ ;;***********************************
+ ;;**       IHS/RPMS CRS 2018       **
+ ;;**  Meaningful Use Reports Menu  **
+ ;;***********************************
+ ;;QUIT
+ ;;
 CTR(X,Y) ;EP - Center X in a field Y wide.
  Q $J("",$S($D(Y):Y,1:IOM)-$L(X)\2)_X
  ;----------

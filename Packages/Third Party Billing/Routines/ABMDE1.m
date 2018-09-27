@@ -1,9 +1,10 @@
 ABMDE1 ; IHS/ASDST/DMJ - CLAIM IDENTIFIERS-SCRN 1 ;   
- ;;2.6;IHS 3P BILLING SYSTEM**9**;;NOV 12, 2009
+ ;;2.6;IHS 3P BILLING SYSTEM**9,10,22**;;NOV 12, 2009;Build 418
  ;
  ; IHS/SD/SDR - v2.5 p8 - task 8 - Added code to check when VT changes to check for replacement insurer
  ; IHS/SD/SDR - v2.5 p11 - IM22787 - Fix for replacement insurer
  ; IHS/SD/SDR - 2.6*9 - HEAT28364 - changed replacement insurer to use LDFN not DUZ(2)
+ ;IHS/SD/SDR 2.6*22 HEAT335246 - Added AUTO-SPLIT tag to claim number if AUTO-SPLIT claim
  ;
 OPT K ABM,ABMV,ABME
  S ABMP("OPT")="EVNJBQ"
@@ -101,7 +102,11 @@ S2 ;
 HRN ;
  I ABMP("LDFN")]"" D
  . W " ",$S($D(^AUPNPAT(ABMP("PDFN"),41,ABMP("LDFN"),0)):" [HRN:"_$P(^(0),U,2)_"]",1:" [no HRN]")
- W ?59,"Claim Number: ",ABMP("CDFN"),!
+ ;W ?59,"Claim Number: ",ABMP("CDFN"),!  ;abm*2.6*10 ICD10 008
+ I $P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),0)),U,22)="S" W ?53,"SPLIT Claim Number: ",ABMP("CDFN"),!  ;abm*2.6*10 ICD10 008
+ I $P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),0)),U,22)="A" W ?53,"AUTOSPLIT Claim#: ",ABMP("CDFN"),!  ;abm*2.6*22 IHS/SD/SDR HEAT335246
+ ;I $P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),0)),U,22)'="S" W ?59,"Claim Number: ",ABMP("CDFN"),!  ;abm*2.6*10 ICD10 008  ;abm*2.6*22 HEAT335246
+ I "^A^S^"'[("^"_$P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),0)),U,22)_"^") W ?59,"Claim Number: ",ABMP("CDFN"),!  ;abm*2.6*10 ICD10 008  ;abm*2.6*22 HEAT335246
  I +ABMZ("PG")=8 D
  .W "Mode of Export: ",$P($G(^ABMDEXP(ABMP(ABMZ("PG")),0)),U),!
  S ABM("D")=""
@@ -123,7 +128,9 @@ S4 ;
  S ABM("PG")="  DETAILED CLAIM LISTING  "
  S $P(ABM("D"),"~",(80-$L(ABM("PG"))/2)+1)=""
  W ABM("D"),ABM("PG"),ABM("D"),!
- W "Patient: ",$P(^DPT(ABMP("PDFN"),0),U),?59,"Claim Number: ",ABMP("CDFN"),!
+ ;W "Patient: ",$P(^DPT(ABMP("PDFN"),0),U),?59,"Claim Number: ",ABMP("CDFN"),!  ;abm*2.6*10 ICD10 008
+ W "Patient: ",$P(^DPT(ABMP("PDFN"),0),U)  ;abm*2.6*10 ICD10 008
+ W ?59,"Claim Number: ",ABMP("CDFN"),!  ;abm*2.6*10 ICD10 008
  S ABM("D")=""
  S ABM("TITL")=" (PAGE "_ABMZ("PG")_" - "_ABMZ("TITL")_") "
  S $P(ABM("D"),".",(80-$L(ABM("TITL"))/2)+1)=""

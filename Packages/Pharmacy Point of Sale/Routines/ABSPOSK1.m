@@ -1,5 +1,5 @@
 ABSPOSK1 ; IHS/FCS/DRS - winnow POS data ;      [ 04/03/2002  10:05 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**1**;JUN 21, 2001;Build 15
+ ;;1.0;PHARMACY POINT OF SALE;**1,48,49**;JUN 21, 2001;Build 27
  Q
  ;
  ; IHS/SD/lwj 04/03/02  as per David's fix at ANMC - changed
@@ -62,16 +62,24 @@ AGE02(N) ; how old is the 9002313.02 entry?
  . D LOG("Setting current date into 9002313.02 IEN="_N)
 AG5 . N FDA,MSG S FDA(9002313.02,N_",",.06)="NOW"
  . D FILE^DIE("E","FDA","MSG")
+ . I $D(MSG) D LOG^ABSPOSL2("AG5^ABSPOSK1",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  . I $D(MSG) G AG5:$$IMPOSS^ABSPOSUE("FM","TRI","FILE^DIE failed",,"AGE02",$T(+0))
  . S Y=$$GET1^DIQ(9002313.02,N_",",.06,"I")
  Q $$AGE(Y)
 CLOSED02(N) ; is ^ABSPC(N,... posted to A/R and with a zero balance?
  ;   ILC A/R only !!!  This code is not reached for other A/R types
  ; (also returns true if the .02 is unposted for over a year)
- N PCN S PCN=$P(^ABSPC(N,0),U,3)
+ N PCN,BBLIMIT S PCN=$P(^ABSPC(N,0),U,3)
  I PCN Q '$G(^ABSBITMS(9002302,PCN,3),U) ; true if zero balance
  ; not posted - is it over a year old?
- Q $$AGE02(N)>365
+ ;  Q $$AGE02(N)>365
+ ; /IHS/OIT/RAM ; 16 OCT 2017 ; CR#09828 Changes the amount of time we can back-bill payers; change
+ ;     1 year limit to a new field in the ABSP SETUP file with that parameter. Default is now 6 years.
+ ; S BBLIMIT=+$G(^ABSP(9002313.99,1,"BACKLIMIT")) ; Grab default from ABSP SETUP file.
+ ; I BBLIMIT=0 S BBLIMIT=2192 ; If there is no value, set it to 6 years (in days).
+ S BBLIMIT=365 ; 31 OCT 17 ; CR 9828 IS NOW ON HOLD; CHANGE BACK TO ORIGINAL 1 YEAR BEHAVIOUR.
+ Q $$AGE02(N)>BBLIMIT ; Return 1 if within the time limit, 0 otherwise.
+ ; /IHS/OIT/RAM ; 16 OCT 2017 ; END OF CHANGES FOR CR#09828
 51 ;EP -  9002313.51 Input
  ; a month is more than enough
  I 'AGE("WINNOW .51") S AGE("WINNOW .51")=31
@@ -133,6 +141,7 @@ IFACE57()          ; true if you have a billing interface w/9002313.57
  I 'X D  Q  ; stuff 
  . D LOG("Setting current date into 9002313.59 IEN="_N)
  . N FDA,MSG S FDA(9002313.59,IEN_",",7)=NOW D FILE^DIE("E","FDA","MSG")
+ . I $D(MSG) D LOG^ABSPOSL2("59^ABSPOSK1",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  I $$AGE(X)>AGE("WINNOW .59") D DELETE(9002313.59,IEN)
  Q
 LOGFILES ;EP -  ^ABSPECP("LOG",IEN,
@@ -189,6 +198,7 @@ SETTODAY(FILE,IENS,FIELD)         ; the given FILE, FIELD is missing a date, une
  D LOG("Missing date; stuffed today into FILE="_FILE_",IENS="_IENS_",FIELD="_FIELD)
  S FDA(FILE,IENS,FIELD)=$$TODAY
 ST5 D FILE^DIE(,"FDA","MSG")
+ I $D(MSG) D LOG^ABSPOSL2("ST5^ABSPOSK1",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  Q:'$D(MSG)  ; success
  D ZWRITE^ABSPOS("MSG")
  G ST5:$$IMPOSS^ABSPOSUE("FM","TRI","FILE^DIE failed",,"SETTODAY",$T(+0))
@@ -210,6 +220,7 @@ DELETE(FILE,IENS)  ; this is where it happens!!!
  S FDA(FILE,IENS,.01)=""
  Q:TESTING
 DE5 D FILE^DIE(,"FDA","MSG")
+ I $D(MSG) D LOG^ABSPOSL2("DE5^ABSPOSK1",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  I $D(MSG) D ZWRITE^ABSPOS("FDA","MSG") G DE5:$$IMPOSS^ABSPOSUE("FM","TRI","FILE^DIE failed",,"DELETE",$T(+0))
  ; Make sure the deletion worked: fetch the .01 field
  I $$GET1^DIQ(FILE,IENS,.01)]"" G DE5:$$IMPOSS^ABSPOSUE("FM","TRI","deletion failed",,"DELETE",$T(+0))
@@ -226,7 +237,7 @@ DELFIELD(FILE,IENS,FIELD) ; and here too
  D LOG(MSG)
  K MSG
  S FDA(FILE,IENS,FIELD)=""
- I 'TESTING D FILE^DIE(,"FDA","MSG")
+ I 'TESTING D FILE^DIE(,"FDA","MSG") I $D(MSG) D LOG^ABSPOSL2("DELFIELD^ABSPOSK1",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  Q
 DELLOG(N)          ; special for log files
  N MSG S MSG=$S(TESTING:"We would delete",1:"DELETING")

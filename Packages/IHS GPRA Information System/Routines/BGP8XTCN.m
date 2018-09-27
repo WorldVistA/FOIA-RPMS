@@ -1,10 +1,10 @@
-BGP8XTCN ; IHS/CMI/LAB - TAXONOMY CHECK FOR FY04 CRS REPORT ;
- ;;8.0;IHS CLINICAL REPORTING;**2**;MAR 12, 2008
+BGP8XTCN ; IHS/CMI/LAB - TAXONOMY CHECK FOR CRS REPORT ;
+ ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
  ;
  ;
  D HOME^%ZIS
  W:$D(IOF) @IOF
- W !!,"Checking for Taxonomies to support the National GPRA/GPRA Performance Reports.",!,"Please enter the device for printing.",!
+ W !!,"Checking for Taxonomies to support the National GPRA/GPRAMA/GPRA/GPRAMA Performance Reports.",!,"Please enter the device for printing.",!
 ZIS ;
  S BGPTCO=1
  S XBRC="",XBRP="TAXCHK^BGP8XTCN",XBNS="BGPTCO",XBRX="XIT^BGP8XTCN"
@@ -17,16 +17,16 @@ TAXCHK ;EP
  K BGPQUIT
 GUICHK ;EP
  W !,"Checking for Taxonomies to support the "
- W $S($G(BGPTCO)=1:"National GPRA/GPRA Performance Reports...",'$G(BGP8GPU):"National GPRA Report...",1:"GPRA Performance Report..."),!
+ W $S($G(BGPTCO)=1:"National GPRA/GPRAMA/GPRA/GPRAMA Performance Reports...",'$G(BGPYGPU):"National GPRA/GPRAMA Report...",1:"GPRA/GPRAMA Performance Report..."),!
  NEW A,BGPX,I,Y,Z,J,BGPY,BGPT
  K A
  ;S T="TAXS" F J=1:1 S Z=$T(@T+J),BGPX=$P(Z,";;",2),Y=$P(Z,";;",3) Q:BGPX=""  D
- S BGPT="" F  S BGPT=$O(^BGPTAXE("B",BGPT)) Q:BGPT=""  D
- .S BGPY=$O(^BGPTAXE("B",BGPT,0))
- .Q:'$D(^BGPTAXE(BGPY,12,"B",1))
- .;I $P(^BGPTAXE(BGPY,0),U,2)'="L" S BGPX=$O(^ATXAX("B",BGPT,0))
- .;I $P(^BGPTAXE(BGPY,0),U,2)="L" S BGPX=$O(^ATXLAB("B",BGPT,0))
- .S BGPTYPE=$P(^BGPTAXE(BGPY,0),U,2),Y=$G(^BGPTAXE(BGPY,11,1,0))
+ S BGPT="" F  S BGPT=$O(^BGPTAXR("B",BGPT)) Q:BGPT=""  D
+ .S BGPY=$O(^BGPTAXR("B",BGPT,0))
+ .Q:'$D(^BGPTAXR(BGPY,12,"B",1))
+ .;I $P(^BGPTAXR(BGPY,0),U,2)'="L" S BGPX=$O(^ATXAX("B",BGPT,0))
+ .;I $P(^BGPTAXR(BGPY,0),U,2)="L" S BGPX=$O(^ATXLAB("B",BGPT,0))
+ .S BGPTYPE=$P(^BGPTAXR(BGPY,0),U,2),Y=$G(^BGPTAXR(BGPY,11,1,0))
  .I BGPTYPE'="L" D
  ..I '$D(^ATXAX("B",BGPT)) S A(BGPT)=Y_"^is Missing" Q
  ..S I=$O(^ATXAX("B",BGPT,0))
@@ -36,7 +36,7 @@ GUICHK ;EP
  ..S I=$O(^ATXLAB("B",BGPT,0))
  ..I '$D(^ATXLAB(I,21,"B")) S A(BGPT)=Y_"^has no entries "
  I '$D(A) W !,"All taxonomies are present.",! K A,BGPX,Y,I,Z D DONE Q
- W !,"In order for the National GPRA Report to find all necessary data, several",!,"taxonomies must be established.  The following taxonomies are missing or have",!,"no entries:"
+ W !,"In order for the National GRPA/GPRAMA Report to find all necessary data, several",!,"taxonomies must be established.  The following taxonomies are missing or have",!,"no entries:"
  S BGPX="" F  S BGPX=$O(A(BGPX)) Q:BGPX=""!($D(BGPQUIT))  D
  .;I $Y>(IOSL-2) D PAGE Q:$D(BGPQUIT)
  .W !,$P(A(BGPX),U)," [",BGPX,"] ",$P(A(BGPX),U,2)

@@ -1,5 +1,5 @@
 ABSPOSCC ; IHS/FCS/DRS - Set up ABSP() ;      [ 05/09/2003  9:37 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**1,4,6,9,11,15,16,17,19,20,21,29,37,40,42,46,47**;JUN 01, 2001;Build 15
+ ;;1.0;PHARMACY POINT OF SALE;**1,4,6,9,11,15,16,17,19,20,21,29,37,40,42,46,47**;JUN 01, 2001;Build 27
  ;---
  ; IHS/SD/lwj 03/12/02  some insurers are requiring the entire
  ; untranslated value as the cardholder id - new array budget
@@ -54,7 +54,7 @@ ABSPOSCC ; IHS/FCS/DRS - Set up ABSP() ;      [ 05/09/2003  9:37 AM ]
  ;    Updated NPI
  ;---
  ;IHS/OIT/RCS - 8/12/13 - Patch 46
- ;    Added 'ABSP("Patient","Location")' variable
+ ;    Added 'ABSP("Patient","Location")' variable ;; /IHS/OIT/RAM 22 MAY 17; *Should* be "Residence" variable; modifying.
  Q
  ; Called from ABSPOSCA from ABSPOSQG from ABSPOSQ2
  ; Sets up the ABSP(*) nodes
@@ -62,7 +62,7 @@ ABSPOSCC ; IHS/FCS/DRS - Set up ABSP() ;      [ 05/09/2003  9:37 AM ]
  ;
 GETINFO(DIALOUT,PATIEN,VSTIEN,PINS,INSIEN) ;EP
  ;Manage local variables
- N XDATA,NRECIEN
+ N XDATA,NRECIEN,I,I2
  ; PINSDA = pointer into insurance elig file,
  ; PINSDA1 = pointer into multiple of ^AUPNPRVT where appropriate
  N PINSDA,PINSDA1,PINSTYPE S PINSDA=$P(PINS,",",2),PINSTYPE=$P(PINS,",")
@@ -130,8 +130,17 @@ GETINFO(DIALOUT,PATIEN,VSTIEN,PINS,INSIEN) ;EP
  S ABSP("Patient","DOB")=$P(XDATA,U,3)
  S ABSP("Patient","SSN")=$P(XDATA,U,9)
  S ABSP("Patient","EMAIL")=$P($G(^AUPNPAT(PATIEN,18)),U,2) ;Patch 42
- S ABSP("Patient","Location")="01" ;Patch 46, Default value
- ;
+ S ABSP("Patient","Residence")="01" ;Patch 46, Default value -- for the "Residence" (384) node, not the "Location" (307) node.
+ ; /IHS/OIT/RAM 22 MAY 17; Here is where the patch for CR07945 needs to go to acquire Patient Residence from Patient Reg.
+ ; From Nicholas Daniel; here's the new _tentative_ fields:
+ ; PATIENT RESIDENCE file #9999999.361  (new) (data comes with file) ;; CODE field #.01 (new) ;; DESCRIPTION field #.02 (new)
+ ; PATIENT file #9000001 ;; PATIENT RESIDENCE field #1803  (new)
+ ; _if_ they need just the pointer, here's the change:
+ S I=$$GET1^DIQ(9000001,PATIEN,1803,"I")
+ I +I S ABSP("Patient","Residence")=$P($G(^AUTTPRES(I,0)),"^",2)
+ I ABSP("Patient","Residence")="" S ABSP("Patient","Residence")="01" ; /IHS/OIT/RAM/ 23 JUL 17 ; KEEP DEFAULT OF '01' IF FIELD IS EMPTY.
+ ; Assuming they don't need the 'description' field from the new file; I would think that they'd retrieve that from the pointer or code.
+ ; /IHS/OIT/RAM 22 MAY 17; End of notes regarding patch for CR07945.
  ;IHS/SD/lwj 12/04/03  patch 9 get address info
  D GETAINFO^ABSPOSCH
  ;

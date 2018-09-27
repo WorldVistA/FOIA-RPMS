@@ -1,117 +1,67 @@
 BGP8EL1R ; IHS/CMI/LAB - print ind ;
- ;;8.0;IHS CLINICAL REPORTING;**2**;MAR 12, 2008
+ ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
  ;
 I1AGEP ;EP
 PR ; 
- D HEADER^BGP8DPH W !,^BGPELIE(BGPIC,53,1,0) S X=" " D S(X,1,1) D H3^BGP8EL1P S X=" " D S(X,1,1)
+ D HEADER^BGP8DPH W !,^BGPELIR(BGPIC,53,1,0) S X=" " D S(X,1,1) D H3^BGP8EL1P S X=" " D S(X,1,1)
  S X="BASELINE YEAR PERIOD" D S(X,1,1)
- S X=" " D S(X,1,1) S X=BGPHD2 D S(X,1,1)
+ S X=" " D S(X,1,1) S X=BGPHD2 D S(X,1,1) S X=BGPHD3 D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAB(X),U) S Y=$$C(V,0,6) D S(Y,,X+1)
- S X="# w/exposure to at least 1" D S(X,1,1) S X=" harmful drug" D S(X,1,1)
+ S X="# w/ Exposure to 1+" D S(X,1,1) S X=" High-Risk Med" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAB(X),U,2) S Y=$$C(V,0,6) D S(Y,,X+1)
- S X="% # w/exposure to at least 1" D S(X,1,1) S X=" harmful drug" D S(X,1,1)
+ S X="% w/ Exposure to 1+" D S(X,1,1) S X=" High-Risk Med" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAB(X),U,3) S Y=$J(V,5,1) D S(Y,,X+1)
- S X=" " D S(X,1,1) S X="A. # w/antianxiety Rx" D S(X,1,1)
+ S X=" " D S(X,1,1) S X="A. # w/ Anticholinergic Rx" D S(X,1,1) S X="  w/ % of Total Meds" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAB(X),U,4) S Y=$$C(V,0,6) D S(Y,,X+1)
- S X="% A. w/antianxiety Rx" D S(X,1,1) S X="  w/ % of total meds" D S(X,1,1)
+ S X="A. % w/ Anticholinergic Rx" D S(X,1,1) S X="  w/ % of Total Meds" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAB(X),U,5) S Y=$J(V,5,1) D S(Y,,X+1)
- S X=" " D S(X,1,1) S X="B. # w/antiemetic Rx" D S(X,1,1)
+ S X=" " D S(X,1,1) S X="B. # w/ Antithrombotic Rx" D S(X,1,1) S X="  w/ % of Total Meds" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAB(X),U,6) S Y=$$C(V,0,6) D S(Y,,X+1)
- S X="% B. w/antiemetic Rx" D S(X,1,1) S X="  w/ % of total meds" D S(X,1,1)
+ S X="B. % w/ Antithrombotic Rx" D S(X,1,1) S X="  w/ % of Total Meds" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAB(X),U,7) S Y=$J(V,5,1) D S(Y,,X+1)
- S X=" " D S(X,1,1) S X="C. # w/analgesic Rx" D S(X,1,1)
+ S X=" " D S(X,1,1) S X="C. # w/ Anti-infective Rx" D S(X,1,1) S X="  w/ % of Total Meds" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAB(X),U,8) S Y=$$C(V,0,6) D S(Y,,X+1)
- S X="% C. w/analgesic Rx" D S(X,1,1) S X="  w/ % of total meds" D S(X,1,1)
+ S X="C. % w/ Anti-infective Rx" D S(X,1,1) S X="  w/ % of Total Meds" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAB(X),U,9) S Y=$J(V,5,1) D S(Y,,X+1)
- S X=" " D S(X,1,1) S X="D. # w/antihistamine Rx" D S(X,1,1)
+ S X=" " D S(X,1,1) S X="D. # w/ Cardiovascular Rx" D S(X,1,1) S X="  w/ % of Total Meds" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAB(X),U,10) S Y=$$C(V,0,6) D S(Y,,X+1)
- S X="% D. w/antihistamine Rx" D S(X,1,1) S X="  w/ % of total meds" D S(X,1,1)
+ S X="D. % w/ Cardiovascular Rx" D S(X,1,1) S X="  w/ % of Total Meds" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAB(X),U,11) S Y=$J(V,5,1) D S(Y,,X+1)
- S X=" " D S(X,1,1) S X="E. # w/antipsychotic Rx" D S(X,1,1)
+ S X=" " D S(X,1,1) S X="E. # w/ Central Nervous System Rx" D S(X,1,1) S X="  w/ % of Total Meds" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAB(X),U,12) S Y=$$C(V,0,6) D S(Y,,X+1)
- S X="% E. w/antipsychotic Rx" D S(X,1,1) S X="  w/ % of total meds" D S(X,1,1)
+ S X="E. % w/ Central Nervous System Rx" D S(X,1,1) S X="  w/ % of Total Meds" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAB(X),U,13) S Y=$J(V,5,1) D S(Y,,X+1)
- S X=" " D S(X,1,1) S X="F. # w/amphetamine Rx" D S(X,1,1)
+ S X=" " D S(X,1,1) S X="F. # w/ Endocrine Rx" D S(X,1,1) S X="  w/ % of Total Meds" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAB(X),U,14) S Y=$$C(V,0,6) D S(Y,,X+1)
- S X="% F. w/amphetamine Rx" D S(X,1,1) S X="  w/ % of total meds" D S(X,1,1)
+ S X="F. % w/ Endocrine Rx" D S(X,1,1) S X="  w/ % of Total Meds" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAB(X),U,15) S Y=$J(V,5,1) D S(Y,,X+1)
- S X=" " D S(X,1,1) S X="G. # w/barbiturate Rx" D S(X,1,1)
- F X=1:1:3 S V=$P(BGPDAB(X),U,16) S Y=$$C(V,0,6) D S(Y,,X+1)
- S X="% G. w/barbiturate Rx" D S(X,1,1) S X="  w/ % of total meds" D S(X,1,1)
- F X=1:1:3 S V=$P(BGPDAB(X),U,17) S Y=$J(V,5,1) D S(Y,,X+1)
- D HEADER^BGP8DPH W !,^BGPELIE(BGPIC,53,1,0) S X=" " D S(X,1,1) D H3^BGP8EL1P S X=" " D S(X,1,1)
- S X=" " D S(X,1,1) S X="H. # w/benzodiazepine Rx" D S(X,1,1)
+ D HEADER^BGP8DPH W !,^BGPELIR(BGPIC,53,1,0) S X=" " D S(X,1,1) D H3^BGP8EL1P S X=" " D S(X,1,1)
+ S X=" " D S(X,1,1) S X="G. # w/ Pain Med Rx" D S(X,1,1) S X="  w/ % of Total Meds" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAB(X),U,18) S Y=$$C(V,0,6) D S(Y,,X+1)
- S X="% H. w/benzodiazepine Rx" D S(X,1,1) S X="  w/ % of total meds" D S(X,1,1)
+ S X="G. % w/ Pain Med Rx" D S(X,1,1) S X="  w/ % of Total Meds" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAB(X),U,19) S Y=$J(V,5,1) D S(Y,,X+1)
- S X=" " D S(X,1,1) S X="I. # w/other benzodiazepine Rx" D S(X,1,1)
- F X=1:1:3 S V=$P(BGPDAB(X),U,20) S Y=$$C(V,0,6) D S(Y,,X+1)
- S X="% I. w/other benzodiazepine Rx" D S(X,1,1) S X="  w/ % of total meds" D S(X,1,1)
- F X=1:1:3 S V=$P(BGPDAB(X),U,21) S Y=$J(V,5,1) D S(Y,,X+1)
- S X=" " D S(X,1,1) S X="J. # w/calcium channel blocker Rx" D S(X,1,1)
- F X=1:1:3 S V=$P(BGPDAB(X),U,22) S Y=$$C(V,0,6) D S(Y,,X+1)
- S X="% J. w/calcium channel blocker Rx" D S(X,1,1) S X="  w/ % of total meds" D S(X,1,1)
- F X=1:1:3 S V=$P(BGPDAB(X),U,23) S Y=$J(V,5,1) D S(Y,,X+1)
- S X=" " D S(X,1,1) S X="K. # w/gastro antispasmodic Rx" D S(X,1,1)
- F X=1:1:3 S V=$P(BGPDAB(X),U,24) S Y=$$C(V,0,6) D S(Y,,X+1)
- S X="% K. w/gastro antispasmodic Rx" D S(X,1,1) S X="  w/ % of total meds" D S(X,1,1)
- F X=1:1:3 S V=$P(BGPDAB(X),U,25) S Y=$J(V,5,1) D S(Y,,X+1)
- S X=" " D S(X,1,1) S X="L. # w/belladonna alkaloid Rx" D S(X,1,1)
- F X=1:1:3 S V=$P(BGPDAB(X),U,26) S Y=$$C(V,0,6) D S(Y,,X+1)
- S X="% L. w/belladonna alkaloid Rx" D S(X,1,1) S X="  w/ % of total meds" D S(X,1,1)
- F X=1:1:3 S V=$P(BGPDAB(X),U,27) S Y=$J(V,5,1) D S(Y,,X+1)
- S X=" " D S(X,1,1) S X="M. # w/skeletal muscle relaxant Rx" D S(X,1,1)
+ S X=" " D S(X,1,1) S X="H. # w/ Skeletal Muscle Relaxant Rx" D S(X,1,1) S X="  w/ % of Total Meds" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAB(X),U,28) S Y=$$C(V,0,6) D S(Y,,X+1)
- S X="% M. w/skeletal muscle relaxant Rx" D S(X,1,1) S X="  w/ % of total meds" D S(X,1,1)
+ S X="H. % w/ Skeletal Muscle Relaxant Rx" D S(X,1,1) S X="  w/ % of Total Meds" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAB(X),U,29) S Y=$J(V,5,1) D S(Y,,X+1)
- S X=" " D S(X,1,1) S X="N. # w/oral estrogen Rx" D S(X,1,1)
- F X=1:1:3 S V=$P(BGPDAB(X),U,30) S Y=$$C(V,0,6) D S(Y,,X+1)
- S X="% N. w/oral estrogen Rx" D S(X,1,1) S X="  w/ % of total meds" D S(X,1,1)
- F X=1:1:3 S V=$P(BGPDAB(X),U,31) S Y=$J(V,5,1) D S(Y,,X+1)
- S X=" " D S(X,1,1) S X="O. # w/oral hypoglycemic Rx" D S(X,1,1)
- F X=1:1:3 S V=$P(BGPDAB(X),U,32) S Y=$$C(V,0,6) D S(Y,,X+1)
- S X="% O. w/oral hypoglycemic Rx" D S(X,1,1) S X="  w/ % of total meds" D S(X,1,1)
- F X=1:1:3 S V=$P(BGPDAB(X),U,33) S Y=$J(V,5,1) D S(Y,,X+1)
- D HEADER^BGP8DPH W !,^BGPELIE(BGPIC,53,1,0) S X=" " D S(X,1,1) D H3^BGP8EL1P S X=" " D S(X,1,1)
- S X=" " D S(X,1,1) S X="P. # w/narcotic Rx" D S(X,1,1)
- F X=1:1:3 S V=$P(BGPDAB(X),U,34) S Y=$$C(V,0,6) D S(Y,,X+1)
- S X="% P. w/narcotic Rx" D S(X,1,1) S X="  w/ % of total meds" D S(X,1,1)
- F X=1:1:3 S V=$P(BGPDAB(X),U,35) S Y=$J(V,5,1) D S(Y,,X+1)
- S X=" " D S(X,1,1) S X="Q. # w/vasodilator Rx" D S(X,1,1)
- F X=1:1:3 S V=$P(BGPDAB(X),U,36) S Y=$$C(V,0,6) D S(Y,,X+1)
- S X="% Q. w/vasodilator Rx" D S(X,1,1) S X="  w/ % of total meds" D S(X,1,1)
- F X=1:1:3 S V=$P(BGPDAB(X),U,37) S Y=$J(V,5,1) D S(Y,,X+1)
- S X=" " D S(X,1,1) S X="R. # w/other avoid meds Rx" D S(X,1,1)
- F X=1:1:3 S V=$P(BGPDAB(X),U,38) S Y=$$C(V,0,6) D S(Y,,X+1)
- S X="% R. w/other avoid meds Rx" D S(X,1,1) S X="  w/ % of total meds" D S(X,1,1)
- F X=1:1:3 S V=$P(BGPDAB(X),U,39) S Y=$J(V,5,1) D S(Y,,X+1)
- S X=" " D S(X,1,1) S X="# w/ exposure to multiple" D S(X,1,1) S X=" harmful drugs" D S(X,1,1)
+ ;D HEADER^BGP8DPH W !,^BGPELIR(BGPIC,53,1,0) S X=" " D S(X,1,1) D H3^BGP8EL1P S X=" " D S(X,1,1)
+ S X=" " D S(X,1,1) S X="# w/ Exposure to Multiple" D S(X,1,1) S X=" High-Risk Meds" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAB(X),U,40) S Y=$$C(V,0,6) D S(Y,,X+1)
- S X="% w/ exposure to multiple" D S(X,1,1) S X=" harmful drugs" D S(X,1,1)
+ S X="% w/ Exposure to Multiple" D S(X,1,1) S X=" High-Risk Meds" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAB(X),U,41) S Y=$J(V,5,1) D S(Y,,X+1)
  Q:BGPQUIT
  ;% changes
  S X=" " D S(X,1,1) S X="CHANGE FROM BASE YR %" D S(X,1,1)
- S BGP2="",BGP1="# w/exposure to at least",BGP2=" 1 harmful drug",BGPPIE=3 D PPC
- S BGP2="",BGP1="A. # w/antianxiety Rx",BGPPIE=5 D PPC
- S BGP2="",BGP1="B. # w/antiemetic Rx",BGPPIE=7 D PPC
- S BGP2="",BGP1="C. # w/analgesic Rx",BGPPIE=9 D PPC
- S BGP2="",BGP1="D. # w/antihistamine Rx",BGPPIE=11 D PPC
- S BGP2="",BGP1="E. # w/antipsychotic Rx",BGPPIE=13 D PPC
- S BGP2="",BGP1="F. # w/amphetamine Rx",BGPPIE=15 D PPC
- S BGP2="",BGP1="G. # w/barbiturate Rx",BGPPIE=17 D PPC
- S BGP2="",BGP1="H. # w/benzodiazepine Rx",BGPPIE=19 D PPC
- S BGP2="",BGP1="I. # w/other benzodiazepine Rx",BGPPIE=21 D PPC
- S BGP2="",BGP1="J. # w/calcium channel ",BGP2=" blocker Rx",BGPPIE=23 D PPC
- S BGP2="",BGP1="K. # w/gastro antispasmodic Rx",BGPPIE=25 D PPC
- S BGP2="",BGP1="L. # w/belladonna alkaloid Rx",BGPPIE=27 D PPC
- S BGP2="",BGP1="M. # w/skeletal muscle ",BGP2=" relaxant Rx",BGPPIE=29 D PPC
- S BGP2="",BGP1="N. # w/oral estrogen Rx",BGPPIE=31 D PPC
- S BGP2="",BGP1="O. # w/oral hypoglycemic Rx",BGPPIE=33 D PPC
- S BGP2="",BGP1="P. # w/narcotic Rx",BGPPIE=35 D PPC
- S BGP2="",BGP1="Q. # w/vasodilator Rx",BGPPIE=37 D PPC
- S BGP2="",BGP1="R. # w/other avoid meds Rx",BGPPIE=39 D PPC
- S BGP2="",BGP1="# w/ exposure to multiple",BGP2=" harmful drugs",BGPPIE=41 D PPC
+ S BGP2="",BGP1="# w/ Exposure to 1+",BGP2=" High-Risk Med",BGPPIE=3 D PPC
+ S BGP2="",BGP1="A. # w/ Anticholinergic Rx",BGPPIE=5 D PPC
+ S BGP2="",BGP1="B. # w/ Antithrombotic Rx",BGPPIE=7 D PPC
+ S BGP2="",BGP1="C. # w/ Anti-infective Rx",BGPPIE=9 D PPC
+ S BGP2="",BGP1="D. # w/ Cardiovascular Rx",BGPPIE=11 D PPC
+ S BGP2="",BGP1="E. # w/ Central Nervous System Rx",BGPPIE=13 D PPC
+ S BGP2="",BGP1="F. # w/ Endocrine Rx",BGPPIE=15 D PPC
+ S BGP2="",BGP1="G. # w/ Pain Med Rx",BGPPIE=19 D PPC
+ S BGP2="",BGP1="H. # w/ Skeletal Muscle ",BGP2=" Relaxant Rx",BGPPIE=29 D PPC
+ S BGP2="",BGP1="# w/ Exposure to Multiple",BGP2=" High-Risk Meds",BGPPIE=41 D PPC
  Q
 PPC ;
  D S(BGP1,1,1)
@@ -121,15 +71,15 @@ PPC ;
 V(T,R,N,P) ;EP
  I $G(BGPAREAA) G VA
  NEW X
- I T=1 S X=$P($G(^BGPELDCE(R,N)),U,P) Q $S(X]"":X,1:0)
- I T=2 S X=$P($G(^BGPELDPE(R,N)),U,P) Q $S(X]"":X,1:0)
- I T=3 S X=$P($G(^BGPELDBE(R,N)),U,P) Q $S(X]"":X,1:0)
+ I T=1 S X=$P($G(^BGPEDLCR(R,N)),U,P) Q $S(X]"":X,1:0)
+ I T=2 S X=$P($G(^BGPEDLPR(R,N)),U,P) Q $S(X]"":X,1:0)
+ I T=3 S X=$P($G(^BGPEDLBR(R,N)),U,P) Q $S(X]"":X,1:0)
  Q ""
 VA ;
  NEW X,V,C S X=0,C="" F  S X=$O(BGPSUL(X)) Q:X'=+X  D
- .I T=1 S C=C+$P($G(^BGPELDCE(X,N)),U,P)
- .I T=2 S C=C+$P($G(^BGPELDPE(X,N)),U,P)
- .I T=3 S C=C+$P($G(^BGPELDBE(X,N)),U,P)
+ .I T=1 S C=C+$P($G(^BGPEDLCR(X,N)),U,P)
+ .I T=2 S C=C+$P($G(^BGPEDLPR(X,N)),U,P)
+ .I T=3 S C=C+$P($G(^BGPEDLBR(X,N)),U,P)
  .Q
  Q $S(C:C,1:0)
 C(X,X2,X3) ;
@@ -138,7 +88,7 @@ C(X,X2,X3) ;
 S(Y,F,P) ;set up array
  ;Q:BGPQUIT
  ;I $Y>(IOSL-5) D HEADER^BGP8DPH Q:BGPQUIT
- ;W !,^BGPELIE(BGPIC,53,1,0) S X=" " D S(X,1,1) D H3 S X=" " D S(X,1,1)
+ ;W !,^BGPELIR(BGPIC,53,1,0) S X=" " D S(X,1,1) D H3 S X=" " D S(X,1,1)
  I $G(F) F J=1:1:F W !
  S T=$S(P=1:1,P=2:38,P=3:50,P=4:62,1:1)
  W ?T,Y

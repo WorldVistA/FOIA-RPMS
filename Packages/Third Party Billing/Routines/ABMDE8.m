@@ -1,20 +1,14 @@
 ABMDE8 ; IHS/ASDST/DMJ - Edit Page 8 - WORKSHEET DATA ;  
- ;;2.6;IHS 3P BILLING SYSTEM;;NOV 12, 2009
+ ;;2.6;IHS 3P BILLING SYSTEM;**23**;NOV 12, 2009;Build 427
  ;
- ; IHS/DSD/DMJ - 6/17/98 -  NOIS CKA-0698-110070
- ;            Modified to include more than just room charges on Page 8C
+ ;IHS/DSD/DMJ - 6/17/98 -  NOIS CKA-0698-110070 odified to include more than just room charges on Page 8C
  ;
- ; IHS/SD/SDR - 10/15/02 - V2.5 P2 - 888-0501-N0008
- ;           Modified to put Supplies lock on Charge Master page instead of Medical
+ ;IHS/SD/SDR - 10/15/02 - V2.5 P2 - 888-0501-N0008 Modified to put Supplies lock on Charge Master page instead of Medical
+ ;IHS/SD/EFG - V2.5 P8 - IM16385 Modified to allow page 8H to display when vt=998 (dental)
+ ;IHS/SD/SDR - v2.5 p8 - task 6 Added code for new page 8K
+ ;IHS/SD/SDR - v2.5 p10 - IM20329 Display anesthesia page if anesthesia charge on visit
  ;
- ; IHS/SD/EFG - V2.5 P8 - IM16385
- ;    Modified to allow page 8H to display when vt=998 (dental)
- ;
- ; IHS/SD/SDR - v2.5 p8 - task 6
- ;    Added code for new page 8K
- ;
- ; IHS/SD/SDR - v2.5 p10 - IM20329
- ;   Display anesthesia page if anesthesia charge on visit
+ ;IHS/SD/AML 2.6*23 HEAT247169 Made page 8H display if the visit type is 997 Pharmacy
  ;
 A ;EP - Entry Point to Page 8A
  S ABMP("LBL")="A",ABMP("LOC")=10,ABMP("SB")=27 G SCRN ;MEDICAL
@@ -47,7 +41,8 @@ SCRN K ABM,ABME,DUOUT,DTOUT,DIROUT,DIRUT
  I $D(ABMP("DDL"))!$D(ABMP("WORKSHEET")),'+$O(^ABMDCLM(DUZ(2),ABMP("CDFN"),ABMP("SB"),0)) G CHK
  I ABMP("VTYP")'=111&(ABMP("LBL")="I") G CHK
  I $D(^ABMDPARM(DUZ(2),1,11,ABMP("LOC"))) G CHK
- I ABMP("VTYP")=997,ABMP("LBL")'="D" G CHK
+ ;I ABMP("VTYP")=997,ABMP("LBL")'="D" G CHK  ;abm*2.6*23 IHS/SD/AML HEAT247169
+ I ABMP("VTYP")=997,"DH"'[ABMP("LBL") G CHK  ;abm*2.6*23 IHS/SD/AML HEAT247169
  I ABMP("VTYP")=996,ABMP("LBL")'="E" G CHK
  I ABMP("VTYP")=995,ABMP("LBL")'="F" G CHK
  D @("^ABMDE8"_ABMP("LBL")) W ! S ABMP("OPT")=$S(ABMP("LBL")="B":"ADESVNJBQM",1:"ADEVNJBQM") D SEL^ABMDEOPT

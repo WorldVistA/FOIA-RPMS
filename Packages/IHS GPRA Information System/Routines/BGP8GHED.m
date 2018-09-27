@@ -1,11 +1,11 @@
-BGP8GHED ; IHS/CMI/LAB - IHS Diabetes Audit 2003 ;
- ;;8.0;IHS CLINICAL REPORTING;**2**;MAR 12, 2008
+BGP8GHED ; IHS/CMI/LAB - CRS ;
+ ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
  ;
  ;
 TESTNTL ;
  S ERR=""
  F X=1:1:12 S LORILST(X)=""
- D EP(.ERR,1,2522,"BGP 08 HEDIS REPORT",338,1,3040000,3000000,1,1,"A",.LORILST,"","","B",$$NOW^XLFDT)
+ D EP(.ERR,1,2522,"BGP 07 HEDIS REPORT",338,1,3040000,3000000,1,1,"A",.LORILST,"","","B",$$NOW^XLFDT)
  W !,ERR
  Q
 EP(BGPRET,BGPUSER,BGPDUZ2,BGPOPTN,BGPTAXI,BGPQTR,BGPPER,BGPVDT,BGPBEN,BGPEXPT,BGPLSTT,BGPLIST,BGPLPRV,BGPLPROV,BGPROT,BGPRTIME,BGPMFITI) ;EP - called from GUI to produce national GPU report (OTH-HED)
@@ -25,7 +25,7 @@ EP(BGPRET,BGPUSER,BGPDUZ2,BGPOPTN,BGPTAXI,BGPQTR,BGPPER,BGPVDT,BGPBEN,BGPEXPT,BG
  ;       Enter the date range for your report:
  ;
  ;  BGPPER - this is the year they select if they answered the above question
- ;           with a 1 through 4  e.g  305000 (fileman imprecise date for 2008)
+ ;           with a 1 through 4  e.g  305000 (fileman imprecise date for 2007)
  ;
  ;  BGPVDT - baseline year entered by user in internal fileman format, year only
  ;           e.g.  3010000
@@ -45,7 +45,7 @@ EP(BGPRET,BGPUSER,BGPDUZ2,BGPOPTN,BGPTAXI,BGPQTR,BGPPER,BGPVDT,BGPBEN,BGPEXPT,BG
  ;  BGPLIST (array) contains the iens of the measures they want a list for.
  ;        when you present the choices for lists only present the measures they pick
  ;        that are in array BGPIND (run report to see this)
- ;        NOTE:  THE GLOBAL TO USE TO DISPLAY THE AVAILABLE LISTS IS ^BGPHEIE(
+ ;        NOTE:  THE GLOBAL TO USE TO DISPLAY THE AVAILABLE LISTS IS ^BGPHEIA(
  ;        e.g.  BGPLIST="A"
  ;              BGPLIST(3)=""
  ;
@@ -84,7 +84,7 @@ EP1 ;
  S BGPLIST=$G(BGPLSTT)
  I $G(BGPLIST)="P",$G(BGPLPRV)="" S BGPRET=0_"^PROVIDER NOT PASSED FOR LIST TYPE P" Q
  S BGPRTIME=$G(BGPRTIME)
- ;S DUZ=BGPUSER
+ S DUZ=BGPUSER
  S DUZ(2)=BGPDUZ2
  S:'$D(DT) DT=$$DT^XLFDT
  D ^XBKVAR
@@ -109,7 +109,7 @@ BY ;get baseline year
  F  S X=$O(^ATXAX(BGPTAXI,21,X)) Q:'X  D
  .S BGPTAX($P(^ATXAX(BGPTAXI,21,X,0),U))=""
  .Q
- S X=0 F  S X=$O(^BGPHEIE(X)) Q:X'=+X  S BGPIND(X)=""
+ S X=0 F  S X=$O(^BGPHEIA(X)) Q:X'=+X  S BGPIND(X)=""
  S BGPEXCEL=""
  S BGPUF=""
  I ^%ZOSF("OS")["PC"!(^%ZOSF("OS")["NT")!($P($G(^AUTTSITE(1,0)),U,21)=2) S BGPUF=$S($P($G(^AUTTSITE(1,1)),U,2)]"":$P(^AUTTSITE(1,1),U,2),1:"C:\EXPORT")
@@ -117,12 +117,12 @@ BY ;get baseline year
  D REPORT^BGP8HUTL
  I $G(BGPQUIT) S BGPRET=0_"^COULD NOT CREATE REPORT ENTRY" Q
  I BGPRPT="" S BGPRET=0_"^COULD NOT CREATE REPORT ENTRY" Q
- S BGPFILEN="BG08"_$P(^AUTTLOC(DUZ(2),0),U,10)_".HE"_BGPRPT_" in directory "_BGPUF
+ S BGPFILEN="BG07"_$P(^AUTTLOC(DUZ(2),0),U,10)_".HE"_BGPRPT_" in directory "_BGPUF
  S BGPDELT=""
  ;create entry in GUI file
  D ^XBFMK
  S X=BGPUSER_$$NOW^XLFDT
- S DIC="^BGPGUIE(",DIC(0)="L",DIADD=1,DLAYGO=90534.08,DIC("DR")=".02////"_BGPUSER_";.03////"_$S(BGPRTIME]"":BGPRTIME,1:$$NOW^XLFDT)_";.05///"_BGPOPTN_";.06///R;.07///"_$G(BGPROT)
+ S DIC="^BGPGUIA(",DIC(0)="L",DIADD=1,DLAYGO=90531.08,DIC("DR")=".02////"_BGPUSER_";.03////"_$S(BGPRTIME]"":BGPRTIME,1:$$NOW^XLFDT)_";.05///"_BGPOPTN_";.06///R;.07///"_$G(BGPROT)
  K DD,D0,DO D FILE^DICN K DLAYGO,DIADD,DD,D0,DO
  I Y=-1 S BGPRET=0_"^UNABLE TO CREATE ENTRY IN GUI OUTPUT FILE" Q
  S BGPGIEN=+Y
@@ -148,8 +148,8 @@ OTHHED ;
  . N BGPDATA
  . S BGPDATA=$G(^TMP($J,"BGPGUI",X))
  . I BGPDATA="ZZZZZZZ" S BGPDATA=$C(12)
- . S ^BGPGUIE(BGPGIEN,11,C,0)=BGPDATA
- S ^BGPGUIE(BGPGIEN,11,0)="^90534.0811^"_C_"^"_C_"^"_DT
+ . S ^BGPGUIA(BGPGIEN,11,C,0)=BGPDATA
+ S ^BGPGUIA(BGPGIEN,11,0)="^90531.0811^"_C_"^"_C_"^"_DT
  K ^TMP($J,"BGPGUI")
  ;cmi/anch/maw end of mods
  I BGPEXPT D GS^BGP8HUTL
@@ -173,7 +173,7 @@ XIT ;
  Q
  ;
 ENDLOG ;-- UPDATE LOG AT END
- S DIE="^BGPGUIE(",DA=BGPGIEN,DR=".04////"_$$NOW^XLFDT_";.06///C"
+ S DIE="^BGPGUIA(",DA=BGPGIEN,DR=".04////"_$$NOW^XLFDT_";.06///C"
  D ^DIE
  K DIE,DR,DA
  Q

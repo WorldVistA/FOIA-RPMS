@@ -1,5 +1,5 @@
 ABSPOSP ; IHS/FCS/DRS - Pharm POS pay/adj batches ;    [ 09/12/2002  10:17 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**3**;JUN 21, 2001;Build 15
+ ;;1.0;PHARMACY POINT OF SALE;**3,48**;JUN 21, 2001;Build 27
  ; main entry points and some callable utilities are in here
  Q
 TEST ;
@@ -23,6 +23,7 @@ NEWBATCH(ECHO) ;EP - create a new batch
  S FDA(FN,X,.045)=0 ; CONTRACTUAL ALLOWANCE CONTROL
  S FDA(FN,X,.08)=DT ; DEPOSIT DATE
  D UPDATE^DIE("S","FDA","IEN","MSG")
+ I $D(MSG) D LOG^ABSPOSL2("NEWBATCH^ABSPOSP",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  I $D(MSG),$G(ECHO) D
  . W "Failed to create the batch!",!
  . D ZWRITE^ABSPOS("MSG")
@@ -65,12 +66,13 @@ ADDAMT(BATCH,AMT,FIELD)        ; add to the adjustment total ; either $$ or not
  S X=$$SETAMT(BATCH,X+AMT,FIELD)
  Q:$Q X Q
 SETAMT(BATCH,AMT,FIELD) ;EP - store the adjustment total ; either $$ or not
- N FDA,IEN,MSG,FN S FN=9001625.1
+ N FDA,IEN,MSG,FN S FN=9001625.1    ;; /IHS/OIT/RAM ; ANOTHER FM FILE THAT DOESN'T EXIST IN (AT LEAST) THE TRAINING DATABASES...
  S FDA(FN,BATCH_",",FIELD)=AMT
  D SETAMT1
  Q:$Q AMT Q
 SETAMT1 ;
  D FILE^DIE("K","FDA","MSG")
+ I $D(MSG) D LOG^ABSPOSL2("SETAMT1^ABSPOSP",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  Q:'$D(MSG)  ; success
  D ZWRITE^ABSPOS("FN","BATCH","FIELD","MSG")
  I $$IMPOSS^ABSPOSUE("FM","TRI","FILE^DIE failed",,"SETAMT1",$T(+0))

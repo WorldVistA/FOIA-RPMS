@@ -1,5 +1,5 @@
 BGP8ALG ; IHS/CMI/LAB - measure AHR.A ;
- ;;8.0;IHS CLINICAL REPORTING;**2**;MAR 12, 2008
+ ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
  ;
  ;
 BETA(P,EDATE) ;EP - BETA BLOCKER ALLERGY/ADR
@@ -87,5 +87,5 @@ STATIN(P,BDATE,EDATE) ;EP does patient have an STATIN ALLERGY/ADR
  ;       creatine kinase levels >10x ULN or CK>10,000 IU/L between bdate and edate
  ;       pov in BGP MYOPATHY/MYALGIA taxonomy between BDATE and EDATE
  ;
- G STATIN^BGP8ALG1
+ G STATIN^BGP8ALG2
  ;

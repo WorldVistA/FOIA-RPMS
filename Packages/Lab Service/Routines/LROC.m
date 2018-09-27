@@ -1,10 +1,11 @@
-LROC ;VA/DALOI/CJS - ORDER LIST CLEAN-UP ; 20 Apr 2005
- ;;5.2;LAB SERVICE;**1003,1013,1018,1031**;NOV 1, 1997
+LROC ;VA/DALOI/CJS - ORDER LIST CLEAN-UP ; 13-Oct-2017 14:04 ;  MKK
+ ;;5.2;LAB SERVICE;**1003,1013,121,1018,295,1030,329,1031,1041**;NOV 1, 1997;Build 23
  ;
  ;;VA LR Patch(s): 121,295,329
  ;
  ; Modified slc/jer to include set/kill for "D" cross-reference
  ;
+EP ; EP
  N DA,DIR,DIROUT,DTOUT,DUOUT,LRAA,LRSAVE,LRX,MSG,X,Y
  D ^LROCM
  ;
@@ -12,6 +13,8 @@ LROC ;VA/DALOI/CJS - ORDER LIST CLEAN-UP ; 20 Apr 2005
  S DIR("A")="Do you wish to Purge old Orders and Accessions",DIR("B")="NO"
  D ^DIR
  I Y'=1 Q
+ ;
+ D STORPURG^BLRPURGU    ; IHS/MSC/MKK - LR*5.2*1041
  ;
  S LRX=+$P($G(^LAB(69.9,1,0)),U,9) S:'LRX LRX=7
  S LRSAVE=$$FMADD^XLFDT(DT,"-"_LRX)

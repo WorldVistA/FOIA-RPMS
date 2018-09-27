@@ -1,5 +1,5 @@
 BMCRINH ; IHS/ITSC/FCJ - IN-HOUSE REPORT;    
- ;;4.0;REFERRED CARE INFO SYSTEM;**9**;JAN 09, 2006;Build 51
+ ;;4.0;REFERRED CARE INFO SYSTEM;**9**;JAN 09, 2006;Build 92
  ;
  ;IHS/ITSC/FCJ Referral number was not printing
  ; This routine lists active In-house referrals,

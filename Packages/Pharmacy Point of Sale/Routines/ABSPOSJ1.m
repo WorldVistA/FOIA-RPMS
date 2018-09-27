@@ -1,5 +1,5 @@
 ABSPOSJ1 ;IHS/SD/lwj - NCPDP 5.1 pre and post init for V1.0 patch 3 [ 10/31/2002  10:58 AM ]
- ;;1.0;Pharmacy Point of Sale;**3,6,12,14,16,17,24,28,29,31,32,36,37,38,39,42,43,44,45,46,47**;Jun 1,2001;Build 15
+ ;;1.0;Pharmacy Point of Sale;**3,6,12,14,16,17,24,28,29,31,32,36,37,38,39,42,43,44,45,46,47,48**;Jun 21,2001;Build 27
  ;
  ; Pre and Post init routine use in absp0100.03k
  ;------------------------------------------------------------------
@@ -94,6 +94,7 @@ SAV320 ; Save the 320 field, since node 300 also hit its limits
  S OUTREC=VALUE_"^"
  S FDA(9002313.02,CLMIEN_",",320)=""
  D FILE^DIE("","FDA","MSG")
+ I $D(MSG) D LOG^ABSPOSL2("SAV320^ABSPOSJ1",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  S ^ABSPOSXX("ABSPOSJ1",CLMIEN,320)=OUTREC
  Q
  ;
@@ -112,6 +113,7 @@ DELFLD(FLDNUM) ;
  N FDA,MSG
  S FDA(9002313.0201,MEDIEN_","_CLMIEN_",",FLDNUM)=""
  D FILE^DIE("","FDA","MSG")
+ I $D(MSG) D LOG^ABSPOSL2("DELFLD^ABSPOSJ1",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  S FND=1              ;we found at least 1
  Q
 POST47 ; IHS/OIT/RCS 04/08/2014 Patch 47 Add the new ICD10 General default date
@@ -202,13 +204,13 @@ POST24 ;EP - 02/28/08 - Patch 24 - RLT
  S DIALIEN=$O(^ABSP(9002313.55,"B","ENVOY DIRECT VIA T1 LINE",0))
  I 'DIALIEN D
  . D MES^XPDUTL("ENVOY DIRECT VIA TO LINE NOT FOUND, NOT updated")
- . D MES^XPDUTL("from 199.244.222.6 to emdeonserver.ihs.gov")
+ . D MES^XPDUTL("from 999.999.999.9 to emdeonserver.ihs.gov")
  I DIALIEN D
  . S NEWIP="emdeonserver.ihs.gov"
  . S IP=$P($G(^ABSP(9002313.55,DIALIEN,"SERVER")),U)
  . I IP'="199.244.222.6"&(IP'="emdeonserver.ihs.gov") D
  .. D MES^XPDUTL("ENVOY DIRECT VIA TO LINE has NOT been updated")
- .. D MES^XPDUTL("origninal IP is not 199.244.222.6")
+ .. D MES^XPDUTL("origninal IP is not 999.999.999.9")
  .. D MES^XPDUTL("origninal IP is "_IP)
  . I IP="emdeonserver.ihs.gov" D
  .. D MES^XPDUTL("ENVOY DIRECT VIA TO LINE has all ready")
@@ -222,10 +224,10 @@ POST24 ;EP - 02/28/08 - Patch 24 - RLT
  .. S IP=$P($G(^ABSP(9002313.55,DIALIEN,"SERVER")),U)
  .. I IP="emdeonserver.ihs.gov" D
  ... D MES^XPDUTL("ENVOY DIRECT VIA TO LINE has been updated")
- ... D MES^XPDUTL("from 199.244.222.6 to emdeonserver.ihs.gov")
+ ... D MES^XPDUTL("from 999.999.999.9 to emdeonserver.ihs.gov")
  .. I IP'="emdeonserver.ihs.gov" D
  ... D MES^XPDUTL("ENVOY DIRECT VIA TO LINE has NOT been updated")
- ... D MES^XPDUTL("from 199.244.222.6 to emdeonserver.ihs.gov")
+ ... D MES^XPDUTL("from 999.999.999.9 to emdeonserver.ihs.gov")
  D POST17  ;cumulative patches - let's call the rest
  Q
 POST17 ;EP - 6/13/06 Patch 17 RLT
@@ -298,6 +300,7 @@ MOVFLD(FLDNUM,VALUE) ;Adds the field back to it's new location
  Q:FLDNUM=432    ;don't need to move 432
  S FDA(9002313.0201,MEDIEN_","_CLMIEN_",",FLDNUM)=VALUE
  D FILE^DIE(,"FDA","MSG")
+ I $D(MSG) D LOG^ABSPOSL2("MOVFLD^ABSPOSJ1",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  Q
 UPSETUP ; This routine is called after the conversion to the claim file is 
  ; completed.  It will update the "NCPDP51" node of the setup file
@@ -308,6 +311,7 @@ UPSETUP ; This routine is called after the conversion to the claim file is
  S DATE=%
  S FDA(9002313.99,"1,",5151)=DATE
  D FILE^DIE(,"FDA","MSG")
+ I $D(MSG) D LOG^ABSPOSL2("UPSETUP^ABSPOSJ1",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  Q
 CKSETUP() ; This routine will check the setup file for the existance of the
  ; NCPDP51 node in the setup file.  If it exists, then the conversion
@@ -339,6 +343,7 @@ CLNRPT()  ;This routine will remove 'garbage' strings from
  ...N FDA,MSG
  ...S FDA(9002313.61,ABSPIEN,1300)="MSGTEXT"
  ...D UPDATE^DIE(,"FDA",,"MSG")
+ ...I $D(MSG) D LOG^ABSPOSL2("CLNRPT^ABSPOSJ1",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  ...S ABSPRTN=2
  ...Q
  ..Q

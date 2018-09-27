@@ -1,5 +1,5 @@
-BLREXEC3 ;IHS/OIT/MKK - IHS Implementation of the Chronic Kidney Disease Epidemiology Collaboration (CKD-EPI) eGFR equation ; 21-Dec-2015 07:15 ; MKK
- ;;5.2;IHS LABORATORY;**1038**;NOV 01, 1997;Build 6
+BLREXEC3 ;IHS/OIT/MKK - IHS Implementation of the Chronic Kidney Disease Epidemiology Collaboration (CKD-EPI) eGFR equation ; 13-Oct-2017 14:04 ;  MKK
+ ;;5.2;IHS LABORATORY;**1038,1041**;NOV 01, 1997;Build 23
  ;
  ; Equation and Warning are from the National Kidney Disease web-page (as of 12/21/2015):
  ;      http://nkdep.nih.gov/lab-evaluation/gfr/estimating.shtml
@@ -10,6 +10,7 @@ EEP ; Ersatz EP
  ;
  ;
 CKDEPI(CRET) ; EP - Creatinine value is passed in
+ Q:+$G(CRET)'>0 ""    ; IHS/MSC/MKK - LR*5.2*1041 -- If CRET variable is not > 0, then return null.
  ;
  Q:(AGE<18) "N/A"    ; Cannot calculate if AGE < 18.
  Q:(SEX="U") "N/A"   ; Cannot calculate if SEX is Undetermined/Unknown.

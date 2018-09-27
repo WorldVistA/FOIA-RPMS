@@ -1,8 +1,9 @@
-APSPDR3 ;IHS/OHPRD/JCM - PHARMACY DRUG RECALL;16-Dec-2009 21:40;SM
- ;;7.0;IHS PHARMACY MODIFICATIONS;**1008,1009**;Sep 23, 2004
+APSPDR3 ;IHS/OHPRD/JCM - PHARMACY DRUG RECALL;10-Oct-2017 11:35;DU
+ ;;7.0;IHS PHARMACY MODIFICATIONS;**1008,1009,1022**;Sep 23, 2004;Build 20
  ;THIS ROUTINE BUILDS THE PHARMACY DRUG RECALL LIST
  ; IHS/MSC/PLS - 01/02/09 - Routine updated
  ;               12/16/09 - Modified GETIEN1 call to GETIEN for File 50
+ ;               10/10/17 - Removed trailing Q at SET+4
 EN ;
  N APSPBD,APSPED,APSPBDF,APSPEDF,APSPDIV,APSPDRG,APSPDARY
  N QFLG,DCNT
@@ -66,7 +67,9 @@ SET(RX,DRG,DIV) ;EP
  N STA,RXN,DFN,QTY,DRGNM,NXT
  S STA=$P($G(^PSRX(RX,"STA")),U)
  Q:STA=13  ; Prescription marked as deleted
- Q:FTYPE="N"&($P($G(^PSRX(RX,2)),U,15)) Q  ; Prescription has been returned to stock
+ ;IHS/MSC/PLS - 10/10/2017
+ ;Q:FTYPE="N"&($P($G(^PSRX(RX,2)),U,15)) Q  ; Prescription has been returned to stock
+ Q:FTYPE="N"&($P($G(^PSRX(RX,2)),U,15))  ; Prescription has been returned to stock
  S NXT=$O(^TMP($J,"DATA",$C(1)),-1)
  S NXT=NXT+1
  S RXN=$P(^PSRX(RX,0),U) ;PRESCRIPTION NUMBER ON FILE

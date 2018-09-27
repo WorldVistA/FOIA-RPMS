@@ -1,0 +1,964 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2018-09-27 12:54:35">
+<Class name="csp.bedddiag">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeChanged>64672,29653.261365</TimeChanged>
+<TimeCreated>64672,29653.230197</TimeCreated>
+<GeneratedBy>/csp/foia_goldb/BEDDDIAG.csp</GeneratedBy>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPagePREHTML()
+	Do ..OnPageCSPROOT()
+	Do ..OnPagePOSTHTML()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<BODY bgcolor=""#CCCCFF"" onload=""check_diag();"">"
+	Write !,!,"<!-- use CSP:OBJECT tag to create a reference to an instance of the class -->"
+	Write !
+	If ((%session.Data("OBJECTID"))'="") {
+	Set objForm = ##class(BEDD.EDDiagnosis).%OpenId((%session.Data("OBJECTID")))
+	} Else {
+	Set objForm = ##class(BEDD.EDDiagnosis).%New()
+	}
+	Write !
+	If ((%session.Data("OBJECTID"))'="") {
+	Set vstForm = ##class(BEDD.EDVISIT).%OpenId((%session.Data("OBJECTID")))
+	} Else {
+	Set vstForm = ##class(BEDD.EDVISIT).%New()
+	}
+	Write !,!,"<form name=""form"" onsubmit='return form_validate();' method=""get"">"
+	Write !,..InsertHiddenFields(""),!
+	Write !,!
+	Set U="^"
+	Set objid=%session.Data("OBJECTID")
+	Set (dfn,ptdfn)=vstForm.PtDFN
+	//Set %session.Data("DFN")=dfn
+	Set vien=vstForm.VIEN
+	Set %session.Data("VIEN")=vien
+	//Audit the activity
+	Do LOG^BEDDUTIU(%session.Data("DUZ"),"P","Q","BEDDDIAG.csp","BEDD: User displayed patient POV information",dfn)
+	//
+	//Injury
+	Set isInjury=$$ISINJ^BEDDINJ(vien)
+	//
+	//Name and Gender
+	Set ptname=vstForm.PtName
+	Set ptsex=vstForm.Sex
+	//
+	//DOB, Age and Chart
+	Set ptdob=vstForm.DOB
+	Set ptage=vstForm.Age
+	Set ptchart=vstForm.Chart
+	//
+	//Get DX Default Info
+	Set dxinfo=$$PLCHLD^BEDDUTID(%session.Data("EDVISITID"),vien)
+	Set dxsrch=$P(dxinfo,"^")
+	Set dxien=$P(dxinfo,"^",2)
+	Set dxname=$P(dxinfo,"^",3)
+	Write !,"<center>",!
+	Write !,"<center><b><font size=6>ED Diagnosis Worksheet</font></b></center>",!
+	Write "<br>",!
+	Write !,"<label for=""PtName"">Patient (Gender)</label> "
+	Write "<input name=""%noname"" type=""text"" id=""PtName"" value='"_(ptname)_" ("_(ptsex)_")' size=""40"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write "<label for=""PtDOB"">DOB (Age)</label> "
+	Write "<input name=""%noname"" type=""text"" id=""PtDOB"" value='"_(ptdob)_" ("_(ptage)_")' size=""25"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write "<label for=""PtChart"">Chart</label> "
+	Write "<input name=""%noname"" type=""text"" id=""PtChart"" value='"_(ptchart)_"' size=""8"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp; &nbsp;",!
+	Write "<input type=""button"" name=""btnClose"" style=""width:100px;height:25px"" value=""Close"" onclick='close_it();'>"
+	Write !,!,"<hr>",!
+	Write "<br>",!
+	Write !,"<input name=""%noname"" type=""hidden"" value="_(dfn)," readonly size=""20"" style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,!,"	<table border=1 bgcolor="""" width=""70%"">",!
+	Write "		<tr><td><b>Code</b></td>",!
+	Write "			<td><b>Diagnosis</b></td>",!
+	Write "			<td><b>Diagnosis Narrative</b></td>",!
+	Write "			<td><b>Primary Diagnosis</b></td>",!
+	Write "			<td><b>Injury Related</b></td>",!
+	Write "		</tr>",!
+	Write "				",!
+	// Open instance of ResultSet for runtime mode of DISPLAY.
+	Set VuCons = ##class(%ResultSet).%New()
+	Set VuCons.RuntimeMode=2
+	Set sqlStatement=$zstrip($tr($c(13,10,9)_"SELECT ID, Code, DiagNarrative, Diagnosis, PrimaryDiag FROM BEDD.EDDiagnosis"_$c(13,10,9)_"Where (EDVISITID = :edvisitid) "_$c(13,10),$C(9,13,10),"   "),"<>W")
+	If $zcvt($extract(sqlStatement,1,6),"U")'="SELECT" {
+	Do ..ShowError($$$ERROR($$$CSPSQLOnlySelect,"284"))
+	Quit
+	}
+	// translate tab/cr/nl to spaces
+	Set %sc = VuCons.Prepare(sqlStatement,0,"RUNTIME")
+	If (+%sc=0) {
+	Do ..ShowError(%sc)
+	Quit
+	}
+	Set %sc = VuCons.Execute()
+	If (+%sc=0) {
+	Do ..ShowError(%sc)
+	Quit
+	}
+	Write !,"	",!
+	Write "	"
+	//Retrieve list of V POV entries
+	Kill aVPOVList
+	Do LIST^BEDDPOV(%session.Data("VIEN"),%session.Data("DUZ"),.aVPOVList)
+	Set dx=""
+	Set dx=$O(aVPOVList(dx))
+	While(dx]"") {
+	Set info=aVPOVList(dx)
+	Set tPS=$P(info,"^",4)
+	Set tPS=$S(tPS="P":"Yes",1:"No")
+	Set tDs=$P(info,"^",5) S:$E(tDs,1)="*" tDs=$E(tDs,2,999)
+	Set tIn=$P(info,"^",6)
+	&html<<tr>>
+	&html<<td><a href="javascript:edit_item(#($P(info,"^"))#);">#($P(info,"^",2))#</a></td>>
+	&html<<td> #($P(info,"^",3))# </td>>
+	&html<<td> #(tDs)# </td>>
+	&html<<td> #(tPS)# </td>>
+	&html<<td> #(tIn)# </td>>
+	&html<</tr>>
+	Set dx=$O(aVPOVList(dx))
+	}
+	Write "					",!
+	Write "	",!
+	Write "	</table>",!
+	Write !,"<input type=""hidden"" name=""PTDFN"" id=""PTDFN"" value="_(dfn),">"
+	Write !,"<input type=""hidden"" name=""isInjury"" id=""isInjury"" value="_(isInjury),">"
+	Write !
+	Set %value = $$$HTMLENCODE($get(%request.Data("DFN",1),$ZSTRIP($select(objForm="":"",1:(objForm.DFNLogicalToDisplay(objForm.DFN))),">W")))
+	Write "<input value="""_(%value)_""" type=""hidden"" name=""DFN"" id=""DFN"" size=""10"">"
+	Write !,"<input type=""hidden"" name=""VisitIEN"" id=""VisitIEN"" value="_(vien),">"
+	Write !
+	Set %value = $$$HTMLENCODE($get(%request.Data("EDVISITID",1),$ZSTRIP($select(objForm="":"",1:(objForm.EDVISITIDLogicalToDisplay(objForm.EDVISITID))),">W")))
+	Write "<input type=""hidden"" name=""EDVISITID"" id=""EDVISITID"" size=""10"" value='"_(%value)_"'>"
+	Write !,!,"<br><br>",!
+	Write !,"<table border=1 width=""70%"">",!
+	Write "	<tr>",!
+	Write "		<td><b>Search for Diagnosis:</b></td>",!
+	Write "		<td>"
+	Write "<input type=""text"" name=""DXSearch"" id=""DXSearch"" size=20 value='"_(dxsrch)_"' onchange=""doDXSearch();"">"
+	Write "<td>",!
+	Write "	</tr>",!
+	Write "	<tr>",!
+	Write "		<td colspan=""2"">",!
+	Write "			"
+	Write "<select name=""DXdata"" id=""DXdata"" onchange=""setDXdata();"">"
+	Write "		",!
+	Write "				if dxsrch]"""" {",!
+	Write "					"
+	Write "<option selected value="""_(dxien)_""">"
+	Write " "_(dxsrch)_" - "_(dxname)_"  </option>",!
+	Write "				}",!
+	Write !,"			"
+	Write "</select>"
+	Write !,"		</td>",!
+	Write "	</tr>",!
+	Write "</table>",!
+	Write !,"<table border=1 width=""70%"">",!
+	Write "	"
+	Write "<input type=""hidden"" name=""DiagID"" id=""DiagID"" value="""">"
+	Write !,"	"
+	Write "<input type=""hidden"" name=""CodeIEN"" id=""CodeIEN"" value='"_(dxien)_"'>"
+	Write !,"	",!
+	Write "	<tr>",!
+	Write "	<td><b>*Code:</b></td>	",!
+	Write "	<td>"
+	Write "<input type=""text"" name=""Code"" id=""Code"" size=10 readonly value='"_(dxsrch)_"' style=""color: #000000; background-color: #C0C0C0;"">"
+	Write " &nbsp; &nbsp;</td>",!
+	Write "	</tr>",!
+	Write "	",!
+	Write "	<tr>",!
+	Write "	<td><b>*Diagnosis:</b></td>",!
+	Write "	<td>"
+	Write "<input type=""text"" name=""Diagnosis"" id=""Diagnosis"" readonly size=40 value='"_(dxname)_"' style=""color: #000000; background-color: #C0C0C0;"">"
+	Write "</td>",!
+	Write "	</tr>",!
+	Write !,"	<tr>",!
+	Write "	<td><b>*Diagnosis Narrative:</b></td>",!
+	Write "	<td>"
+	Write "<input type=""text"" name=""DiagNarrative"" id=""DiagNarrative"" size=40 value="""">"
+	Write "</td>",!
+	Write "	</tr>",!
+	Write "	<tr>",!
+	Write "	",!
+	Write "	<td><b>*Primary Diagnosis:</b></td>",!
+	Write "	<td>"
+	Write "<select name=""PrimaryDiag"" id=""PrimaryDiag"">"
+	Write !,"		"
+	Write "<option value=""NO"">"
+	Write "No</option>",!
+	Write "		"
+	Write "<option selected value=""YES"">"
+	Write "Yes</option>",!
+	Write "		"
+	Write "</select>"
+	Write !,"	</td>",!
+	Write "	",!
+	Write "	</tr>",!
+	Write "	",!
+	Write "	<tr>",!
+	Write "		<td><b>Injury Related:</b></td>",!
+	Write "		"
+	If '(isInjury=0) Goto %csp00001 ;{
+	Write !,"			<td>"
+	Write "<select name=""InjuryRel"" id=""InjuryRel"" disabled>"
+	Write !,"				"
+	Write "<option value=""YES"">"
+	Write "Yes</option>",!
+	Write "		 		"
+	Write "<option selected value=""NO"">"
+	Write "No</option>",!
+	Write "			"
+	Write "</select>"
+	Write !,"	",!
+	Write "		"
+%csp00001	;}
+	Write !,"		",!
+	Write "		"
+	If '(isInjury=1) Goto %csp00002 ;{
+	Write !,"			<td>"
+	Write "<select name=""InjuryRel"" id=""InjuryRel"">"
+	Write !,"				"
+	Write "<option value=""YES"">"
+	Write "Yes</option>",!
+	Write "				"
+	Write "<option selected value=""NO"">"
+	Write "No</option>",!
+	Write "			"
+	Write "</select>"
+	Write !,"	",!
+	Write "		",!
+	Write "		"
+%csp00002	;}
+	Write !,!,"		</td>",!
+	Write "	</tr>",!
+	Write "</table>",!
+	Write "<br>",!
+	Write !,"<div id=""PrimaryWarn"" class=""hidden"">"
+	Write !,"<p><font color=""red""><b>Warning: No Diagnosis is listed as primary</b></font></p>",!
+	Write "</div>"
+	Write !,"<div id=""ToManyPrimary"" class=""hidden"">"
+	Write !,"<p><font color=""red""><b>Warning: Multiple Diagnosises are marked primary</b></font></p>",!
+	Write "</div>"
+	Write !,!,"<br><br>",!
+	Write "<input type=""button"" name=""btnSaveClose"" style=""width:100px;height:25px"" value=""Save/Close"" onclick='save_close();'>"
+	Write !,"&nbsp;",!
+	Write "<input type=""button"" name=""btnSave"" style=""width:100px;height:25px"" value=""Save"" onclick='add_item();'>"
+	Write !,"&nbsp; ",!
+	Write "<input type=""button"" name=""btnDel"" style=""width:100px;height:25px"" value=""Delete"" onclick='delete_item();'>"
+	Write !,"&nbsp; ",!
+	Write "<input type=""button"" name=""btnClose"" style=""width:100px;height:25px"" value=""Close"" onclick='close_it();'>"
+	Write !,!,"</center>",!
+	Write !,"<input id=""OBJID"" name=""OBJID"" type=""hidden"" value="""_($select(objForm="":"",1:objForm.%Id()))_""">"
+	Write "</form>"
+	Write !,!,!,!,!,!,!,!,!,!,!,!,!,"</BODY>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<!-- BEDDDIAG.csp - BEDD ED Diagnosis Page -->"
+	Write !,"<!-- ;;2.0;IHS EMERGENCY DEPT DASHBOARD;;Apr 02, 2014 -->"
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<HEAD>"
+	Write !,!,!,!
+	Set U="^",site=%session.Data("SITE")
+	Do LOADSYS^BEDDUTW(.beddsys,site)
+	Set timeout=$G(beddsys("TimeOut"))
+	Write !,!,"<META HTTP-EQUIV=""Refresh"" CONTENT="""_( timeout )_"; URL=BEDD.csp"">"
+	Write !,!,"<TITLE>	ED Diagnosis </TITLE>",!
+	Write "	"
+	//Set edvisitid=%request.Get("EDVISITID")
+	Set edvisitid=$Get(%session.Data("OBJECTID"))
+	Set %session.Data("EDVISITID")=edvisitid
+	Set dfn=$Get(%session.Data("DFN"))
+	Write !,"  ",!
+	Write "<style type=""text/css"">"
+	Write !,"	.hidden { display: none; }",!
+	Write "	.unhidden { display: block; }    ",!
+	Write "</style>"
+	Write !,!,"<SCRIPT language=""JavaScript"">"
+	Write !,!,"	// This function will add or change a diagnosis item. If DiagID is not null",!
+	Write "	// then this is a change otherwise we are adding a diagnosis to the list.",!
+	Write "	function add_item() {",!
+	Write "		var x1 = document.getElementById(""DiagID"");",!
+	Write "		var x2 = document.getElementById(""Code"");",!
+	Write "		var x3 = document.getElementById(""DiagNarrative"");",!
+	Write "		var x4 = document.getElementById(""CodeIEN"");",!
+	Write "		var x5 = document.getElementById(""PTDFN"");",!
+	Write "		var x6 = document.getElementById(""EDVISITID"");",!
+	Write "		var x7 = document.getElementById(""Diagnosis"");",!
+	Write "		var x8 = document.getElementById(""InjuryRel"");",!
+	Write "		// if we do not have a CodeIEN then we will not save the entry",!
+	Write "		if ( x4.value != """" && x3.value != """") {",!
+	Write "			var Selected = document.form.PrimaryDiag.selectedIndex;",!
+	Write "    		var myPrime = document.form.PrimaryDiag.options[Selected].value;",!
+	Write "			// Function will add (if no DiagID) or update the diagnosis information",!
+	Write "			"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".updateDiag"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',x1.value,x2.value,x3.value,myPrime,x5.value,x6.value,x4.value,x7.value,x8.value)",!
+	Write "		} else {",!
+	Write "			alert(""Missing Information: Code, Diagnosis, Diagnosis Narrative, and Primary Diagnosis fields are all required"");",!
+	Write "		}",!
+	Write "		location.reload(true);",!
+	Write "	}",!
+	Write "	",!
+	Write "	// This function will add or change a diagnosis item and then close. If DiagID is not null",!
+	Write "	// then this is a change otherwise we are adding a diagnosis to the list.",!
+	Write "	function save_close() {",!
+	Write "		var x1 = document.getElementById(""DiagID"");",!
+	Write "		var x2 = document.getElementById(""Code"");",!
+	Write "		var x3 = document.getElementById(""DiagNarrative"");",!
+	Write "		var x4 = document.getElementById(""CodeIEN"");",!
+	Write "		var x5 = document.getElementById(""PTDFN"");",!
+	Write "		var x6 = document.getElementById(""EDVISITID"");",!
+	Write "		var x7 = document.getElementById(""Diagnosis"");",!
+	Write "		var x8 = document.getElementById(""InjuryRel"");",!
+	Write !,"		// if we do not have a CodeIEN then we will not save the entry",!
+	Write "		if ( x4.value != """" && x3.value != """") {",!
+	Write "			var Selected = document.form.PrimaryDiag.selectedIndex;",!
+	Write "    		var myPrime = document.form.PrimaryDiag.options[Selected].value;",!
+	Write "			// Function will add (if no DiagID) or update the diagnosis information",!
+	Write "			"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".updateDiag"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',x1.value,x2.value,x3.value,myPrime,x5.value,x6.value,x4.value,x7.value,x8.value)",!
+	Write "			self.document.location.replace = ""BEDDEDIT1.csp?OBJID="_(edvisitid)_"&DFN="_(%session.Data("DFN"))_""" ;",!
+	Write "		} ",!
+	Write "		",!
+	Write "		else {",!
+	Write "			alert(""Missing Information: Code, Diagnosis, Diagnosis Narrative, and Primary Diagnosis fields are all required"");",!
+	Write "		}",!
+	Write "	}",!
+	Write "	",!
+	Write "	// If user clicks one of the items in the table this function is called to",!
+	Write "	// populate the edit fields with data from the existing diagnosis data",!
+	Write "	function edit_item(mydata1) {",!
+	Write "		"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".editDiag"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',mydata1) ;",!
+	Write "			",!
+	Write "	}",!
+	Write "	",!
+	Write "	// Delete this diagnosis information",!
+	Write "	function delete_item() {",!
+	Write "		",!
+	Write "		var x1 = document.getElementById(""DiagID"");",!
+	Write !,"		// if no DiagID, do not delete",!
+	Write "		if ( x1.value != """" ) {",!
+	Write "			",!
+	Write "			//Perform the deletion",!
+	Write "			"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".deleteDiag"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',x1.value)",!
+	Write "		} ",!
+	Write "		",!
+	Write "		else {",!
+	Write "			alert('Delete failed no Diagnosis ID (DiagID)');",!
+	Write "		}",!
+	Write "				",!
+	Write "		location.reload(true);",!
+	Write "	}",!
+	Write "	",!
+	Write "	// Close this page and return to the calling page",!
+	Write "	function close_it( ) {",!
+	Write "		self.document.location.replace = ""BEDDEDIT1.csp?OBJID="_(edvisitid)_"&DFN="_(%session.Data("DFN"))_""" ;",!
+	Write !,"	}",!
+	Write "	",!
+	Write "	function doDXSearch() {",!
+	Write "		var x1 = document.getElementById(""DXSearch"");",!
+	Write "	",!
+	Write "		//Clear out current list",!
+	Write "		var curList=document.getElementById(""DXdata"");",!
+	Write "		while(curList.length > 0)",!
+	Write "  		{",!
+	Write "   			curList.remove(0);",!
+	Write "  		}",!
+	Write "	",!
+	Write "		//Perform the search",!
+	Write "		"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".getDXSearch"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',x1.value) ;",!
+	Write "	",!
+	Write "		//No results",!
+	Write "		if (curList.length == 0) {",!
+	Write "			alert(""No results returned. Please try another search"");",!
+	Write "		}",!
+	Write "	}",!
+	Write "	",!
+	Write "	function setDXdata() {",!
+	Write "		var Selected = document.form.DXdata.selectedIndex;",!
+	Write "    	var SelectedOption = document.form.DXdata.options[Selected].value;",!
+	Write "    	var x1 = document.getElementById(""CodeIEN"");",!
+	Write "    	var x2 = document.getElementById(""Code"");",!
+	Write "		var x3 = document.getElementById(""DiagNarrative"");",!
+	Write "		var x4 = document.getElementById(""Diagnosis"");",!
+	Write "		var x5 = document.getElementById(""isInjury"");",!
+	Write "		",!
+	Write "		//Determine if injury field should be enabled",!
+	Write "		if (x5.value == ""true"") {",!
+	Write "			document.getElementById(""InjuryRel"").disabled = false;",!
+	Write "		}",!
+	Write "		",!
+	Write "		var myData = SelectedOption.split("" - "");",!
+	Write "		if (myData[0] != undefined) {",!
+	Write "			x1.value = myData[0];",!
+	Write "		}",!
+	Write "		else {",!
+	Write "			x1.value = """";",!
+	Write "		}",!
+	Write "		",!
+	Write "		if (myData[1] != undefined) {",!
+	Write "			x2.value = myData[1];",!
+	Write "		}",!
+	Write "		else {",!
+	Write "			x2.value = """";",!
+	Write "		}",!
+	Write "		",!
+	Write "		if (myData[2] != undefined) {",!
+	Write "			x3.value = myData[2];",!
+	Write "			x4.value = myData[2];",!
+	Write "		}",!
+	Write "		else {",!
+	Write "			x3.value = """";",!
+	Write "			x4.value = """";",!
+	Write "		}	",!
+	Write "	}",!
+	Write "	",!
+	Write "	function check_diag() {",!
+	Write "		",!
+	Write "		//Make sure user is logged in",!
+	Write !,"		//Get user",!
+	Write "		var user = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".ReturnDUZ"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"') ;",!
+	Write "	",!
+	Write "		if (user == 0) {",!
+	Write "			location.replace='BEDDLogin.csp';",!
+	Write "			return true;",!
+	Write "		}",!
+	Write "	",!
+	Write "		//var x1 = document.getElementById(""EDVISITID"");",!
+	Write "		var x1 = document.getElementById(""VisitIEN"");",!
+	Write "		var status= "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".getCheckDX"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',x1.value) ;",!
+	Write "		if (status == 0) {",!
+	Write "			// Everything is Okay",!
+	Write "		} else if ( status == 1 ) {",!
+	Write "			// There is no primary diagnosis",!
+	Write "			var item = document.getElementById(""PrimaryWarn"");",!
+	Write "			if (item) {",!
+	Write "				item.className = 'unhidden';",!
+	Write "			}",!
+	Write "		} else if ( status == 2 ) {",!
+	Write "			// There are multiple diagnosises with primary",!
+	Write "			var item = document.getElementById(""ToManyPrimary"");",!
+	Write "			if (item) {",!
+	Write "				item.className = 'unhidden';",!
+	Write "			}",!
+	Write "		}",!
+	Write "	}",!
+	Write "	",!
+	Write "</SCRIPT>"
+	Do ..formGenJS()
+	Write !,(..HyperEventHead(0,0))
+	Write !,!,"</HEAD>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<HTML>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !
+	Do ..OnPageBODY()
+	Write !,"</HTML>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPagePOSTHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Set objForm=$$$NULLOREF
+	Set vstForm=$$$NULLOREF
+	Set VuCons=$$$NULLOREF
+]]></Implementation>
+</Method>
+
+<Method name="OnPagePREHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Set objForm=$$$NULLOREF
+	Set vstForm=$$$NULLOREF
+	Set VuCons=$$$NULLOREF
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+ 	Set U="^"
+ 	//
+ 	//Check for access information
+ 	If ('$D(%session.Data("DUZ"))) {
+ 		Set %response.Redirect="BEDDLogin.csp"
+ 	}
+ Quit 1
+ 
+]]></Implementation>
+</Method>
+
+<Method name="ReturnDUZ">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set user=$Get(%session.Data("DUZ"))
+ 	If (user<1) {
+ 		Set user=0
+ 	}
+ 
+ 	Quit user
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="deleteDiag">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>vpovien:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Quit:vpovien=""
+ 
+ 	//Audit the activity
+ 	Do LOG^BEDDUTIU($G(%session.Data("DUZ")),"P","D","BEDDDIAG.csp","BEDD: User deleted patient POV information",$G(%session.Data("DFN")))
+ 
+ 	Set dstatus=$$DEL^BEDDPOV(vpovien,$G(%session.Data("DUZ")))
+ 	&js<alert('Diagnosis deleted');>
+ 	Quit
+ 
+]]></Implementation>
+</Method>
+
+<Method name="editDiag">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>dxID:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set tResult=$$GETDX^BEDDPOV(dxID)
+ 	Set VPOVIEN=$P(tResult,"^")
+ 	Set tCode=$P(tResult,"^",2)
+ 	Set tDesc=$P(tResult,"^",3)
+ 	Set tNarr=$P(tResult,"^",5)
+ 	Set:$E(tNarr,1)="*" tNarr=$E(tNarr,2,999)
+ 	Set tPrim=$P(tResult,"^",4)
+ 	Set tCodeIEN=$P(tResult,"^",6)
+ 	Set tInjury=$P(tResult,"^",7),tInjury=$S(tInjury="Yes":"YES",1:"NO")
+ 	Set tPrim=$S(tPrim="P":"YES",1:"NO")
+ 	&js<CSPPage.document.form.DiagID.value = #(..QuoteJS(VPOVIEN))# ;>
+ 	&js<CSPPage.document.form.Code.value = #(..QuoteJS(tCode))# ;>
+ 	&js<CSPPage.document.form.Diagnosis.value = #(..QuoteJS(tDesc))# ;>
+ 	&js<CSPPage.document.form.DiagNarrative.value = #(..QuoteJS(tNarr))# ;>
+ 	&js<CSPPage.document.form.PrimaryDiag.value = #(..QuoteJS(tPrim))# ;>
+ 	&js<CSPPage.document.form.CodeIEN.value = #(..QuoteJS(tCodeIEN))# ;>
+ 	&js<CSPPage.document.form.InjuryRel.value = #(..QuoteJS(tInjury))#>
+ 
+ 	Quit
+ 
+]]></Implementation>
+</Method>
+
+<Method name="formGenJS">
+<Description><![CDATA[
+Called to render JavaScript code that is required for form <var>form</var>.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<Language>cache</Language>
+<ReturnType/>
+<Implementation><![CDATA[
+	Write !,"<script language=""JavaScript"" type=""text/javascript"">",!
+	Write "<!--",!
+	Write "function form_new()",!
+	Write "{",!
+	Write "   // invoke #server(csp.bedddiag.formLoad())",!
+	Write "   return ("_"cspHttpServerMethod"_"('",..Encrypt($listbuild("csp.bedddiag.formLoad"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""),"','') == 1);",!
+	Write "}",!
+	Write "function form_save()",!
+	Write "{",!
+	Write "   var form = self.document.form;",!
+	Write "   var objid = form.OBJID.value;",!
+	Write "   var result = 0;",!
+	Write "   if (form_validate()) {",!
+	Do ..formSavJS()
+	Write "   }",!
+	Write "   return (result == 1);",!
+	Write "}",!
+	Write "function form_validate()",!
+	Write "{",!
+	Write "   var errorMsg = '';",!
+	Write "   var missingMsg = '';",!
+	Write "   var invalidMsg = '';",!
+	Write "   var missingArray = new Array();",!
+	Write "   var invalidArray = new Array();",!
+	Write "   var valid;",!
+	Write "   missingMsg = form_testRequired(missingArray);",!
+	Write "   invalidMsg = form_testValid(invalidArray);",!
+	Write "   if ((missingMsg == '') && (invalidMsg == '')) {",!
+	Write "      return true;",!
+	Write "   }",!
+	Write "   errorMsg   = "_..QuoteJS(%response.GetText("","%CSPBind","SaveErrorLine","_______________________________________________________________"))_"+'\n\n';",!
+	Write "   errorMsg  += "_..QuoteJS(%response.GetText("","%CSPBind","SaveError","The form was not saved because of the following error(s)."))_"+'\n';",!
+	Write "   errorMsg  += "_..QuoteJS(%response.GetText("","%CSPBind","SaveCorrect","Please correct these error(s) and try again."))_"+'\n';",!
+	Write "   errorMsg  += "_..QuoteJS(%response.GetText("","%CSPBind","SaveErrorLine","_______________________________________________________________"))_"+'\n\n';",!
+	Write "   if (missingMsg!= '') {",!
+	Write "      errorMsg += "_..QuoteJS(%response.GetText("","%CSPBind","SaveRequiredError","The following required field(s) are empty: "))_" + missingMsg + '\n';",!
+	Write "   }",!
+	Write "   if (invalidMsg != '') {",!
+	Write "      errorMsg += "_..QuoteJS(%response.GetText("","%CSPBind","SaveInvalidError","The following field(s) contain invalid values: "))_" + invalidMsg + '\n';",!
+	Write "   }",!
+	Write "   alert(errorMsg);",!
+	Write "   return false;",!
+	Write "}",!
+	Write "function form_testRequired(missingArray)",!
+	Write "{",!
+	Write "   var missingMsg = '';",!
+	Do ..formReqJS()
+	Write "   return missingMsg;",!
+	Write "}",!
+	Write "function form_testValid(invalidArray)",!
+	Write "{",!
+	Write "   var valid;",!
+	Write "   var invalidMsg = '';",!
+	Do ..formValJS()
+	Write "   return invalidMsg;",!
+	Write "}",!
+	Write "// -->",!
+	Write "</script>",!
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="formLoad">
+<Description><![CDATA[
+Updates the form <var>form</var> from the specified object instance by sending JavaScript to the client.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>objid:%String,obj:%Integer=""</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	If '..formLoadJS(.objid,obj) {
+		Write "CSPPage.alert("_..QuoteJS("formLoad: "_%response.GetText("","%CSPBind","OpenObjectError","Unable to open object."))_");",!
+		Do ..formLoadJS(objid,obj,1)
+	}
+	Quit 1
+]]></Implementation>
+</Method>
+
+<Method name="formLoadJS">
+<Description><![CDATA[
+Updates the form <var>form</var> from the specified object instance by sending JavaScript to the client.  Error reporting is left to the caller.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>objid:%String,obj:%Integer="",alwaysLoad:%Boolean=0</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	New close,ok
+	Set close=0,ok=1
+	If (obj'=$$$NULLOREF) {
+		Set objid = obj.%Id()
+	} Else {
+		If (objid'="") {
+			Set obj = ##class(BEDD.EDDiagnosis).%OpenId(objid)
+		} Else {
+			Set obj = ##class(BEDD.EDDiagnosis).%New()
+		}
+		If (obj=$$$NULLOREF) {
+			If 'alwaysLoad Quit 0
+			Set ok=0
+		} Else {
+			Set close=1
+		}
+	}
+	Write "var form = CSPPage.document.form;",!
+	Write "if (form.DFN != null && form.DFN != null) { form.DFN.value = ",..QuoteJS($select(obj="":"",1:($select(obj.DFN=$c(0):"",1:(obj.DFNLogicalToDisplay(obj.DFN)))))),";}",!
+	Write "if (form.EDVISITID != null && form.EDVISITID != null) { form.EDVISITID.value = ",..QuoteJS($select(obj="":"",1:($select(obj.EDVISITID=$c(0):"",1:(obj.EDVISITIDLogicalToDisplay(obj.EDVISITID)))))),";}",!
+	Write "if (form.OBJID != null) { form.OBJID.value = ",..QuoteJS(objid),";}",!
+	If close=1 Set obj=""
+	Quit ok
+]]></Implementation>
+</Method>
+
+<Method name="formReqJS">
+<Description><![CDATA[
+Called during rendering of this page to write out JavaScript code to do required field tests for form <var>form</var>.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<Language>cache</Language>
+<ReturnType/>
+<Implementation><![CDATA[
+	Write "   if (cspIsFieldEmpty('form','EDVISITID')) {",!
+	Write "      missingMsg = missingMsg + '\n     EDVISITID';",!
+	Write "      if (missingArray != null) { missingArray[missingArray.length] = 'EDVISITID'; }",!
+	Write "   }",!
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="formSavJS">
+<Description><![CDATA[
+Called during rendering of this page to write out JavaScript code to invoke the server-side save method for form <var>form</var>.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<Language>cache</Language>
+<ReturnType/>
+<Implementation><![CDATA[
+	Write "      //invoke #server(csp.bedddiag.formSave())"
+	Write !,"      result = "_"cspHttpServerMethod"_"('",..Encrypt($listbuild("csp.bedddiag.formSave"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""),"',1,'',objid"
+	Write ",",!,"         (form.DFN == null || form.DFN == null) ? null : cspTrim(form.DFN.value)" ;%in1
+	Write ",",!,"         (form.EDVISITID == null || form.EDVISITID == null) ? null : cspTrim(form.EDVISITID.value)" ;%in2
+	Write ");",!
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="formSave">
+<Description><![CDATA[
+Saves the data sent from the form <var>form</var> into the specified object instance. If successful, updates the values on the form.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec><![CDATA[respond:%Boolean=0,&errmsg:%String="",objid:%String="",%in1:%Library.String,%in2:%Library.String]]></FormalSpec>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	New obj,sc,value,in,error,sverror,err,i,ok
+	Set sc=$$$OK
+	Set ok=1
+	Set error=""
+	Set sverror=""
+	If (objid="") {
+		Set obj = ##class(BEDD.EDDiagnosis).%New()
+	} ElseIf '$isobject(objid) {
+		Set obj = ##class(BEDD.EDDiagnosis).%OpenId(objid)
+	} Else {
+		Set obj = objid
+	}
+	If (obj=$$$NULLOREF) {
+		If (respond) {
+			Write "CSPPage.alert("_..QuoteJS(%response.GetText("","%CSPBind","SaveObjectError","Unable to open object for saving"))_");",!
+		} Else {
+			Set errmsg = %response.GetText("","%CSPBind","SaveObjectError","Unable to open object for saving")
+		}
+		Quit 0
+	}
+	Try {
+ ; DFN 
+ If $data(%in1) {
+   Set value=$select(%in1="":"",1:##class(BEDD.EDDiagnosis).DFNDisplayToLogical(%in1))
+   If (%in1'=""),(value="") {
+     Set error=error_%response.GetText("","%CSPBind","InvalidValue","%1 has an invalid value.","DFN")_"\n"
+   } Else {
+     Set obj.DFN=value
+   }
+ }
+ ; EDVISITID 
+ If $data(%in2) {
+   Set value=$select(%in2="":"",1:##class(BEDD.EDDiagnosis).EDVISITIDDisplayToLogical(%in2))
+   If (%in2'=""),(value="") {
+     Set error=error_%response.GetText("","%CSPBind","InvalidValue","%1 has an invalid value.","EDVISITID")_"\n"
+   } Else {
+     Set obj.EDVISITID=value
+   }
+ }
+	Set:error'="" ok=0
+	Set:error="" sc=obj.%Save()
+	} Catch ex {
+		Set ok=0
+		If ($classname(ex)'="%Exception.SystemException") || (ex.Name'="<MAXSTRING>") || (error="") {
+			Set sc=ex.AsStatus(),error=""
+		}
+	}
+	If $$$ISERR(sc) {
+		Set ok=0
+		Do DecomposeStatus^%apiOBJ(sc,.err,"",%response.MatchLanguage())
+		For i=1:1:err {
+			If (respond) {
+				Set sverror=sverror_" + "_..QuoteJS(err(i))_" + '\n'"
+			} Else {
+				Set sverror=sverror_..EscapeHTML(err(i))_"\n"
+			}
+		}
+	}
+	If (respond) {
+		If (ok) {
+			Do ..formLoad("",obj)
+		} Else {
+			Write "CSPPage.alert(",!
+			Write ..QuoteJS(%response.GetText("","%CSPBind","SaveErrorLine","_______________________________________________________________"))_"+'\n\n'+",!
+			Write ..QuoteJS(%response.GetText("","%CSPBind","SaveError","The form was not saved because of the following error(s)."))_"+'\n'+",!
+			Write ..QuoteJS(%response.GetText("","%CSPBind","SaveCorrect","Please correct these error(s) and try again."))_"+'\n'+",!
+			Write ..QuoteJS(%response.GetText("","%CSPBind","SaveErrorLine","_______________________________________________________________"))_"+'\n\n'+",!
+			Write "'",error,"'",sverror,");",!
+		}
+	} Else {
+		Set errmsg=..EscapeHTML(error)_sverror
+	}
+	Quit ok
+]]></Implementation>
+</Method>
+
+<Method name="formSubmit">
+<Description><![CDATA[
+Translates a submit request from form <var>form</var> into a call to <METHOD>formSave</METHOD>.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec><![CDATA[&errmsg:%String="",objid]]></FormalSpec>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+ New v
+ Set v("DFN")=$ZSTRIP($get(%request.Data("DFN",1)),">W")
+ Set v("EDVISITID")=$ZSTRIP($get(%request.Data("EDVISITID",1)),">W")
+	If $get(objid)="" Set objid=$get(%request.Data("OBJID",1))
+	Quit ..formSave(0,.errmsg,objid,v("DFN"),v("EDVISITID"))
+]]></Implementation>
+</Method>
+
+<Method name="formValJS">
+<Description><![CDATA[
+Called during rendering of this page to write out JavaScript code to do field validation tests for form <var>form</var>.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<Language>cache</Language>
+<ReturnType/>
+<Implementation><![CDATA[	Quit
+]]></Implementation>
+</Method>
+
+<Method name="getCheckDX">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>vien:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%Integer</ReturnType>
+<Implementation><![CDATA[
+ 	
+ 	Set POVInfo=$$GETPOV^BEDDPOV(vien)
+ 	//
+ 	// Check how many Diagnosises are assigned to this visit if 0 then
+ 	// no diagnosis is assigned to this visit quit and return 0
+ 	If $P(POVInfo,"^")=0 { Quit 0 }
+ 
+ 	// We have at least 1 diagnosis, count the number of diagnosises
+ 	// that have PrimaryDX = 'YES' if more than 1 then report the problem
+ 	// of too many primary diagnosises
+ 	If ($P(POVInfo,"^",2)> 1) { Quit 2 }
+ 	
+ 	//No Primary on File
+ 	If ($P(POVInfo,"^",2) = 0) { Quit 1 }
+ 	
+ 	//There is at least one Dx and only one is primary
+ 	Quit 0
+ 
+]]></Implementation>
+</Method>
+
+<Method name="getDXSearch">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>dxTerm:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set tDUZ=%session.Data("DUZ")
+ 	Set tVisitDate=%session.Data("EDVISITID")
+ 	Do DXLKP^BEDDUTID(dxTerm,tVisitDate,tDUZ)
+ 	Set U="^",cnt=0
+ 	Set idx=$O(^TMP("BEDDDX",$J,""))
+ 	If (idx]"") {
+ 		// Zero out the search results
+ 		&js<
+ 			CSPPage.document.form.DXdata.options.length=0;
+ 			CSPPage.document.form.DXdata.options[0]=new Option(" ", " ", false, false);
+ 			>
+ 		
+ 	}
+ 	While idx]"" {
+ 		Set zz=^TMP("BEDDDX",$J,idx)
+ 		Set myien=$p(zz,U,1)
+ 		Set mycd=$p(zz,U,2)
+ 		Set mynar=$p(zz,U,3)
+ 		Set cnt=cnt+1
+ 		// Put this data into the page
+ 		&js<
+ 			CSPPage.document.form.DXdata.options[#(cnt)#]=new Option("#(mycd)# - #(mynar)#", "#(myien)# - #(mycd)# - #(mynar)#", false, false,"#(myien)# - #(mycd)# - #(mynar)#");
+ 		>
+ 		Set idx=$O(^TMP("BEDDDX",$J,idx))
+ 	}
+ 	Quit
+ 
+]]></Implementation>
+</Method>
+
+<Method name="updateDiag">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>objid:%String,code:%String,narrative:%String,primary:%String,mydfn:%String,myedid:%String,mycdien:%String,diagnosis:%String,injury:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	//&js<alert('Error saving Diagnosis information');>
+ 
+ 	//Audit the activity
+ 	Do LOG^BEDDUTIU($G(%session.Data("DUZ")),"P","E","BEDDDIAG.csp","BEDD: User saved patient POV information",$G(%session.Data("DFN")))
+ 
+ 	Set tStatus=$$SAVE^BEDDPOV($G(objid),$G(mycdien),$G(narrative),$G(primary),$G(code),$G(injury),$G(%session.Data("VIEN")),$G(%session.Data("DUZ")),$G(%session.Data("DFN")))
+ 	Quit
+ 	
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>D:\intersystems\E3IHS\CSP\foia_goldb\BEDDDIAG.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/foia_goldb/BEDDDIAG.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>64671,78195</Default>
+</Parameter>
+</Class>
+</Export>

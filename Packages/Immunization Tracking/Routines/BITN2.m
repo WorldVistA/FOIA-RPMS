@@ -1,5 +1,5 @@
 BITN2 ;IHS/CMI/MWR - BUILD ^BITN GLOBAL SECOND PART.
- ;;8.5;IMMUNIZATION;**14**;AUG 01,2017
+ ;;8.5;IMMUNIZATION;**15**;SEP 30,2017
  ;;* MICHAEL REMILLARD, DDS * CIMARRON MEDICAL INFORMATICS, FOR IHS *
  ;;  UTILITY: BUILD STANDARD ^BITN GLOBAL.
  ;
@@ -60,7 +60,7 @@ TABLE ; EP
  ;;215a;;^^^^^^^^^^^^^No vaccine administered
  ;;216;;DTaP-Hep B-IPV^PEDIARIX^110^^^^0^^14^^90723^1,22,28,102,43,44,45,10,106,107,50,8,42,20,170^3151105^^^0^1^.5^^^138^107^133
  ;;216a;;Pediarix^59^^^^^^^^^^^^DTap- hepatitis B and poliovirus vaccine
- ;;217;;INFLUENZA, Intranasal, Trivalent^FLU-LAIV3^111^^^^1^0^10^Flu-LAIV3^90660^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185^3150807^^^0^1^.2
+ ;;217;;INFLUENZA, Intranasal, Trivalent^FLU-LAIV3^111^^^^1^0^10^Flu-LAIV3^90660^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185,186^3150807^^^0^1^.2
  ;;217a;;FluMist^42^^^^^^^^^^^^Influenza virus vaccine, live, attenuated, for intranasal use
  ;;218;;TETANUS TOXOID, NOS^TETTOX,NOS^112^^^^1^^1^^^9,28,35,112,113,115,138,139,142^^^^^1^.5
  ;;218a;;^^^^^^^^^^^^^TETANUS TOXOID, NOS
@@ -84,7 +84,7 @@ TABLE ; EP
  ;;227a;;Zostavax^^^^^^^^^^^^^zoster vaccine, live
  ;;228;;ROTAVIRUS, NOS^ROTA,NOS^122^^^^1^0^15^^^74,116,119^^^^^1
  ;;228a;;^^^^^^^^^^^^^rotavirus vaccine, NOS
- ;;229;;INFLUENZA, H5N1^FLU-H5N1^123^^^^1^^10^Flu-H5N1^^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185^3150807^^^0^0^
+ ;;229;;INFLUENZA, H5N1^FLU-H5N1^123^^^^1^^10^Flu-H5N1^^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185,186^3150807^^^0^0^
  ;;229a;;^^^^^^^^^^^^^Influenza virus vaccine, H5N1, A/Vietnam/1203/2004 (national stockpile)
  ;;230;;DTaP-IPV^KINRIX^130^^^^0^0^14^^90696^10,110,20,50,106,107^3151105^^^^1^.5^^^133^107
  ;;230a;;Kinrix^^^^^^^^^^^^^Diphtheria, tetanus toxoids and acellular pertussis, and poliovirus, inactivated
@@ -98,7 +98,7 @@ TABLE ; EP
  ;;234a;;^^^^^^^^^^^^^Novel influenza-H1N1-09, all formulations^90470
  ;;235;;Pneumococcal, PCV-13^PCV-13^133^^^^0^0^11^PCV13^90670^33,100,109,133^3151105^^^0^1^.5
  ;;235a;;Prevnar 13^^PREVNAR 13^^^^^^^^^^^pneumococcal conjugate vaccine, 13 valent
- ;;236;;INFLUENZA, HIGH DOSE SEASONAL^FLU-HIGH^135^^^^0^0^10^Flu-HIGH^90662^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185^3150807^^^^1^.5
+ ;;236;;INFLUENZA, HIGH DOSE SEASONAL^FLU-HIGH^135^^^^0^0^10^Flu-HIGH^90662^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185,186^3150807^^^^1^.5
  ;;236a;;Fluzone High Dose^^^^^^^^^^^^^INFLUENZA, HIGH DOSE SEASONAL, PRESERVATIVE-FREE
  ;;237;;Meningococcal MCV4O^Menveo^136^^^^0^^16^^90734^32,103,108,114,136,147,148,162,163,164,167^3160331^^^0^1^.5
  ;;237a;;MENING^^^^^^^^^^^^^meningococcal oligosaccharide (groups A, C, Y and W-135) diphtheria toxoid conj
@@ -110,9 +110,9 @@ TABLE ; EP
  ;;240a;;^^^^^^^^^^^^^Japanese Encephalitis vaccine for intramuscular administration.
  ;;241;;Typhus, historical^TYPHUS,NOS^131^^^^1^^12
  ;;241a;;^^^^^^^^^^^^^Historical record of a typhus vaccination
- ;;242;;INFLUENZA, seasonal, injectable, preservative free, trivalent ^FLU-IIV3pf^140^^^^0^0^10^Flu-IIV3pf^90655^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185^3150807^^^0^1^
+ ;;242;;INFLUENZA, seasonal, injectable, preservative free, trivalent ^FLU-IIV3pf^140^^^^0^0^10^Flu-IIV3pf^90655^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185,186^3150807^^^0^1^
  ;;242a;;Fluzone^^Fluvirin^^^^^^^^^^^INFLUENZA, SEASONAL INJ, PRES. FREE^90656
- ;;243;;INFLUENZA [TIV], SEASONAL, INJ^FLU-IIV3^141^^^^0^0^10^Flu-IIV3^90657^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185^3150807^^^0^1^.5
+ ;;243;;INFLUENZA [TIV], SEASONAL, INJ^FLU-IIV3^141^^^^0^0^10^Flu-IIV3^90657^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185,186^3150807^^^0^1^.5
  ;;243a;;Fluzone^^Fluvirin ^^^^^^^^^^^INFLUENZA, SEASONAL INJECTABLE^90658
  ;;244;;Td-NA^Td-NA^138^^^^1^0^8^^^9,28,35,112,113,115,138,139,142^^^^0^1^.5
  ;;244a;;^^^^^^^^^^^^^tetanus and diphtheria toxoids, not adsorbed, for adult use
@@ -122,7 +122,7 @@ TABLE ; EP
  ;;246a;;^^^^^^^^^^^^^tetanus toxoid, not adsorbed
  ;;247;;ADENOVIRUS, TYPES 4&7^ADENO,oral^143^^^^1^0^12^^^54,55,82,143^3140611^^^0^1
  ;;247a;;^^^^^^^^^^^^^Adenovirus, type 4 and type 7, live, oral
- ;;248;;INFLUENZA, INTRADERMAL^FLU-DERMAL^144^^^^0^0^10^Flu-Dermal^90654^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185^3150807^^^0^1^.1
+ ;;248;;INFLUENZA, INTRADERMAL^FLU-DERMAL^144^^^^0^0^10^Flu-Dermal^90654^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185,186^3150807^^^0^1^.1
  ;;248a;;Fluzone Intradermal^^^^^^^^^^^^^seasonal influenza, intradermal, preservative free
  ;;249;;RSV-MAb,M^RSV-MAb,M^145^^^^1^0^12^^^71,93,145^^^^0^1
  ;;249a;;Motavizumab^^^^^^^^^^^^^respiratory syncytial virus monoclonal antibody (motavizumab), intramuscular
@@ -132,17 +132,17 @@ TABLE ; EP
  ;;251a;;MENING^^^^^^^^^^^^^Meningococcal, MCV4, unspecified formulation(groups A, C, Y and W-135)
  ;;252;;Meningococcal C/Y-HIB PRP^Menhibrix^148^^^^1^0^14^^90644^32,103,108,114,136,147,148,162,163,164,167^3150402^^^0^1^.5^^^136^271
  ;;252a;;MENING^^^^^^^^^^^^^Meningococcal Groups C and Y and Haemophilus b Tetanus Toxoid Conjugate Vaccine
- ;;253;;INFLUENZA, Live, Intranasal, Quadrivalent^FLU-LAIV4^149^^^^1^0^10^Flu-LAIV4^90672^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185^3150807^^^0^1^.2
+ ;;253;;INFLUENZA, Live, Intranasal, Quadrivalent^FLU-LAIV4^149^^^^1^0^10^Flu-LAIV4^90672^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185,186^3150807^^^0^1^.2
  ;;253a;;FluMist^^^^^^^^^^^^^Influenza, Live, Intranasal, Quadrivalent
- ;;254;;INFLUENZA, INJECTABLE, QUAD, PF^FLU-IIV4pf^150^^^^1^0^10^Flu-IIV4pf^90685^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185^3150807^^^^1
+ ;;254;;INFLUENZA, INJECTABLE, QUAD, PF^FLU-IIV4pf^150^^^^1^0^10^Flu-IIV4pf^90685^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185,186^3150807^^^^1
  ;;254a;;^^^^^^^^^^^^^Influenza, injectable, quadrivalent, preservative free^90686
- ;;255;;INFLUENZA NASAL, UNSPECIFIED^FLU-NasNOS^151^^^^1^0^10^Flu-NasNOS^^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185^
+ ;;255;;INFLUENZA NASAL, UNSPECIFIED^FLU-NasNOS^151^^^^1^0^10^Flu-NasNOS^^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185,186^
  ;;255a;;FluMist^^^^^^^^^^^^^influenza nasal, unspecified formulation
  ;;256;;Pneumococcal, Unspecified^PCV-NOS^152^^^^1^0^11
  ;;256a;;^^^^^^^^^^^^^Pneumococcal Conjugate, unspecified formulation
- ;;257;;INFLUENZA, INJECTABLE, MDCK, PF^FLU-ccIIV3^153^^^^1^0^10^Flu-ccIIV3^90661^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185^3150807^^^^1
+ ;;257;;INFLUENZA, INJECTABLE, MDCK, PF^FLU-ccIIV3^153^^^^1^0^10^Flu-ccIIV3^90661^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185,186^3150807^^^^1
  ;;257a;;Flucelvax^^^^^^^^^^^^^Influenza, injectable, Madin Darby Canine Kidney, preservative free
  ;;258;;HEP A, IG^HEP A,IG^154^^^^1^0^9^^^^^^^^1
  ;;258a;;^^^^^^^^^^^^^Hepatitis A immune globulin
- ;;259;;INFLUENZA, INJECTABLE, RECOMB, PF^FLU-RIV3^155^^^^1^0^10^Flu-RIV3^90673^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185^3150807
+ ;;259;;INFLUENZA, INJECTABLE, RECOMB, PF^FLU-RIV3^155^^^^1^0^10^Flu-RIV3^90673^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185,186^3150807
  ;;259a;;FluBlok^^^^^^^^^^^^^Seasonal, trivalent, recombinant, injectable influenza, preservative free

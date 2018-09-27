@@ -1,5 +1,5 @@
-APSPFNC6 ;IHS/MSC/PLS - Prescription Creation Support ;29-Oct-2014 14:27;DU
- ;;7.0;IHS PHARMACY MODIFICATIONS;**1011,1012,1016,1017,1018**;Sep 23, 2004;Build 21
+APSPFNC6 ;IHS/MSC/PLS - Prescription Creation Support ;28-Mar-2016 11:53;DU
+ ;;7.0;IHS PHARMACY MODIFICATIONS;**1011,1012,1016,1017,1018,1021**;Sep 23, 2004;Build 14
  ;=================================================================
  ;Returns string containing the possible pickup locations
 GPKUP(DATA,USR,OI,ORDER) ; EP -
@@ -14,24 +14,27 @@ GPKUP(DATA,USR,OI,ORDER) ; EP -
  I AUTORX=0 D  ;Internal Pharmacy
  .S RET="CMW"
  E  I AUTORX=1 D  ;Internal and External Pharmacy
+ .S OKERX=$$OKTOUSE(OI,RSCH)
  .I '$$ERXUSER(USR) D  ;User not able to select E
- ..S RET=$S(AUTOOR>0:"CP",1:"CMWP")
+ ..S RET=$S(OKERX=2:"P",AUTOOR>0:"CP",1:"CMWP")
  .E  D
  ..;IHS/MSC/MGH Patch 1016 Changes to incorporate ERX field
- ..S OKERX=$$OKTOUSE(OI,RSCH)
  ..I '+OKERX D
  ...S RET=$S(AUTOOR>0:"CP",'AUTOOR:"CMW",1:"CMWP")
  ..E  D
- ...S RET=$S(AUTOOR>0:"CP",'AUTOOR:"CMW",1:"CMWP")
- ...I AUTOOR'=0 S RET=RET_$S(OKERX=1:"E",$L(RSCH)&($$ERXOI(OI,RSCH)):"",$$ERXOI(OI,"2"):$S(CRX:"E",1:""),1:"E")
+ ...S RET=$S(OKERX=2:"P",AUTOOR>0:"CP",'AUTOOR:"CMW",1:"CMWP")
+ ...I AUTOOR'=0 S RET=RET_$S(OKERX>0:"E",$L(RSCH)&($$ERXOI(OI,RSCH)):"",$$ERXOI(OI,"2"):$S(CRX:"E",1:""),1:"E")
  E  I AUTORX=2 D  ;External Pharmacy
+ .S OKERX=$$OKTOUSE(OI,RSCH)
  .I '$$ERXUSER(USR) D  ;User not able to select E
- ..S RET="CP"
+ ..S RET=$S(OKERX=2:"P",1:"CP")
  .E  D
  ..;IHS/MSC/MGH Patch 1016 Changes to incorporate ERX field
- ..S OKERX=$$OKTOUSE(OI,RSCH)
- ..I '+OKERX S RET="CP"
- ..E  S RET="CP"_$S(OKERX=1:"E",$L(RSCH)&($$ERXOI(OI,RSCH)):"",$$ERXOI(OI,"2"):$S(CRX:"E",1:""),1:"E")
+ ..I '+OKERX D
+ ...S RET=$S(OKERX=2:"P",1:"CP")
+ ..E  D
+ ...S RET=$S(OKERX=2:"P",1:"CP")
+ ...S RET=RET_$S(OKERX>0:"E",$L(RSCH)&($$ERXOI(OI,RSCH)):"",$$ERXOI(OI,"2"):$S(CRX:"E",1:""),1:"E")
  S DATA=RET
  Q
  ; Returns ability of user to e-prescribe
@@ -87,6 +90,7 @@ OKTOUSE(OI,RSCH) ;function call
  .S NODE=$G(^PSDRUG(IEN,0))
  .Q:NODE=""
  .I $P($G(^PSDRUG(IEN,999999935)),U,3)=1 S RES=0
+ .I $$ERXONLY(IEN) S RES=2
  Q RES
 CHKERX(ORDER) ;Find out if ORDER was an eRX one
  N VALUE,RX
@@ -95,6 +99,13 @@ CHKERX(ORDER) ;Find out if ORDER was an eRX one
  Q:RX="" VALUE
  S VALUE=+$$GET1^DIQ(52,RX,9999999.23,"I")
  Q VALUE
+ ; Return ERX only of drug
+ ; Input: Order File IEN
+ ; Output: Boolean
+ERXONLY(DRUG) ;EP- Patch 1021
+ N VAL
+ S VAL=$P($G(^PSDRUG(DRUG,999999935)),U,3)
+ Q VAL=2
  ; Return long name of drug
  ; Input: Order File IEN
 GETLONG(RET,ORDER) ;EP-
@@ -102,7 +113,7 @@ GETLONG(RET,ORDER) ;EP-
  S RET=""
  S DRUG=$$VALUE^ORCSAVE2(ORDER,"DRUG")
  Q:'+DRUG
- S RET=$$GET1^DIQ(50,DRUG,9999999.352)
+ S RET=$$GETLNGDG(DRUG)
  Q
  ; Return long name of drug
  ; Input: Drug File IEN

@@ -1,5 +1,6 @@
-AGMCDPN ; IHS/ASDS/EFG - PRINT LIST OF MEDICAID ACCOUNTS BY ACCOUNT #;    
- ;;7.1;PATIENT REGISTRATION;;AUG 25,2005
+AGMCDPN ; IHS/ASDS/EFG - PRINT LIST OF MEDICAID ACCOUNTS BY ACCOUNT #;
+ ;;7.1;PATIENT REGISTRATION;**12**;AUG 25,2005;Build 1
+ ;IHS/OIT/NKD AG*7.1*12 INSURER TYPE
  ;
  ;Modified so user can select one/many/all plans
  ;
@@ -40,7 +41,8 @@ PLAN2 ;
  .S DIC="^AUTNINS("
  .S X=Y
  .S DIC(0)="EMQ"
- .S DIC("S")="I ""DK""[$P($G(^(2)),""^"",1)"
+ .;S DIC("S")="I ""DK""[$P($G(^(2)),""^"",1)"
+ .S DIC("S")="I ""DK""[$$INSTYP^AGUTL(Y)"  ;IHS/OIT/NKD AG*7.1*12
  .D ^DIC
  .Q:X["^"
  .S AG("PLANS",+Y)=$P(Y,"^",2)

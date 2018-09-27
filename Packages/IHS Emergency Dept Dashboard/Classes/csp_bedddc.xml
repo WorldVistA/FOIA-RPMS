@@ -1,0 +1,1500 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2018-09-27 12:54:35">
+<Class name="csp.bedddc">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeChanged>64672,29653.164465</TimeChanged>
+<TimeCreated>64672,29653.121082</TimeCreated>
+<GeneratedBy>/csp/foia_goldb/BEDDDC.csp</GeneratedBy>
+
+<Method name="ClearPatSession">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set %session.Data("DFN")=""
+ 	Set %session.Data("OBJECTID")=""
+ 	Set %session.Data("EDVISITID")=""
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="ClearSession">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set %session.Data("opttrg")=""
+ 	Set %session.Data("trgdtm")=""
+ 	Set %session.Data("otrgNrs")=""
+ 	Set %session.Data("oAdmPrv")=""
+ 	Set %session.Data("AdPvTm")=""
+ 	Set %session.Data("oClinic")=""
+ 	Set %session.Data("Injury")=""
+ 	Set %session.Data("EDConsult")=""
+ 	Set %session.Data("FinAct")=""
+ 	Set %session.Data("Disp")=""
+ 	Set %session.Data("WhrTrn")=""
+ 	Set %session.Data("DCInst")=""
+ 	Set %session.Data("DCPrv")=""
+ 	Set %session.Data("DCNrs")=""
+ 	Set %session.Data("DCDtTm")=""
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="MyXdate">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>rawDtTm:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set val=$$XDATE^BEDDUTID(rawDtTm)
+ 	Quit val
+ 
+]]></Implementation>
+</Method>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPagePREHTML()
+	Do ..OnPageCSPROOT()
+	Do ..OnPagePOSTHTML()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<BODY bgcolor=""#CCCCFF"" onload=""setFocus()"">"
+	Write !,!
+	If ((objid)'="") {
+	Set objForm = ##class(BEDD.EDVISIT).%OpenId((objid))
+	} Else {
+	Set objForm = ##class(BEDD.EDVISIT).%New()
+	}
+	Write !,"<form name=""form"" action=""BEDDDC.csp"" method=""POST"" onsubmit=""return CheckForm();"">"
+	Write !,..InsertHiddenFields("BEDDDC.csp?OBJID="_(objid)),!
+	Write !,!
+	Set (dfn,ptdfn)=objForm.PtDFN
+	Set vien=objForm.VIEN
+	//Audit the activity
+	Do LOG^BEDDUTIU($G(%session.Data("DUZ")),"P","Q","BEDDDC.csp","BEDD: User brought up patient discharge page",dfn)
+	//
+	//Allergies and PCP
+	Set ptalg=$$PTALG^BEDDUTIL(dfn)
+	Set ptpcp=$$PPR^BEDDUTIL(vien,objid,dfn)
+	//
+	//Name and Gender
+	Set ptname=objForm.PtName
+	Set ptsex=objForm.Sex
+	//
+	//DOB, Age and Chart
+	Set ptdob=objForm.DOB
+	Set ptage=objForm.Age
+	Set ptchart=objForm.Chart
+	//
+	//Admission Information
+	Set ptcidt=objForm.PtCIDT
+	//
+	//Complaint
+	Set ptcc=$$GETCC^BEDDUTIL(objForm.VIEN,objForm.Complaint)
+	//
+	//Triage Information
+	Set trgact=objForm.TrgA
+	Set trgdttm=$$FMTE^BEDDUTIL(objForm.TrgDtTm)
+	Set trgdt=objForm.TrgDt
+	Set trgtm=objForm.TrgTm
+	Set trgdtm=$TR($$HTE^XLFDT(trgdt_","_trgtm),"@"," ")
+	Set trgnrs=objForm.TrgNrs
+	Set adpvdtm=$$FMTE^BEDDUTIL(objForm.AdPvDtm)
+	Set admprv=objForm.AdmPrv
+	Set prmnrs=objForm.PrmNurse
+	Set dcadmdt=objForm.NewDecAdmit
+	Set clinic=objForm.GetCln(objForm.AMERVSIT,objForm.PtDFN,objForm.VIEN)
+	Set clinic=$$CCLN^BEDDUTID(objForm.TrgCln)
+	//
+	//Injury Information
+	Set vdate=$$GETF^BEDDUTIL(9000010,objForm.VIEN,".01","I")
+	Set injury=objForm.Injury
+	Set injwhr=objForm.PtInjury.InjLocat
+	Set injcas=$$DX^AMERPOV(objForm.PtInjury.InjCauseIEN,"",1,vdate)
+	Set injset=$$GETF^BEDDUTIL(9009083,objForm.PtInjury.InjSet,".01","I")
+	Set injtim=$$FMTE^BEDDUTIL(objForm.PtInjury.InjDtTm)
+	Set injsaf=$$GETF^BEDDUTIL(9009083,objForm.PtInjury.SafetyEquip,".01","I")
+	Set injwrk=objForm.PtInjury.WrkRel
+	//
+	//ED Consult
+	Kill ercons
+	Set erconn=$$EDCNT^BEDDUTIS(objid,1,.ercons)
+	If (erconn>0) {
+	Set erconn="YES"
+	}
+	Else {
+	Set erconn="NO"
+	}
+	//
+	//Procedure Information
+	Kill erproc
+	Set erprocn=$$PRCNT^BEDDUTIS(objid,1,.erproc)
+	If (erprocn>0) {
+	Set erprocn="YES"
+	}
+	Else {
+	Set erprocn="NO"
+	}
+	//
+	//DX Information
+	Kill erdiag
+	Set erdiagn=$P($$DXCNT^BEDDUTIS(objid,1,.erdiag),"^")
+	If (erdiagn>0) {
+	Set erdiagn="YES"
+	}
+	Else {
+	Set erdiagn="NO"
+	}
+	//
+	//Code Blue
+	Set codbl=objForm.CodeBlue
+	If (codbl="Yes") {
+	Set codbl="YES"
+	}
+	Else {
+	Set codbl="NO"
+	}
+	//
+	//Discharge Information
+	Set finact=objForm.DCTrgH
+	Set disp=objForm.DCDispH
+	Set dctrns=objForm.DCTrns
+	Set dcinst=objForm.DCInstH
+	Set dcprv=objForm.DCDPrvH
+	Set dcnrs=objForm.DCNrsH
+	Set dcdttm=objForm.DCDtTm
+	Write !,!
+	Set %value = $$$HTMLENCODE($get(%request.Data("ID",1),$ZSTRIP($select(objForm="":"",1:(objForm.%Id())),">W")))
+	Write "<input value="""_(%value)_""" type=""hidden"" id=""ID"" name=""ID"" readonly/>"
+	Write !
+	Set %value = $$$HTMLENCODE($get(%request.Data("ptdfn",1),$ZSTRIP($select(objForm="":"",1:(objForm.PtDFNLogicalToDisplay(objForm.PtDFN))),">W")))
+	Write "<input value="""_(%value)_""" type=""hidden"" id=""ptdfn"" name=""ptdfn"" readonly/>"
+	Write !
+	Set %value = $$$HTMLENCODE($get(%request.Data("VIEN",1),$ZSTRIP($select(objForm="":"",1:(objForm.VIENLogicalToDisplay(objForm.VIEN))),">W")))
+	Write "<input value="""_(%value)_""" type=""hidden"" id=""VIEN"" name=""VIEN"" readonly/>"
+	Write !,"<input type=""hidden"" id=""DUZ"" name=""DUZ"" value="_(%session.Data("DUZ")),"/>"
+	Write !,"<input type=""hidden"" id=""SITE"" name=""SITE"" value="_(%session.Data("SITE")),"/>"
+	Write !
+	Set %value = $$$HTMLENCODE($get(%request.Data("ptstI",1),$ZSTRIP($select(objForm="":"",1:(objForm.PtStatILogicalToDisplay(objForm.PtStatI))),">W")))
+	Write "<input value="""_(%value)_""" type=""hidden"" id=""ptstI"" name=""ptstI"" size=""1"" readonly/>"
+	Write !,"<input type=""hidden"" id=""SaveCheck"" name=""SaveCheck"" value=""""/>"
+	Write !,"<input type=""hidden"" id=""FormIsOkay"" name=""FormIsOkay"" value=""""/>"
+	Write !
+	Set %value = $$$HTMLENCODE($get(%request.Data("reclock",1),$ZSTRIP($select(objForm="":"",1:(objForm.RecLockLogicalToDisplay(objForm.RecLock))),">W")))
+	Write "<input value="""_(%value)_""" type=""hidden"" id=""reclock"" name=""reclock"" size=""1""/>"
+	Write !
+	Set %value = $$$HTMLENCODE($get(%request.Data("reclockuser",1),$ZSTRIP($select(objForm="":"",1:(objForm.RecLockUserLogicalToDisplay(objForm.RecLockUser))),">W")))
+	Write "<input value="""_(%value)_""" type=""hidden"" id=""reclockuser"" name=""reclockuser"" size=""1""/>"
+	Write !
+	Set %value = $$$HTMLENCODE($get(%request.Data("reclockdt",1),$ZSTRIP($select(objForm="":"",1:(objForm.RecLockDTLogicalToDisplay(objForm.RecLockDT))),">W")))
+	Write "<input value="""_(%value)_""" type=""hidden"" id=""reclockdt"" name=""reclockdt"" size=""1""/>"
+	Write !,"<input type=""hidden"" id=""PrimDx"" name=""PrimDx"" value="""_(objForm.PrimDx)_"""/>"
+	Write !,"<input type=""hidden"" id=""PrimDxN"" name=""PrimDxN"" value="""_(objForm.PrimDxNarr)_"""/>"
+	Write !,"<input type=""hidden"" id=""opttrg"" name=""opttrg"" value="""_(trgact)_"""/>"
+	Write !,"<input type=""hidden"" id=""otrgNrs"" name=""otrgNrs"" value="""_(trgnrs)_"""/>"
+	Write !,"<input type=""hidden"" id=""oClinic"" name=""oClinic"" value="""_(clinic)_"""/>"
+	Write !,"<input type=""hidden"" id=""oPrmNurse"" name=""oPrmNurse"" value="""_(prmnrs)_"""/>"
+	Write !,"<input type=""hidden"" id=""oAdmPrv"" name=""oAdmPrv"" value="""_(admprv)_"""/>"
+	Write !,!,"<center><b><font size=6>Patient Discharge</font></b></center>",!
+	Write "<br>",!
+	Write !,"<input type=""Submit"" name=""btnSave"" value=""Complete Discharge"" onclick=""CheckDischarge()"">"
+	Write !,"&nbsp;&nbsp",!
+	Write "<input type=""Button"" name=""btnCancel"" value=""Cancel"" onclick=""CancelDischarge()"">"
+	Write !,"<hr>",!
+	Write !,"<br><b><font size=4>Patient Information</font></b><br><br>",!
+	Write "<label for=""PtName"">Patient (Gender)</label> "
+	Write "<input name=""%noname"" type=""text"" id=""PtName"" value='"_(ptname)_" ("_(ptsex)_")' size=""40"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write "<label for=""PtDOB"">DOB (Age)</label> "
+	Write "<input name=""%noname"" type=""text"" id=""PtDOB"" value='"_(ptdob)_" ("_(ptage)_")' size=""25"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write "<label for=""PtChart"">Chart</label> "
+	Write "<input name=""%noname"" type=""text"" id=""PtChart"" value='"_(ptchart)_"' size=""8"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"<br><br>",!
+	Write "<label for=""PtAlg"">Allergies</label> "
+	Write "<input name=""%noname"" type=""text"" id=""PtAlg"" value='"_(ptalg)_"' size=""80"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write "<label for=""PtPCP"">PCP</label> "
+	Write "<input name=""%noname"" type=""text"" id=""PtPCP"" value='"_(ptpcp)_"' size=""25"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"<br><br>",!
+	Write "<hr>",!
+	Write " ",!
+	Write "<b><font size=4>Admission Information</font></b><br><br>",!
+	Write "<label for=""AStmp"">Check-In</label> "
+	Write "<input name=""%noname"" type=""text"" id=""AStmp"" value='"_(ptcidt)_"' size=""16"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write "<label for=""ptcc"">Presenting Complaint:</label> "
+	Write "<input name=""%noname"" type=""text"" id=""ptcc"" value="""_(ptcc)_""" size=""60"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"<br><br>",!
+	Write !,"<label for=""pttrg"">Initial Acuity</label>",!
+	Write "<input name=""%noname"" type=""hidden"" id=""itrga"" value='"_(trgact)_"' style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"	"
+	Write "<select disabled id=""pttrg"" name=""pttrg"">"
+	Write !,"	"
+	Do BLDTRG^BEDDUTIL(.acty)
+	&html<<option> </option>>
+	Set acty=$O(acty(""))
+	While(+acty'=0) {
+	&html<<option value="#(acty)#"> #(acty)# - #($P(acty(acty),"^",4))#  </option>>
+	Set acty=$O(acty(acty))
+	}
+	Write !,"	"
+	Write "</select>"
+	Write !,"&nbsp;",!
+	Write !,"<label for=""trgdtm"">Triaged</label>",!
+	Write "<input type=""trgdtm"" id=""trgdtm"" name=""trgdtm"" size=""18"" value='"_(trgdttm)_"' readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write !,"<label for=""trgNrs"">Triage Nurse</label>",!
+	Write "<input name=""%noname"" type=""hidden"" id=""trgnr"" size=""5"" value="""_(trgnrs)_""">"
+	Write !,"	"
+	Write "<select disabled id=""trgNrs"" name=""trgNrs"">"
+	Write !,"	"
+	Do PROV^BEDDUTID(.prov)
+	&html<<option> </option>>
+	Set prov=$O(prov(""))
+	While (+prov'=0) {
+	&html<<option value="#($P(prov(prov),"^"))#"> #($P(prov(prov),"^",2))#  </option>>
+	Set prov=$O(prov(prov))
+	}
+	Write !,"	"
+	Write "</select>"
+	Write "<br><br>",!
+	Write "	",!
+	Write !,"<label for=""Clinic"">Clinic Type</label>",!
+	Write "<input name=""%noname"" type=""hidden"" id=""clin"" value='"_(clinic)_"' style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"	"
+	Write "<select disabled id=""Clinic"" name=""Clinic"">"
+	Write !,"	"
+	Do CLIN^BEDDUTID(.clin)
+	&html<<option> </option>>
+	Set clin=$O(clin(""))
+	While (+clin'=0) {
+	&html<<option value="#($P(clin(clin),"^"))#"> #($P(clin(clin),"^",2))#  </option>>
+	Set clin=$O(clin(clin))
+	}
+	Write !,"	"
+	Write "</select>"
+	Write !,"<br><br>",!
+	Write "<hr>",!
+	Write "<b><font size=4>Injury Information</font></b><br><br>",!
+	Write !,"<label for=""erinjury"">Was this visit caused by an injury?</label> "
+	Write "<input name=""%noname"" type=""text"" id=""injury"" value='"_(injury)_"' size=""3"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"			&nbsp;",!
+	Write !
+	If '(injury="YES") Goto %csp00001 ;{
+	Write !,"	&nbsp;&nbsp;",!
+	Write "	<label for=""InjTim"">Injury Occurred</label> "
+	Write "<input name=""%noname"" type=""text"" id=""InjTim"" value='"_(injtim)_"' size=""18"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"	<br><br>",!
+	Write "	<label for=""InjSet"">Location</label> "
+	Write "<input name=""%noname"" type=""text"" id=""InjSet"" value='"_(injset)_"' size=""50"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"	&nbsp;&nbsp;",!
+	Write "	<label for=""InjWhr"">Where Injury Occurred</label> "
+	Write "<input name=""%noname"" type=""text"" id=""InjWhr"" value='"_(injwhr)_"' size=""25"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"	&nbsp;&nbsp;",!
+	Write "	<br><br>",!
+	Write "	<label for=""InjCau"">Injury Cause</label> "
+	Write "<input name=""%noname"" type=""text"" id=""InjCau"" value='"_(injcas)_"' size=""90"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"	<br><br>",!
+	Write "	<label for=""InjSaf"">Safety Equipment Used</label> "
+	Write "<input name=""%noname"" type=""text"" id=""InjSaf"" value='"_(injsaf)_"' size=""35"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"	&nbsp;&nbsp;",!
+	Write "	<label for=""InjWrk"">Work Related</label> "
+	Write "<input name=""%noname"" type=""text"" id=""InjWrk"" value='"_(injwrk)_"' size=""4"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !
+%csp00001	;}
+	Write !,"<br><br>",!
+	Write "<hr>",!
+	Write !,"<b><font size=4>Visit Information</font></b><br><br>",!
+	Write !,"<label for=""PrmNurse"">Primary Nurse</label>",!
+	Write "<input name=""%noname"" type=""hidden"" id=""prmnrs"" size=""5"" value="""_(prmnrs)_""">"
+	Write !,"	"
+	Write "<select disabled id=""PrmNurse"" name=""PrmNurse"">"
+	Write !,"	"
+	Do PROV^BEDDUTID(.prov)
+	&html<<option> </option>>
+	Set prov=$O(prov(""))
+	While (+prov'=0) {
+	&html<<option value="#($P(prov(prov),"^"))#"> #($P(prov(prov),"^",2))#  </option>>
+	Set prov=$O(prov(prov))
+	}
+	Write !,"	"
+	Write "</select>"
+	Write !,"&nbsp;",!
+	Write "<br><br>	",!
+	Write !,"<label for=""AdPvTm"">Medical Screening Exam Time</label> "
+	Write "<input type=""AdPvTm"" id=""AdPvTm"" name=""AdPvTm"" size=""18"" value='"_(adpvdtm)_"' readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write !,"<label for=""AdmPrv"">ED Provider</label>",!
+	Write "<input name=""%noname"" type=""hidden"" id=""admpr"" size=""5"" value="""_(admprv)_""">"
+	Write !,"	"
+	Write "<select disabled id=""AdmPrv"" name=""AdmPrv"">"
+	Write !,"	"
+	Do PROV^BEDDUTID(.prov)
+	&html<<option> </option>>
+	Set prov=$O(prov(""))
+	While (+prov'=0) {
+	&html<<option value="#($P(prov(prov),"^"))#"> #($P(prov(prov),"^",2))#  </option>>
+	Set prov=$O(prov(prov))
+	}
+	Write !,"	"
+	Write "</select>"
+	Write !,"<br><br>",!
+	Write !,"<label for=""DecAdmDt"">Decision to Admit Time</label> "
+	Write "<input type=""DecAdmDt"" id=""DecAdmDt"" name=""DecAdmDt"" size=""18"" value='"_(dcadmdt)_"' readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"<br><br>",!
+	Write !,"<label for=""erconn"">ER Consult Notified</label> "
+	Write "<input name=""%noname"" type=""text"" id=""erconn"" value='"_(erconn)_"' size=""3"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"			&nbsp;",!
+	Write "			",!
+	If '(erconn="YES") Goto %csp00002 ;{
+	Write !,"<br><br>",!
+	Write "	<table border=1 bgcolor="""" width=""80%"">",!
+	Write "	<tr><td><b>Consult Service</b></td>",!
+	Write "	<td><b>Date and Time Seen</b></td>",!
+	Write "	<td><b>Consult</b></td>",!
+	Write "	</tr>",!
+	Write !,"	"
+	For erlst=1:1:(ercons) {
+	Write !,"		<tr>",!
+	Write "        <td>"_($P(ercons(erlst),"^",1))_" </td>",!
+	Write "        <td>"_($P(ercons(erlst),"^",2))_" </td>",!
+	Write "        <td>"_($$GETF^BEDDUTIL(200,$P(ercons(erlst),"^",3),".01","I"))_" </td>",!
+	Write "        </tr>",!
+	Write "	"
+	}
+	Write !,!,"	</table>	",!
+%csp00002	;}
+	Write !,"<br><br>",!
+	Write !,"<label for=""erprocn"">Procedures</label> "
+	Write "<input name=""%noname"" type=""text"" id=""erprocn"" value='"_(erprocn)_"' size=""3"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"			&nbsp;",!
+	Write !
+	If '(erprocn="YES") Goto %csp00003 ;{
+	Write !,"	<br><br>",!
+	Write "	<table border=1 bgcolor="""" width=""40%"">",!
+	Write "		<tr><td><b>Procedures</b></td>",!
+	Write "		</tr>",!
+	Write "		",!
+	Write "		"
+	For erprc=1:1:(erproc) {
+	Write !,"                <tr>",!
+	Write "                <td>"_(erproc(erprc))_" </td>",!
+	Write "                </tr>",!
+	Write "		"
+	}
+	Write !,!,"		</table>	",!
+%csp00003	;}
+	Write !,"<br><br>",!
+	Write !,"<label for=""erdiagn"">Diagnosis</label> "
+	Write "<input name=""%noname"" type=""text"" id=""erdiagn"" value='"_(erdiagn)_"' size=""3"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"			&nbsp;",!
+	Write !
+	If '(erdiagn="YES") Goto %csp00004 ;{
+	Write !,"	<br><br>",!
+	Write "	<table border=1 bgcolor="""" width=""40%"">",!
+	Write "		<tr>",!
+	Write "		<td><b>Code</b></td>",!
+	Write "		<td><b>Diagnosis</b></td>",!
+	Write "		<td><b>Prime</b></td>",!
+	Write "		</tr>",!
+	Write "		",!
+	Write "		"
+	For erdrg=1:1:(erdiag) {
+	Write !,"                <tr>",!
+	Write "                <td>"_($P(erdiag(erdrg),"^"))_" </td>",!
+	Write "                <td>"_($P(erdiag(erdrg),"^",2))_" </td>",!
+	Write "                <td>"_($P(erdiag(erdrg),"^",3))_" </td>",!
+	Write "                </tr>",!
+	Write "		"
+	}
+	Write !,!,"		</table>	",!
+%csp00004	;}
+	Write !,"<br><br>",!
+	Write !,"<label for=""codbl"">Code Blue</label> "
+	Write "<input name=""%noname"" type=""text"" id=""codbl"" value='"_(codbl)_"' size=""3"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"			&nbsp;",!
+	Write "<br><br>",!
+	Write "<hr>",!
+	Write "			",!
+	Write "<b><font size=4>Disposition Information</font></b><br><br>",!
+	Write !,"<label for=""FinAct"">*Final Acuity</label>",!
+	Write "<input name=""%noname"" type=""hidden"" id=""fact"" value='"_(finact)_"' style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"	"
+	Write "<select id=""FinAct"" name=""FinAct"">"
+	Write !,"	"
+	Do BLDTRG^BEDDUTIL(.acty)
+	&html<<option> </option>>
+	Set acty=$O(acty(""))
+	While(+acty'=0) {
+	&html<<option value="#(acty)#"> #(acty)#  </option>>
+	Set acty=$O(acty(acty))
+	}
+	Write !,"	"
+	Write "</select>"
+	Write !,"&nbsp;&nbsp;",!
+	Write !,"<label for=""Disp"">*Disposition</label>",!
+	Write "<input name=""%noname"" type=""hidden"" id=""dsp"" size=""3"" value='"_(disp)_"' style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"	"
+	Write "<select id=""Disp"" name=""Disp"">"
+	Write !,"  	"
+	&html<<option> </option>>
+	Do DISP^BEDDUTID(.disp)
+	Set disp=$O(disp(""))
+	While(+disp'=0) {
+	&html<<option value="#($P(disp(disp),"^"))#"> #($P(disp(disp),"^",2))#  </option>>
+	Set disp=$O(disp(disp))
+	}
+	Write !,"	"
+	Write "</select>"
+	Write !,"&nbsp;&nbsp;",!
+	Write !,"<label for=""WhrTrn"">Where Transferred</label>",!
+	Write "<input name=""%noname"" type=""hidden"" id=""whrtrn"" size=""3"" value='"_(dctrns)_"' style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"	"
+	Write "<select id=""SelWhrTrn"" name=""WhrTrn"">"
+	Write !,"  	"
+	&html<<option> </option>>
+	Do TRNF^BEDDUTID(.trnf)
+	Set trnf=$O(trnf(""))
+	While(+trnf'=0) {
+	&html<<option value="#($P(trnf(trnf),"^"))#"> #($P(trnf(trnf),"^",2))#  </option>>
+	Set trnf=$O(trnf(trnf))
+	}
+	Write !,"	"
+	Write "</select>"
+	Write !,"<br><br>		   ",!
+	Write !,"<label for=""DCInst"">Follow up Instructions</label>",!
+	Write "<input name=""%noname"" type=""hidden"" id=""dinst"" size=""3"" value="_(dcinst)," style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"	"
+	Write "<select id=""DCInst"" name=""DCInst"">"
+	Write !,"	"
+	&html<<option> </option>>
+	Do INST^BEDDUTID(.inst)
+	Set inst=$O(inst(""))
+	While (+inst'=0) {
+	&html<<option value="#($P(inst(inst),"^"))#"> #($P(inst(inst),"^",2))# </option>>
+	Set inst=$O(inst(inst))
+	}
+	Write !,"	"
+	Write "</select>"
+	Write !,"<br><br>",!
+	Write !,"<label for=""DCPrv"">*(PRIMARY) Provider who signed PCC form</label>",!
+	Write "<input name=""%noname"" type=""hidden"" id=""dprv"" size=""5"" value="_(dcprv)," style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"	"
+	Write "<select id=""DCPrv"" name=""DCPrv"">"
+	Write !,"	"
+	Do PROV^BEDDUTID(.prov)
+	&html<<option> </option>>
+	Set prov=$O(prov(""))
+	While (+prov'=0) {
+	&html<<option value="#($P(prov(prov),"^"))#"> #($P(prov(prov),"^",2))#  </option>>
+	Set prov=$O(prov(prov))
+	}
+	Write !,"	"
+	Write "</select>"
+	Write !,"&nbsp;&nbsp;",!
+	Write "			",!
+	Write "<label for=""DCNrs"">*Discharge Nurse</label>",!
+	Write "<input name=""%noname"" type=""hidden"" id=""dnrs"" size=""5"" value="_(dcnrs)," style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"	"
+	Write "<select id=""DCNrs"" name=""DCNrs"">"
+	Write !,"	"
+	Do PROV^BEDDUTID(.prov)
+	&html<<option> </option>>
+	Set prov=$O(prov(""))
+	While (+prov'=0) {
+	&html<<option value="#($P(prov(prov),"^"))#"> #($P(prov(prov),"^",2))#  </option>>
+	Set prov=$O(prov(prov))
+	}
+	Write !,"	"
+	Write "</select>"
+	Write !,"<br><br>",!
+	Write "	",!
+	Write "<label for=""DCDtTm"">*Departure Date/Time</label> "
+	Write "<input type=""dcdttm"" id=""DCDtTm"" name=""DCDtTm"" size=""18"" value='"_(dcdttm)_"' onchange=""doDCDtTmDateCheck()"" style=""color: #000000; font-family: Tahoma; font-weight: normal; font-size: 14px; background-color: #FFFFFF;""/>"
+	Write !,"<br><br>",!
+	Write "<hr>",!
+	Write "			",!
+	Write "<input type=""Submit"" name=""btnSave"" value=""Complete Discharge"" onclick=""CheckDischarge()"">"
+	Write !,"&nbsp;&nbsp",!
+	Write "<input type=""Button"" name=""btnCancel"" value=""Cancel"" onclick=""CancelDischarge()"">"
+	Write !,"<input id=""OBJID"" name=""OBJID"" type=""hidden"" value="""_($select(objForm="":"",1:objForm.%Id()))_""">"
+	Write "</form>"
+	Write !,!,!,!,!,!,!,!,"<!--Clear out Discharge Session Variables -->"
+	Write !,!,!,!,!,"<!--Clear Patient Session Variables -->"
+	Write !,!,!,!,!,!,!,!,!,"</BODY>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<!-- BEDDDC.csp - Main BEDD Discharge Screen -->"
+	Write !,"<!-- ;;2.0;IHS EMERGENCY DEPT DASHBOARD;;Apr 02, 2014 -->"
+	Write !,"<!-- BEDD*2.0*2 - Changes for log out button -->"
+	Write !,!
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,!,!,!
+	Set U="^",site=%session.Data("SITE")
+	Do LOADSYS^BEDDUTW(.beddsys,site)
+	Set timeout=$G(beddsys("TimeOut"))
+	Write !,!,"<META HTTP-EQUIV=""Refresh"" CONTENT="""_( timeout )_"; URL=BEDD.csp"">"
+	Write !,!,!,"<title>	DISCHARGE </title>",!
+	Set U="^"
+	Set duz=%session.Data("DUZ")
+	Set objid=%session.Data("OBJECTID")
+	Set dfn=%session.Data("DFN") 
+	Write !,!,"<script language=""Javascript"" type=""text/javascript"">"
+	Write !,!,"//BEDD*2.0*2;New logic to handle logout feature. Now saving information",!
+	Write "//in session variables and referencing them in ProcessSave",!
+	Write !,"function SaveSessionVar() {",!
+	Write "		",!
+	Write "	//Initial Acuity",!
+	Write "	var opttrg = document.getElementById('opttrg');",!
+	Write "	",!
+	Write "	//Triage Date/Time",!
+	Write "	var trgdtm = document.getElementById('trgdtm');",!
+	Write "	",!
+	Write "	//Triage Nurse",!
+	Write "	var otrgNrs = document.getElementById('otrgNrs');",!
+	Write "	",!
+	Write "	//Primary Provider",!
+	Write "	var oAdmPrv = document.getElementById('oAdmPrv');",!
+	Write "	",!
+	Write "	//MSE Time",!
+	Write "	var AdPvTm = document.getElementById('AdPvTm');",!
+	Write "	",!
+	Write "	//Clinic",!
+	Write "	var oClinic = document.getElementById('oClinic');",!
+	Write "	",!
+	Write "	//Save 1",!
+	Write "	"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".SaveEdit1"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',opttrg.value,trgdtm.value,otrgNrs.value,oAdmPrv.value,AdPvTm.value,oClinic.value) ;	",!
+	Write !,"	//Injury",!
+	Write "	var Injury = document.getElementById('injury');",!
+	Write "	",!
+	Write "	//ED Consults",!
+	Write "	var EDConsult = document.getElementById('erconn');",!
+	Write !,"	//Final Acuity",!
+	Write "	var fact = document.getElementById('FinAct');",!
+	Write "	",!
+	Write "	//Disposition",!
+	Write "	var Disp = document.getElementById('Disp');",!
+	Write "	",!
+	Write "	//Where Transferred",!
+	Write "	var WhrTrn = document.getElementById('SelWhrTrn');",!
+	Write "	",!
+	Write "	//Save 2",!
+	Write "	"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".SaveEdit2"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',Injury.value,EDConsult.value,fact.value,Disp.value,WhrTrn.value) ;	",!
+	Write !,"	//Follow up Instructions",!
+	Write "	var DCInst = document.getElementById('DCInst');",!
+	Write "	",!
+	Write "	//Discharge provider",!
+	Write "	var DCPrv = document.getElementById('DCPrv');",!
+	Write "	",!
+	Write "	//Discharge nurse",!
+	Write "	var DCNrs = document.getElementById('DCNrs');",!
+	Write "	",!
+	Write "	//Discharge date and time",!
+	Write "	var DCDtTm = document.getElementById('DCDtTm');",!
+	Write "	",!
+	Write "	//Save 3",!
+	Write "	"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".SaveEdit3"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',DCInst.value,DCPrv.value,DCNrs.value,DCDtTm.value) ;	",!
+	Write !,"}		",!
+	Write !,"//BEDD*2.0*2;New Cancel handling",!
+	Write "function CancelDischarge() {",!
+	Write "		",!
+	Write "		//Clear Session variables",!
+	Write "		"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".ClearSession"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"');",!
+	Write "			",!
+	Write "		//Return to Dashboard",!
+	Write "		self.document.location.replace = ""BEDDEDIT1.csp?OBJID="_(%session.Data("OBJECTID"))_"&DFN="_(%session.Data("DFN"))_""" ;",!
+	Write "		",!
+	Write "	}",!
+	Write !,"function CheckDischarge() {",!
+	Write "	submitOK=""true"";",!
+	Write "	",!
+	Write "	<!--Final Acuity Check-->",!
+	Write "	var fact = document.getElementById('FinAct');",!
+	Write "	if (fact.value=="""") {",!
+	Write "		alert(""Final Acuity is Required"")",!
+	Write "		submitOK=""false"";",!
+	Write "	}",!
+	Write "	",!
+	Write "	<!--Disposition Check-->",!
+	Write "	var disp = document.getElementById('Disp');",!
+	Write "	if (disp.value=="""") {",!
+	Write "		alert(""Disposition of Patient is Required"")",!
+	Write "		submitOK=""false"";",!
+	Write "	}",!
+	Write "		 ",!
+	Write "	<!--(PRIMARY) Provider who signed PCC form Check-->",!
+	Write "	var dcpv = document.getElementById('DCPrv');",!
+	Write "	if (dcpv.value=="""") {",!
+	Write "		alert(""(PRIMARY) Provider who signed PCC form is Required"")",!
+	Write "		submitOK=""false"";",!
+	Write "	}",!
+	Write "	",!
+	Write "	<!--Discharge Nurse Check-->",!
+	Write "	var dcnr = document.getElementById('DCNrs');",!
+	Write "	if (dcnr.value=="""") {",!
+	Write "		alert(""Discharge Nurse is Required"")",!
+	Write "		submitOK=""false"";",!
+	Write "	}",!
+	Write "	",!
+	Write "	<!--Departure Date/Time Check-->",!
+	Write "	var dsdt = document.getElementById('DCDtTm');",!
+	Write "	if (dsdt.value=="""") {",!
+	Write "		alert(""Departure Date/Time is Required"")",!
+	Write "		submitOK=""false"";",!
+	Write "	}",!
+	Write "	if (dsdt.value.length>0) {",!
+	Write "		if (dsdt.value.length<11) {",!
+	Write "			alert(""Both Departure Date and Time are Required"");",!
+	Write "			submitOK=""false"";",!
+	Write "		}",!
+	Write "		if (dsdt.value.length>10) {",!
+	Write "			var admdt = document.getElementById('AStmp');",!
+	Write "			var mess = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".getDtChk"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',dsdt.value,admdt.value,""AF"") ;",!
+	Write "			if (mess==""F"") {",!
+	Write "				alert(""Future Departure Date/Time is not allowed"");",!
+	Write "				submitOK=""false"";",!
+	Write "			}",!
+	Write "			if (mess==""A"") {",!
+	Write "				alert(""Departure Date/Time must be after Admit Date/Time"");",!
+	Write "				submitOK=""false"";",!
+	Write "			}",!
+	Write !,"		}",!
+	Write "	}",!
+	Write "	",!
+	Write "	if (submitOK==""true"") {",!
+	Write "		var answer = confirm (""Complete Discharge?"")",!
+	Write "		if (answer) {",!
+	Write "			",!
+	Write "			//Save to Session variables",!
+	Write "			SaveSessionVar();",!
+	Write "		",!
+	Write "			//Get user",!
+	Write "			var user = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".ReturnDUZ"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"') ;",!
+	Write "		",!
+	Write "			//Save information",!
+	Write "			"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".discharge"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',user);",!
+	Write "		",!
+	Write "			//Clear Session variables",!
+	Write "			"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".ClearSession"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"');",!
+	Write "		",!
+	Write "			//Clear Patient Session variables",!
+	Write "			"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".ClearPatSession"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"');		",!
+	Write !,"			//Return to Dashboard",!
+	Write "			location.replace(""BEDD.csp"");",!
+	Write "		}",!
+	Write "	} ",!
+	Write "	",!
+	Write "}",!
+	Write !,"function procdisch() {",!
+	Write "	submitOK=""true"";",!
+	Write "	",!
+	Write "	<!--Final Acuity Check-->",!
+	Write "	var fact = document.getElementById('FinAct');",!
+	Write "	if (fact.value=="""") {",!
+	Write "		alert(""Final Acuity is Required"")",!
+	Write "		submitOK=""false"";",!
+	Write "	}",!
+	Write "	",!
+	Write "	<!--Disposition Check-->",!
+	Write "	var disp = document.getElementById('Disp');",!
+	Write "	if (disp.value=="""") {",!
+	Write "		alert(""Disposition of Patient is Required"")",!
+	Write "		submitOK=""false"";",!
+	Write "	}",!
+	Write "		 ",!
+	Write "	<!--(PRIMARY) Provider who signed PCC form Check-->",!
+	Write "	var dcpv = document.getElementById('DCPrv');",!
+	Write "	if (dcpv.value=="""") {",!
+	Write "		alert(""(PRIMARY) Provider who signed PCC form is Required"")",!
+	Write "		submitOK=""false"";",!
+	Write "	}",!
+	Write "	",!
+	Write "	<!--Discharge Nurse Check-->",!
+	Write "	var dcnr = document.getElementById('DCNrs');",!
+	Write "	if (dcnr.value=="""") {",!
+	Write "		alert(""Discharge Nurse is Required"")",!
+	Write "		submitOK=""false"";",!
+	Write "	}",!
+	Write "	",!
+	Write "	<!--Departure Date/Time Check-->",!
+	Write "	var dsdt = document.getElementById('DCDtTm');",!
+	Write "	if (dsdt.value=="""") {",!
+	Write "		alert(""Departure Date/Time is Required"")",!
+	Write "		submitOK=""false"";",!
+	Write "	}",!
+	Write "	if (dsdt.value.length>0) {",!
+	Write "		if (dsdt.value.length<11) {",!
+	Write "			alert(""Both Departure Date and Time are Required"");",!
+	Write "			submitOK=""false"";",!
+	Write "		}",!
+	Write "		if (dsdt.value.length>10) {",!
+	Write "			var admdt = document.getElementById('AStmp');",!
+	Write "			var mess = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".getDtChk"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',dsdt.value,admdt.value,""AF"") ;",!
+	Write "			if (mess==""F"") {",!
+	Write "				alert(""Future Departure Date/Time is not allowed"");",!
+	Write "				submitOK=""false"";",!
+	Write "			}",!
+	Write "			if (mess==""A"") {",!
+	Write "				alert(""Departure Date/Time must be after Admit Date/Time"");",!
+	Write "				submitOK=""false"";",!
+	Write "			}",!
+	Write !,"		}",!
+	Write "	}",!
+	Write "	",!
+	Write "	if (submitOK==""true"") {",!
+	Write "		var answer = confirm (""Complete Discharge?"")",!
+	Write "		if (answer) {",!
+	Write "			var x=document.getElementById(""SaveCheck"");",!
+	Write "			x.value = ""YES"";",!
+	Write "		}",!
+	Write "	} ",!
+	Write "	",!
+	Write "	else {",!
+	Write "		var x=document.getElementById(""SaveCheck"");",!
+	Write "		x.value = ""NO"";",!
+	Write "	}",!
+	Write "}",!
+	Write "function CheckForm() {",!
+	Write "	var x1= document.getElementById(""SaveCheck"") ;",!
+	Write "	var x2=document.getElementById(""FormIsOkay"");",!
+	Write "	if ( x2.value == ""YES"" ) {",!
+	Write "		return true;",!
+	Write "	}",!
+	Write "	if ( x1.value == ""YES"" ) {",!
+	Write "		return true;",!
+	Write "	} else {",!
+	Write "		return false;",!
+	Write "	}",!
+	Write "	",!
+	Write "	// Default answer is we save the page",!
+	Write "	return true;",!
+	Write "}",!
+	Write !,"function setFormOK() {",!
+	Write "	var x=document.getElementById(""FormIsOkay"");",!
+	Write "	x.value = ""YES"";",!
+	Write "} ",!
+	Write !,"function setFocus(){",!
+	Write "	",!
+	Write "	//Make sure user is logged in",!
+	Write !,"	//Get user",!
+	Write "	var user = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".ReturnDUZ"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"') ;",!
+	Write !,"	if (user == 0) {",!
+	Write "		location.replace='BEDDLogin.csp';",!
+	Write "		return true;",!
+	Write "	}",!
+	Write !,"	setITrgA();",!
+	Write "	setTrgNrs();",!
+	Write "	setAdmPrv();",!
+	Write "	setPrmNrs();",!
+	Write "	setCln();",!
+	Write "	setFinAct();",!
+	Write "	setDisp();",!
+	Write "	setWhrTrn();",!
+	Write "	setDCInst();",!
+	Write "	setDCPrv();",!
+	Write "	setDCNrs();",!
+	Write "	}",!
+	Write "function setITrgA() {",!
+	Write "	var x = document.getElementById(""pttrg"") ;",!
+	Write "	var itrga = document.form.itrga.value ;",!
+	Write "	for (i=0; i<x.options.length; i++){",!
+	Write "		if (x.options[i].value == itrga) {",!
+	Write "			x.selectedIndex = i ;",!
+	Write "			}",!
+	Write "		}",!
+	Write "	}",!
+	Write "function setTrgNrs() {",!
+	Write "	var x2 = document.getElementById(""trgNrs"") ;",!
+	Write "	var trgnr = document.form.trgnr.value;",!
+	Write "	for (i=0; i<x2.options.length; i++){",!
+	Write "		if (x2.options[i].value == trgnr) {",!
+	Write "			x2.selectedIndex = i ;",!
+	Write "			}",!
+	Write "		}",!
+	Write "	}",!
+	Write "function setAdmPrv() {",!
+	Write "	var x3 = document.getElementById(""AdmPrv"") ;",!
+	Write "	var admpr = document.form.admpr.value;",!
+	Write "	for (i=0; i<x3.options.length; i++){",!
+	Write "		if (x3.options[i].value == admpr) {",!
+	Write "			x3.selectedIndex = i ;",!
+	Write "			}",!
+	Write "		}",!
+	Write "	}",!
+	Write "function setPrmNrs() {",!
+	Write "	var x15 = document.getElementById(""PrmNurse"") ;",!
+	Write "	var prmnrs = document.form.prmnrs.value;",!
+	Write "	for (i=0; i<x15.options.length; i++){",!
+	Write "		if (x15.options[i].value == prmnrs) {",!
+	Write "			x15.selectedIndex = i ;",!
+	Write "			}",!
+	Write "		}",!
+	Write "}",!
+	Write "function setCln() {",!
+	Write "	var x4 = document.getElementById(""Clinic"") ;",!
+	Write "	var clin = document.getElementById(""clin"").value ;",!
+	Write "	for (i=0; i<x4.options.length; i++){",!
+	Write "		if (x4.options[i].value == clin) {",!
+	Write "			x4.selectedIndex = i ;",!
+	Write "			}",!
+	Write "		}",!
+	Write "	}",!
+	Write "function setFinAct() {",!
+	Write "	var x5 = document.getElementById(""FinAct"") ;",!
+	Write "	var fact = document.form.fact.value ;",!
+	Write "	for (i=0; i<x5.options.length; i++){",!
+	Write "		if (x5.options[i].value == fact) {",!
+	Write "			x5.selectedIndex = i ;",!
+	Write "			}",!
+	Write "		}",!
+	Write "	}",!
+	Write "function setDisp() {",!
+	Write "	var x6 = document.getElementById(""Disp"") ;",!
+	Write "	var dsp = document.form.dsp.value ;",!
+	Write "	for (i=0; i<x6.options.length; i++){",!
+	Write "		if (x6.options[i].value == dsp) {",!
+	Write "			x6.selectedIndex = i ;",!
+	Write "			}",!
+	Write "		}",!
+	Write "	}",!
+	Write "function setWhrTrn() {",!
+	Write "	var x11 = document.getElementById(""SelWhrTrn"") ;",!
+	Write "	var whrtrn = document.form.whrtrn.value ;",!
+	Write "	for (i=0; i<x11.options.length; i++) {",!
+	Write "		if (x11.options[i].value == whrtrn) {",!
+	Write "			x11.selectedIndex = i ;",!
+	Write "			}",!
+	Write "		}",!
+	Write "	}",!
+	Write "function setDCInst() {",!
+	Write "	var x8 = document.getElementById(""DCInst"") ;",!
+	Write "	var dinst = document.form.dinst.value ;",!
+	Write "	for (i=0; i<x8.options.length; i++){",!
+	Write "		if (x8.options[i].value == dinst) {",!
+	Write "			x8.selectedIndex = i ;",!
+	Write "			}",!
+	Write "		}",!
+	Write "	}",!
+	Write "function setDCPrv() {",!
+	Write "	var x9 = document.getElementById(""DCPrv"") ;",!
+	Write "	var dprv = document.form.dprv.value;",!
+	Write "	for (i=0; i<x9.options.length; i++){",!
+	Write "		if (x9.options[i].value == dprv) {",!
+	Write "			x9.selectedIndex = i ;",!
+	Write "			}",!
+	Write "		}",!
+	Write "	}",!
+	Write "function setDCNrs() {",!
+	Write "	var x10 = document.getElementById(""DCNrs"") ;",!
+	Write "	var dnrs = document.form.dnrs.value;",!
+	Write "	for (i=0; i<x10.options.length; i++){",!
+	Write "		if (x10.options[i].value == dnrs) {",!
+	Write "			x10.selectedIndex = i ;",!
+	Write "			}",!
+	Write "		}",!
+	Write "	}",!
+	Write "function chkflds() {",!
+	Write "		submitOK=""true"";",!
+	Write "	var themessage = ""Please complete the following fields: "";",!
+	Write "	",!
+	Write "	var disp = document.getElementById('Disp');",!
+	Write "	if (disp.value=="""") {",!
+	Write "		themessage = themessage + "" Disposition of Pt is required"" ;",!
+	Write "		submitOK=""false"";",!
+	Write "		}",!
+	Write "		",!
+	Write "	if (submitOK==""true"") {",!
+	Write "		 document.getElementById('btnSave1').style.visibility='hidden'; // hide   ",!
+	Write "		var dfn=document.getElementById(""ptdfn"").value ;",!
+	Write "		var objid=document.getElementById(""ID"").value ;",!
+	Write "		var vien=document.getElementById(""VIEN"").value ;",!
+	Write "		var duz=document.getElementById(""DUZ"").value ;",!
+	Write "		var site=document.getElementById(""SITE"").value ;",!
+	Write "		// "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".dcnow"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',dfn,objid,vien,duz,site)",!
+	Write "		var r=confirm(""Complete Discharge?""); ",!
+	Write "   		if ( r == true){",!
+	Write "  		   		document.form.reclock.value = """" ;",!
+	Write "				document.form.reclockdt.value = """" ;",!
+	Write "				document.form.reclockuser.value = """" ;",!
+	Write "				var rc = form_save();",!
+	Write "	   			//"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".dcnow"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',dfn,objid,vien,duz,site)",!
+	Write "   			}",!
+	Write "   		else",!
+	Write "   			{",!
+	Write "	   			var r1=confirm(""Hold for ED documentation"");",!
+	Write "	   			if (r1==true){",!
+	Write "		   			document.getElementById(""DCDocH"").value = 1",!
+	Write "		   			//"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".dchold"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',objid)",!
+	Write "		   			document.form.reclock.value = """" ;",!
+	Write "					document.form.reclockdt.value = """" ;",!
+	Write "					document.form.reclockuser.value = """" ;",!
+	Write "					var rc = form_save();",!
+	Write "		   			self.document.location = ""BEDD.csp""	 ",!
+	Write "	   				}",!
+	Write "	   		}",!
+	Write "	",!
+	Write "		self.document.location = ""BEDD.csp""	 ",!
+	Write "		}",!
+	Write "	else {",!
+	Write "		alert(themessage);",!
+	Write "		}",!
+	Write "	}",!
+	Write "function doDCDtTmDateCheck()  {",!
+	Write "	var my_info = document.getElementById(""DCDtTm"");",!
+	Write "	var my_datetm = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".MyXdate"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',my_info.value) ;",!
+	Write "	my_info.value=my_datetm;",!
+	Write "		}",!
+	Write "function close_page() {",!
+	Write "	self.document.location = ""BEDDEDIT1.csp?OBJID="_(objid)_"&DFN="_(dfn)_""";",!
+	Write "}	",!
+	Write "</script>"
+	Do ..formGenJS()
+	Write !,(..HyperEventHead(0,0))
+	Write !,!,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPagePOSTHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[	Set objForm=$$$NULLOREF
+]]></Implementation>
+</Method>
+
+<Method name="OnPagePREHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[	Set objForm=$$$NULLOREF
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+ 	Set U="^"
+ 	//
+ 	//Check for access information
+ 	If ('$D(%session.Data("DUZ"))) {
+ 		Set %response.Redirect="BEDDLogin.csp"
+ 	}	
+ 	Set dfn=%session.Data("DFN")
+ 	Set objid=%session.Data("OBJECTID")   
+  	Quit 1
+ 
+]]></Implementation>
+</Method>
+
+<Method name="ReturnDUZ">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set user=$Get(%session.Data("DUZ"))
+ 	If (user<1) {
+ 		Set user=0
+ 	}
+ 
+ 	Quit user
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="SaveEdit1">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>opttrg:%String,trgdtm:%String,otrgNrs:%String,oAdmPrv:%String,AdPvTm:%String,oClinic:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	//Called by: #server(..SaveEdit1(opttrg.value,trgdtm.value,otrgNrs.value,oAdmPrv.value,AdPvTm.value,oClinic.value))# ;
+ 	Set %session.Data("opttrg")=opttrg
+ 	Set %session.Data("trgdtm")=trgdtm
+ 	Set %session.Data("otrgNrs")=otrgNrs
+ 	Set %session.Data("oAdmPrv")=oAdmPrv
+ 	Set %session.Data("AdPvTm")=AdPvTm
+ 	Set %session.Data("oClinic")=oClinic
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="SaveEdit2">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>Injury:%String,EDConsult:%String,FinAct:%String,Disp:%String,WhrTrn:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	//Called by: #server(..SaveEdit2(Injury.value,EDConsult.value,fact.value,Disp.value,WhrTrn.value))# ;
+ 	Set %session.Data("Injury")=Injury
+ 	Set %session.Data("EDConsult")=EDConsult
+ 	Set %session.Data("FinAct")=FinAct
+ 	Set %session.Data("Disp")=Disp
+ 	Set %session.Data("WhrTrn")=WhrTrn
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="SaveEdit3">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>DCInst:%String,DCPrv:%String,DCNrs:%String,DCDtTm:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	//Called by: #server(..SaveEdit2(DCInst.value,DCPrv.value,DCNrs.value,DCDtTm.value))# ;
+ 	Set %session.Data("DCInst")=DCInst
+ 	Set %session.Data("DCPrv")=DCPrv
+ 	Set %session.Data("DCNrs")=DCNrs
+ 	Set %session.Data("DCDtTm")=DCDtTm
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="discharge">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>myUser:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set duz=%session.Data("DUZ")
+ 	Set site=%session.Data("SITE")
+ 	Set objid=$G(%session.Data("OBJECTID"))
+ 	Set (vien,dfn,amvisit)=""
+ 	Lock +^BEDD.EDVISIT(objid):30
+ 	If ($T) {
+ 		Set entry=##class(BEDD.EDVISIT).%OpenId(objid)
+ 		Set vien=entry.VIEN
+ 		Set dfn=entry.PtDFN
+ 		Set amvisit=entry.AMERVSIT
+ 
+ 		//Audit the activity
+ 		Do LOG^BEDDUTIU($G(%session.Data("DUZ")),"P","E","BEDDDC.csp","BEDD: User discharged patient from ER",dfn)
+ 
+ 		//
+ 		// Build array to pass to BEDDUTIL for processing
+ 		//
+ 		//Initial Acuity
+ 		Set beddfld("Trg")=$Get(%session.Data("opttrg"))
+ 		//
+ 		//Triage Date/Time
+ 		Set beddfld("TrgNow")=$$DATE^BEDDUTIU(%session.Data("trgdtm"))
+ 		//
+ 		//Triage Nurse
+ 		Set beddfld("TrgN")=$Get(%session.Data("otrgNrs"))
+ 		//
+ 		//Admitting Provider
+ 		Set beddfld("AdmPrv")=$Get(%session.Data("oAdmPrv"))
+ 		//
+ 		//Time Seen By Admitting Provider
+ 		Set beddfld("AdPvTm")=$$DATE^BEDDUTIU($Get(%session.Data("AdPvTm")))
+ 		//
+ 		//Clinic
+ 		Set beddfld("txcln")=$Get(%session.Data("oClinic"))
+ 		//
+ 		//Injury Yes/No
+ 		Set beddfld("Injury")=$Get(%session.Data("Injury"))
+  		//
+  		//ED Consult Yes/No
+ 		Set beddfld("EDConsult")=$Get(%session.Data("EDConsult"))
+  		//
+ 		//Final Acuity
+ 		Set beddfld("FinAct")=$Get(%session.Data("FinAct"))
+ 		//
+ 		//Disposition
+ 		Set beddfld("Disp")=$Get(%session.Data("Disp"))
+ 		//
+ 		//Where Transferred
+ 		Set beddfld("WhrTrn")=$Get(%session.Data("WhrTrn"))
+ 		//
+ 		//Followup Instructions
+ 		Set beddfld("DCInst")=$Get(%session.Data("DCInst"))
+ 		//
+ 		//(PRIMARY)Provider who signed PCC form
+ 		Set beddfld("DCPrv")=$Get(%session.Data("DCPrv"))
+ 		//	
+ 		//Discharge Nurse
+ 		Set beddfld("DCNrs")=$Get(%session.Data("DCNrs"))
+ 		//
+ 		//Dishcarge Date and Time
+ 		Set beddfld("DCDtTm")=$$DATE^BEDDUTIU($Get(%session.Data("DCDtTm")))
+ 		//
+ 		//Prime Dx
+ 		//Set beddfld("PrimDx")=$Get(%session.Data("PrimDx"))
+ 		//
+ 		//Prime Dx Narrative
+ 		//Set beddfld("PrimDxN")=$Get(%request.Data("PrimDxN",1))
+ 		
+ 		//Complete the discharge
+ 		Set save=$$DSAVE^BEDDUTID(dfn,amvisit,vien,objid,duz,site,.beddfld)
+ 		//
+ 		//
+ 		LOCK -^BEDD.EDVISIT(objid)
+ 	}
+ 	Quit
+ 
+]]></Implementation>
+</Method>
+
+<Method name="formGenJS">
+<Description><![CDATA[
+Called to render JavaScript code that is required for form <var>form</var>.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<Language>cache</Language>
+<ReturnType/>
+<Implementation><![CDATA[
+	Write !,"<script language=""JavaScript"" type=""text/javascript"">",!
+	Write "<!--",!
+	Write "function form_new()",!
+	Write "{",!
+	Write "   // invoke #server(csp.bedddc.formLoad())",!
+	Write "   return ("_"cspHttpServerMethod"_"('",..Encrypt($listbuild("csp.bedddc.formLoad"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""),"','') == 1);",!
+	Write "}",!
+	Write "function form_save()",!
+	Write "{",!
+	Write "   var form = self.document.form;",!
+	Write "   var objid = form.OBJID.value;",!
+	Write "   var result = 0;",!
+	Write "   if (form_validate()) {",!
+	Do ..formSavJS()
+	Write "   }",!
+	Write "   return (result == 1);",!
+	Write "}",!
+	Write "function form_validate()",!
+	Write "{",!
+	Write "   var errorMsg = '';",!
+	Write "   var missingMsg = '';",!
+	Write "   var invalidMsg = '';",!
+	Write "   var missingArray = new Array();",!
+	Write "   var invalidArray = new Array();",!
+	Write "   var valid;",!
+	Write "   missingMsg = form_testRequired(missingArray);",!
+	Write "   invalidMsg = form_testValid(invalidArray);",!
+	Write "   if ((missingMsg == '') && (invalidMsg == '')) {",!
+	Write "      return true;",!
+	Write "   }",!
+	Write "   errorMsg   = "_..QuoteJS(%response.GetText("","%CSPBind","SaveErrorLine","_______________________________________________________________"))_"+'\n\n';",!
+	Write "   errorMsg  += "_..QuoteJS(%response.GetText("","%CSPBind","SaveError","The form was not saved because of the following error(s)."))_"+'\n';",!
+	Write "   errorMsg  += "_..QuoteJS(%response.GetText("","%CSPBind","SaveCorrect","Please correct these error(s) and try again."))_"+'\n';",!
+	Write "   errorMsg  += "_..QuoteJS(%response.GetText("","%CSPBind","SaveErrorLine","_______________________________________________________________"))_"+'\n\n';",!
+	Write "   if (missingMsg!= '') {",!
+	Write "      errorMsg += "_..QuoteJS(%response.GetText("","%CSPBind","SaveRequiredError","The following required field(s) are empty: "))_" + missingMsg + '\n';",!
+	Write "   }",!
+	Write "   if (invalidMsg != '') {",!
+	Write "      errorMsg += "_..QuoteJS(%response.GetText("","%CSPBind","SaveInvalidError","The following field(s) contain invalid values: "))_" + invalidMsg + '\n';",!
+	Write "   }",!
+	Write "   alert(errorMsg);",!
+	Write "   return false;",!
+	Write "}",!
+	Write "function form_testRequired(missingArray)",!
+	Write "{",!
+	Write "   var missingMsg = '';",!
+	Do ..formReqJS()
+	Write "   return missingMsg;",!
+	Write "}",!
+	Write "function form_testValid(invalidArray)",!
+	Write "{",!
+	Write "   var valid;",!
+	Write "   var invalidMsg = '';",!
+	Do ..formValJS()
+	Write "   return invalidMsg;",!
+	Write "}",!
+	Write "// -->",!
+	Write "</script>",!
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="formLoad">
+<Description><![CDATA[
+Updates the form <var>form</var> from the specified object instance by sending JavaScript to the client.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>objid:%String,obj:%Integer=""</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	If '..formLoadJS(.objid,obj) {
+		Write "CSPPage.alert("_..QuoteJS("formLoad: "_%response.GetText("","%CSPBind","OpenObjectError","Unable to open object."))_");",!
+		Do ..formLoadJS(objid,obj,1)
+	}
+	Quit 1
+]]></Implementation>
+</Method>
+
+<Method name="formLoadJS">
+<Description><![CDATA[
+Updates the form <var>form</var> from the specified object instance by sending JavaScript to the client.  Error reporting is left to the caller.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>objid:%String,obj:%Integer="",alwaysLoad:%Boolean=0</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	New close,ok
+	Set close=0,ok=1
+	If (obj'=$$$NULLOREF) {
+		Set objid = obj.%Id()
+	} Else {
+		If (objid'="") {
+			Set obj = ##class(BEDD.EDVISIT).%OpenId(objid)
+		} Else {
+			Set obj = ##class(BEDD.EDVISIT).%New()
+		}
+		If (obj=$$$NULLOREF) {
+			If 'alwaysLoad Quit 0
+			Set ok=0
+		} Else {
+			Set close=1
+		}
+	}
+	Write "var form = CSPPage.document.form;",!
+	Write "if (form.ID != null && form.ID != null) { form.ID.value = ",..QuoteJS($select(obj="":"",1:(obj.%Id()))),";}",!
+	Write "if (form.ptdfn != null && form.ptdfn != null) { form.ptdfn.value = ",..QuoteJS($select(obj="":"",1:($select(obj.PtDFN=$c(0):"",1:(obj.PtDFNLogicalToDisplay(obj.PtDFN)))))),";}",!
+	Write "if (form.VIEN != null && form.VIEN != null) { form.VIEN.value = ",..QuoteJS($select(obj="":"",1:($select(obj.VIEN=$c(0):"",1:(obj.VIENLogicalToDisplay(obj.VIEN)))))),";}",!
+	Write "if (form.ptstI != null && form.ptstI != null) { form.ptstI.value = ",..QuoteJS($select(obj="":"",1:($select(obj.PtStatI=$c(0):"",1:(obj.PtStatILogicalToDisplay(obj.PtStatI)))))),";}",!
+	Write "if (form.reclock != null && form.reclock != null) { form.reclock.value = ",..QuoteJS($select(obj="":"",1:($select(obj.RecLock=$c(0):"",1:(obj.RecLockLogicalToDisplay(obj.RecLock)))))),";}",!
+	Write "if (form.reclockuser != null && form.reclockuser != null) { form.reclockuser.value = ",..QuoteJS($select(obj="":"",1:($select(obj.RecLockUser=$c(0):"",1:(obj.RecLockUserLogicalToDisplay(obj.RecLockUser)))))),";}",!
+	Write "if (form.reclockdt != null && form.reclockdt != null) { form.reclockdt.value = ",..QuoteJS($select(obj="":"",1:($select(obj.RecLockDT=$c(0):"",1:(obj.RecLockDTLogicalToDisplay(obj.RecLockDT)))))),";}",!
+	Write "if (form.OBJID != null) { form.OBJID.value = ",..QuoteJS(objid),";}",!
+	If close=1 Set obj=""
+	Quit ok
+]]></Implementation>
+</Method>
+
+<Method name="formReqJS">
+<Description><![CDATA[
+Called during rendering of this page to write out JavaScript code to do required field tests for form <var>form</var>.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<Language>cache</Language>
+<ReturnType/>
+<Implementation><![CDATA[	Quit
+]]></Implementation>
+</Method>
+
+<Method name="formSavJS">
+<Description><![CDATA[
+Called during rendering of this page to write out JavaScript code to invoke the server-side save method for form <var>form</var>.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<Language>cache</Language>
+<ReturnType/>
+<Implementation><![CDATA[
+	Write "      //invoke #server(csp.bedddc.formSave())"
+	Write !,"      result = "_"cspHttpServerMethod"_"('",..Encrypt($listbuild("csp.bedddc.formSave"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""),"',1,'',objid"
+	Write ",",!,"         (form.reclock == null || form.reclock == null) ? null : cspTrim(form.reclock.value)" ;%in1
+	Write ",",!,"         (form.reclockuser == null || form.reclockuser == null) ? null : cspTrim(form.reclockuser.value)" ;%in2
+	Write ",",!,"         (form.reclockdt == null || form.reclockdt == null) ? null : cspTrim(form.reclockdt.value)" ;%in3
+	Write ");",!
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="formSave">
+<Description><![CDATA[
+Saves the data sent from the form <var>form</var> into the specified object instance. If successful, updates the values on the form.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec><![CDATA[respond:%Boolean=0,&errmsg:%String="",objid:%String="",%in1:%Library.Integer,%in2:%Library.String,%in3:%Library.String]]></FormalSpec>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	New obj,sc,value,in,error,sverror,err,i,ok
+	Set sc=$$$OK
+	Set ok=1
+	Set error=""
+	Set sverror=""
+	If (objid="") {
+		Set obj = ##class(BEDD.EDVISIT).%New()
+	} ElseIf '$isobject(objid) {
+		Set obj = ##class(BEDD.EDVISIT).%OpenId(objid)
+	} Else {
+		Set obj = objid
+	}
+	If (obj=$$$NULLOREF) {
+		If (respond) {
+			Write "CSPPage.alert("_..QuoteJS(%response.GetText("","%CSPBind","SaveObjectError","Unable to open object for saving"))_");",!
+		} Else {
+			Set errmsg = %response.GetText("","%CSPBind","SaveObjectError","Unable to open object for saving")
+		}
+		Quit 0
+	}
+	Try {
+ ; RecLock 
+ If $data(%in1) {
+   Set value=$select(%in1="":"",1:##class(BEDD.EDVISIT).RecLockDisplayToLogical(%in1))
+   If (%in1'=""),(value="") {
+     Set error=error_%response.GetText("","%CSPBind","InvalidValue","%1 has an invalid value.","reclock")_"\n"
+   } Else {
+     Set obj.RecLock=value
+   }
+ }
+ ; RecLockUser 
+ If $data(%in2) {
+   Set value=$select(%in2="":"",1:##class(BEDD.EDVISIT).RecLockUserDisplayToLogical(%in2))
+   If (%in2'=""),(value="") {
+     Set error=error_%response.GetText("","%CSPBind","InvalidValue","%1 has an invalid value.","reclockuser")_"\n"
+   } Else {
+     Set obj.RecLockUser=value
+   }
+ }
+ ; RecLockDT 
+ If $data(%in3) {
+   Set value=$select(%in3="":"",1:##class(BEDD.EDVISIT).RecLockDTDisplayToLogical(%in3))
+   If (%in3'=""),(value="") {
+     Set error=error_%response.GetText("","%CSPBind","InvalidValue","%1 has an invalid value.","reclockdt")_"\n"
+   } Else {
+     Set obj.RecLockDT=value
+   }
+ }
+	Set:error'="" ok=0
+	Set:error="" sc=obj.%Save()
+	} Catch ex {
+		Set ok=0
+		If ($classname(ex)'="%Exception.SystemException") || (ex.Name'="<MAXSTRING>") || (error="") {
+			Set sc=ex.AsStatus(),error=""
+		}
+	}
+	If $$$ISERR(sc) {
+		Set ok=0
+		Do DecomposeStatus^%apiOBJ(sc,.err,"",%response.MatchLanguage())
+		For i=1:1:err {
+			If (respond) {
+				Set sverror=sverror_" + "_..QuoteJS(err(i))_" + '\n'"
+			} Else {
+				Set sverror=sverror_..EscapeHTML(err(i))_"\n"
+			}
+		}
+	}
+	If (respond) {
+		If (ok) {
+			Do ..formLoad("",obj)
+		} Else {
+			Write "CSPPage.alert(",!
+			Write ..QuoteJS(%response.GetText("","%CSPBind","SaveErrorLine","_______________________________________________________________"))_"+'\n\n'+",!
+			Write ..QuoteJS(%response.GetText("","%CSPBind","SaveError","The form was not saved because of the following error(s)."))_"+'\n'+",!
+			Write ..QuoteJS(%response.GetText("","%CSPBind","SaveCorrect","Please correct these error(s) and try again."))_"+'\n'+",!
+			Write ..QuoteJS(%response.GetText("","%CSPBind","SaveErrorLine","_______________________________________________________________"))_"+'\n\n'+",!
+			Write "'",error,"'",sverror,");",!
+		}
+	} Else {
+		Set errmsg=..EscapeHTML(error)_sverror
+	}
+	Quit ok
+]]></Implementation>
+</Method>
+
+<Method name="formSubmit">
+<Description><![CDATA[
+Translates a submit request from form <var>form</var> into a call to <METHOD>formSave</METHOD>.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec><![CDATA[&errmsg:%String="",objid]]></FormalSpec>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+ New v
+ Set v("RecLock")=$ZSTRIP($get(%request.Data("reclock",1)),">W")
+ Set v("RecLockUser")=$ZSTRIP($get(%request.Data("reclockuser",1)),">W")
+ Set v("RecLockDT")=$ZSTRIP($get(%request.Data("reclockdt",1)),">W")
+	If $get(objid)="" Set objid=$get(%request.Data("OBJID",1))
+	Quit ..formSave(0,.errmsg,objid,v("RecLock"),v("RecLockUser"),v("RecLockDT"))
+]]></Implementation>
+</Method>
+
+<Method name="formValJS">
+<Description><![CDATA[
+Called during rendering of this page to write out JavaScript code to do field validation tests for form <var>form</var>.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<Language>cache</Language>
+<ReturnType/>
+<Implementation><![CDATA[	Quit
+]]></Implementation>
+</Method>
+
+<Method name="getDtChk">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>date:%String,admdt:%String,chk:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ Quit $$DTCHK^BEDDUTIU(date,admdt,chk)
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>D:\intersystems\E3IHS\CSP\foia_goldb\BEDDDC.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/foia_goldb/BEDDDC.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>64671,78193</Default>
+</Parameter>
+</Class>
+</Export>

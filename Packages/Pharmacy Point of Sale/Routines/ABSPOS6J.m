@@ -1,5 +1,5 @@
 ABSPOS6J ; IHS/FCS/DRS - user screen subrous ; 
- ;;1.0;PHARMACY POINT OF SALE;;JUN 21, 2001
+ ;;1.0;PHARMACY POINT OF SALE;**49**;JUN 21, 2001;Build 27
  Q
 HEADER ; protocol ABSP P1 HEADER ; edit header  (EV  "Edit view screen")
  ; first, ask "All users or just one user or one patient?"
@@ -54,7 +54,7 @@ HDRA ; display for which one patient?
  ;    access all point of sale patients regardless of division.
  ;    SAC 2.3.1.4.1 says this is okay so long as we reset DUZ(2)
  ;    to its original value.
- N ABSPDUZ2 S ABSPDUZ2=+$G(DUZ(2)),DUZ(2)=0 ; ABSP*1.0T7*7
+ N ABSPDUZ2,BBLIMIT S ABSPDUZ2=+$G(DUZ(2)),DUZ(2)=0 ; ABSP*1.0T7*7
  S DIC=2,DIC(0)="AEMQZ",DIC("A")="Prescriptions for which patient? "
  S DIC("S")="I $D(^ABSPT(""AC"",Y))"
  D ^DIC W !
@@ -63,7 +63,14 @@ HDRA ; display for which one patient?
  W !,"Enter the number of DAYS to go back to find"
  W !,"Point of Sale activity for ",$P(Y(0),U),"."
  W ! S X=^TMP("ABSPOS",$J,"PATIENT TIME")
- S X=$$NUMERIC^ABSPOSU2("Number of days:  ",X,1,1,365) W !
+ ; /IHS/OIT/RAM ; 16 OCT 2017 ; CR#09828 Changes the amount of time we can back-bill payers; change
+ ;     1 year limit to a new field in the ABSP SETUP file with that parameter. Default is now 6 years.
+ ; S BBLIMIT=$D(^ABSP(9002313.99,"BACKLIMIT")) ; Grab default from ABSP SETUP file.
+ ; I BBLIMIT=0 S BBLIMIT=2192 ; If there is no value, set it to 6 years (in days).
+ S BBLIMIT=365 ; 31 OCT 17 ; CR 9828 IS NOW ON HOLD; CHANGE BACK TO ORIGINAL 1 YEAR BEHAVIOUR.
+ S X=$$NUMERIC^ABSPOSU2("Number of days:  ",X,1,1,BBLIMIT) W !
+ ; ; S X=$$NUMERIC^ABSPOSU2("Number of days:  ",X,1,1,365) W !
+ ; /IHS/OIT/RAM ; 16 OCT 2017 ; END OF CHANGES FOR CR#09828
  I X<1 G HDRA
  S PATTIME=X
  S ^TMP("ABSPOS",$J,"PATIENT")=PAT,^("PATIENT TIME")=PATTIME

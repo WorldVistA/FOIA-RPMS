@@ -1,24 +1,24 @@
 ABMERGRV ; IHS/SD/SDR - GET ANCILLARY SVCS REVENUE CODE INFO ;   
- ;;2.6;IHS Third Party Billing;**1,8,11,13,20,21**;NOV 12, 2009;Build 379
+ ;;2.6;IHS Third Party Billing;**1,8,11,13,20,21,22,23,25**;NOV 12, 2009;Build 444
  ;Original;DMJ;01/26/96 4:02 PM
- ; IHS/SD/SDR - v2.5 p8 - task 6
- ;    Added code for new ambulance multiple 47
- ; IHS/SD/SDR - v2.5 p9 - IM18857
- ;    Added code to print FL45
- ; IHS/SD/SDR - v2.5 p10 - IM20395
- ;  Split out lines bundled by rev code
- ; IHS/SD/SDR - v2.5 p10 - IM20396
- ;   Made change to fix covered days amount when there aren't
- ;   any covered days
+ ; IHS/SD/SDR 2.5 p8 task 6 Added code for new ambulance multiple 47
+ ; IHS/SD/SDR 2.5 p9 IM18857 Added code to print FL45
+ ; IHS/SD/SDR 2.5 p10 IM20395 Split out lines bundled by rev code
+ ; IHS/SD/SDR 2.5 p10 IM20396 Made change to fix covered days amount when there aren't any covered days
  ;
- ;IHS/SD/SDR - v2.6 CSV
- ;IHS/SD/SDR - abm*2.6*1 - HEAT5691 - Correction for covered days
- ;IHS/SD/SDR - abm*2.6*1 - HEAT6395 - allow dental codes to print on UB
- ;IHS/SD/SDR - abm*2.6*1 - HEAT7884 -
- ;IHS/SD/SDR - 2.6*13 - HEAT135507 - fix for <SUBSCR>P1+39^ABMERGRV
- ;IHS/SD/SDR - 2.6*13 - HEAT117086 - Removed code to put T1015 as top line; it doesn't work here.
- ;IHS/SD/AML - 2.6*20 - HEAT262141 Made changes for AHCCCS RX billing
- ;IHS/SD/SDR 2.6*21 HEAT120880 - Updated so flat rate will have service from and service to dates
+ ;IHS/SD/SDR 2.6 CSV
+ ;IHS/SD/SDR 2.6*1 HEAT5691 Correction for covered days
+ ;IHS/SD/SDR 2.6*1 HEAT6395 allow dental codes to print on UB
+ ;IHS/SD/SDR 2.6*1 HEAT7884
+ ;IHS/SD/SDR 2.6*13 HEAT135507 fix for <SUBSCR>P1+39^ABMERGRV
+ ;IHS/SD/SDR 2.6*13 HEAT117086 Removed code to put T1015 as top line; it doesn't work here.
+ ;IHS/SD/AML 2.6*20 HEAT262141 Made changes for AHCCCS RX billing
+ ;IHS/SD/SDR 2.6*21 HEAT120880 Updated so flat rate will have service from and service to dates
+ ;IHS/SD/SDR 2.6*22 HEAT335246 Made it so if the insurer is setup to print the NDC it will do flat rate and itemized on a claim, with either the default CPT
+ ;  printing with the flat rate or the flat rate printing on the first line item.
+ ;IHS/SD/SDR 2.6*23 HEAT247169 Added code to check subfile 43 if visit type is 997.
+ ;IHS/SD/SDR 2.6*23 HEAT347035 Added quit if print order was selected to not do the T1015-on-top thing
+ ;IHS/SD/SDR 2.6*25 CR10016 Made change to fix Arizona Medicaid pharmacy billing rev code 519
  ;
  ; *********************************************************************
  ;
@@ -51,14 +51,16 @@ P1 ;EP - SET UP ABMRV ARRAY
  ; 47 - Ambulance
  ; 
  ; if not flat rate .....
- I '$D(ABMP("FLAT")) D
+ ;I '$D(ABMP("FLAT")) D  ;abm*2.6*22 IHS/SD/SDR HEAT335246
+ I '$D(ABMP("FLAT"))!(($D(ABMP("FLAT")))&($P($G(^ABMNINS(DUZ(2),ABMP("INS"),0)),U,14)="Y")) D  ;abm*2.6*22 IHS/SD/SDR HEAT335246
  .N I
  .F I=21,23,25,27,33,35,37,39,43,45,47 D
  ..; dont get pharmacy if RX bill status is unbillable
  ..I $P($G(^AUTNINS(ABMP("INS"),2)),"^",3)="U",I=23 Q
  ..;this will make only viewable pages in CE show on bill, not everything
  ..;I ABMP("VTYP")=998,((I'=21)&(I'=25)&(I'=27)&(I'=39)&(I'=45)&(I'=47)) Q  ;dental  ;abm*2.6*1 HEAT6395
- ..I ABMP("VTYP")=997,(I'=23) Q  ;pharmacy
+ ..;I ABMP("VTYP")=997,(I'=23) Q  ;pharmacy  ;abm*2.6*23 IHS/SD/SDR HEAT247169
+ ..I ABMP("VTYP")=997,((I'=23)&(I'=43)) Q  ;pharmacy  ;abm*2.6*23 IHS/SD/SDR HEAT247169
  ..I ABMP("VTYP")=996,(I'=37) Q  ;lab
  ..I ABMP("VTYP")=995,(I'=35) Q  ;rad
  ..I $G(ABMP("CLIN"))="A3",((I'=43)&(I'=47)) Q  ;ambulance
@@ -67,6 +69,7 @@ P1 ;EP - SET UP ABMRV ARRAY
  ;start new code abm*2.6*11 HEAT117086
  ;I ABMP("ITYPE")="D" D  ;abm*2.6*13 HEAT135507
  I (($P($G(^AUTNINS(ABMP("INS"),0)),U)="ARBOR HEALTH PLAN")!($$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,ABMP("INS"),".211","I"),1,"I")="D"))&($D(ABMRV)) D  ;abm*2.6*21 IHS/SD/DR HEAT205579
+ .I +$O(^ABMDBILL(DUZ(2),ABMP("BDFN"),"PO",0))'=0 Q  ;the lines have been sequenced so don't do this  ;abm*2.6*23 IHS/SD/SDR HEAT347035
  .S ABMIS=$O(ABMRV(0))
  .;S ABMJS=+$O(ABMRV(ABMIS,0))  ;abm*2.6*13 HEAT135507
  .S ABMJS=$O(ABMRV(ABMIS,""))  ;abm*2.6*13 HEAT135507
@@ -155,8 +158,17 @@ P1 ;EP - SET UP ABMRV ARRAY
  ...S A=$O(ABMRV(519,0))
  ...Q:+A=0
  ...S B=$O(ABMRV(519,A,0))
- ...S $P(ABMRV(519,A,B),U,6)=$P(ABMRV(519,0,1),U,6)  ;put flat rate on first drug line
+ ...;S $P(ABMRV(519,A,B),U,6)=$P(ABMRV(519,0,1),U,6)  ;put flat rate on first drug line  ;abm*2.6*25 IHS/SD/SDR CR10016
+ ...S $P(ABMRV(519,A,B),U,6)=$P(ABMRV(519,0,1),U,6),$P(ABMRV(519,A,B),U)=519  ;put flat rate on first drug line and piece 1 as 519  ;abm*2.6*25 IHS/SD/SDR CR10016
  ...K ABMRV(519,0,1)  ;remove flat rate line
+ ...;start new abm*2.6*25 IHS/SD/SDR CR10016
+ ...S B=0
+ ...F  S B=$O(ABMRV(519,B)) Q:'B  D
+ ....S C=0
+ ....F  S C=$O(ABMRV(519,B,C)) Q:'C  D
+ .....S $P(ABMRV(519,B,C),U)=519
+ ...K A,B,C
+ ...;end new abm*2.6*25 IHS/SD/SDR CR10016
  ...;end new abm*2.6*20 IHS/SD/AML HEAT262141 1/4/2016 - AHCCCS RX REQUIREMENT
  .;
  .;start old code abm*2.6*11 HEAT105003

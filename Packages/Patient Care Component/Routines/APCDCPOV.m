@@ -1,5 +1,5 @@
 APCDCPOV ; IHS/CMI/LAB - POV LOOKUP ;
- ;;2.0;IHS PCC SUITE;**11,13,16**;MAY 14, 2009;Build 9
+ ;;2.0;IHS PCC SUITE;**11,13,16,20**;MAY 14, 2009;Build 25
  ;
 START ;
  D EN^XBNEW("LEX^APCDCPOV","APCDDATE;APCDTCLK;APCDVSIT;APCDTDIA,APCDT90;APCDTIN9")
@@ -43,14 +43,30 @@ LEX1 ;reader call to get TEXT for code
  S DIC("A")=$S($G(APCDTDIA)]"":APCDTDIA_": ",1:"Enter PURPOSE OF VISIT: ")
  I APCDIMP=1 D LOOK^LEXA(X,"ICD",999,"ICD",$P(APCDD,"."))
  I APCDIMP=30 D LOOK^LEXA(X,"10D",999,"10D",$P(APCDD,"."))
- I 'LEX D  G LEX
+ I 'LEX D  G:%="" LEX G:% LEXN
  .S X=0 F  S X=$O(LEX("HLP",X)) Q:X'=+X  W !,LEX("HLP",X)
+ .;now check fileman V2.0 PATCH 20 CR#554
+ .W !!,"now trying secondary fileman lookup..."
+ .S %="" S X=APCDUINP,DIC="^ICD9(",DIC(0)="MEQ",DIC("S")="D CHKE^AUPNSICD" D ^DIC K DIC
+ .S %="" I $P(Y,U)'=-1 S %=+Y
  ;display all codes and call reader
  S APCDANS=""
  D GETANS^APCDAPOV
- I APCDY="^" W ! G LEX
- I APCDY="" W ! G LEX
- I '$G(APCDY) W ! G LEX
+ I APCDY="^" W ! D  G:%="" LEX G:% LEXN
+ .;now check fileman
+ .;W !!,"now trying fileman lookup..."
+ .S %="" ;S X=APCDUINP,DIC="^ICD9(",DIC(0)="QME" D ^DIC K DIC
+ .;S %="" I $P(Y,U)'=-1 S %=+Y
+ I APCDY="" W ! D  G:%="" LEX G:% LEXN
+ .;now check fileman
+ .;W !!,"now trying fileman lookup..."
+ .S %="" ;S X=APCDUINP,DIC="^ICD9(",DIC(0)="MEQ" D ^DIC K DIC
+ .;S %="" I $P(Y,U)'=-1 S %=+Y
+ I '$G(APCDY) W ! D  G:%="" LEX G:% LEXN
+ .;now check fileman
+ .;W !!,"now trying fileman lookup..."
+ .S %="" ;S X=APCDUINP,DIC="^ICD9(",DIC(0)="MEQ" D ^DIC K DIC
+ .;S %="" I $P(Y,U)'=-1 S %=+Y
  I APCDIMP=1 S Y=$$ICDONE^LEXU($P(^TMP("LEXHIT",$J,APCDY),U,1),$P(APCDD,"."))
  I APCDIMP=30 S Y=$$ONE^LEXU($P(^TMP("LEXHIT",$J,APCDY),U,1),$P(APCDD,"."),"10D")
  K DO,^TMP("LEXSCH",$J)
@@ -155,14 +171,30 @@ CLEX ;EP
  I $G(APCDTDIA)]"" S DIC("A")=$G(APCDTDIA)
  I APCDIMP=1 D LOOK^LEXA(X,"ICD",999,"ICD",$P(APCDD,"."))
  I APCDIMP=30 D LOOK^LEXA(X,"10D",999,"10D",$P(APCDD,"."))
- I 'LEX D  G CLEX
+ I 'LEX D  G:%="" CLEX G:% LEXC
  .S X=0 F  S X=$O(LEX("HLP",X)) Q:X'=+X  W !,LEX("HLP",X)
+ .;now check fileman V2.0 PATCH 20 CR#554
+ .W !!,"now trying secondary fileman lookup..."
+ .S %="" S X=APCDUINP,DIC="^ICD9(",DIC(0)="MEQ",DIC("S")="D CHKE^AUPNSICD" D ^DIC K DIC
+ .S %="" I $P(Y,U)'=-1 S %=+Y
  ;display all codes and call reader
  S APCDANS=""
  D GETANS^APCDAPOV
- I APCDY="^" W ! G CLEX
- I APCDY="" W ! G CLEX
- I '$G(APCDY) W ! G CLEX
+ I APCDY="^" W ! D  G:%="" CLEX G:% LEXC
+ .;now check fileman
+ .;W !!,"now trying fileman lookup..."
+ .S %="" ;S X=APCDUINP,DIC="^ICD9(",DIC(0)="QME" D ^DIC K DIC
+ .;S %="" I $P(Y,U)'=-1 S %=+Y
+ I APCDY="" W ! D  G:%="" CLEX G:% LEXC
+ .;now check fileman
+ .;W !!,"now trying fileman lookup..."
+ .S %="" ;S X=APCDUINP,DIC="^ICD9(",DIC(0)="MEQ" D ^DIC K DIC
+ .;S %="" I $P(Y,U)'=-1 S %=+Y
+ I '$G(APCDY) W ! D  G:%="" CLEX G:% LEXC
+ .;now check fileman
+ .;W !!,"now trying fileman lookup..."
+ .S %="" ;S X=APCDUINP,DIC="^ICD9(",DIC(0)="MEQ" D ^DIC K DIC
+ .;S %="" I $P(Y,U)'=-1 S %=+Y
  I APCDIMP=1 S Y=$$ICDONE^LEXU($P(^TMP("LEXHIT",$J,APCDY),U,1),$P(APCDD,"."))
  I APCDIMP=30 S Y=$$ONE^LEXU($P(^TMP("LEXHIT",$J,APCDY),U,1),$P(APCDD,"."),"10D")
  K DO,^TMP("LEXSCH",$J)

@@ -1,0 +1,446 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2018-09-27 12:54:36">
+<Class name="csp.beddrptmnu">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeChanged>64672,29654.016803</TimeChanged>
+<TimeCreated>64672,29654.00545</TimeCreated>
+<GeneratedBy>/csp/foia_goldb/BEDDRPTMNU.csp</GeneratedBy>
+
+<Method name="MyXdate">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>rawDtTm:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set val=$$XDATE^BEDDUTID(rawDtTm)
+ 	QUIT $P(val," ")
+ 
+]]></Implementation>
+</Method>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body bgcolor=#DCDCDC onload=""setFocus()"">"
+	Write !,!
+	Set Begdt=$$DTCMP^BEDDUTIU("",-30)
+	Set Begdt1=$$XNOW^BEDDUTIL("5D")
+	Set Enddt=$$XNOW^BEDDUTIL("5D")
+	Write !,!,"<h1><b>"
+	Write "<div align=""center"">"
+	Write "ERS/BEDD Reports"
+	Write "</div>"
+	Write "</b></h1> ",!
+	Write "<b>"
+	Write "<div align=""right"">"
+	Write "<a href="""_($zconvert(..Link("BEDDAPPL.EDRoom.cls"),"O","HTML"))_""">"
+	Write "BEDD Manager Home"
+	Write "</a>"
+	Write "</div>"
+	Write "</b> ",!
+	Write "  ",!
+	Write "<b>Admission Activity </b>",!
+	Write !,"<form name=""activity"" action=""BEDDRPTMNU.csp"" method=""POST"">"
+	Write !,..InsertHiddenFields("BEDDRPTMNU.csp"),!
+	Write !,!,"<table cellpadding=""3"" border=1 bgcolor=#DDDDFF>",!
+	Write "	<tr>",!
+	Write "		<td><b>"
+	Write "<div align=""right"">"
+	Write "Enter the Beginning Admission Date"
+	Write "</div>"
+	Write "</b></td>",!
+	Write "		<td>"
+	Write "<input type=""date"" name=""ASBDt"" id=""ASBDt"" value="_(Begdt1)," size=""12"" onchange=""doASBDtChk()"">"
+	Write "</td>",!
+	Write "		<td><b>"
+	Write "<div align=""center"">"
+	Write "Enter the Ending Admission Date"
+	Write "</div>"
+	Write "</b></td>",!
+	Write "		<td>"
+	Write "<input type=""date"" name=""ASEDt"" id=""ASEDt"" value="_(Enddt)," size=""12"" onchange=""doASEDtChk()"">"
+	Write "</td>",!
+	Write "		<td></td><td></td>",!
+	Write "		<td>"
+	Write "<input type=""submit"" name=""ASrunbtn"" value=""Run Report"">"
+	Write "</td>",!
+	Write "	</tr>",!
+	Write "</table> ",!
+	Write "<hr>",!
+	Write !,"<br>",!
+	Write "<b>Central Log Report</b>",!
+	Write "<br><br>",!
+	Write "<table cellpadding=""3"" border=1 bgcolor=#DDDDFF >",!
+	Write "	<tr>",!
+	Write "   		<td><b>"
+	Write "<div align=""right"">"
+	Write "Enter the Beginning Date"
+	Write "</div>"
+	Write "</b></td>",!
+	Write "    	<td>"
+	Write "<input type=""date"" name=""CLBDt"" id=""CLBDt"" value="_(Begdt1)," size=""12"" onchange=""doCLBDtChk()"">"
+	Write "</td>",!
+	Write "    	<td><b>"
+	Write "<div align=""center"">"
+	Write "Enter the Ending Date"
+	Write "</div>"
+	Write "</b></td>",!
+	Write "    	<td>"
+	Write "<input type=""date"" name=""CLEDt"" id=""CLEDt"" value="_(Enddt)," size=""12"" onchange=""doCLEDtChk()"">"
+	Write "</td>",!
+	Write "    	<td><b>"
+	Write "<div align=""right"">"
+	Write "Selection Date Range"
+	Write "</div>"
+	Write "</b></td>",!
+	Write "    	<td>"
+	Write "<select name=""CISrt"" id=""CISrt"" value=""Admit"">"
+	Write !,"    	"
+	Write "<option value=""ADMIT"">"
+	Write "Admission</option>",!
+	Write "    	"
+	Write "<option value=""DISCH"">"
+	Write "Discharge</option>",!
+	Write "    	"
+	Write "</select>"
+	Write "</td>",!
+	Write "    	<td>"
+	Write "<input type=""submit"" name=""CLrunbtn"" value=""Run Report"">"
+	Write "</td>",!
+	Write "	</tr>",!
+	Write "</table>",!
+	Write "<hr>",!
+	Write !,"<br>",!
+	Write "<b>Check-In by hour </b>",!
+	Write "<br><br>",!
+	Write "<table cellpadding=""3"" border=1 bgcolor=#DDDDFF>",!
+	Write "	<tr>",!
+	Write "		<td><b>"
+	Write "<div align=""right"">"
+	Write "Enter the Beginning Admission Date"
+	Write "</div>"
+	Write "</b></td>",!
+	Write "    	<td>"
+	Write "<input type=""date"" name=""CHBDt"" id=""CHBDt"" value="_(Begdt1)," size=""12"" onchange=""doCHBDtChk()"">"
+	Write "</td>",!
+	Write "    	<td><b>"
+	Write "<div align=""center"">"
+	Write "Enter the Ending Admission Date"
+	Write "</div>"
+	Write "</b></td>",!
+	Write "    	<td>"
+	Write "<input type=""date"" name=""CHEDt"" id=""CHEDt"" value="_(Enddt)," size=""12"" onchange=""doCHEDtChk()"">"
+	Write "</td>",!
+	Write "  		<td></td><td></td>",!
+	Write "    	<td>"
+	Write "<input type=""submit"" name=""CHrunbtn"" value=""Run Report"">"
+	Write "</td>",!
+	Write "	</tr>",!
+	Write "</table>",!
+	Write "<hr>",!
+	Write !,"<br>",!
+	Write "<b>Length of Stay by Acuity </b>",!
+	Write "<br><br>",!
+	Write "<table cellpadding=""3"" border=1 bgcolor=#DDDDFF>",!
+	Write "	<tr>",!
+	Write "		<td><b>"
+	Write "<div align=""right"">"
+	Write "Enter the Beginning Admission Date"
+	Write "</div>"
+	Write "</b></td>",!
+	Write "    	<td>"
+	Write "<input type=""date"" name=""LSBDt"" id=""LSBDt"" value="_(Begdt1)," size=""12"" onchange=""doLSBDtChk()"">"
+	Write "</td>",!
+	Write "    	<td><b>"
+	Write "<div align=""center"">"
+	Write "Enter the Ending Admission Date"
+	Write "</div>"
+	Write "</b></td>",!
+	Write "    	<td>"
+	Write "<input type=""date"" name=""LSEDt"" id=""LSEDt"" value="_(Enddt)," size=""12"" onchange=""doLSEDtChk()"">"
+	Write "</td>",!
+	Write "  		<td></td><td></td>",!
+	Write "     	<td>"
+	Write "<input type=""submit"" name=""LSrunbtn"" value=""Run Report"">"
+	Write "</td>",!
+	Write " 	</tr>",!
+	Write "</table>",!
+	Write "<hr>",!
+	Write " ",!
+	Write "<br>",!
+	Write "<b>Discharge Activity by hour </b>",!
+	Write "<br><br>",!
+	Write "<table cellpadding=""3"" border=1 bgcolor=#DDDDFF>",!
+	Write "	<tr>",!
+	Write "		<td><b>"
+	Write "<div align=""right"">"
+	Write "Enter the Beginning Discharge Date"
+	Write "</div>"
+	Write "</b></td>",!
+	Write "    	<td>"
+	Write "<input type=""date"" name=""DABDt"" id=""DABDt"" value="_(Begdt1)," size=""12"" onchange=""doDABDtChk()"">"
+	Write "</td>",!
+	Write "    	<td><b>"
+	Write "<div align=""center"">"
+	Write "Enter the Ending Discharge Date"
+	Write "</div>"
+	Write "</b></td>",!
+	Write "    	<td>"
+	Write "<input type=""date"" name=""DAEDt"" id=""DAEDt"" value="_(Enddt)," size=""12"" onchange=""doDAEDtChk()"">"
+	Write "</td>",!
+	Write "  		<td></td><td></td>",!
+	Write "     	<td>"
+	Write "<input type=""submit"" name=""DArunbtn"" value=""Run Report"">"
+	Write "</td>",!
+	Write "	</tr>",!
+	Write " </table>",!
+	Write "<hr>",!
+	Write !,"<br>",!
+	Write "<b>Room Utilization </b>",!
+	Write "<br><br>",!
+	Write "<table cellpadding=""3"" border=1 bgcolor=#DDDDFF>",!
+	Write "	<tr>",!
+	Write "		<td><b>"
+	Write "<div align=""right"">"
+	Write "Enter the Beginning Admission Date"
+	Write "</div>"
+	Write "</b></td>",!
+	Write "    	<td>"
+	Write "<input type=""date"" name=""RUBDt"" id=""RUBDt"" value="_(Begdt1)," size=""12"" onchange=""doRUBDtChk()"">"
+	Write "</td>",!
+	Write "    	<td><b>"
+	Write "<div align=""center"">"
+	Write "Enter the Ending Admission Date"
+	Write "</div>"
+	Write "</b></td>",!
+	Write "    	<td>"
+	Write "<input type=""date"" name=""RUEDt"" id=""RUEDt"" value="_(Enddt)," size=""12"" onchange=""doRUEDtChk()"">"
+	Write "</td>",!
+	Write "  		<td></td><td></td>",!
+	Write " 		<td>"
+	Write "<input type=""submit"" name=""RUrunbtn"" value=""Run Report"">"
+	Write "</td>",!
+	Write " 	</tr>",!
+	Write "</table> ",!
+	Write "</form>"
+	Write !,!,!,"<hr>",!
+	Write !,!,!,"</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<!-- BEDDRPTMNU.csp - BEDD Report Menu -->"
+	Write !,"<!-- ;;2.0;IHS EMERGENCY DEPT DASHBOARD;;Apr 02, 2014 -->"
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<HEAD>"
+	Write !,!,!
+	Set U="^",site=%session.Data("SITE")
+	Do LOADSYS^BEDDUTW(.beddsys,site)
+	Set timeout=$G(beddsys("TimeOut"))
+	Write !,!,"<META HTTP-EQUIV=""Refresh"" CONTENT="""_( timeout )_"; URL=BEDD.csp"">"
+	Write !,!,"<TITLE>BEDD Report Menu </TITLE>",!
+	Write !,"<script language=""javascript"" type=""text/javascript"">"
+	Write !,"function setFocus() {",!
+	Write "		",!
+	Write "	//Make sure user is logged in",!
+	Write !,"	//Get user",!
+	Write "	var user = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".ReturnDUZ"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"') ;",!
+	Write !,"	if (user == 0) {",!
+	Write "		location.replace='BEDDLogin.csp';",!
+	Write "		return true;",!
+	Write "	}",!
+	Write "}",!
+	Write !,"function doASBDtChk()	{",!
+	Write "	var my_info = document.getElementById(""ASBDt"");",!
+	Write "	var my_datetm = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".MyXdate"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',my_info.value) ;",!
+	Write "	my_info.value=my_datetm;",!
+	Write "	}",!
+	Write "function doASEDtChk()	{",!
+	Write "	var my_info = document.getElementById(""ASEDt"");",!
+	Write "	var my_datetm = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".MyXdate"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',my_info.value) ;",!
+	Write "	my_info.value=my_datetm;",!
+	Write "	}",!
+	Write "function doASEDtChk()	{",!
+	Write "	var my_info = document.getElementById(""ASEDt"");",!
+	Write "	var my_datetm = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".MyXdate"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',my_info.value) ;",!
+	Write "	my_info.value=my_datetm;",!
+	Write "	}",!
+	Write "function doCLBDtChk()	{",!
+	Write "	var my_info = document.getElementById(""CLBDt"");",!
+	Write "	var my_datetm = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".MyXdate"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',my_info.value) ;",!
+	Write "	my_info.value=my_datetm;",!
+	Write "}",!
+	Write "function doCLEDtChk()	{",!
+	Write "	var my_info = document.getElementById(""CLEDt"");",!
+	Write "	var my_datetm = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".MyXdate"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',my_info.value) ;",!
+	Write "	my_info.value=my_datetm;",!
+	Write "}",!
+	Write "function doCHBDtChk()	{",!
+	Write "	var my_info = document.getElementById(""CHBDt"");",!
+	Write "	var my_datetm = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".MyXdate"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',my_info.value) ;",!
+	Write "	my_info.value=my_datetm;",!
+	Write "}",!
+	Write "function doCHEDtChk()	{",!
+	Write "	var my_info = document.getElementById(""CHEDt"");",!
+	Write "	var my_datetm = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".MyXdate"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',my_info.value) ;",!
+	Write "	my_info.value=my_datetm;",!
+	Write "}",!
+	Write "function doLSBDtChk()	{",!
+	Write "	var my_info = document.getElementById(""LSBDt"");",!
+	Write "	var my_datetm = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".MyXdate"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',my_info.value) ;",!
+	Write "	my_info.value=my_datetm;",!
+	Write "}",!
+	Write "function doLSEDtChk()	{",!
+	Write "	var my_info = document.getElementById(""LSEDt"");",!
+	Write "	var my_datetm = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".MyXdate"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',my_info.value) ;",!
+	Write "	my_info.value=my_datetm;",!
+	Write "}",!
+	Write "function doDABDtChk()	{",!
+	Write "	var my_info = document.getElementById(""DABDt"");",!
+	Write "	var my_datetm = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".MyXdate"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',my_info.value) ;",!
+	Write "	my_info.value=my_datetm;",!
+	Write "}",!
+	Write "function doDAEDtChk()	{",!
+	Write "	var my_info = document.getElementById(""DAEDt"");",!
+	Write "	var my_datetm = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".MyXdate"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',my_info.value) ;",!
+	Write "	my_info.value=my_datetm;",!
+	Write "}",!
+	Write "function doRUBDtChk()	{",!
+	Write "	var my_info = document.getElementById(""RUBDt"");",!
+	Write "	var my_datetm = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".MyXdate"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',my_info.value) ;",!
+	Write "	my_info.value=my_datetm;",!
+	Write "}",!
+	Write "function doRUEDtChk()	{",!
+	Write "	var my_info = document.getElementById(""RUEDt"");",!
+	Write "	var my_datetm = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".MyXdate"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',my_info.value) ;",!
+	Write "	my_info.value=my_datetm;",!
+	Write "}",!
+	Write "</script>"
+	Write !,(..HyperEventHead(0,0))
+	Write !,"</HEAD>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<HTML>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,"</HTML>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+ Set U="^"
+ //
+ //Check for access information
+ If ($Get(%session.Data("DUZ")) = "") {
+ 	Set %response.Redirect="BEDDLogin.csp"
+ }
+ //
+ //Process Admission Summary (Button)
+ If ($Data(%request.Data("ASrunbtn",1))) {
+    	Set %response.Redirect="BEDDASRPT.csp?Begdt="_%request.Get("ASBDt")_"&Enddt="_%request.Get("ASEDt")
+ }
+ //
+ //Process Central Log (Button)
+ If ($Data(%request.Data("CLrunbtn",1))) {
+    	Set %response.Redirect="BEDDCLOGRPT.csp?Begdt="_%request.Get("CLBDt")_"&Enddt="_%request.Get("CLEDt")_"&CISrt="_%request.Get("CISrt")
+ }
+ //
+ //Process Check In By Hour (Button)
+ If ($Data(%request.Data("CHrunbtn",1))) {
+    	Set %response.Redirect="BEDDCITMRPT.csp?Begdt="_%request.Get("CHBDt")_"&Enddt="_%request.Get("CHEDt")
+ }
+ //
+ //Process LOS by Acuity (Button)
+ If ($Data(%request.Data("LSrunbtn",1))) {
+    	Set %response.Redirect="BEDDLOSRPT.csp?Begdt="_%request.Get("LSBDt")_"&Enddt="_%request.Get("LSEDt")
+ }
+ //
+ //Process Discharge Activity by hour (Button)
+ If ($Data(%request.Data("DArunbtn",1))) {
+    	Set %response.Redirect="BEDDDCTMRPT.csp?Begdt="_%request.Get("DABDt")_"&Enddt="_%request.Get("DAEDt")
+ }
+ //
+ //Process Room Utilization (Button)
+ If ($Data(%request.Data("RUrunbtn",1))) {
+    	Set %response.Redirect="BEDDRMTMRPT.csp?Begdt="_%request.Get("RUBDt")_"&Enddt="_%request.Get("RUEDt")
+ }
+ 
+ Quit 1
+ 
+]]></Implementation>
+</Method>
+
+<Method name="ReturnDUZ">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set user=$Get(%session.Data("DUZ"))
+ 	If (user<1) {
+ 		Set user=0
+ 	}
+ 
+ 	Quit user
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>D:\intersystems\E3IHS\CSP\foia_goldb\BEDDRPTMNU.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/foia_goldb/BEDDRPTMNU.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>64671,78216</Default>
+</Parameter>
+</Class>
+</Export>

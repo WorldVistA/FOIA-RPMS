@@ -1,6 +1,7 @@
 ABMDF35D ; IHS/SD/SDR - Set HCFA1500 (02/12) Print Array - Part 4 ;  
- ;;2.6;IHS Third Party Billing;**13,14**;NOV 12, 2009;Build 238
+ ;;2.6;IHS Third Party Billing;**13,14,22**;NOV 12, 2009;Build 418
  ;IHS/SD/SDR - 2.6*14 - Updated DX^ABMCVAPI call to be numeric
+ ;IHS/SD/SDR 2.6*22 HEAT335246 check new parameter for itemized but with the flat rate on first line, zeros for the rest
  ;
  ; *********************************************************************
  ;
@@ -29,6 +30,22 @@ DX ; Diagnosis Info
  ;
 ST S ABMP("GL")="^ABMDBILL(DUZ(2),"_ABMP("BDFN")_","
  S ABMPRINT=1 D ^ABMDESM1
+ ;start new abm*2.6*22 IHS/SD/SDR HEAT335246
+ S ABMITMZ=$P($G(^ABMNINS(DUZ(2),ABMP("INS"),1,ABMP("VTYP"),0)),"^",12)
+ I ((ABMITMZ)&($P($G(^ABMNINS(DUZ(2),ABMP("INS"),0)),U,14)="Y")&($D(ABMP("FLAT")))) D
+ .I +$P($G(^ABMNINS(DUZ(2),ABMP("INS"),1,ABMP("VTYP"),0)),U,16) S ABMS("I")=+$G(ABMS("I"))+1
+ .D ITEM^ABMDESM1
+ I $D(ABMP("FLAT")) D
+ .S ABMS("TOT")=+ABMP("FLAT")  ;set total equal to flat rate
+ .K I
+ .S M=0
+ .S I=0
+ .F  S I=$O(ABMS(I)) Q:'I  D
+ ..S M=+M+1
+ ..I M=1 S $P(ABMS(I),U)=+ABMP("FLAT"),$P(ABMS(I),U,6)=1
+ ..I M'=1 S $P(ABMS(I),U)=0,$P(ABMS(I),U,6)=0  ;zeros for all other lines
+ .K ABMP("FLAT")
+ ;end new abm*2.6*22 IHS/SD/SDR HEAT335246 
  I $P($G(^DIC(40.7,$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),0)),U,10),0)),U,2)="A3" D
  .S ABMI=0
  .F  S ABMI=$O(ABMS(ABMI)) Q:'ABMI  D

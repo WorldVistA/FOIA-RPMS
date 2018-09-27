@@ -1,5 +1,5 @@
 ABSPOSBB ; IHS/FCS/DRS - POS billing - new ;        [ 03/14/2003  11:18 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**6,7,11,14,19,22,28,31,36,37,38,39,46**;JUN 21, 2001;Build 15
+ ;;1.0;PHARMACY POINT OF SALE;**6,7,11,14,19,22,28,31,36,37,38,39,46,48**;JUN 21, 2001;Build 27
  ;
  ; When a transaction completes, POSTING^ABSPOSBB is called
  ; (the transaction completion happens in ^ABSPOSU)
@@ -12,6 +12,9 @@ ABSPOSBB ; IHS/FCS/DRS - POS billing - new ;        [ 03/14/2003  11:18 AM ]
  ; Your posting routine is called by $$.
  ; The result is stuffed into Field .15, POSTED TO A/R.
  ; It's a free text field.  Use it in any way your interface desires.
+ ; 
+ ; /IHS/OIT/RAM ; PATCH 48 ; Change: added for HEAT ticket # 135473; CR 07534 - pass insurer information to 3PB.
+ ; 
  ;
  Q
 POSTING ; EP - for _all_ billing interfaces - with ABSP57
@@ -38,6 +41,7 @@ POSTING ; EP - for _all_ billing interfaces - with ABSP57
  . N FDA,IEN,MSG
  . S FDA(9002313.57,ABSP57_",",.15)=RESULT
  . D FILE^DIE(,"FDA","MSG")
+ . I $D(MSG) D LOG^ABSPOSL2("F^ABSPOSBX",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  Q
  ; *********************************************************************
 THIRD()  ; IHS Third Party Billing ; ABSP*1.0T7*6  entire paragraph is new
@@ -155,6 +159,7 @@ REVERSIT  ; sets DA on its way out ; ABSP*1.0T7*6 ; entire paragraph is new
 POSTIT(ABSPRJCT)  ; ABSP*1.0T7*6 ; entire paragraph is new
  N ABSPOST ;IHS/OIT/SCR 011210 patch 36
  N ABSPCNT ;IHS/OIT/SCR 020210 patch 37
+ N ABSPINS ;/IHS/OIT/RAM 18 MAY 2017; Patch 48, CR 07534
  S ABSP(.21)=$$GET1^DIQ(9002313.57,TX,505)       ; Total price
  S ABSP(.23)=ABSP(.21)
  S ABSP(.05)=$$GET1^DIQ(9002313.57,TX,5,"I")     ; IEN to Patient file
@@ -163,8 +168,8 @@ POSTIT(ABSPRJCT)  ; ABSP*1.0T7*6 ; entire paragraph is new
  S ABSP(.1)=$$GET1^DIQ(9000010,VSTDFN,.08,"I")   ; IEN to Clinic Stop
  S ABSP(.03)=$$GET1^DIQ(9000010,VSTDFN,.06,"I")  ; Location of Encounter
  I ABSP(.03)="" D  Q ""  ;IHS/OIT/SCR 122809 patch 36 - if no location of Encounter, don't pass to 3PB
- .D SETFLAG^ABSPOSBC(ABSP57,0) ; clear the "needs billing" flag'
- .Q
+ . D SETFLAG^ABSPOSBC(ABSP57,0) ; clear the "needs billing" flag'
+ . Q
  S ABSP(.08)=INSDFN
  S ABSP(.58)=$$GET1^DIQ(9002313.57,TX,1.09)     ; Prior Authorization
  S ABSP(.14)=$$GET1^DIQ(9002313.57,TX,13,"I")   ; User
@@ -180,6 +185,16 @@ POSTIT(ABSPRJCT)  ; ABSP*1.0T7*6 ; entire paragraph is new
  S ABSP(23,.06)=$$GET1^DIQ(52,RXI,.01)          ; Prescription
  S ABSP(23,14)=$$GET1^DIQ(9002313.57,TX,10401)  ; Date filled
  S ABSP(23,20)=$$GET1^DIQ(9002313.57,TX,10405)  ; Days supply
+ ; /IHS/OIT/RAM ; 18 MAY 2017 ; CR 07534 - Pass Insurer Information to 3PB. All code that follows until end comment is new for Patch 48.
+ S ABSPINS=$$GETINSINFO(TX) ; Gather all available insurance information for xfer to 3PB.
+ ; As they say... plan for the worst, hope for the best. Just in case more info needs to be returned than the PRVT multiple, uncomment any needed info from the possibilities below.
+ ; I +$P(ABSPINS,U,1)>0 S ABSP(13,.01)=$P(ABSPINS,U,1) ; Insurer pointer from the 701/702/703 field of ^ABSPTL.
+ ; I +$P(ABSPINS,U,4)>0 S ABSP(13,.04)=$P(ABSPINS,U,4) ; Medicare multiple from the 601/602/603 field of ^ABSPTL.
+ ; I +$P(ABSPINS,U,5)>0 S ABSP(13,.05)=$P(ABSPINS,U,5) ; Railroad multiple from the 601/602/603 field of ^ABSPTL.
+ ; I +$P(ABSPINS,U,6)>0 S ABSP(13,.06)=$P(ABSPINS,U,6) ; Medicaid Eligible pointer from the 601/602/603 field of ^ABSPTL.
+ ; I +$P(ABSPINS,U,7)>0 S ABSP(13,.07)=$P(ABSPINS,U,7) ; Medicaid multiple from the 601/602/603 field of ^ABSPTL.
+ I +$P(ABSPINS,U,8)>0 S ABSP(13,.08)=$P(ABSPINS,U,8) ; Private Insurance multiple from the 601/602/603 field of ^ABSPTL.
+ ; /IHS/OIT/RAM ; 18 MAY 2017 ; CR 07534 - End of new code detailed above. 
  ;IHS/OIT/SCR 020210 patch 37 send reject information
  I $G(ABSPRJCT("RJCTIME")) D
  .S ABSPCNT=0
@@ -284,3 +299,45 @@ VMEDSTAT(VMEDDFN,STAT) ;
  S DIE=9000010.14,DA=VMEDDFN,DR="1106///^S X=STAT"
  D ^DIE
  Q
+GETINSINFO(TX) ; /IHS/OIT/RAM ; 18 MAY 2017 - P48 - new routine to gather all the insurance information.
+ N BEG,END,I,I2,I3,ABSPPINNO,ABSPPINDATA,ABSPINSIEN,ABSPPINTYPE,ABSPELIGIEN,ABSPMULT,ABSPRETURN,ABSPTODAY  ;/IHS/OIT/RAM 07534 Patch 48 - New parameters to hold temporary insurance info for 3PB.
+ S ABSPPINDATA="" ; verify that "no data" is empty on entry.
+ S ABSPRETURN="" ;  verify that the return value is initialized -- return "nothing" if there is no data.
+ D NOW^%DTC S ABSPTODAY=X ; Get today's FileMan date -- useful if we have to manually find the correct Medicaid Multiple.
+ ;
+ ; Very little documentation on the PINS pieces; here's how (I think) they work: 
+ ; There are 5 types of PINS insurers: "CAID" (Medicaid),"PRVT"(Private Insurance),"CARE"(Medicare),"SELF PAY" & "RR"(rarely used.)
+ ; The 2nd piece is the IEN in ^AUPNMCD, ^AUPNPRVT, ^AUPNMCR, [[ NO GLOBAL ]], & ^AUPNRRE (respective above).
+ ; The 3rd piece is the "Multiple" - as each primary node can have multiple subnodes, this value is the correct subnode for the record.
+ ; ** Warning! ** There is currently a bug in ABSP that does _not_ save the Medicaid multiple. The patch code below will need to account for that and manually generate the correct information.
+ ; also, not sure if this is 'expected behaviour' but it seems that the 'active' insurance is always in PINS 1; but sometimes the PINS piece number will point to an empty 2/3/4. Possibly another bug.
+ S ABSPPINNO=$$GET1^DIQ(9002313.57,TX,1.08)  ; PINS Piece Number ; determine which insurer (primary/secondary/tertiary) we're working with.
+ I ABSPPINNO=1 S ABSPPINDATA=$$GET1^DIQ(9002313.57,TX,601),ABSPINSIEN=$$GET1^DIQ(9002313.57,TX,701,"I") ; Pointer to #1 -- this will be the case most of the time.
+ I ABSPPINNO=2 S ABSPPINDATA=$$GET1^DIQ(9002313.57,TX,602),ABSPINSIEN=$$GET1^DIQ(9002313.57,TX,702,"I") ; Pointer to #2 -- this will probably be broken, but we need to take this into account.
+ I ABSPPINNO=3 S ABSPPINDATA=$$GET1^DIQ(9002313.57,TX,603),ABSPINSIEN=$$GET1^DIQ(9002313.57,TX,703,"I") ; Pointer to #3 -- this will probably be broken, but we need to take this into account.
+ ; if 1>ABSPPINNO>3, leave ABSPPINDATA empty and don't add information to 3PB. may change if we need to add a 'broken' value to 3PB.
+ W "ABSPPINNO: ",ABSPPINNO," ABSPPINSIEN: ",ABSPINSIEN,!
+ I ABSPPINDATA'="" D           ; Only add the data if there is actual ABSP PIN data available.
+ . I +ABSPINSIEN>0 S $P(ABSPRETURN,U,1)=ABSPINSIEN ; Return the current insurer IEN.
+ . S ABSPPINTYPE=$P(ABSPPINDATA,",",1) ; Separate the PIN type for further analysis.
+ . S ABSPELIGIEN=$P(ABSPPINDATA,",",2) ; Get the Eligibility IEN (not used for "SELF PAY", only passed with Medicaid.)
+ . S ABSPMULT=$P(ABSPPINDATA,",",3) ; And the multiple IEN - reminder: currently broken for Medicaid.
+ . I ABSPPINTYPE="RR" S $P(ABSPRETURN,U,5)=ABSPMULT
+ . I ABSPPINTYPE="CARE" S $P(ABSPRETURN,U,4)=ABSPMULT
+ . I ABSPPINTYPE="PRVT" S $P(ABSPRETURN,U,8)=ABSPMULT
+ . I ABSPPINTYPE="CAID" D
+ . . ; /IHS/OIT/RAM - Here's the "fun part" - we have to account for when the Medicaid pointer is fixed, and if not find the data manually.
+ . . I +ABSPELIGIEN>0 S $P(ABSPRETURN,U,6)=ABSPELIGIEN ; If the Eligability IEN exists, populate the .06 field.
+ . . I ABSPMULT?7N S $P(ABSPRETURN,U,7)=ABSPMULT    ; If the Medicaid multiple is correct (a 7-digit FileMan date) populate the field.
+ . . E  D     ; If not... we have some work to do. Let's go find the correct multiple.
+ . . . S I="",GO=1 F  S I=$O(^AUPNMCD(ABSPELIGIEN,11,I),-1) Q:I=""!('GO)  D
+ . . . . S BEG=$P($G(^AUPNMCD(ABSPELIGIEN,11,I,0)),U,1),END=$P($G(^AUPNMCD(ABSPELIGIEN,11,I,0)),U,2)
+ . . . . W "ABSPTODAY: ",ABSPTODAY," TESTING: ",I," BEG: ",BEG," END: ",END,!
+ . . . . I (BEG<=ABSPTODAY)&(+END=0) W "FLERM.",! S GO=0,$P(ABSPRETURN,U,7)=I Q  ; If "Today" is after the beginning date and there is no end date, this is an eligible multiple, store it and exit loop.
+ . . . . I (BEG<=ABSPTODAY)&(ABSPTODAY<END) S GO=0,$P(ABSPRETURN,U,7)=I Q  ; If "Today" is between the eligible dates, this is an eligible multiple, store it and exit loop.
+ ; That _should_ be all of the available data to send to 3PB; let's clean up the room and head back...
+ ; RETURN DATA IS IN SAME FORM / ORDER AS THE 13 MULTIPLE NEEDS IN FILE 9002274.3:
+ ;    .01 / INSURER; .04 / MEDICARE MULTIPLE ; .05 / RAILROAD MULTIPLE ; .06 / MEDICAID ELIG POINTER
+ ;    .07 / MEDICAID MULTIPLE ; .08 / PRIVATE INSURANCE MULTIPLE
+ Q ABSPRETURN
+ ; /IHS/OIT/RAM ; 18 MAY 2017 ; CR 07534 - End of new code detailed above. 

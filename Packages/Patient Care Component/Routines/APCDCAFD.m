@@ -1,5 +1,5 @@
 APCDCAFD ; IHS/CMI/LAB - ;
- ;;2.0;IHS PCC SUITE;**2,7,11,15,16**;MAY 14, 2009;Build 9
+ ;;2.0;IHS PCC SUITE;**2,7,11,15,16,20**;MAY 14, 2009;Build 25
  ;
 START ;
  D XIT
@@ -73,10 +73,10 @@ HOSPLOC ;
  G:$D(APCDQ) HOSPLOC
 PRIMPROV ;
  K APCDQ
- W !!,$G(IORVON)_"Please enter the Providers whose visits you want to display",!,"This will screen on the primary provider on the visit."_$G(IORVOFF),!
+ W !!,$G(IORVON)_"Please enter the Providers whose visits you want to display",!,"This will screen on the provider on the visit."_$G(IORVOFF),!
  S APCDPRVT=""
  K APCDPRVS
- S DIR(0)="S^A:ALL Providers;S:Selected set or Taxonomy of Providers;O:ONE Provider;X:No Visit Primary Provider Assigned",DIR("A")="Include Visits to Which Providers",DIR("B")="A"
+ S DIR(0)="S^A:ALL Primary Providers;S:Selected set or Taxonomy of Primary Providers;O:ONE Primary Provider;X:No Visit Primary Provider Assigned;C:One Secondary Provider",DIR("A")="Include Visits to Which Providers",DIR("B")="A"
  S DIR("A")="Enter a code indicating which providers are of interest",DIR("B")="A" K DA D ^DIR K DIR,DA
  G:$D(DIRUT) HOSPLOC
  S APCDPRVT=Y
@@ -251,13 +251,13 @@ SHL ;selected hospital locations
  I Y=-1 S APCDQ="" Q
  S APCDHLS(+Y)=""
  G SHL
- Q
-OPRV ;one clinic
+OPRV ;one PROV
  S DIC="^VA(200,",DIC(0)="AEMQ",DIC("A")="Which PROVIDER: " D ^DIC K DIC
  I Y=-1 S APCDQ="" Q
  S APCDPRVS(+Y)=""
  Q
 SPRV ;taxonomy of PROVIDERS
+ ;I $D(APCDIASE) G S
  S X="PRIMARY PROVIDER",DIC="^AMQQ(5,",DIC(0)="FM",DIC("S")="I $P(^(0),U,14)" D ^DIC K DIC,DA I Y=-1 W "OOPS - QMAN NOT CURRENT - QUITTING" G XIT
  D PEP^AMQQGTX0(+Y,"APCDPRVS(")
  I '$D(APCDPRVS) S APCDQ="" Q
@@ -270,4 +270,9 @@ SCDR ;selected CHART DEF REASONS
  I Y=-1 S APCDQ="" Q
  S APCDCDRS(+Y)=""
  G SCDR
+ Q
+CPRV ;one PROV
+ S DIC="^VA(200,",DIC(0)="AEMQ",DIC("A")="Which SECONDARY PROVIDER: " D ^DIC K DIC
+ I Y=-1 S APCDQ="" Q
+ S APCDPRVS(+Y)=""
  Q

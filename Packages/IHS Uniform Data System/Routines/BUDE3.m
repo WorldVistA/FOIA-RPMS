@@ -1,0 +1,11 @@
+BUDE3 ;IHS/CMI/LAB-CREATED BY ^ATXSTX ON JAN 09, 2018;
+ ;;12.0;IHS/RPMS UNIFORM DATA SYSTEM;**1**;NOV 22, 2017;Build 1
+ ;
+ ; See referenced routines to see taxonomies being loaded.
+ ;
+START ;
+ D ^BUDE3A ;    BUD 17 T6A LINE 4B
+ D ^BUDE3B ;    BUD 17 T6A LINE 7
+ D ^BUDE3C ;    BUD 17 T6A LINE 10
+ D ^BUDE3D ;    BUD 17 T6A LINE 16
+ Q

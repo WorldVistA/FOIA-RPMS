@@ -1,5 +1,5 @@
 BQIIPMNU ;GDIT/HS/ALA-Update Monthly ; 24 Jun 2013  8:43 AM
- ;;2.3;ICARE MANAGEMENT SYSTEM;**3,5**;Apr 18, 2012;Build 17
+ ;;2.7;ICARE MANAGEMENT SYSTEM;;Dec 19, 2017;Build 23
  ;
 EN ;EP - IPC calculations
  ; 
@@ -32,10 +32,39 @@ EN ;EP - IPC calculations
  S BQIUPD(90508,"1,",11.05)=BQDATE
  D FILE^DIE("","BQIUPD","ERROR")
  ;
+ ;  Set the DATE/TIME FLAG STARTED field
+ NEW DA
+ S DA=$O(^BQI(90508,0)) I 'DA Q
+ S BQIUPD(90508,DA_",",8.1)=$$NOW^XLFDT()
+ S BQIUPD(90508,DA_",",8.12)=1
+ S BQIUPD(90508,DA_",",24.08)=$G(ZTSK)
+ D FILE^DIE("","BQIUPD","ERROR")
+ K BQIUPD
  ; Get current IPC
  S CRIPC=$P($G(^BQI(90508,1,11)),U,1)
  S CRN=$O(^BQI(90508,1,22,"B",CRIPC,"")) I CRN="" Q
  ;
+ D PROC
+ ;
+ I CRIPC="IPC4/IPC5" D
+ . S CRIPC="IPCMH",CRN=3 D PROC
+ ;
+ ; Send the file to the Data Warehouse
+ ;D RET^BQIIPCME(.DATA,BQDATE,"")
+ ;
+ ;  Set the DATE/TIME FLAG ENDED field
+ NEW DA
+ S DA=$O(^BQI(90508,0)) I 'DA Q
+ S BQIUPD(90508,DA_",",8.11)=$$NOW^XLFDT()
+ S BQIUPD(90508,DA_",",8.12)="@"
+ S BQIUPD(90508,DA_",",24.08)="@"
+ S BQIUPD(90508,"1,",11.04)="@"
+ D FILE^DIE("","BQIUPD","ERROR")
+ K BQIUPD
+ Q
+ ;
+PROC ;EP - Process the data
+ I $G(DEBUG)=1 W !,CRIPC
  ; Set the date
  NEW DA,DIC,X,PRDTE,PRN,ROW,FROW,QFL,RMON,RYEAR,RROW
  I $G(^BQI(90508,1,22,CRN,3,0))="" S ^BQI(90508,1,22,CRN,3,0)="^90508.223D^^"
@@ -46,43 +75,37 @@ EN ;EP - IPC calculations
  S BQDA=+Y
  S PRDTE=$O(^BQI(90508,1,22,CRN,3,"B",X),-1)
  ;
- S QFL=0 F BI=1:1:16 S FROW=$P($T(ROW+BI),";;",2) D  Q:QFL
- . S RMON=$P(FROW,U,1),RYEAR=$P(FROW,U,2),RROW=$P(FROW,U,3)
- . I $E(BQDATE,1,3)=RYEAR,$E(BQDATE,4,5)=RMON D  Q
- .. S ROW=RROW,QFL=1
+ I CRIPC'="IPCMH" D
+ . S QFL=0 F BI=1:1:16 S FROW=$P($T(ROW+BI),";;",2) D  Q:QFL
+ .. S RMON=$P(FROW,U,1),RYEAR=$P(FROW,U,2),RROW=$P(FROW,U,3)
+ .. I $E(BQDATE,1,3)=RYEAR,$E(BQDATE,4,5)=RMON D  Q
+ ... S ROW=RROW,QFL=1
+ ... S $P(^BQI(90508,1,22,CRN,3,BQDA,0),U,2)=ROW
+ . ;
+ . I 'QFL D
+ .. S PRN=$O(^BQI(90508,1,22,CRN,3,"B",PRDTE,""))
+ .. S PROW=$P(^BQI(90508,1,22,CRN,3,PRN,0),U,2)
+ .. S ROW=PROW+1
  .. S $P(^BQI(90508,1,22,CRN,3,BQDA,0),U,2)=ROW
- I 'QFL D
- . S PRN=$O(^BQI(90508,1,22,CRN,3,"B",PRDTE,""))
- . S PROW=$P(^BQI(90508,1,22,CRN,3,PRN,0),U,2)
- . S ROW=PROW+1
- . S $P(^BQI(90508,1,22,CRN,3,BQDA,0),U,2)=ROW
- ;
- ;  Set the DATE/TIME FLAG STARTED field
- NEW DA
- S DA=$O(^BQI(90508,0)) I 'DA Q
- S BQIUPD(90508,DA_",",8.1)=$$NOW^XLFDT()
- S BQIUPD(90508,DA_",",8.12)=1
- S BQIUPD(90508,DA_",",24.08)=$G(ZTSK)
- D FILE^DIE("","BQIUPD","ERROR")
- K BQIUPD
  ;
  S MSN=0
  F  S MSN=$O(^BQI(90508,1,22,CRN,1,MSN)) Q:'MSN  D
  . S IDATA=^BQI(90508,1,22,CRN,1,MSN,0)
- . S CODE=$P(IDATA,U,1),TYP=$P(IDATA,U,2)
+ . S CODE=$P(IDATA,U,1),TYP=$P(IDATA,U,2) I $G(DEBUG)=1 W !,IDATA
  . ; If inactive, quit
  . I $P(IDATA,U,7)=1 Q
  . ; If type is RPMS
  . I TYP="R" D  Q
  .. S EXEC=$G(^BQI(90508,1,22,CRN,1,MSN,1)) I EXEC="" Q
  .. X EXEC
- ;
- S BQIPROV=$P($G(^BQI(90508,1,11)),U,3)
- S TDEN=0,TNUM=0
- F  S BQIPROV=$O(^AUPNPAT("AK",BQIPROV)) Q:BQIPROV=""  D
- . I $P(^VA(200,BQIPROV,0),U,13)'="" Q
- . D EN^BQIIPSNG(BQIPROV,BQDATE)
- . S $P(^BQI(90508,1,11),U,3)=BQIPROV
+ . ;
+ . S BQIPROV=$P($G(^BQI(90508,1,11)),U,3)
+ . S TDEN=0,TNUM=0
+ . F  S BQIPROV=$O(^AUPNPAT("AK",BQIPROV)) Q:BQIPROV=""  D
+ .. I $P(^VA(200,BQIPROV,0),U,13)'="" Q
+ .. S MSNN=MSN
+ .. D EN^BQIIPSNG(BQIPROV,BQDATE,CRIPC)
+ .. S $P(^BQI(90508,1,11),U,3)=BQIPROV,MSN=MSNN
  ;
  S $P(^BQI(90508,1,11),U,3)=""
  ;
@@ -93,7 +116,7 @@ EN ;EP - IPC calculations
  . ; If inactive, quit
  . I $P(IDATA,U,7)=1 Q
  . ; If type is CRS, update the facility
- . I TYP'="G" Q
+ . ;I TYP'="G" Q
  . S PRV="",TDEN=0,TNUM=0
  . F  S PRV=$O(^AUPNPAT("AK",PRV)) Q:PRV=""  D
  .. I $P(^VA(200,PRV,0),U,13)'="" Q
@@ -102,7 +125,38 @@ EN ;EP - IPC calculations
  .. S DEN=$P(^BQIPROV(PRV,30,IPRN,1,IPRD,0),U,2),NUM=$P(^(0),U,3)
  .. S TNUM=TNUM+NUM,TDEN=TDEN+DEN
  . S FAC=$$HME^BQIGPUTL()
+ . I $G(DEBUG)=1 W !,FAC,"|",CODE,"|",BQDATE,"|",TDEN,"|",TNUM
  . D STORF^BQIIPUTL(FAC,CODE,BQDATE,TDEN,TNUM)
+ ;
+ S MSN=0
+ F  S MSN=$O(^BQI(90508,1,22,CRN,1,MSN)) Q:'MSN  D
+ . S IDATA=^BQI(90508,1,22,CRN,1,MSN,0)
+ . S CODE=$P(IDATA,U,1),TYP=$P(IDATA,U,2)
+ . ; If inactive, quit
+ . I $P(IDATA,U,7)=1 Q
+ . I CODE="IPC_CCPR"!(CODE="IPC_PEMP") Q
+ . NEW TMN,TEAM,TMM,OK,TDEN,TNUM,IPRN,IPRD,DEN,NUM
+ . S TMN=0
+ . F  S TMN=$O(^BSDPCT(TMN)) Q:'TMN  D
+ .. ; Check inactivation date
+ .. I $P(^BSDPCT(TMN,0),"^",3)'="" Q
+ .. S TEAM=$P(^BSDPCT(TMN,0),"^",1)
+ .. ; Check if the team members has at least one member with patients assigned to them
+ .. S OK=0
+ .. S TMM="" F  S TMM=$O(^BSDPCT(TMN,1,"B",TMM)) Q:TMM=""  I $O(^AUPNPAT("AK",TMM,""))'="" S OK=1
+ .. I 'OK Q
+ .. I CODE="IPC_CCTM" D  Q
+ ... S EXEC=$G(^BQI(90508,1,22,CRN,1,MSN,1)) I EXEC="" Q
+ ... X EXEC
+ .. S TDEN=0,TNUM=0
+ .. S TMM="" F  S TMM=$O(^BSDPCT(TMN,1,"B",TMM)) Q:TMM=""  I $O(^AUPNPAT("AK",TMM,""))'="" D
+ ... I $P(^VA(200,TMM,0),U,13)'="" Q
+ ... S IPRN=$O(^BQIPROV(TMM,30,"B",CODE,"")) I IPRN="" Q
+ ... S IPRD=$O(^BQIPROV(TMM,30,IPRN,1,"B",BQDATE,"")) I IPRD="" Q
+ ... S DEN=$P(^BQIPROV(TMM,30,IPRN,1,IPRD,0),U,2),NUM=$P(^(0),U,3)
+ ... S TNUM=TNUM+NUM,TDEN=TDEN+DEN
+ .. I $G(DEBUG)=1 W !,TEAM,"|",CODE,"|",TDEN,"|",TNUM
+ .. D STORT^BQIIPUTL(TEAM,CODE,BQDATE,TDEN,TNUM)
  ;
 TOT ;EP total up values for MU
  NEW MCOD
@@ -129,14 +183,6 @@ TOT ;EP total up values for MU
  . I GPRN=""!(GPRD="") Q
  . S $P(^BQIFAC(FAC,30,GPRN,1,GPRD,0),U,2)=DEN
  ;
- ;  Set the DATE/TIME FLAG ENDED field
- NEW DA
- S DA=$O(^BQI(90508,0)) I 'DA Q
- S BQIUPD(90508,DA_",",8.11)=$$NOW^XLFDT()
- S BQIUPD(90508,DA_",",8.12)="@"
- S BQIUPD(90508,DA_",",24.08)="@"
- D FILE^DIE("","BQIUPD","ERROR")
- K BQIUPD
  Q
  ;
 CHK ; EP - Check whether the IPC data ran or not

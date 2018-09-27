@@ -1,5 +1,5 @@
 ABSPOSJ2 ;IHS/OIT/SCR - pre and post init for V1.0 patch 28 [ 10/31/2002  10:58 AM ]
- ;;1.0;Pharmacy Point of Sale;**29,39,43,44,45,46,47**;Jun 1,2001;Build 15
+ ;;1.0;Pharmacy Point of Sale;**29,39,43,44,45,46,47,48**;Jun 21,2001;Build 27
  ;
  ; Pre and Post init routine use in absp0100.29k
  ;------------------------------------------------------------------
@@ -20,6 +20,10 @@ ABSPOSJ2 ;IHS/OIT/SCR - pre and post init for V1.0 patch 28 [ 10/31/2002  10:58 
  ;IHS/OIT/SCR = 02/06/09 - Patch 29
  ; Remove OPTION 'ABSP MEDICARE PART D ELIG CHK' from OPTION 'ABSP MENU RPT CLAIM STATUS'
  ; in post install since it doesn't go away with the new menu 
+ ; =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ ; /IHS/OIT/RAM ; 19 MAY 2017 ; CR 07534 - I don't think that this file is actively used, but as there's no documentation
+ ; stating that it *isn't* used, I'm adding the change required for the sending the insurance information to 3PB here as well.
+ ; However, I'm not recreating _all_ the code; I'm calling the function $$GETINSINFO^ABSPOSBB to gather the info.
  Q
  ;IHS/OIT/SCR 09/22/08 Patch 28 - remove release any HELD claims START new code
 HOLDCHK  ;
@@ -55,6 +59,7 @@ CHKHOLD(HOLDIEN) ; Process to check the hold claim.
  . N FDA,IEN,MSG
  . S FDA(9002313.57,HOLD57_",",.15)=HOLDDA
  . D FILE^DIE(,"FDA","MSG")
+ . I $D(MSG) D LOG^ABSPOSL2("CHKHOLD^ABSPOSJ2",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  D ^XBFMK      ;kill FileMan variables
  S DIK="^ABSPHOLD("
  S DA=HOLDIEN
@@ -62,7 +67,7 @@ CHKHOLD(HOLDIEN) ; Process to check the hold claim.
  ;
  Q
 POSTIT ;
- N ABSP,ABSPOST,HOLDREC2
+ N ABSP,ABSPOST,HOLDREC2,ABSPINS ; /IHS/OIT/RAM ; 19 MAY 2017 ; ADDED NEW VARIABLE FOR INSURANCE INFO.
  ;
  S ABSP(.21)=$P(HOLDREC,U,1)                 ; Bill amount
  S ABSP(.23)=$P(HOLDREC,U,2)                 ; Gross amount
@@ -84,6 +89,16 @@ POSTIT ;
  S ABSP(23,.06)=$P(HOLDREC2,U,7)             ; Prescription
  S ABSP(23,14)=$P(HOLDREC2,U,8)              ; Date filled
  S ABSP(23,20)=$P(HOLDREC2,U,9)              ; Days supply
+ ; /IHS/OIT/RAM ; 18 MAY 2017 ; CR 07534 - Pass Insurer Information to 3PB. All code that follows until end comment is new for Patch 48.
+ S ABSPINS=$$GETINSINFO^ABSPOSBB(HOLD57) ; Gather all available insurance information for xfer to 3PB.
+ ; As they say... plan for the worst, hope for the best. Just in case more info needs to be returned than the PRVT multiple, uncomment any needed info from the possibilities below.
+ ; I +$P(ABSPINS,U,1)>0 S ABSP(13,.01)=$P(ABSPINS,U,1) ; Insurer pointer from the 701/702/703 field of ^ABSPTL.
+ ; I +$P(ABSPINS,U,4)>0 S ABSP(13,.04)=$P(ABSPINS,U,4) ; Medicare multiple from the 601/602/603 field of ^ABSPTL.
+ ; I +$P(ABSPINS,U,5)>0 S ABSP(13,.05)=$P(ABSPINS,U,5) ; Railroad multiple from the 601/602/603 field of ^ABSPTL.
+ ; I +$P(ABSPINS,U,6)>0 S ABSP(13,.06)=$P(ABSPINS,U,6) ; Medicaid Eligible pointer from the 601/602/603 field of ^ABSPTL.
+ ; I +$P(ABSPINS,U,7)>0 S ABSP(13,.07)=$P(ABSPINS,U,7) ; Medicaid multiple from the 601/602/603 field of ^ABSPTL.
+ I +$P(ABSPINS,U,8)>0 S ABSP(13,.08)=$P(ABSPINS,U,8) ; Private Insurance multiple from the 601/602/603 field of ^ABSPTL.
+ ; /IHS/OIT/RAM ; 18 MAY 2017 ; CR 07534 - End of new code detailed above. 
  S ABSP("OTHIDENT")=$P(HOLDREC2,U,10)        ; Other Bill Identifier
  S INSDFN=ABSP(.08)
  D LOG^ABSPOSL("Posting transaction "_HOLD57_".")
@@ -110,6 +125,7 @@ SETFLAG(IEN57,VALUE) ;EP -
  . N FDA,MSG ; clear the "needs billing" flag
  . S FDA(9002313.57,IEN57_",",.16)=VALUE
 SF1 . D FILE^DIE(,"FDA","MSG")
+ . I $D(MSG) D LOG^ABSPOSL2("SF1^ABSPOSJ2",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  Q
  ;IHS/OIT/CNI/RAN Following two routines added for PATCH 39.
 CLNREJ ;Clean out the unrecognized reject codes in response file.
@@ -243,4 +259,5 @@ RST320 ; this will restore the 320 value onto the 320 node, piece 20
  Q:VALUE=""
  S FDA(9002313.02,CLMIEN_",",320)=VALUE
  D FILE^DIE(,"FDA","MSG")
+ I $D(MSG) D LOG^ABSPOSL2("RST320^ABSPOSJ2",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  Q

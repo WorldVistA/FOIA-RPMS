@@ -1,0 +1,58 @@
+ABMRSTI3 ; IHS/SD/SDR - Split Claim Billing - split report (part 3); 
+ ;;2.6;IHS 3P BILLING SYSTEM;**22**;NOV 12, 2009;Build 418
+ ;IHS/SD/SDR 2.6*22 HEAT335246 - New routine
+ ;
+PRINT ;EP
+ S ABM("HD",1)="with "_$S(ABMY("DT")="V":"Visit",1:"Approval")_" Dates from "_$$SDT^ABMDUTL(ABMY("DT",1))_" to "_$$SDT^ABMDUTL(ABMY("DT",2))
+ S ABM("HD",1)=ABM("HD",1)_" AND for page"_$S(($L(ABMY("PGS"),"^")>3):"s",1:"")_" "_$E($TR($G(ABMY("PGS")),"^",","),2,$L(ABMY("PGS"))-1)
+ S ABM("HD",2)="for insurer"_$S((+$G(ABMY("INS"))>1):"s",1:"")_" "
+ S ABMI=0
+ S ABMJ=0
+ F  S ABMI=$O(ABMY("INS",ABMI)) Q:'ABMI  S ABM("HD",2)=ABM("HD",2)_$S(ABMJ=1:", ",1:"")_$P($G(^AUTNINS(ABMI,0)),U) S ABMJ=1
+ S ABM("PG")=0
+ ;
+PRINT2 ;EP
+ D HDB
+ S ABMCDFN=0
+ S ABMOCNT=0
+ S ABMNCNT=0
+ F  S ABMCDFN=$O(^TMP("ABM-STIN",$J,"NEWCLMLST",ABMCDFN)) Q:'ABMCDFN  D
+ .I $Y>(IOSL-9) D HD Q:$D(DTOUT)!$D(DUOUT)!$D(DIROUT)  W " (cont)"
+ .W !,ABMCDFN  ;original claim#
+ .W ?12,$P($G(^AUTNINS($P($G(^ABMDCLM(DUZ(2),ABMCDFN,0)),U,8),0)),U)  ;active insurer
+ .S ABMVLOC=$P($G(^ABMDCLM(DUZ(2),ABMCDFN,0)),U,3)
+ .S ABMPT=$P($G(^ABMDCLM(DUZ(2),ABMCDFN,0)),U)
+ .S ABMHRN=$P($G(^AUPNPAT(ABMPT,41,ABMVLOC,0)),U,2)
+ .W ?45,ABMHRN  ;HRN
+ .W ?53,$$SDTO^ABMDUTL($P($G(^ABMDCLM(DUZ(2),ABMCDFN,0)),U,2))  ;visit date
+ .W ?65,$E($P($G(^DIC(40.7,$P($G(^ABMDCLM(DUZ(2),ABMCDFN,0)),U,6),0)),U),1,14)  ;clinic
+ .S ABMOCNT=+$G(ABMOCNT)+1
+ .S ABMCDFN2=0
+ .F  S ABMCDFN2=$O(^TMP("ABM-STIN",$J,"NEWCLMLST",ABMCDFN,ABMCDFN2)) Q:'ABMCDFN2  D
+ ..W !?15,ABMCDFN2  ;new claim#
+ ..S ABMNCNT=+$G(ABMNCNT)+1
+ ..S ABMPG=""
+ ..F  S ABMPG=$O(^TMP("ABM-STIN",$J,"NEWCLMLST",ABMCDFN,ABMCDFN2,ABMPG)) Q:$G(ABMPG)=""  D
+ ...S ABMMLT=$S(ABMPG="8D":23,ABMPG="8E":37,ABMPG="8F":35,1:43)
+ ...S ABMJ=0
+ ...F  S ABMJ=$O(^ABMDCLM(DUZ(2),ABMCDFN2,ABMMLT,ABMJ)) Q:'ABMJ  D
+ ....I ABMMLT=23 D
+ .....S ABMCODE=$S($P($G(^ABMDCLM(DUZ(2),ABMCDFN2,ABMMLT,ABMJ,0)),U,6)'="":$P(^(0),U,6),$P($G(^ABMDCLM(DUZ(2),ABMCDFN2,ABMMLT,ABMJ,0)),U,22):$$GET1^DIQ(52,$P($G(^ABMDCLM(DUZ(2),ABMCDFN2,ABMMLT,ABMJ,0)),U,22),".01","E"),1:ABMJ_"NORX#")  ;RX#
+ .....S ABMDESC=$S($P($G(^ABMDCLM(DUZ(2),ABMCDFN2,ABMMLT,ABMJ,0)),U,24):$P($G(^ABMDCLM(DUZ(2),ABMCDFN2,ABMMLT,ABMJ,0)),U,24),1:"<NO NDC>")_" "_$$GET1^DIQ(50,$P($G(^ABMDCLM(DUZ(2),ABMCDFN2,ABMMLT,ABMJ,0)),U),".01","E")
+ ....I ABMMLT'=23 D
+ .....S ABMCODE=$P($$CPT^ABMCVAPI($P($G(^ABMDCLM(DUZ(2),ABMCDFN2,ABMMLT,ABMJ,0)),U),$P($G(^ABMDCLM(DUZ(2),ABMCDFN2,0)),U,2)),U,2)
+ .....S ABMDESC=$P($$CPT^ABMCVAPI(ABMCODE,$P($G(^ABMDCLM(DUZ(2),ABMCDFN2,0)),U,2)),U,3)
+ ....I ABMCODE["NORX" S ABMCODE="NORX#"
+ ....W ?26,ABMCODE  ;Ref#
+ ....W ?37,$E(ABMDESC,1,40)  ;description
+ ....I $G(ABMY("SPLITHOW"))'=1 W !
+ I $G(ABMY("SPLIT"))="A" W !!,"<End of Report>"
+ Q
+HD ;
+ D PAZ^ABMDRUTL Q:$D(DTOUT)!$D(DUOUT)!$D(DIROUT)
+HDB ;
+ I $G(ABMY("SPLIT"))="A" S ABM("PG")=ABM("PG")+1 D WHD^ABMDRHD
+ W !,"Orig Clm#",?12,"Active Insurer",?45,"HRN",?53,"Visit Date",?65,"Clinic"
+ W !?15,"New Clm#",?26,"Ref#",?37,"Description",!
+ F I=1:1:80 W "-"
+ Q

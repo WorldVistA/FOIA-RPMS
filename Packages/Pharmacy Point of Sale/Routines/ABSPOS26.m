@@ -1,5 +1,5 @@
 ABSPOS26 ; IHS/FCS/DRS - put insurance in order ;   
- ;;1.0;PHARMACY POINT OF SALE;*46*;JUN 21, 2001;Build 15
+ ;;1.0;PHARMACY POINT OF SALE;*46,49*;JUN 21, 2001;Build 27
  ; these are most of the rules implementations
  ; called from ABSPOS25
  Q
@@ -24,7 +24,8 @@ FINDTYPE(TYPE)      ;EP - from ABSPOS28
 WCINS(N)        ; what kind of workers comp is this one?
  ; returns ONLY (wc only), BOTH (doesn't matter), NEVER (no wc claims)
  N X S X=$P($G(^ABSPEI($$INSIEN(N),107)),U)
- I X="",$P($G(^AUTNINS($$INSIEN(N),2)),U)="W" S X="ONLY"
+ ; I X="",$P($G(^AUTNINS($$INSIEN(N),2)),U)="W" S X="ONLY"
+ I X="",$$INSTYP^AGUTL($$INSIEN(N))="W" S X="ONLY" ; NEW API FOR INSURER TYPE.
  I X="" S X="BOTH"
  Q X
 PHOLDER(N)         Q $P($$COMBREC(N),U,7) ; returns pointer to ^AUPN3PPH

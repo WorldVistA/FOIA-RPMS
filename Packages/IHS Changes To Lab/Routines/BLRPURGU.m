@@ -1,0 +1,172 @@
+BLRPURGU ; IHS/MSC/MKK - Purge Old Orders & Accessions Utilities ; 13-Oct-2017 14:04 ;  MKK
+ ;;5.2;LAB SERVICE;**1041**;NOV 1, 1997;Build 23
+ ;
+EEP ; Ersatz EP
+ D EEP^BLRGMENU
+ Q
+ ;
+ ;
+EP ; EP
+PEP ; EP
+ NEW (DILOCKTM,DISYS,DT,DTIME,DUZ,IO,IOBS,IOF,IOM,ION,IOS,IOSL,IOST,IOT,IOXY,U,XPARSYS,XQXFLG)
+ ;
+ D SETBLRVS
+ ;
+ D ADDTMENU^BLRGMENU("REPORT^BLRPURGU","Report by Date")
+ D ADDTMENU^BLRGMENU("DUZRPT^BLRPURGU","Report by User")
+ ;
+ S BLRIEN=$$FIND1^DIC(9.4,,"M","BLR")
+ S PKGNAME=$S(BLRIEN:$$GET1^DIQ(9.4,BLRIEN,.01),1:"RPMS Laboratory")
+ ;
+ D MENUDRVR^BLRGMENU(PKGNAME,"Purge old orders & accessions Reports")
+ Q
+ ;
+REPORT ; EP - Main Report
+ NEW (DILOCKTM,DISYS,DT,DTIME,DUZ,IO,IOBS,IOF,IOM,ION,IOS,IOSL,IOST,IOT,IOXY,U,XPARSYS,XQXFLG)
+ ;
+ Q:$$REPORTI()="Q"
+ ;
+ F  S DEEZ=$O(^BLRPURGU(DEEZ),-1)  Q:DEEZ<1!(QFLG="Q")  D
+ . S PURGDTT=$$GET1^DIQ(90475.8,DEEZ,.01,"I")
+ . S USER=$$GET1^DIQ(90475.8,DEEZ,1,"I")
+ . S USERDIV=$$GET1^DIQ(90475.8,DEEZ,2,"I")
+ . ;
+ . I LINES>MAXLINES D HEADERPG^BLRGMENU(.PG,.QFLG,HDRONE)  Q:QFLG="Q"
+ . ;
+ . W $$FMTE^XLFDT(PURGDTT,"5MZ")
+ . W ?19,USER
+ . W ?29,$$GET1^DIQ(200,USER,.01)
+ . W ?49,USERDIV
+ . D LINEWRAP^BLRGMENU(59,$$GET1^DIQ(4,USERDIV,.01),21)
+ . W !
+ . S CNT=CNT+1
+ ;
+ W !!,?4,CNT," 'Purge Old Orders & Accessions' entr",$$PLURALI(CNT),"."
+ D PRESSKEY^BLRGMENU(9)
+ Q
+ ;
+REPORTI() ; EP - Initialization
+ D SETBLRVS
+ ;
+ S HEADER(1)="Purge Old Orders & Accessions"
+ S GRACEPO=$$GET1^DIQ(69.9,1,15)
+ S HEADER(2)="File 69.9 Grace Period For Orders: "_$S(GRACEPO:GRACEPO_" Days",1:"Not Set")
+ S HEADER(3)=$$CJ^XLFSTR("Reverse Date Listing",IOM)
+ ;
+ D HEADERDT^BLRGMENU
+ D HEADONE^BLRGMENU(.HDRONE)
+ D HEADERDT^BLRGMENU
+ D ^%ZIS
+ I POP Q $$BADSTUFQ("^%ZIS Problem.")
+ ;
+ D HEADERDT^BLRGMENU
+ S HEADER(4)=" "
+ S HEADER(5)="Purge Date/Time"
+ S $E(HEADER(5),20)="DUZ"
+ S $E(HEADER(5),30)="Name"
+ S $E(HEADER(5),50)="Division"
+ S $E(HEADER(5),60)="Division Description"
+ ;
+ S MAXLINES=IOSL-4,LINES=MAXLINES+10
+ S (CNT,PG)=0,QFLG="NO",DEEZ="A"
+ Q "OK"
+ ;
+ ;
+DUZRPT ; EP - Report by User
+ NEW (DILOCKTM,DISYS,DT,DTIME,DUZ,IO,IOBS,IOF,IOM,ION,IOS,IOSL,IOST,IOT,IOXY,U,XPARSYS,XQXFLG)
+ ;
+ Q:$$DUZRPTI()="Q"
+ ;
+ F  S USER=$O(^BLRPURGU("C",USER))  Q:USER<1!(QFLG="Q")  D
+ . S DEEZ="A"
+ . F  S DEEZ=$O(^BLRPURGU("C",USER,DEEZ),-1)  Q:DEEZ<1  D
+ .. S PURGDTT=$$GET1^DIQ(90475.8,DEEZ,.01,"I")
+ .. S USERDIV=$$GET1^DIQ(90475.8,DEEZ,2,"I")
+ .. ;
+ .. I LINES>MAXLINES D HEADERPG^BLRGMENU(.PG,.QFLG,HDRONE)  Q:QFLG="Q"
+ .. ;
+ .. W $$FMTE^XLFDT(PURGDTT,"5MZ")
+ .. W ?19,USER
+ .. W ?29,$$GET1^DIQ(200,USER,.01)
+ .. W ?49,USERDIV
+ .. D LINEWRAP^BLRGMENU(59,$$GET1^DIQ(4,USERDIV,.01),21)
+ .. W !
+ .. S CNT=CNT+1
+ ;
+ W !!,?4,CNT," 'Purge Old Orders & Accessions' entr",$$PLURALI(CNT),"."
+ D PRESSKEY^BLRGMENU(9)
+ Q
+ ;
+DUZRPTI() ; EP - Initialization
+ D SETBLRVS
+ ;
+ S HEADER(1)="Purge Old Orders & Accessions"
+ S GRACEPO=$$GET1^DIQ(69.9,1,15)
+ S HEADER(2)="File 69.9 Grace Period For Orders: "_$S(GRACEPO:GRACEPO_" Days",1:"Not Set")
+ S HEADER(3)=$$CJ^XLFSTR("User Sorted Listing",IOM)
+ ;
+ D HEADERDT^BLRGMENU
+ D HEADONE^BLRGMENU(.HDRONE)
+ D HEADERDT^BLRGMENU
+ D ^%ZIS
+ I POP Q $$BADSTUFQ("^%ZIS Problem.")
+ ;
+ D HEADERDT^BLRGMENU
+ S HEADER(4)=" "
+ S HEADER(5)="Purge Date/Time"
+ S $E(HEADER(5),20)="DUZ"
+ S $E(HEADER(5),30)="Name"
+ S $E(HEADER(5),50)="Division"
+ S $E(HEADER(5),60)="Division Description"
+ ;
+ S MAXLINES=IOSL-4,LINES=MAXLINES+10
+ S (CNT,PG,USER)=0,QFLG="NO"
+ Q "OK"
+ ;
+ ;
+STORPURG ; EP - Store Purging Data - Called from LROC
+ NEW (DILOCKTM,DISYS,DT,DTIME,DUZ,IO,IOBS,IOF,IOM,ION,IOS,IOSL,IOST,IOT,IOXY,U,XPARSYS,XQXFLG)
+ ;
+ S NOW=$$NOW^XLFDT
+ S FDA(90475.8,"?+1,",.01)=NOW
+ S FDA(90475.8,"?+1,",1)=DUZ
+ S FDA(90475.8,"?+1,",2)=DUZ(2)
+ D UPDATE^DIE("S","FDA",,"ERRS")
+ Q:$D(ERRS)<1
+ ;
+ S STR(1)="Purge Old Orders & Accessions UPDATE^DIE call failed."
+ S STR(2)=" "
+ S STR(3)=$TR($$CJ^XLFSTR("@FDA@",50)," @","= ")
+ S $E(STR(4),10)="FDA(90475.8,""?+1,"",.01)="_NOW
+ S $E(STR(5),10)="FDA(90475.8,""?+1,"",.1)="_DUZ
+ ;
+ D MAILALMI^BLRUTIL3("Purge Old Orders & Accessions UPDATE-DIE call failed",.STR,"STORPURG-BLRPURGU")
+ Q
+ ;
+ ;
+ ; ============================= UTILITIES =============================
+ ;
+JUSTNEW ; EP - Generic RPMS EXCLUSIVE NEW
+ NEW (DILOCKTM,DISYS,DT,DTIME,DUZ,IO,IOBS,IOF,IOM,ION,IOS,IOSL,IOST,IOT,IOXY,U,XPARSYS,XQXFLG)
+ ;
+ Q
+ ;
+SETBLRVS(TWO) ; EP - Set the BLRVERN variable(s)
+ K BLRVERN,BLRVERN2
+ ;
+ S BLRVERN=$P($P($T(+1),";")," ")
+ S:$L($G(TWO)) BLRVERN2=$G(TWO)
+ Q
+ ;
+BADSTUFF(STR,TAB) ; EP - BADSTUFF error message
+ S TAB=$S($L($G(TAB))<1:4,1:TAB)
+ W !!,?TAB,STR,"  Routine Ends."
+ D PRESSKEY^BLRGMENU(TAB+5)
+ Q
+ ;
+BADSTUFQ(STR,TAB) ; EP - BADSTUFF error message.  Ends with Q "Q"uit
+ D BADSTUFF(STR,$G(TAB))
+ Q "Q"
+ ;
+PLURALI(CNT) ; EP - If CNT'=1, return IES else return Y
+ Q $S(CNT=1:"y",1:"ies")

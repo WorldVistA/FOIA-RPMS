@@ -1,5 +1,5 @@
-BGP8DARO ; IHS/CMI/LAB - ihs area GPRA 02 Sep 2004 1:11 PM ; 01 Jul 2008  11:43 AM
- ;;8.0;IHS CLINICAL REPORTING;**2**;MAR 12, 2008
+BGP8DARO ; IHS/CMI/LAB - ihs area GPRA 02 Sep 2004 1:11 PM 01 Jul 2010 11:43 AM ;
+ ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
  ;
  ;
  W:$D(IOF) @IOF
@@ -10,8 +10,8 @@ CHOICE ;
  W !!!,"Please select the type of report would you like to run:"
  W !!?8,"H  Hard-coded Report:  Report with all parameters set to the"
  W !?11,"same as the National GPRA Report (report period of "
- W !?11,"July 1, 2007 - June 30, 2008, baseline period of July 1, 1999"
- W !?11,"- June 30, 2008, and AI/AN patients only)"
+ W !?11,"July 1, 2017 - June 30, 2018, baseline period of July 1, 2009"
+ W !?11,"- June 30, 2010, and AI/AN patients only)"
  W !!?8,"U  User-defined Report:  You select the report and baseline"
  W !?11,"periods and beneficiary population"
  W !
@@ -33,14 +33,14 @@ INTRO ;
  ;
  S BGPAREAA=1
  S (BGPBD,BGPED,BGPTP)=""
- S BGPRTYPE=7,BGP8RPTH=""
+ S BGPRTYPE=7,BGPYRPTH=""
 H I BGPRTC="H" D  G ASU
- .S X=$O(^BGPCTRL("B",2008,0))
+ .S X=$O(^BGPCTRL("B",2018,0))
  .S Y=^BGPCTRL(X,0)
  .S BGPBD=$P(Y,U,8),BGPED=$P(Y,U,9)
  .S BGPPBD=$P(Y,U,10),BGPPED=$P(Y,U,11)
  .S BGPBBD=$P(Y,U,12),BGPBED=$P(Y,U,13)
- .S BGPPER=$P(Y,U,14),BGPQTR=3
+ .S BGPPER=$P(Y,U,14),BGPQTR=4
  .;BEGIN TEST STUFF
  .G NT  ;comment out when testing in TEHR
  .W !!,"for testing purposes only, please enter a report year",!
@@ -70,7 +70,10 @@ TP ;
  I BGPQTR=2 S BGPBD=($E(BGPPER,1,3)-1)_"0401",BGPED=$E(BGPPER,1,3)_"0331"
  I BGPQTR=3 S BGPBD=($E(BGPPER,1,3)-1)_"0701",BGPED=$E(BGPPER,1,3)_"0630"
  I BGPQTR=4 S BGPBD=($E(BGPPER,1,3)-1)_"1001",BGPED=$E(BGPPER,1,3)_"0930"
- I BGPQTR=5 S BGPBD=$$FMADD^XLFDT(BGPPER,-364),BGPED=BGPPER,BGPPER=$E(BGPED,1,3)_"0000"
+ I BGPQTR=5 D
+ .S D=$$FMADD^XLFDT(BGPPER,1)
+ .I $E(BGPPER,4,7)'=1231 S BGPBD=($E(BGPPER,1,3)-1)_$E(D,4,7),BGPED=BGPPER,BGPPER=$E(BGPED,1,3)_"0000"
+ .I $E(BGPPER,4,7)=1231 S BGPBD=$E(BGPPER,1,3)_$E(D,4,7),BGPED=BGPPER,BGPPER=$E(BGPED,1,3)_"0000"
  I BGPED>DT D  G:BGPDO=1 TP
  .W !!,"You have selected Current Report period ",$$FMTE^XLFDT(BGPBD)," through ",$$FMTE^XLFDT(BGPED),"."
  .W !,"The end date of this report is in the future; your data will not be",!,"complete.",!
@@ -80,9 +83,9 @@ TP ;
  .Q
 BY ;get baseline year
  S BGPVDT=""
- W !!,"Enter the Baseline Year to compare data to.",!,"Use a 4 digit year, e.g. 1999, 2000"
+ W !!,"Enter the Baseline Year to compare data to.",!,"Use a 4 digit year, e.g. 2010"
  S DIR(0)="D^::EP"
- S DIR("A")="Enter Year (e.g. 2000)"
+ S DIR("A")="Enter Year (e.g. 2010)"
  D ^DIR KILL DIR
  I $D(DIRUT) G TP
  I $D(DUOUT) S DIRUT=1 G TP
@@ -120,29 +123,35 @@ ASU ;
  W !!,"A total of ",C," facilities have been selected.",!!
 ZIS ;call to XBDBQUE
 EISSEX ;
- S BGPEXCEL=1
- S BGPUF=""
- I ^%ZOSF("OS")["PC"!(^%ZOSF("OS")["NT")!($P($G(^AUTTSITE(1,0)),U,21)=2) S BGPUF=$S($P($G(^AUTTSITE(1,1)),U,2)]"":$P(^AUTTSITE(1,1),U,2),1:"C:\EXPORT")
- I $P(^AUTTSITE(1,0),U,21)=1 S BGPUF="/usr/spool/uucppublic/"
- S BGPEXCEL=1 D
+ S BGPEXCEL=$S($G(BGPSUMON):0,BGPRPTT="F":0,1:1)
+ S BGPUF=$$GETDIR^BGP8UTL2()
+ ;I ^%ZOSF("OS")["PC"!(^%ZOSF("OS")["NT")!($P($G(^AUTTSITE(1,0)),U,21)=2) S BGPUF=$S($P($G(^AUTTSITE(1,1)),U,2)]"":$P(^AUTTSITE(1,1),U,2),1:"C:\EXPORT")
+ ;I $P(^AUTTSITE(1,0),U,21)=1 S BGPUF="/usr/spool/uucppublic/"
+ I BGPEXCEL=1 D
  .S BGPNOW=$$NOW^XLFDT() S BGPNOW=$P(BGPNOW,".")_"."_$$RZERO^BGP8UTL($P(BGPNOW,".",2),6)
  .S BGPC=0,X=0 F  S X=$O(BGPSUL(X)) Q:X'=+X  S BGPC=BGPC+1
  .I BGPUF="" W:'$D(ZTQUEUED) !!,"Cannot continue.....can't find export directory name. EXCEL file",!,"not written." Q
- .S BGPFONN1="CRSONMNT1"_$P(^AUTTLOC(DUZ(2),0),U,10)_2008063000000000_$$D^BGP8UTL(BGPNOW)_"_"_$$LZERO^BGP8UTL(BGPC,6)_".TXT"
- .S BGPFONN2="CRSONMNT2"_$P(^AUTTLOC(DUZ(2),0),U,10)_2008063000000000_$$D^BGP8UTL(BGPNOW)_"_"_$$LZERO^BGP8UTL(BGPC,6)_".TXT"
- .S BGPFONN3="CRSONMNT3"_$P(^AUTTLOC(DUZ(2),0),U,10)_2008063000000000_$$D^BGP8UTL(BGPNOW)_"_"_$$LZERO^BGP8UTL(BGPC,6)_".TXT"
+ .S BGPFONN1="CRSONMNT1"_$P(^AUTTLOC(DUZ(2),0),U,10)_2018063000000000_$$D^BGP8UTL(BGPNOW)_"_"_$$LZERO^BGP8UTL(BGPC,6)_".TXT"
+ .S BGPFONN2="CRSONMNT2"_$P(^AUTTLOC(DUZ(2),0),U,10)_2018063000000000_$$D^BGP8UTL(BGPNOW)_"_"_$$LZERO^BGP8UTL(BGPC,6)_".TXT"
+ .S BGPFONN3="CRSONMNT3"_$P(^AUTTLOC(DUZ(2),0),U,10)_2018063000000000_$$D^BGP8UTL(BGPNOW)_"_"_$$LZERO^BGP8UTL(BGPC,6)_".TXT"
+ .;S BGPFONN4="CRSONMNT4"_$P(^AUTTLOC(DUZ(2),0),U,10)_2018063000000000_$$D^BGP8UTL(BGPNOW)_"_"_$$LZERO^BGP8UTL(BGPC,6)_".TXT"
+ .;S BGPFONN5="CRSONMNT5"_$P(^AUTTLOC(DUZ(2),0),U,10)_2018063000000000_$$D^BGP8UTL(BGPNOW)_"_"_$$LZERO^BGP8UTL(BGPC,6)_".TXT"
  .Q
  S BGPASUF=$P(^AUTTLOC(DUZ(2),0),U,10)
  I BGPEXCEL D
  .W !!,"A file will be created called ",BGPFONN1,!,"and will reside in the ",BGPUF," directory. This file can be used in Excel.",!
  .W !!,"A file will be created called ",BGPFONN2,!,"and will reside in the ",BGPUF," directory. This file can be used in Excel.",!
  .W !!,"A file will be created called ",BGPFONN3,!,"and will reside in the ",BGPUF," directory.  This file can be used in Excel.",!
+ .;W !!,"A file will be created called ",BGPFONN4,!,"and will reside in the ",BGPUF," directory. This file can be used in Excel.",!
+ .;W !!,"A file will be created called ",BGPFONN5,!,"and will reside in the ",BGPUF," directory.  This file can be used in Excel.",!
  S BGPASUF=$P(^AUTTLOC(DUZ(2),0),U,10)
  D ^XBFMK
  K DIC,DIADD,DLAYGO,DR,DA,DD,X,Y,DINUM
 GI ;gather all gpra measures
- S X=0 F  S X=$O(^BGPINDE("ON",1,X)) Q:X'=+X  S BGPIND(X)=""
- S BGPINDT="G"
+ S X=0 F  S X=$O(^BGPINDR("ON",1,X)) Q:X'=+X  S BGPIND(X)=""
+ S BGPINDG="G"
+ D TEXT^BGP8DSL
+ I $D(DIRUT) G ASU
  D PT^BGP8DSL
  I BGPROT="" G ASU
  ;
@@ -153,7 +162,7 @@ GI ;gather all gpra measures
 DRIVER ;
  U IO
  D PRINT^BGP8PARQ
- I BGPRPTT="A" D ONN1^BGP8UTL
+ I BGPEXCEL D ONN1^BGP8UTL
  D ^%ZISC
  D EXIT
  Q
@@ -186,7 +195,7 @@ EXIT ;
  ;
 B ;fiscal year
  S (BGPBPER,BGPVDT)=""
- W !!,"Enter the BASELINE year for the report.  Use a 4 digit ",!,"year, e.g. 2005"
+ W !!,"Enter the BASELINE year for the report.  Use a 4 digit ",!,"year, e.g. 2010"
  S DIR(0)="D^::EP"
  S DIR("A")="Enter BASELINE year"
  S DIR("?")="This report is compiled for a period.  Enter a valid date."
@@ -201,7 +210,7 @@ F ;fiscal year
  S BGPPER=""
  W !
  S BGPVDT=""
- W !,"Enter the Fiscal Year (FY) for the report END date.  Use a 4 digit",!,"year, e.g. 2002, 2005"
+ W !,"Enter the Fiscal Year (FY) for the report END date.  Use a 4 digit",!,"year, e.g. 2018"
  S DIR(0)="D^::EP"
  S DIR("A")="Enter FY"
  S DIR("?")="This report is compiled for a period.  Enter a valid date."
@@ -231,14 +240,14 @@ LOC() ;EP - Return location name from file 4 based on DUZ(2).
  ;----------
  ;
 ENDDATE ;
- W !!,"When entering dates, if you do not enter a full 4 digit year (e.g. 2008)"
+ W !!,"When entering dates, if you do not enter a full 4 digit year (e.g. 2018)"
  W !,"will assume a year in the past, if you want to put in a future date,"
  W !,"remember to enter the full 4 digit year.  For example, if today is"
- W !,"January 4, 2008 and you type in 6/30/05 the system will assume the year"
- W !,"as 1905 since that is a date in the past.  You must type 6/30/2008 if you"
+ W !,"January 4, 2010 and you type in 6/30/10 the system will assume the year"
+ W !,"as 1910 since that is a date in the past.  You must type 6/30/2010 if you"
  W !,"want a date in the future."
  S (BGPPER,BGPVDT)=""
- W ! K DIR,X,Y S DIR(0)="D^::EP",DIR("A")="Enter End Date for the Report: (e.g. 11/30/2005)" D ^DIR K DIR S:$D(DUOUT) DIRUT=1
+ W ! K DIR,X,Y S DIR(0)="D^::EP",DIR("A")="Enter End Date for the Report: (e.g. 11/30/2015)" D ^DIR K DIR S:$D(DUOUT) DIRUT=1
  I $D(DIRUT) Q
  S (BGPPER,BGPVDT)=Y
  Q

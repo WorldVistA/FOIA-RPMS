@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2018-09-27 12:54:35">
+<Class name="csp.beddedc">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeChanged>64672,29653.323967</TimeChanged>
+<TimeCreated>64672,29653.317524</TimeCreated>
+<GeneratedBy>/csp/foia_goldb/BEDDEDC.csp</GeneratedBy>
+
+<Method name="DisplayList">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>myUser:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	D DLST^BEDDUTW($G(%request.Data("BegDt",1)),$G(%request.Data("EndDt",1)))
+ 	Quit 
+ 	
+ 
+]]></Implementation>
+</Method>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<BODY onload=""setFocus()"">"
+	Write !,"<H2>Emergency Department DISCHARGES </H2>",!
+	Write "<form name=""edcForm"" action=""BEDDEDC.csp"" method=""GET"">"
+	Write !,..InsertHiddenFields("BEDDEDC.csp"),!
+	Write !
+	If ('$$DSUM^BEDDUTID()) {
+	Do DLST^BEDDUTW("T-1","T")
+	}
+	Write !,"<input type=""hidden"" id=""DUZ"" name=""DUZ"" value="""_(duz)_""" readonly/>"
+	Write !,"<input type=""button"" name=""btnMGR"" value=""Manager"" onclick='rpfedmgr("_(duz)_");'>"
+	Write !,"<input type=""button"" name=""btnDSH"" value=""Dashboard"" onclick='rpfeddsh("_(duz)_");'>"
+	Write !,!,"&nbsp; &nbsp; &nbsp; Last update: &nbsp; <b> "_($TR($$XNOW^BEDDUTIL(),"@"," "))_"</b>",!
+	Write "</br></br>",!
+	Write "&nbsp; <label for=""BegDt"">Discharge From Date</label> "
+	Write "<input type=""text"" name=""BegDt"" value="_($Get(^TMP("BEDDDSC",$J,"XBDT")))," size=""10"">"
+	Write !,"&nbsp; <label for=""EndDt"">Discharge To Date</label> "
+	Write "<input type=""text"" name=""EndDt"" value="_($Get(^TMP("BEDDDSC",$J,"XEDT")))," size=""10"">"
+	Write !,!,"<input type=""Submit"" name=""btnShow"" value=""Show"">"
+	Write !," "
+	Write "</form>"
+	Write !," <hr>",!
+	Write "<h3> DISCHARGES </h3>",!
+	Write "<table border=1 >",!
+	Write "	<tr>",!
+	Write "	"
+	&html<<th>Discharge</th> <th>Trg</th> <th>Patient (gender)</th>>
+	&html<<th>DOB (age) </th> <th>Chart</th><th>Disposition</th> >
+	Write "	",!
+	Write "	</tr>",!
+	Set bgc="white"
+	Set trrow=0
+	Set ddate=$O(^TMP("BEDDDSC",$J,"LST",""))
+	While (ddate]"") {
+	Set beddien=$O(^TMP("BEDDDSC",$J,"LST",ddate,""))
+	While (beddien]"") {
+	Set edid=##class(BEDD.EDVISIT).%OpenId(beddien)
+	Set trrow=trrow+1
+	Set bgc="#FFFFFF"
+	If (trrow#2=0) {
+	Set bgc="#C0C0C0"
+	}
+	&html<<tr bgcolor=#(bgc)#>> 
+	&html<<td> #($P(edid.PtDCDT,":",1,2))# </td>>
+	&html<<td> #(edid.TrgA)# </td>>
+	&html<<td> <a href="BEDDEDCV.csp?OBJID=#(beddien)#&DFN=#(edid.PtDFN)#"> #(edid.PtName)# (#(edid.Sex)#) </a> </td>>
+	&html<<td> #(edid.DOB)# ( #(edid.Age)# ) </td>>
+	&html<<td> #(edid.Chart)# </td>>
+	&html<<td> #(edid.DispN)# </td>>
+	&html<</tr>>
+	Set beddien=$O(^TMP("BEDDDSC",$J,"LST",ddate,beddien))
+	//Audit the activity
+	Do LOG^BEDDUTIU($G(%session.Data("DUZ")),"P","Q","BEDDEDC.csp","BEDD: User displayed patient discharge listing",edid.PtDFN)
+	}
+	Set ddate=$O(^TMP("BEDDDSC",$J,"LST",ddate))
+	}
+	Kill ^TMP("BEDDDSC",$J)
+	Write "			",!
+	Write !,"</table>",!
+	Write !,!,!,!,!,!,!,!,!,!,"</BODY>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<!-- BEDDEDC.csp - BEDD Discharge Listing -->"
+	Write !,"<!-- ;;2.0;IHS EMERGENCY DEPT DASHBOARD;;Apr 02, 2014 -->"
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<HEAD>"
+	Write !,!,!
+	Set U="^",site=%session.Data("SITE")
+	Do LOADSYS^BEDDUTW(.beddsys,site)
+	Set timeout=$G(beddsys("TimeOut"))
+	Write !,!,"<META HTTP-EQUIV=""Refresh"" CONTENT="""_( timeout )_"; URL=BEDD.csp"">"
+	Write !,!,"<TITLE>	Emergency Department DISCHARGES </TITLE>",!
+	Write !
+	Set duz=%session.Data("DUZ")
+	Set site=%session.Data("SITE")
+	Set loc=%session.Data("LOC")
+	Set (cirow,trrow,rmrow)=0
+	Write !,!,"<script language=""JavaScript"" type=""text/javascript"">"
+	Write !,"function rpfset(vutable,rpfchk) {",!
+	Write "	alert( 'tbl= ' + vutable + 'chk= ' + rpfchk  ); ",!
+	Write "	"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".setMyED"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',vutable,rpfchk) ",!
+	Write "  }",!
+	Write "</script>"
+	Write !,!,"<script type=""text/javascript"">"
+	Write !,!,"	function setFocus() {",!
+	Write "		",!
+	Write "		//Make sure user is logged in",!
+	Write !,"		//Get user",!
+	Write "		var user = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".ReturnDUZ"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"') ;",!
+	Write !,"		if (user == 0) {",!
+	Write "			location.replace='BEDDLogin.csp';",!
+	Write "			return true;",!
+	Write "		}",!
+	Write "	}",!
+	Write "	",!
+	Write "	//BEDD*2.0*2;changed to replace",!
+	Write "	function rpfeddsh(duz) {",!
+	Write "		",!
+	Write "		//Return to the dashboard",!
+	Write "		location.replace(""BEDD.csp"");",!
+	Write "	}",!
+	Write "	",!
+	Write "	//BEDD*2.0*2;reworked to address log out",!
+	Write "	function rpfedmgr(duz) {",!
+	Write "		",!
+	Write "		//See if they have the manager key",!
+	Write "		//"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".keychk"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',duz);",!
+	Write "		var mgr = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".mgrChk"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"');",!
+	Write !,"		//Has key",!
+	Write "		if (mgr==1) {",!
+	Write "			location.replace = ""BEDDAPPL.EDManager.cls""",!
+	Write "		}",!
+	Write "			",!
+	Write "	}",!
+	Write "	function beddshow(BegDt,EndDt) {",!
+	Write "		",!
+	Write "		"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".show"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',BegDt,EndDt)",!
+	Write "	}",!
+	Write "	function rpfptpg(objid,msg) {",!
+	Write "		var duz = "_(%session.Data("DUZ")),!
+	Write "		"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".ptpg"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',objid,msg,duz)",!
+	Write "	}",!
+	Write "	function rpftrg(DFN) {",!
+	Write "		var duz = "_(%session.Data("DUZ")),!
+	Write "		self.document.location = ""BEDDTRG.csp?DFN="" + DFN + ""&DUZ="" + duz",!
+	Write "	}",!
+	Write "	",!
+	Write "</script>"
+	Write " ",!
+	Write !,(..HyperEventHead(0,0))
+	Write "</HEAD>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<HTML>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,"</HTML>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+ 	If ($Get(%session.Data("DUZ"))'>0) {
+ 		Set %response.Redirect="BEDDLogin.csp" Quit 1
+ 	}
+ 	If ('$D(^BEDD.EDSYSTEMD)) {
+ 		Set %response.Redirect="BEDDAPPL.EDSYSTEM.cls" Quit 1
+ 	}
+ 	If ($Data(%request.Data("btnShow",1))) {
+ 	  // Show button pressed - Display Listing
+ 	  Set myUser=$Get(%request.Data("USERNAME",1))
+       Do ..DisplayList($Get(%request.Data("USERNAME",1)))
+ 	}
+ 	Quit 1
+ 
+]]></Implementation>
+</Method>
+
+<Method name="ReturnDUZ">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set user=$Get(%session.Data("DUZ"))
+ 	If (user<1) {
+ 		Set user=0
+ 	}
+ 
+ 	Quit user
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="dashboard">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>duz:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	&js<self.document.location = "BEDD.csp">
+     Quit 1
+ 
+]]></Implementation>
+</Method>
+
+<Method name="keychk">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>duz:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+     If (duz="") {
+ 	    Quit 1
+     }
+     Set XUF=0
+     Set U="^"
+     If ($$KEYCK^BEDDUTID(duz)) {
+ 	    &js<self.document.location = "BEDDAPPL.EDManager.cls">
+     }
+     ElseIf ('$$KEYCK^BEDDUTID(duz)) {
+ 		&js<alert('RESTRICTED ACCESS');>
+     }
+     Quit 1
+ 
+]]></Implementation>
+</Method>
+
+<Method name="mgrChk">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<Implementation><![CDATA[
+     Set XUF=0
+     Set U="^"
+     Set val=0
+     If ($$KEYCK^BEDDUTID(%session.Data("DUZ"))) {
+ 	    Set val=1
+ 	    //&js<self.document.location = "BEDDAPPL.EDManager.cls">
+     }
+     Else {
+ 		&js<alert('RESTRICTED ACCESS');>
+ 		Set val=0
+     }
+     Quit val
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>D:\intersystems\E3IHS\CSP\foia_goldb\BEDDEDC.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/foia_goldb/BEDDEDC.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>64671,78197</Default>
+</Parameter>
+</Class>
+</Export>

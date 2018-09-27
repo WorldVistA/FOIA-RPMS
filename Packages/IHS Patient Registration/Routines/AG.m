@@ -1,5 +1,6 @@
 AG ; IHS/ASDS/EFG - INITIAL ROUTINE AND UTILITY SUB-ROUTINES ;     
- ;;7.1;PATIENT REGISTRATION;**1,2**;JAN 31, 2007
+ ;;7.1;PATIENT REGISTRATION;**1,2,12**;AUG 25, 2005;Build 1
+ ;IHS/OIT/NKD AG*7.1*12 REVISED VERSION/PATCH DISPLAY
  ;
  ; ****************************************************************
  ;
@@ -21,10 +22,17 @@ AG ; IHS/ASDS/EFG - INITIAL ROUTINE AND UTILITY SUB-ROUTINES ;
  W !?22,"*",?56,"*"
  W !?22,"*      INDIAN HEALTH SERVICE      *"
  W !?22,"*   PATIENT REGISTRATION SYSTEM   *"
- I AG("VERSION")]"" D
- . ;W !?22,"*     VERSION ",AG("VERSION"),", ",AG("VERDT"),?56,"*"
- . W !?22,"*   VERSION ",AG("VERSION") W ".",$$CURPATCH
- . W ", ",AG("VERDT"),?56,"*"
+ ;IHS/OIT/NKD AG*7.1*12 - REVISED DISPLAY - START OLD CODE
+ ;I AG("VERSION")]"" D
+ ;. ;W !?22,"*     VERSION ",AG("VERSION"),", ",AG("VERDT"),?56,"*"
+ ;. W !?22,"*   VERSION ",AG("VERSION") W ".",$$CURPATCH
+ ;. W ", ",AG("VERDT"),?56,"*"
+ ;IHS/OIT/NKD AG*7.1*12 - END OLD CODE - START NEW CODE
+ D
+ . N AGTMP
+ . S AGTMP=$$LAST^XPDUTL("AG","7.1") I +AGTMP>0 W !?22,"*   AG V7.1 P",+AGTMP,", ",$$FMTE^XLFDT($P(AGTMP,"^",2),"5D"),?56,"*"
+ . S AGTMP=$$LAST^XPDUTL("AG","7.2") I +AGTMP>0 W !?22,"*   AGMPI V7.2 P",+AGTMP,", ",$$FMTE^XLFDT($P(AGTMP,"^",2),"5D"),?56,"*"
+ ;IHS/OIT/NKD AG*7.1*12 - END NEW CODE
  W !?22,"*",?56,"*",!?22
  F I=1:1:35 W "*"
  ;

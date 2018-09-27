@@ -1,8 +1,8 @@
 BIENVCHK ;IHS/CMI/MWR - ENVIRONMENTAL CHECK FOR KIDS; DEC 15, 2010
- ;;8.5;IMMUNIZATION;**14**;AUG 01,2017
+ ;;8.5;IMMUNIZATION;**15**;SEP 30,2017
  ;;* MICHAEL REMILLARD, DDS * CIMARRON MEDICAL INFORMATICS, FOR IHS *
  ;;  ENVIRONMENTAL CHECK ROUTINE FOR KIDS INSTALLATION.
- ;;  PATCH 14, v8.5: Check environment for Imm v8.5 Patch 13. START+63
+ ;;  PATCH 15: Check environment for Imm v8.5 Patch 14. START+63
  ;;
  ;
  ;
@@ -63,14 +63,24 @@ START ;EP
  ;I $P(X,U)'=1&($P(X,U)'>1) D  S XPDQUIT=2
  ;.W !,$$CJ^XLFSTR("BGP v9.0 Patch 1 NOT INSTALLED",IOM)
  ;
- ;---> IHS PCC REPORTS v3.0 patch 29.
- ;I '$$VCHK("APCL","3.0",2) S XPDQUIT=2
- ;S X=$$LAST("IHS PCC REPORTS","3.0")
- ;I $P(X,U)'=29&($P(X,U)'>29) D  S XPDQUIT=2
- ;.W !,$$CJ^XLFSTR("IHS PCC REPORTS v3.0 patch 29 NOT INSTALLED",IOM)
  ;
+ ;********** PATCH 15, v8.5, SEP 30,2017, IHS/CMI/MWR
  ;
- ;********** PATCH 14, v8.5, AUG 01,2017, IHS/CMI/MWR
+ ;---> Check environment for previous load of Taxonomy v5.1.
+ I '$$VCHK("ATX","5.1",2) S XPDQUIT=2
+ ;
+ ;---> Check Patch Level of Taxonomy.
+ ;---> Check for ATX v5.1, required patch.
+ D
+ .S X=$$LAST("TAXONOMY","5.1")
+ .;---> Patch 20.
+ .I $P(X,U)'=20&($P(X,U)'>20) D  S XPDQUIT=2
+ ..W !,$$CJ^XLFSTR("ATX v5.1 Patch 20 NOT INSTALLED",IOM)
+ .;
+ .I XPDQUIT'=2 D
+ ..W !,$$CJ^XLFSTR("Checking for Patch 20 of ATX v5.1...Patch 20 Present",IOM)	
+ ;
+ ;	
  ;---> Check environment for previous load of Imm v8.5.
  I '$$VCHK("BI","8.5",2) S XPDQUIT=2
  ;
@@ -78,12 +88,12 @@ START ;EP
  ;---> Check for Imm v8.5, required patch.
  D
  .S X=$$LAST("IMMUNIZATION","8.5")
- .;---> Patch 13.
- .I $P(X,U)'=13&($P(X,U)'>13) D  S XPDQUIT=2
- ..W !,$$CJ^XLFSTR("BI v8.5 Patch 13 NOT INSTALLED",IOM)
+ .;---> Patch 14.
+ .I $P(X,U)'=14&($P(X,U)'>14) D  S XPDQUIT=2
+ ..W !,$$CJ^XLFSTR("BI v8.5 Patch 14 NOT INSTALLED",IOM)
  .;
  .I XPDQUIT'=2 D
- ..W !,$$CJ^XLFSTR("Checking for Patch 13 of BI v8.5...Patch 13 Present",IOM)
+ ..W !,$$CJ^XLFSTR("Checking for Patch 13 of BI v8.5...Patch 14 Present",IOM)
  ;**********
  ;
  ;---> Check for multiple BI entries in the Package File.

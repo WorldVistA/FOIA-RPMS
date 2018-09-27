@@ -1,5 +1,5 @@
 BDMS9B1 ; IHS/CMI/LAB - DIABETIC CARE SUMMARY SUPPLEMENT 12 Jan 2011 12:27 PM ; [ 12 Jan 2011 12:27 PM ]
- ;;2.0;DIABETES MANAGEMENT SYSTEM;**3,4,5,6,7,8,9,10**;JUN 14, 2007;Build 12
+ ;;2.0;DIABETES MANAGEMENT SYSTEM;**3,4,5,6,7,8,9,10,11**;JUN 14, 2007;Build 30
  ;
  Q:'$G(APCHSPAT)
  S BDMSPAT=APCHSPAT
@@ -71,22 +71,22 @@ SETARRAY ;set up array containing dm care summary
  D GETHWB(BDMSDFN)
  S X="BMI: "_BDMX("BMI"),$E(X,12)="Last Height:  "_$$STRIP^XLFSTR($J(BDMX("HT"),5,2)," ")_$S(BDMX("HT")]"":" inches",1:""),$E(X,40)=BDMX("HTD") D S(X,1)
  S X="",$E(X,12)="Last Weight:  "_$S(BDMX("WT")]"":BDMX("WT")\1,1:"")_$S(BDMX("WT")]"":" lbs",1:""),$E(X,40)=BDMX("WTD") D S(X)
- S BDMTOBC="",BDMTOBS=$$TOBACCO^BDMDE1T(BDMSDFN,$$DOB^AUPNPAT(BDMSDFN),DT)
+ S BDMTOBC="",BDMTOBS=$$TOBACCO^BDMDF1T(BDMSDFN,$$DOB^AUPNPAT(BDMSDFN),DT)
  I BDMTOBS]"" S X="Tobacco Use:  "_$P($P($G(BDMTOBS),U,2),"  ",2,99) D S(X,1)
  I BDMTOBS="" S X="Tobacco Use:  NOT DOCUMENTED" D S(X,1)
  ;I $G(BDMTOBC)]"" S X="              "_$P(BDMTOBC,U,1) D S(X)
  ;COUNSELED?
  S X="",$E(X,15)="Counseled in the past year?  " D
  .I $E(BDMTOBS),$E(BDMTOBS)'=1 S X=X_"N/A" Q
- .S Y=$$CESS^BDMDE11(BDMSDFN,$$FMADD^XLFDT(DT,-365),DT)
+ .S Y=$$CESS^BDMDF11(BDMSDFN,$$FMADD^XLFDT(DT,-365),DT)
  .I $E(Y)=1 S X=X_$P(Y,"  ",2,999) Q
  .I $E(Y)=2 S X=X_"No" Q
  D S(X)
- S X=$$ENDS^BDMDE1T(BDMSDFN,$$DOB^AUPNPAT(BDMSDFN),DT)
+ S X=$$ENDS^BDMDF1T(BDMSDFN,$$DOB^AUPNPAT(BDMSDFN),DT)
  D S("Last Screened for Electronic Nicotine Delivery System (ENDS) use:"_$S($P(X,U,1)=2:" Never",1:""))
  I $P(X,U,1)=1 D S("              "_$P(X,U,3))
  S X="HTN Diagnosed:  "_$$HTN(BDMSDFN) D S(X,1)
- S X="CVD Diagnosed:  "_$P($$CVD^BDMDE12(BDMSDFN,DT),"  ",2,999) D S(X)
+ S X="CVD Diagnosed:  "_$P($$CVD^BDMDF12(BDMSDFN,DT),"  ",2,999) D S(X)
  S B=$$BP(BDMSDFN)
  S X="Last 3 BP:      "_$P($G(BDMX(1)),U,2),$E(X,26)=$$DATE($P($G(BDMX(1)),U)) D S(X)
  S X="(non ER)" I $D(BDMX(2)) S $E(X,17)=$P(BDMX(2),U,2),$E(X,26)=$$DATE($P(BDMX(2),U)) D S(X)
@@ -97,16 +97,16 @@ SETARRAY ;set up array containing dm care summary
  I $E(%)="N" S $E(X,50)=% D S(X,1) I 1
  E  D S(X) S X="   "_% D S(X)
  K BDMSX
- S BDMSBEG=$$FMADD^XLFDT(DT,-365)
+ S BDMSBEG=$$FMADD^XLFDT(DT,-180)
  S BDMSX=$E($$ASPIRIN(BDMSDFN,BDMSBEG),1,32)
- S X="Aspirin/Anti-platelet/Anticoagulant prescribed (in past yr):  "
+ S X="Aspirin/Anti-platelet/Anticoagulant prescribed (past 6 months):  "
  I $E(BDMSX)="N" S X=X_BDMSX D S(X) I 1
  E  D S(X) S X="   "_BDMSX D S(X)
  I BDMSX="No" S X="",X=$$ASPREF^BDMS9B4(BDMSDFN) I X]"" S X="     "_X D S(X)
  ;statin
  S X=""
  S BDMSBEG=$$FMADD^XLFDT(DT,-180)
- S Y=$$STATIN^BDMDE16(BDMSDFN,BDMSBEG,DT)
+ S Y=$$STATIN^BDMDF16(BDMSDFN,BDMSBEG,DT)
  S X="Statin prescribed (in past 6 months):"
  I $E(Y)=2 S $E(X,50)=$P(Y,"  ",2,99) D S(X)
  I $E(Y)=1 D S(X) S X="   "_$P(Y,"  ",2,99) D S(X)
@@ -116,13 +116,13 @@ M12 ;
  ;determine date range
  S BDMSBEG=$$FMADD^XLFDT(DT,-365)
  S X="Exams (in past 12 months):" D S(X,1)
- S X="   Foot:",$E(X,13)=$P($$DFE^BDMDE17(BDMSDFN,BDMSBEG,DT,"H"),"  ",2,99) D S(X)
- S X="   Eye:",$E(X,13)=$P($$EYE^BDMDE17(BDMSDFN,BDMSBEG,DT,"H"),"  ",2,99) D S(X)
- S X="   Dental:",$E(X,13)=$P($$DENTAL^BDMDE17(BDMSDFN,BDMSBEG,DT,"H"),"  ",2,99) D S(X)
+ S X="   Foot:",$E(X,13)=$P($$DFE^BDMDF17(BDMSDFN,BDMSBEG,DT,"H"),"  ",2,99) D S(X)
+ S X="   Eye:",$E(X,13)=$P($$EYE^BDMDF17(BDMSDFN,BDMSBEG,DT,"H"),"  ",2,99) D S(X)
+ S X="   Dental:",$E(X,13)=$P($$DENTAL^BDMDF17(BDMSDFN,BDMSBEG,DT,"H"),"  ",2,99) D S(X)
  K BDMSTEX,BDMSDAT,BDMX
- S BDMDEPP=$$DEPDX^BDMDE12(BDMSDFN,$$FMADD^XLFDT(DT,-365),DT)
+ S BDMDEPP=$$DEPDX^BDMDF12(BDMSDFN,$$FMADD^XLFDT(DT,-365),DT)
  S BDMDEPP=$P(BDMDEPP,"  ",2,99)
- S BDMDEPS=$$DEPSCR^BDMDE12(BDMSDFN,$$FMADD^XLFDT(DT,-365),DT)
+ S BDMDEPS=$$DEPSCR^BDMDF12(BDMSDFN,$$FMADD^XLFDT(DT,-365),DT)
  S BDMDEPS=$P(BDMDEPS,"  ",2,99)
  S X="Depression: Active Problem: "_BDMDEPP D S(X,1)
  S X="",$E(X,13)="If no, screened in past year:  "_$S($E(BDMDEPP,1)="N":BDMDEPS,1:"") D S(X)
@@ -162,7 +162,7 @@ HTN(P) ;
  .Q:$P(^AUPNPROB(X,0),U,12)="D"
  .Q:$P(^AUPNPROB(X,0),U,12)="I"
  .S Y=$P(^AUPNPROB(X,0),U) I $$ICD^BDMUTL(Y,"SURVEILLANCE HYPERTENSION",9) S I=1 Q
- .I $P($G(^AUPNPROB(X,800)),U,1)]"",$$SNOMED^BDMUTL(2016,"HYPERTENSION DIAGNOSES",$P(^AUPNPROB(X,800),U,1)) S I=1
+ .I $P($G(^AUPNPROB(X,800)),U,1)]"",$$SNOMED^BDMUTL($$LE^BDMS9B2(),"PXRM ESSENTIAL HYPERTENSION",$P(^AUPNPROB(X,800),U,1)) S I=1
  I I Q "Yes"
  NEW BDMX
  S BDMX=""
@@ -178,7 +178,7 @@ DMPN(P) ;return problem number of firt encountered DM problem
  .S I=$P(^AUPNPROB(X,0),U)
  .Q:$P(^AUPNPROB(X,0),U,12)="D"
  .I $$ICD^BDMUTL(I,"SURVEILLANCE DIABETES",9) S D=X Q
- .I $P($G(^AUPNPROB(X,800)),U,1)]"",$$SNOMED^BDMUTL(2016,"DIABETES DIAGNOSES",$P(^AUPNPROB(X,800),U,1)) S D=X
+ .I $P($G(^AUPNPROB(X,800)),U,1)]"",$$SNOMED^BDMUTL($$LE^BDMS9B2(),"PXRM DIABETES",$P(^AUPNPROB(X,800),U,1)) S D=X
  I D="" Q D
  S X=D ;Ien of problem now return problem #
  NEW L S L=$P(^AUPNPROB(X,0),U,6)
@@ -271,19 +271,19 @@ DEPPL(P,BDATE,EDATE) ;EP
  K BDM
  S (G,X,I)=""
  ;is depression on the problem list?
- S T=$O(^ATXAX("B","DM AUDIT DEPRESSIVE DISORDERS",0))
+ S T=$O(^ATXAX("B","BGP MOOD DISORDERS",0))
  S X=0 F  S X=$O(^AUPNPROB("AC",P,X)) Q:X'=+X!(G]"")  D
  .S I=$P($G(^AUPNPROB(X,0)),U)
- .Q:'$$ICD^BDMUTL(I,"DM AUDIT DEPRESSIVE DISORDERS",9)
+ .Q:'$$ICD^BDMUTL(I,"BGP MOOD DISORDERS",9)
  .Q:$P(^AUPNPROB(X,0),U,12)="D"
  .Q:$P(^AUPNPROB(X,0),U,12)="I"
  .S G="Yes  Problem List ("_$P($$ICDDX^BDMUTL(I,,,"I"),U,2)_") " ;_$E($P($$ICDDX^BDMUTL(I,,,"I"),U,4),1,20)
- .I $P($G(^AUPNPROB(X,800)),U,1)]"",$$SNOMED^BDMUTL(2016,"DEPRESSION DIAGNOSES",$P(^AUPNPROB(X,800),U,1)) S G="Yes  Problem List (SNOMED: "_$P(^AUPNPROB(X,800),U,1)_") "
+ .I $P($G(^AUPNPROB(X,800)),U,1)]"",$$SNOMED^BDMUTL($$LE^BDMS9B2(),"DEPRESSION DIAGNOSES",$P(^AUPNPROB(X,800),U,1)) S G="Yes  Problem List (SNOMED: "_$P(^AUPNPROB(X,800),U,1)_") "
  .Q
  I G]"" Q G
  S (G,X,I)=""
  ;is depression on the BH problem list?
- S T=$O(^ATXAX("B","DM AUDIT DEPRESSIVE DISORDERS",0))
+ S T=$O(^ATXAX("B","BGP MOOD DISORDERS",0))
  S X=0 F  S X=$O(^AMHPPROB("AC",P,X)) Q:X'=+X!(G]"")  D
  .S I=$P($G(^AMHPPROB(X,0)),U)
  .Q:I=""
@@ -300,7 +300,7 @@ DEPPL(P,BDATE,EDATE) ;EP
  I G]"" Q G
  ;now check for 2 dxs in past year
  S Y="BDM("
- S X=P_"^LAST 2 DX [DM AUDIT DEPRESSIVE DISORDERS;DURING "_BDATE_"-"_EDATE S E=$$START1^APCLDF(X,Y)
+ S X=P_"^LAST 2 DX [BGP MOOD DISORDERS;DURING "_BDATE_"-"_EDATE S E=$$START1^APCLDF(X,Y)
  I $D(BDM(2)) Q "Yes, 2 or more dxs in past year"
  S BDM=0,BDMV="" I $D(BDM(1)) S BDM=1,BDMV=$P(BDM(1),U,5)
  S X=BDATE,%DT="P" D ^%DT S BD=Y

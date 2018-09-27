@@ -1,5 +1,5 @@
 ABSPOSD2 ; IHS/FCS/DRS - NCPDP DUR overrides ;  [ 09/03/2002  11:10 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**6**;JUN 21, 2001;Build 15
+ ;;1.0;PHARMACY POINT OF SALE;**6,48**;JUN 21, 2001;Build 27
  Q
  ; EDIT is called from the menu in ABSPOSO1,
  ;   typically reached from the pharmacy package's call
@@ -64,6 +64,7 @@ DELSUB(DLIEN,DLSUB) ; delete subrecord - no valid information
  S FDA(9002313.4731,DLSUB_","_DLIEN_",",.01)="@"
 DE3 D FILE^DIE("E","FDA","MSG")     ;delete the record
  Q:'$D(MSG)   ;successful deletion
+ I $D(MSG) D LOG^ABSPOSL2("DE3^ABSPOSD2",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  ;
  ; delete unsuccessful
  K ^TMP("ABSP",$J,"ABSPOSD2",$J,"DELSUB")
@@ -79,6 +80,7 @@ DELREC(DLIEN) ;delete record - no valid information
  S FDA(9002313.473,DLIEN_",",.01)="@"
 DEL3 D FILE^DIE("E","FDA","MSG")     ;delete the record
  Q:'$D(MSG)   ;successful deletion
+ I $D(MSG) D LOG^ABSPOSL2("DEL3^ABSPOSD2",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  ;
  ; delete unsuccessful
  K ^TMP("ABSP",$J,"ABSPOSD2",$J,"DELREC")
@@ -92,7 +94,7 @@ NEWSUB(DURIEN) ;EP FROM ABSPOSIH
  ; on NEW POS claims (from page 20 on ABSP DATA INPUT)
  ;(block ABSP INPUT 5.1 DUR INPUT)
  ;
- N REC,LASTREC,CNT,FDA,RECNUM,REP,SAVNUM
+ N REC,LASTREC,CNT,FDA,RECNUM,REP,SAVNUM,ZERR  ; /IHS/OIT/RAM ; 12 JUN 17 ; ADD DBS CALL ERROR RETURN VARIABLE
  S (CNT,LASTREC,SAVNUM,REC)=0
  ;
  F  S REC=$O(^ABSP(9002313.473,DURIEN,1,REC)) Q:'+REC  D
@@ -105,10 +107,10 @@ NEWSUB(DURIEN) ;EP FROM ABSPOSIH
  ;
  F REP=1:1:ENDCNT  D
  . S RECNUM=LASTREC+REP
- . N FDA,IEN
+ . N FDA,IEN,ZERR  ; /IHS/OIT/RAM ; 12 JUN 17 ; ADD DBS CALL ERROR RETURN VARIABLE
  . S FDA(9002313.4731,"+1,"_DURIEN_",",.01)=RECNUM
- . D UPDATE^DIE("E","FDA","IEN")
- ;
+ . D UPDATE^DIE("E","FDA","IEN","ZERR") ; /IHS/OIT/RAM ; 12 JUN 17 ; UPDATE DBS CALL TO ALLOW FOR ERROR RETURN.
+ . I $D(ZERR) D LOG^ABSPOSL2("NEWSUB^ABSPOSD2",.ZERR) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  ;
  ;
  Q

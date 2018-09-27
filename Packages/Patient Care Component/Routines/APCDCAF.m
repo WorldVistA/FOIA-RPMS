@@ -1,5 +1,5 @@
 APCDCAF ; IHS/CMI/LAB - MENTAL HLTH ROUTINE 16-AUG-1994 ;
- ;;2.0;IHS PCC SUITE;**2,7,8,11,15**;MAY 14, 2009;Build 11
+ ;;2.0;IHS PCC SUITE;**2,7,8,11,15,20**;MAY 14, 2009;Build 25
  ;
  ;
 EN ; EP -- main entry point
@@ -20,7 +20,7 @@ HDR ;EP -- header code
  ;
 INIT ;EP -- init variables/list array
  S VALMSG="Q - Quit/?? for more actions/+ next/- previous"
- D GATHER  ;GATHER UP ALL VISITS FOR DISPLAY
+ D GATHER
  D RECDISP
  S VALMCNT=APCDRCNT
  Q
@@ -53,8 +53,8 @@ GATHER ;
  ..S APCDV0=$G(^AUPNVSIT(APCDVIEN,0))
  ..Q:APCDV0=""
  ..Q:$P(APCDV0,U,5)=""
- ..Q:'$D(^AUPNPAT($P(APCDV0,U,5),0))  ;no patient
- ..Q:'$D(^DPT($P(APCDV0,U,5),0))  ;no patient
+ ..Q:'$D(^AUPNPAT($P(APCDV0,U,5),0))
+ ..Q:'$D(^DPT($P(APCDV0,U,5),0))
  ..Q:$$DEMO^APCLUTL($P(APCDV0,U,5),APCDDEMO)
  ..Q:$P(APCDV0,U,7)=""
  ..Q:'$$SCW($P(APCDV0,U,7))
@@ -76,8 +76,12 @@ GATHER ;
  ..I $D(APCDHLS),'$D(APCDHLS(APCDVHL)) Q  ;not a HOSP LOC we want
  ..I APCDVPP="",$D(APCDPRVS) Q
  ..I APCDPRVT="X",APCDVPP Q
- ..I $D(APCDPRVS),'$D(APCDPRVS(APCDVPP)) Q  ;not a PRIM PROV we want
- ..S APCDVCAS=$P($G(^AUPNVSIT(APCDVIEN,11)),U,11)
+ ..I APCDPRVT'="C",$D(APCDPRVS),'$D(APCDPRVS(APCDVPP)) Q  ;not a PRIM PROV we want
+ ..I APCDPRVT'="C" G CAS
+ ..S X=0,G=0,H=0 F  S X=$O(^AUPNVPRV("AD",APCDVIEN,X)) Q:X'=+X  I $P(^AUPNVPRV(X,0),U,4)'="P" S S=$$VALI^XBDIQ1(9000010.06,X,.01) D
+ ...I $D(APCDPRVS(S)) S H=1
+ ..Q:'H
+CAS ..S APCDVCAS=$P($G(^AUPNVSIT(APCDVIEN,11)),U,11)
  ..I APCDVCAS="R" Q  ;DON'T DISPLAY REVIEWED VISITS
  ..K APCDVCDR D GETVCDR^APCDCAFS(APCDVIEN,"APCDVCDR")  ;GET ALL PENDING REASONS
  ..I '$D(APCDVCDR),$D(APCDCDRS) Q  ;
@@ -89,7 +93,7 @@ GATHER ;
  .Q
  Q
  ;
-GATHERP ; gather up visits for one patient
+GATHERP ; gather up visits for 1 patient
  S APCDODAT=9999999-APCDED,APCDSTOP=9999999-APCDBD
  S (APCDRCNT,APCDVIEN)=0 F  S APCDODAT=$O(^AUPNVSIT("AA",APCDCAFP,APCDODAT)) Q:APCDODAT=""!($P(APCDODAT,".")>APCDSTOP)  D
  .S APCDVIEN=0 F  S APCDVIEN=$O(^AUPNVSIT("AA",APCDCAFP,APCDODAT,APCDVIEN)) Q:APCDVIEN'=+APCDVIEN  D
@@ -191,7 +195,7 @@ LBLK(V,L) ;left blank fill
  Q V
  ;
 LASTCDR(V,F) ;EP - get last chart deficiency reason
- I $G(F)="" S F="I"  ;default to ien
+ I $G(F)="" S F="I"  ;
  I '$D(^AUPNVCA(V)) Q ""
  NEW X,A,D,L
  S X=0 F  S X=$O(^AUPNVCA("AD",V,X)) Q:X'=+X  D
@@ -292,7 +296,7 @@ ISORT ;
  I $$MCD^AUPNPAT(D,$P($P(^AUPNVSIT(V,0),U),".")) S:R]"" R=R_"/" S R=R_"C"
  I $$PI^AUPNPAT(D,$P($P(^AUPNVSIT(V,0),U),".")) S:R]"" R=R_"/" S R=R_"P"
  Q
-BACK ;EP go back to listman
+BACK ;EP go back
  D TERM^VALM0
  S VALMBCK="R"
  D INIT
@@ -356,7 +360,7 @@ DCAH ;
  W !!,"Chart Audit History for VISIT:"
  W !?1,"Visit Date:  ",$$VAL^XBDIQ1(9000010,APCDVSIT,.01),"   Patient Name:  ",$$VAL^XBDIQ1(9000010,APCDVSIT,.05)
  W !?1,"Hospital Location:  ",$$VAL^XBDIQ1(9000010,APCDVSIT,.22),"  Primary Provider: ",$$PRIMPROV^APCLV(APCDVSIT,"N")
- W !!,"DATE OF AUDIT",?24,"STATUS",?40,"USER WHO AUDITED" ;,?62,"CHART DEFICIENCY"
+ W !!,"DATE OF AUDIT",?24,"STATUS",?40,"USER WHO AUDITED"
  S APCDX=0 F  S APCDX=$O(^AUPNVCA("AD",APCDVSIT,APCDX)) Q:APCDX'=+APCDX  D
  .W !,$$GET1^DIQ(9000010.45,APCDX,.01),?24,$$GET1^DIQ(9000010.45,APCDX,.04),?40,$$GET1^DIQ(9000010.45,APCDX,.05)
  W !!,"DEFICIENCY HISTORY"
@@ -405,13 +409,13 @@ HSX ;
  D BACK
  Q
  ;
-EOP ;EP - End of page.
+EOP ;EP
  Q:$E(IOST)'="C"
  NEW DIR
  K DIRUT,DFOUT,DLOUT,DTOUT,DUOUT
  S DIR("A")="Press Enter to Continue",DIR(0)="E" D ^DIR
  Q
- ;----------
+ ;
 BH ;EP
  K DIR
  I '$D(^XUSEC("AMHZ CODING REVIEW",DUZ)) W !!,"You do not have the security access to see Behavioral Health Notes.",!,"Please see your supervisor for access.  The security key needed is AMHZ CODING REVIEW.",! D PAUSE^APCDALV1,BHX Q
@@ -448,7 +452,7 @@ BH1 ;
  S APCDTIU=$P(^AUPNVNOT(APCDVNOT,0),U)
  D BROWS1^TIURA2("TIU BROWSE FOR READ ONLY",APCDTIU)
  ;
-BHSOAP ;look for SOAP note and display if it exists
+BHSOAP ;look for SOAP note
  I $O(^AMHREC(APCDVBH,31,0)) D
  .W !!,"The SOAP note from the Behavioral Health module will now be displayed."
  .W !! S DIR(0)="Y",DIR("A")="Do you want to continue",DIR("B")="Y" KILL DA D ^DIR KILL DIR

@@ -1,11 +1,13 @@
 ABMDE2P ; IHS/ASDST/DMJ - Edit Page 2 - PICK PAYER ; 
- ;;2.6;IHS 3P BILLING SYSTEM;**6**;NOV 12, 2009
+ ;;2.6;IHS 3P BILLING SYSTEM;**6,24**;NOV 12, 2009;Build 429
  ;
  ; IHS/SD/SDR - v2.5 p8 - task 8
  ;    Added code for replacement insurer
  ;
- ; IHS/SD/SDR - v2.5 p9 - IM13815 - change bill type when different insurer is picked
- ; IHS/SD/SDR - abm*2.6*6 - NOHEAT - allow a 10th insurer to be selected; if 10th was selected it was putting 1st
+ ;IHS/SD/SDR v2.5 p9 - IM13815 - change bill type when different insurer is picked
+ ;
+ ;IHS/SD/SDR 2.6*6 NOHEAT allow a 10th insurer to be selected; if 10th was selected it was putting 1st
+ ;IHS/SD/SDR 2.6*24 CR9823 Added code to update fees if an insurer is Picked that has a different fee table setup than the one on the claim originally
  ; *********************************************************************
  ;
 P1 ; Pick Insurer
@@ -100,7 +102,49 @@ P3 ;
  F  S DA=$O(^ABMDCLM(DUZ(2),ABMP("CDFN"),13,DA)) Q:'DA  D
  .I "CU"'[$P(^ABMDCLM(DUZ(2),ABMP("CDFN"),13,DA,0),U,3) D
  .. I DA'=$P(ABMZ(ABM("ANS")),U,3) D ^DIE
+ S ABMPS("FEE")=ABMP("FEE")  ;abm*2.6*24 IHS/SD/SDR CR9823
  D TPICHECK^ABMDE1
+ ;start new abm*2.6*24 IHS/SD/SDR CR9823
+NEWFETBL ;
+ ;if a fee table is setup for the insurer/visit type and it's not the one already defined
+ S ABMFTST=0
+ I +$P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),1,ABMP("VTYP"),0)),U,5)'=0&(+$G(ABMPS("FEE"))'=+$P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),1,ABMP("VTYP"),0)),U,5)) S ABMFTST=1
+ I ABMFTST=0&(+$P($G(^ABMDPARM(DUZ(2),1,0)),U,9)'=0)&(+$G(ABMPS("FEE"))'=+$P($G(^ABMDPARM(DUZ(2),1,0)),U,9)) S ABMFTST=1
+ I ABMFTST=1 D
+ .W !!,$$EN^ABMVDF("HIN"),"**Note**",$$EN^ABMVDF("HIF")
+ .W "  A different fee schedule (#"_ABMP("FEE")_") has been identified for this"
+ .W !,"visit type ("_ABMP("VTYP")_").",!
+ .D ^XBFMK
+ .S DIR(0)="Y"
+ .S DIR("A")="Do you wish to import those fees into this claim"
+ .S DIR("B")="Yes"
+ .D ^DIR
+ .K DIR
+ .Q:$D(DTOUT)!$D(DUOUT)!$D(DIROUT)
+ .I Y=0 W !!,"Fees will be left as is then.." H 1 Q  ;don't want to import; leave fees as is
+ .S ABMI=19  ;skip everything prior to 21 (starting at 19)
+ .F  S ABMI=$O(^ABMDCLM(DUZ(2),ABMP("CDFN"),ABMI)) Q:'ABMI!(ABMI>47)  D
+ ..Q:ABMI=41  ;skip provider multiple
+ ..S ABMTT=0
+ ..F  S ABMTT=$O(^ABMDCLM(DUZ(2),ABMP("CDFN"),ABMI,ABMTT)) Q:'ABMTT  D
+ ...I $P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),ABMI,ABMTT,0)),U,17)["|TC" Q  ;skip any entry that are from the V Trans Code file; these are from charge master and should be left alone
+ ...K ABMT
+ ...D ^XBFMK
+ ...S DA(1)=ABMP("CDFN")
+ ...S DA=ABMTT
+ ...S DIE="^ABMDCLM("_DUZ(2)_","_DA(1)_","_ABMI_","
+ ...S ABMT("CD")=$P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),ABMI,ABMTT,0)),U)
+ ...S ABMMLT=$S(ABMI=21:11,ABMI=23:25,ABMI=25:31,ABMI=27:19,ABMI=33:21,ABMI=35:15,ABMI=37:17,ABMI=39:23,ABMI=43:13,ABMI=45:32,ABMI=47:13,1:13)
+ ...I ABMI=33 S ABMR("CODE")=$$GET1^DIQ(9999999.31,ABMT("CD"),".01","E"),ABMT("CD")="1"_ABMR("CODE")
+ ...S ABMT("FEE")=+$$ONE^ABMFEAPI(ABMP("FEE"),ABMMLT,ABMT("CD"),ABMP("VDT"))
+ ...I ABMI=21 S DR=".07"
+ ...I "^23^27^35^37^39^43^47^"[("^"_ABMI_"^") S DR=".04"
+ ...I ABMI=25 S DR=".03"
+ ...I ABMI=33 S DR=".08"
+ ...S DR=DR_"////"_+ABMT("FEE")
+ ...D ^DIE
+ .W !!,"Updates complete" H 1
+ ;end new abm*2.6*24 IHS/SD/SDR CR9823
  Q
  ;
 PAZ ;

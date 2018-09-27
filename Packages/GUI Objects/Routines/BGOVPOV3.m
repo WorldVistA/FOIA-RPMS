@@ -1,8 +1,9 @@
-BGOVPOV3 ; IHS/BAO/TMD - Visit POV maintenance ;13-Apr-2016 03:47;du
- ;;1.1;BGO COMPONENTS;**19,20**;Mar 20, 2007;Build 6
+BGOVPOV3 ; IHS/BAO/TMD - Visit POV maintenance ;09-Nov-2017 14:34;PLS
+ ;;1.1;BGO COMPONENTS;**19,20,23**;Mar 20, 2007;Build 6
+ ; Patch 23 added for fracture data
  ; Add/Edit VPOV data
  ;  INP = null^ Visit IEN [2] ^ Problem IEN [3] ^ Patient IEN [4] ^ Prov Text [5] ^ Descriptive CT [6] ^
- ;        SNOMED CT [7] ^ ^Primary/Seconday ^ Provider IEN [10]^ asthma control [11]
+ ;        SNOMED CT [7] ^ ^Primary/Seconday ^ Provider IEN [10]^ asthma control [11] ^norm/abn [12] ^ laterality [13] ^ fracture [14]
  ;  LIST(n) = POV IEN [1]
  ;  QUAL = Q [1] ^ TYPE [2] ^IEN (If edit)  [3] ^ SNOMED [4] ^ BY [5] ^WHEN [6] ^ DEL [7]
  ;  INJ  = Cause DX[1] ^ Injury Code [2] ^ Injury Place [3] ^ First/Revisit [4] ^ Injury Dt [5] ^ Onset Date [6]
@@ -10,7 +11,7 @@ BGOVPOV3 ; IHS/BAO/TMD - Visit POV maintenance ;13-Apr-2016 03:47;du
 EDIT(RET,INP,LIST,QUAL,INJ,NORM) ;EP
  N VIEN,DFN,TYPE,ITYPE,NARR,STAGE,MOD,CAUSEDX,REVISIT,ECODE,PLACE,CONTROL,SNOMED,DESC,TEXT,SAVRET,VDT
  N PRIM,INJDT,ONSET,FDA,FNUM,VFNEW,PRV,TYPE2,DUP,LAT,LATEXT,FIRST
- N CANDUP,OFF,APCDVSIT,PXCEVIEN,PROB,NEW,DESCT,SNODATA,IMP
+ N CANDUP,OFF,APCDVSIT,PXCEVIEN,PROB,NEW,DESCT,SNODATA,IMP,FRAC
  N PTDATA,CHK,POVLST,IENS,POV,RET3,SPEC,VFIEN,X,FIRST
  S FNUM=$$FNUM
  S CHK=0,IENS="",SPEC="",FIRST=""
@@ -56,7 +57,8 @@ EDIT(RET,INP,LIST,QUAL,INJ,NORM) ;EP
  Q:RET<0
  S NARR=$S(RET:"`"_RET,1:""),RET=""
  D GETPOVS(.LIST,.POVLST)
- S PTDATA=$$GETDATA^BGOVPOV2(DFN,$G(LIST(0)))
+ S FRAC=$P(INP,U,14)
+ S PTDATA=$$GETDATA^BGOVPOV2(DFN,$G(LIST(0)),FRAC)
  S SNODATA=$$CONC^BSTSAPI(SNOMED_"^^"_VDT_"^1^^"_PTDATA)
  I 'SPEC D
  .S FIVE=$P(SNODATA,U,5)
@@ -164,6 +166,7 @@ STORE ;Store the POV
  S @FDA@(1104)=$S(LAT="":"@",1:LAT)                                           ;P20
  S @FDA@(1101)=SNOMED
  S @FDA@(1102)=DESCT
+ S @FDA@(1106)=FRAC   ;P23
  S @FDA@(1201)="N"
  S @FDA@(1204)="`"_DUZ                                                 ; PATCH 5
  ;IHS/MSC/MGH added new fields patch 11
@@ -191,7 +194,7 @@ STORE ;Store the POV
  . S ASTHMA=$$CHECK^BGOASLK(ITYPE,DESCT)
  . I ASTHMA=1 S RET=RET_U_ASTHMA
  . I CONTROL="NONE RECORDED" S CONTROL=""
- . I CONTROL'="" D ASTHMA^BGOVPOV(DFN,CONTROL,VIEN)
+ . I CONTROL'="" D ASTHMA^BGOVPOV3(DFN,CONTROL,VIEN)
  .;Check for bulletin for new dx
  .N DA,X,APCDDATE,APCDVSIT,ATXAD,APCDPAT,AUPNPAT
  .S DA=VFIEN,X=ITYPE
@@ -230,5 +233,15 @@ ICD10(RET,ICD) ;New entry point for ICD-10
  .I $E(ICD,1)="T",$E(ICD,2,3)<89 S RET=1
  I IMP>VDT D
  .I ICD>799.9&(ICD<1000) S RET=1
+ Q
+ASTHMA(DFN,CONTROL,VIEN) ;Find last control, if it has changed store the change
+ N LEVEL,INP,RET,RETURN,AIEN
+ Q:CONTROL="@"
+ ;IHS/MSC/MGH change in patch 10 to always store, not just if a change
+ S RETURN=$$ACONTROL^BGOASLK(DFN,VIEN)
+ S LEVEL=$P(RETURN,U,1),AIEN=$P(RETURN,U,2)
+ I LEVEL'=CONTROL D
+ .S INP=AIEN_U_VIEN_U_CONTROL
+ .D SET^BGOVAST(.RET,INP)
  Q
 FNUM() Q 9000010.07

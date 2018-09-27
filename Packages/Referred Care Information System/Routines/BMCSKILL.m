@@ -1,5 +1,5 @@
 BMCSKILL ; IHS/PHXAO/TMJ - KILL ALL BMC VARIABLES ;  
- ;;4.0;REFERRED CARE INFO SYSTEM;**9**;JAN 09, 2006;Build 51
+ ;;4.0;REFERRED CARE INFO SYSTEM;**9**;JAN 09, 2006;Build 92
  ;BMC*4.0*9 IHS.OIT.FCJ ADDED BMCDX10
  ; Kill all BMC variables including system wide variables
  ;

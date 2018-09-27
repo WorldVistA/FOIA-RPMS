@@ -1,0 +1,48 @@
+BQIIPTM ;GDIT/HCSD/ALA-IPC Teams ; 06 Jun 2017  9:27 AM
+ ;;2.7;ICARE MANAGEMENT SYSTEM;;Dec 19, 2017;Build 23
+ ;
+ ;
+EN(TIME,CODE) ;EP
+ NEW TMN
+ S TMN=0
+ F  S TMN=$O(^BSDPCT(TMN)) Q:'TMN  D
+ . S INACT=$P(^BSDPCT(TMN,0),"^",3)
+ . I INACT'="",INACT<DT Q
+ . S NAME=$P(^BSDPCT(TMN,0),"^",1)
+ . I $O(^BQITEAM("B",NAME,""))="" D NTM
+ . I TIME="MON" S NOD=10,FIL=90505.802,MEM=90505.804
+ . I TIME="WEEK" S NOD=20,FIL=90505.803,MEM=90505.805
+ Q
+ ;
+NTM ;EP - New team
+ NEW DIC,DLAYGO,X,Y
+ S DIC(0)="L",X=NAME,DIC="^BQITEAM("
+ D ^DIC
+ Q
+ ;
+STORT(TMN,ID,BQDATE,DEN,NUM) ;EP - Store facility data
+ ; Input parameters
+ ;   TMN    - Team IEN
+ ;   ID     - Measure ID
+ ;   BQDATE - Month and Year date
+ ;   DEN    - Denominator value
+ ;   NUM    - Numerator value
+ ;
+ NEW DA,DIC,DLAYGO,MSRN,X
+ I '$D(^BQITEAM(TMN,10,0)) S ^BQITEAM(TMN,10,0)="^90505.801^^"
+ S DA(1)=TMN,DIC(0)="LMNZ",DLAYGO=90505.801,X=ID,DIC="^BQITEAM("_DA(1)_",10,"
+ D ^DIC I Y=-1 K DO,DD D FILE^DICN
+ S MSRN=+Y
+ I '$D(^BQITEAM(TMN,NOD,MSRN,1,0)) S ^BQITEAM(TMN,NOD,MSRN,1,0)="^"_FIL_"D^^"
+ S DA(2)=TMN,DA(1)=MSRN,DIC(0)="LMNZ",DLAYGO=FIL,X=$S($L(BQDATE)=5:BQDATE_"00",1:BQDATE)
+ S DIC="^BQITEAM("_DA(2)_",10,"_DA(1)_","_NOD_","
+ D ^DIC I Y=-1 K DO,DD D FILE^DICN
+ S DA=+Y
+ S $P(^BQITEAM(TMN,NOD,MSRN,1,DA,0),U,2,3)=DEN_U_NUM
+ ;
+ ; Set team members
+ S DA(3)=TMN,DA(2)=MSRN,DA(1)=DA,DIC(0)="L",DLAYGO=MEM,DIC="^BQITEAM("_DA(3)_",10,"_DA(2)_","_NOD_","_DA(1)_",30,"
+ S MM=0 F  S MM=$O(^BSDPCT(TMN,1,MM)) Q:'MM  D
+ . S IEN=$P(^BSDPCT(TEAM,1,TN,0),U,1),NAME=$P($G(^VA(200,IEN,0)),U,1)
+ . S X=IEN D ^DIC
+ Q

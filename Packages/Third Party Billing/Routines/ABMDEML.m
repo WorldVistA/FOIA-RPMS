@@ -1,31 +1,32 @@
 ABMDEML ; IHS/SD/SDR - Edit Utility - FOR MULTIPLES ;   
- ;;2.6;IHS Third Party Billing;**1,2,3,6,8,9,10,11,13,14,18,21**;NOV 12, 2009;Build 379
+ ;;2.6;IHS Third Party Billing;**1,2,3,6,8,9,10,11,13,14,18,21,23**;NOV 12, 2009;Build 427
  ;
  ; IHS/ASDS/DMJ V2.4 Patch 7 - NOIS HQW-0701-100066 Modifications made related to Medicare Part B.
  ; IHS/ASDS/LSL V2.4 Patch 9 - NOIS HQW-0701-100066 The above change doesn't work as ABMP("HCFA") is undefined. Changed code back to listing HCFA modes of export.
  ;
- ;IHS/SD/SDR - 2.5 p4 IM11671 Added 837 format to list so it would inquire for corresponding diagnosis
- ;IHS/SD/SDR - 2.5 p5 Modified to put POS and TOS by line item
- ;IHS/SD/SDR - 2.5 p8 IM14079 Edited code to not do TOS prompt if 837 format
- ;IHS/SD/SDR - 2.5 p8 IM12246 Added In-House and Reference LAB CLIA prompts
- ;IHS/SD/SDR - 2.5 p8 task 6 Added code to populate mileage on page 3A when A0425/A0888 are used
- ;IHS/SD/SDR - 2.5 p9 task 1 Coded for new line item provider multiple
- ;IHS/SD/SDR - 2.5 p10 IM20346 Variables getting carried over for Stuff tag
- ;IHS/SD/SDR - 2.5 p10 IM21539 Made OBSTETRICAL? question be asked in correct place
- ;IHS/SD/SDR - 2.5 p13 POA changes
+ ;IHS/SD/SDR 2.5 p4 IM11671 Added 837 format to list so it would inquire for corresponding diagnosis
+ ;IHS/SD/SDR 2.5 p5 Modified to put POS and TOS by line item
+ ;IHS/SD/SDR 2.5 p8 IM14079 Edited code to not do TOS prompt if 837 format
+ ;IHS/SD/SDR 2.5 p8 IM12246 Added In-House and Reference LAB CLIA prompts
+ ;IHS/SD/SDR 2.5 p8 task 6 Added code to populate mileage on page 3A when A0425/A0888 are used
+ ;IHS/SD/SDR 2.5 p9 task 1 Coded for new line item provider multiple
+ ;IHS/SD/SDR 2.5 p10 IM20346 Variables getting carried over for Stuff tag
+ ;IHS/SD/SDR 2.5 p10 IM21539 Made OBSTETRICAL? question be asked in correct place
+ ;IHS/SD/SDR 2.5 p13 POA changes
  ;
- ;IHS/SD/SDR - 2.6 CSV
- ;IHS/SD/SDR - 2.6*1 HEAT6566 - populate anes based on MCR/non-MCR
- ;IHS/SD/SDR - 2.6*2 3PMS10003A - modified to call ABMFEAPI
- ;IHS/SD/SDR - 2.6*3 HEAT11696 - added 36415 to use lab prompts
- ;IHS/SD/SDR - 2.6*3 HEAT12742 - removed HEAT6566 changes
- ;IHS/SD/SDR - 2.6*6 5010 - Added prompt for 2400 DTP test date
- ;IHS/SD/SDR - 2.6*13 added check for new export mode 35 and to populate DATE OF FIRST SYMPTOM and INJURY DATE based on occurrence code 11
- ;IHS/SD/SDR - 2.6*14 ICD10 - 002F and 002H - when adding DX or PX to claim, populated PRIORITY and ICD INDICATOR accordingly
- ;IHS/SD/SDR - 2.6*14 HEAT165301 - Removed link between page 9A and page 3 questions introduced in patch13
- ;IHS/SD/SDR - 2.6*21 HEAT240919 - Added Provider Narrative default for DX and PX.  Was missing default after switch to ICD10.
- ;IHS/SD/SDR - 2.6*21 HEAT136508 - Made change to ask for CLIA if lab code starts with 'G'
- ;IHS/SD/SDR - 2.6*21 HEAT235867 - Added code to put default provider narrative for ICD10 codes.  DD change was causing there to be no default
+ ;IHS/SD/SDR 2.6 CSV
+ ;IHS/SD/SDR 2.6*1 HEAT6566 populate anes based on MCR/non-MCR
+ ;IHS/SD/SDR 2.6*2 3PMS10003A modified to call ABMFEAPI
+ ;IHS/SD/SDR 2.6*3 HEAT11696 added 36415 to use lab prompts
+ ;IHS/SD/SDR 2.6*3 HEAT12742 removed HEAT6566 changes
+ ;IHS/SD/SDR 2.6*6 5010 Added prompt for 2400 DTP test date
+ ;IHS/SD/SDR 2.6*13 added check for new export mode 35 and to populate DATE OF FIRST SYMPTOM and INJURY DATE based on occurrence code 11
+ ;IHS/SD/SDR 2.6*14 ICD10 002F and 002H - when adding DX or PX to claim, populated PRIORITY and ICD INDICATOR accordingly
+ ;IHS/SD/SDR 2.6*14 HEAT165301 Removed link between page 9A and page 3 questions introduced in patch13
+ ;IHS/SD/SDR 2.6*21 HEAT240919 Added Provider Narrative default for DX and PX.  Was missing default after switch to ICD10.
+ ;IHS/SD/SDR 2.6*21 HEAT136508 Made change to ask for CLIA if lab code starts with 'G'
+ ;IHS/SD/SDR 2.6*21 HEAT235867 Added code to put default provider narrative for ICD10 codes.  DD change was causing there to be no default
+ ;IHS/SD/AML 2.6*23 HEAT247169 Added code to prompt for NDC when subfile is 43.
  ; *********************************
  ;
 A1 ;
@@ -84,7 +85,7 @@ DIC ;
 DUPCHK ;USED TO BE THE DUPLICATE CHECK LINE TAG
  S ABMX("Y")=+Y
  ;
- ;if Dental multiple (page) . . . 
+ ;if Dental multiple (page)
  ;and no opsite asked add level of serive to DR string
  I $G(ABMZ("SUB"))=33 D
  .I $P(^AUTTADA(ABMX("Y"),0),U,9)]"" S ABMZ("DR")=$P(ABMZ("DR"),";.05")
@@ -126,7 +127,6 @@ MOD ;
  .S ABMZ("DR")=ABMZ("DR")_$S($D(ABMP("638")):"//",ABMZ("SUB")=43:"//",ABMZ("CAT")=23:"//",1:"///")
  .I +$G(ABMZ("MODFEE"))=$G(ABMZ("MODFEE")) D  Q
  ..S ABMZ("DR")=ABMZ("DR")_ABMZ("MODFEE")
- .;S ABMZ("DR")=ABMZ("DR")_$P(^ABMDFEE(ABMP("FEE"),ABMX("DIC"),ABMX("NEWY"),0),"^",2)  ;abm*2.6*2 3PMS10003A
  .S ABMZ("DR")=ABMZ("DR")_$P($$ONE^ABMFEAPI(ABMP("FEE"),ABMX("DIC"),ABMX("NEWY"),ABMP("VDT")),U)  ;abm*2.6*2 3PMS10003A
  ;start new abm*2.6*9 NARR
  I $D(^ABMNINS(ABMP("LDFN"),ABMP("INS"),5,"B",ABMX("Y"))) D
@@ -138,6 +138,7 @@ MOD ;
  ;I ABMP("EXP")'=21,(ABMP("EXP")'=22),(ABMP("EXP")'=23) D TOSA^ABMDEMLC  ;don't do for 837 formats  ;abm*2.6*6 5010
  ;I ABMP("EXP")'=21,(ABMP("EXP")'=22),(ABMP("EXP")'=23),(ABMP("EXP")'=32) D TOSA^ABMDEMLC  ;don't do for 837 formats  ;abm*2.6*6 5010  ;abm*2.6*8 5010
  I ABMP("EXP")'=21,(ABMP("EXP")'=22),(ABMP("EXP")'=23),(ABMP("EXP")'=31),(ABMP("EXP")'=32),(ABMP("EXP")'=33) D TOSA^ABMDEMLC  ;don't do for 837 formats  ;abm*2.6*6 5010  ;abm*2.6*8 5010
+ I ABMZ("SUB")=43 S ABMZ("DR")=ABMZ("DR")_";.19"  ;abm*2.6*23 IHS/SD/AML HEAT247169
  ;I $G(ABMX("Y"))>79999,$G(ABMX("Y"))<90000 D  ;lab charges only  ;abm*2.6*3 HEAT11696
  ;I ($G(ABMX("Y"))>79999&($G(ABMX("Y"))<90000))!($G(ABMZ("SUB"))=37&(ABMX("Y")=36415)) D  ;lab charges only  ;abm*2.6*3 HEAT11696  ;abm*2.6*21 HEAT136508
  I ($G(ABMX("Y"))>79999&($G(ABMX("Y"))<90000))!($G(ABMZ("SUB"))=37&(ABMX("Y")=36415))!($E($P($$CPT^ABMCVAPI($G(ABMX("Y"),ABMP("VDT")),U,2),U,2))="G") D  ;lab charges only  ;abm*2.6*3 HEAT11696  ;abm*2.6*21 HEAT136508

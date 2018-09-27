@@ -1,5 +1,6 @@
 AGUPCHK ; IHS/ASDS/EFG - Merge Insurer Data ; 
- ;;7.1;PATIENT REGISTRATION;;AUG 25,2005
+ ;;7.1;PATIENT REGISTRATION;**12**;AUG 25,2005;Build 1
+ ;IHS/OIT/NKD AG*7.1*12 INSURER TYPE
  ;
  S U="^"
  D HD
@@ -11,7 +12,8 @@ TEMP S (AG("Y"),AG("XIT"))=0 F AGZ("I")=1:1 S AG("Y")=$O(^AUTNINS(AG("Y"))) Q:'+
  G XIT
 SEL D HD W !
  S AG("MODE")="SEL"
- S AG("XIT")=0,DIC="^AUTNINS(",DIC(0)="QEAM",DIC("A")="Select INSURER (to Search against): " S DIC("S")="I $P($G(^(1)),U,7)'=0,""DR""'[$P($G(^(2)),U)"
+ ;S AG("XIT")=0,DIC="^AUTNINS(",DIC(0)="QEAM",DIC("A")="Select INSURER (to Search against): " S DIC("S")="I $P($G(^(1)),U,7)'=0,""DR""'[$P($G(^(2)),U)"
+ S AG("XIT")=0,DIC="^AUTNINS(",DIC(0)="QEAM",DIC("A")="Select INSURER (to Search against): " S DIC("S")="I $P($G(^(1)),U,7)'=0,""DR""'[$$INSTYP^AGUTL(Y)"  ;IHS/OIT/NKD AG*7.1*12
  D ^DIC
  I X="" G XIT
  I +Y<1 G SEL
@@ -22,7 +24,8 @@ CHK W !!,"Dup-Check for: ",$P(AG("X0"),U),!?15,$P(AG("X0"),U,2)
  I $P(AG("X0"),U,3)]"",$P(AG("X0"),U,4)]"" W !?15,$P(AG("X0"),U,3),", "
  I  W $P(^DIC(5,$P(AG("X0"),U,4),0),U,2)," ",$P(AG("X0"),U,5)
  W !,"================================================"
- S DIC="^AUTNINS(",DIC(0)="QEAM",DIC("S")="I Y'=AG(""Y""),$P($G(^(1)),U,7)'=0,""DR""'[$P($G(^(2)),U)",DIC("A")="Select (SEARCH) for Duplicate INSURER: " D ^DIC
+ ;S DIC="^AUTNINS(",DIC(0)="QEAM",DIC("S")="I Y'=AG(""Y""),$P($G(^(1)),U,7)'=0,""DR""'[$P($G(^(2)),U)",DIC("A")="Select (SEARCH) for Duplicate INSURER: " D ^DIC
+ S DIC="^AUTNINS(",DIC(0)="QEAM",DIC("S")="I Y'=AG(""Y""),$P($G(^(1)),U,7)'=0,""DR""'[$$INSTYP^AGUTL(Y)",DIC("A")="Select (SEARCH) for Duplicate INSURER: " D ^DIC  ;IHS/OIT/NKD AG*7.1*12
  I +Y<1 G CONT
  S AG=+Y,AG("Y0")=^AUTNINS(+Y,0)
  W !,"_______________________________________________________________________________"

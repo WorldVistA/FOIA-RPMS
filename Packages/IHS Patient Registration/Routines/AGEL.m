@@ -1,5 +1,6 @@
 AGEL ; IHS/ASDS/EFG - Add/Edit Eligibility Information ;  
- ;;7.1;PATIENT REGISTRATION;**1,2**;JAN 31, 2007
+ ;;7.1;PATIENT REGISTRATION;**1,2,12**;AUG 25, 2005;Build 1
+ ;IHS/OIT/NKD AG*7.1*12 INSURER TYPE
  ;
 HEAD S U="^"
 INS ;EP - EDIT AN INSURER
@@ -7,8 +8,13 @@ INS ;EP - EDIT AN INSURER
  W !!
  K DIC
  S DIC="^AUTNINS(",DIC(0)="AEMQ",DIC("A")="Select INSURER: "
- I $G(AGELP("TYPE"))="PI" S DIC("S")="I $D(^(1)),$P(^(1),U,7),$P(^(0),U)'=""MEDICAID"",$D(^(2)),""NRDI""'[$P(^(2),U)"
- E  S DIC("S")="I $D(^(1)),$P(^(1),U,7),$D(^(2)),""NDR""'[$P(^(2),U)"
+ ;IHS/OIT/NKD AG*7.1*12 - START OLD CODE
+ ;I $G(AGELP("TYPE"))="PI" S DIC("S")="I $D(^(1)),$P(^(1),U,7),$P(^(0),U)'=""MEDICAID"",$D(^(2)),""NRDI""'[$P(^(2),U)"
+ ;E  S DIC("S")="I $D(^(1)),$P(^(1),U,7),$D(^(2)),""NDR""'[$P(^(2),U)"
+ ;IHS/OIT/NKD AG*7.1*12 - END OLD CODE - START NEW CODE
+ I $G(AGELP("TYPE"))="PI" S DIC("S")="I $D(^(1)),$P(^(1),U,7),$P(^(0),U)'=""MEDICAID"",""NRDI""'[$$INSTYP^AGUTL(Y)"
+ E  S DIC("S")="I $D(^(1)),$P(^(1),U,7),""NDR""'[$$INSTYP^AGUTL(Y)"
+ ;IHS/OIT/NKD AG*7.1*12 - END NEW CODE
  K DTOUT,DUOUT
  D ^DIC
  G XIT:X=""!$D(DTOUT)!$D(DUOUT),INS:Y=-1
@@ -47,7 +53,8 @@ PH K AGEL
  ;BEGIN NEW CODE IHS/SD/TPF AG*7.1*1 ITEM 18
  I $G(AGELP("INS")) D
  .N INSTYP,INSNM
- .S INSTYP=$P($G(^AUTNINS(AGELP("INS"),2)),U)
+ .;S INSTYP=$P($G(^AUTNINS(AGELP("INS"),2)),U)
+ .S INSTYP=$$INSTYP^AGUTL(AGELP("INS"))  ;IHS/OIT/NKD AG*7.1*12
  .S INSNM=$P($G(^AUTNINS(AGELP("INS"),0)),U)
  ;END NEW CODE 
  W !

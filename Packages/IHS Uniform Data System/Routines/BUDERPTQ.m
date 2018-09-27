@@ -1,0 +1,52 @@
+BUDERPTQ ;IHS/CMI/LAB - UDS REPORT PRINT;
+ ;;12.0;IHS/RPMS UNIFORM DATA SYSTEM;;NOV 22, 2017;Build 75
+ ;
+C(X,Y) ;
+ I $G(Y)=1,+X=0 Q ""
+ I $G(Y)=2 Q "********"
+ S X2=0,X3=8
+ D COMMA^%DTC
+ Q X
+REST3B ;EP
+ S BUDLANG=1
+ I $Y>(IOSL-7) D HEADER^BUDERPTP Q:BUDQUIT  D T3BSH
+ W !!,BUD80L,!?61,"NUMBER"
+ W !,"PATIENTS BY LANGUAGE",?63,"(a)",!,BUD80L
+ W !?2,"12.",?7,"Patients Best Served in a Language",!?7," Other Than English",?60,$$C($P(BUDLANG(12),U,2)),!,BUD80L
+ I $Y>(IOSL-12) D HEADER^BUDERPTP Q:BUDQUIT  D T3BSH
+ W !!,BUD80L,!?61,"NUMBER"
+ W !,"PATIENTS BY SEXUAL ORIENTATION",?63,"(a)",!,BUD80L
+ F BUDX=13:1:19 Q:BUDQUIT  D
+ .I $Y>(IOSL-3) D HEADER^BUDERPTP Q:BUDQUIT  D T3BSH
+ .W !?2,$P(BUDSOT(BUDX),U),?7,$P(BUDSOT(BUDX),U,2)
+ .I $P(BUDSOT(BUDX),U,7)]"" W !?7,$P(BUDSOT(BUDX),U,7)
+ .I $P(BUDSOT(BUDX),U,8)]"" W !?7,$P(BUDSOT(BUDX),U,8)
+ .I $P(BUDSOT(BUDX),U,9)]"" W !?7,$P(BUDSOT(BUDX),U,9)
+ .I $P(BUDSOT(BUDX),U,3)]"" W ?60,$$C($P(BUDSOT(BUDX),U,3))
+ .W !,BUD80L
+ ;GENDER IDENTITY PRINT
+ I $Y>(IOSL-12) D HEADER^BUDERPTP Q:BUDQUIT  D T3BSH
+ W !!,BUD80L,!?61,"NUMBER"
+ W !,"PATIENTS BY GENDER IDENTITY",?63,"(a)",!,BUD80L
+ F BUDX=20:1:26 Q:BUDQUIT  D
+ .I $Y>(IOSL-3) D HEADER^BUDERPTP Q:BUDQUIT  D T3BSH
+ .W !?2,$P(BUDGIDT(BUDX),U),?7,$P(BUDGIDT(BUDX),U,2)
+ .I $P(BUDGIDT(BUDX),U,7)]"" W !?7,$P(BUDGIDT(BUDX),U,7)
+ .I $P(BUDGIDT(BUDX),U,8)]"" W !?7,$P(BUDGIDT(BUDX),U,8)
+ .I $P(BUDGIDT(BUDX),U,9)]"" W !?7,$P(BUDGIDT(BUDX),U,9)
+ .I $P(BUDGIDT(BUDX),U,3)]"" W ?60,$$C($P(BUDGIDT(BUDX),U,3))
+ .W !,BUD80L
+ Q
+T3BSH ;
+ W !!,$$CTR("TABLE 3B -",80)
+ W !,$$CTR("DEMOGRAPHIC CHARACTERISTICS",80),!,$$CTR("Patients by Hispanic or Latino Ethnicity",80),!,BUD80L
+ Q
+CTR(X,Y) ;EP - Center X in a field Y wide.
+ Q $J("",$S($D(Y):Y,1:IOM)-$L(X)\2)_X
+ ;----------
+USR() ;EP - Return name of current user from ^VA(200.
+ Q $S($G(DUZ):$S($D(^VA(200,DUZ,0)):$P(^(0),U),1:"UNKNOWN"),1:"DUZ UNDEFINED OR 0")
+ ;----------
+LOC() ;EP - Return location name from file 4 based on DUZ(2).
+ Q $S($G(DUZ(2)):$S($D(^DIC(4,DUZ(2),0)):$P(^(0),U),1:"UNKNOWN"),1:"DUZ(2) UNDEFINED OR 0")
+ ;----------

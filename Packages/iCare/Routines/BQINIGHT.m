@@ -1,5 +1,5 @@
 BQINIGHT ;PRXM/HC/ALA-Nightly Background Job ; 05 Jan 2006  1:31 PM
- ;;2.6;ICARE MANAGEMENT SYSTEM;;Jul 07, 2017;Build 72
+ ;;2.7;ICARE MANAGEMENT SYSTEM;;Dec 19, 2017;Build 23
  ;
  ;
 EN ;EP - Entry point
@@ -28,6 +28,7 @@ EN ;EP - Entry point
  D CRS
  ;Run IPC
  D IJB^BQINIGH3("")
+ D WK^BQINIGH3
  ;D NUM^BQIMUSIT
  ; Reminders
  D REM

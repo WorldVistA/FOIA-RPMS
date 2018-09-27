@@ -1,5 +1,5 @@
-LRDIDLE0 ;VA/DALOI/JMC - Create audit trail of changed values ; 13-Aug-2013 09:14 ; MKK
- ;;5.2;LAB SERVICE;**1004,140,171,153,1018,286,1027,396,1033**;NOV 01, 1997
+LRDIDLE0 ;VA/DALOI/JMC - Create audit trail of changed values ; 13-Oct-2017 14:04 ;  MKK
+ ;;5.2;LAB SERVICE;**1004,140,171,153,1018,286,1027,396,1033,1041**;NOV 01, 1997;Build 23
  ;
  ; Called by LRVER3
  ;
@@ -13,7 +13,7 @@ INIT ;
  ;
  S LRJ=0,LROK=1,LRCHDT7=$$FMTE^XLFDT(LRNOW7,"MZ"),LRUSER=$$USERID(.DUZ)
  ;
-EVAL ;
+EVAL ; EP
  ;
  ; Result changed
  I $P($G(LRSA(LRSB,2)),"^") D
@@ -82,6 +82,25 @@ STORE ; Store comments in file #63, field #99 COMMENTS
  . S LRX=LRTXT(LRI)
  . D FILECOM^LRVR4(LRDFN,LRIDT,LRX)
  . W !,LRX
+ ;
+ ; ----- BEGIN IHS/MSC/MKK - LR*5.2*1041
+ ; Check the parameter.  If not YES, then don't do anything.
+ Q:$$GET^XPAR("PKG","BLR LAB RESULTS CHANGED NOTIFY",1,"Q")'=1
+ ;
+ NEW CHNGRI,CHNGRN
+ S LRI=$O(LRTXT("A"),-1)
+ S CHNGRI=+$P($P($G(LRTXT(LRI)),"[",2),"]")
+ S CHNGRN=$$GET1^DIQ(200,CHNGRI,.01)
+ S:CHNGRN="" CHNGRN="<UNKNOWN>"
+ S LRI=LRI+1
+ S LRTXT(LRI)=" ",LRI=LRI+1
+ S LRTXT(LRI)="Patient:"_$G(VADM(1)),LRI=LRI+1
+ S LRTXT(LRI)="     Accession:"_$G(LRACC),LRI=LRI+1
+ S LRTXT(LRI)="           UID:"_$G(LRUID),LRI=LRI+1
+ S LRTXT(LRI)=" ",LRI=LRI+1
+ S LRTXT(LRI)="     Results Changed by:"_CHNGRN_" ["_CHNGRI_"]"
+ D SENDMAIL^BLRUTIL8("Accession "_LRACC_" Lab Results Changed",.LRTXT,"LRDIDLE0","NO","G.LAB RESULTS CHANGED")
+ ; ----- BEGIN IHS/MSC/MKK - LR*5.2*1041
  ;
  Q
  ;

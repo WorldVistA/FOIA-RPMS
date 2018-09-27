@@ -1,5 +1,5 @@
 BMCFPRN ; IHS/OIT/FCJ - PRINT REFERRAL FORMS ;   [ 09/27/2006  1:33 PM ]
- ;;4.0;REFERRED CARE INFO SYSTEM;**1,2,3,4**;JAN 09, 2006;Build 51
+ ;;4.0;REFERRED CARE INFO SYSTEM;**1,2,3,4,12**;JAN 09, 2006;Build 92
  ;IHS/OIT/FCJ CHG VEND SECTION TO PRT BTH MAIL/PHY ADD, SPLIT
  ;   RTN AT PAYOR LINE COPIED TO BMCFRPN1 FR PAYOR THRU RR LINE
  ;   PRNT MED HX FR RCIS COMMENTS FILE; ADDED TEST FOR VENDOR ADDRESS
@@ -8,8 +8,46 @@ BMCFPRN ; IHS/OIT/FCJ - PRINT REFERRAL FORMS ;   [ 09/27/2006  1:33 PM ]
  ;BMC*4.0*2 9.14.06 IHS.OIT.FCJ ADDED SECTION TO PRINT CONSULT LTR
  ;BMC*4.0*3 8.10.07 IHS.OIT.FCJ ADDED NPI AND INS AUTH
  ;BMC*4.0*3 9.15.08 IHS.OIT.FCJ FX FOR UNDEF VAR WHEN QUEUED
+ ;GDIT/HS/BEE 10/19/17 - p12 CR#5450:Modifications to allow printing from EHR GUI
+ ;GDIT/HS/BEE 10/19/17 - p12 - Address XINDEX/SAC issues
  ;
-PRINT ;print referral form
+ ;GDIT/HS/BEE 10/19/17 - p12 CR#5450: Renamed old PRINT tag to PRT
+ ;                       created separate R&S (PRINT) and GUI (GPRINT) entry pts
+PRINT ;EP print referral form - Roll and Scroll Front End
+ ;
+ NEW PRTGUI,PGL
+ S PRTGUI=0
+ ;
+ ;Page length
+ S PGL=IOSL
+ ;
+ ;Print the Letter
+ D PRT
+ Q
+ ;
+GPRINT(BMCREF) ;EP print referral form - GUI
+ ;
+ NEW PRTGUI,BMCFTYPE,BMCPROUT,PGL
+ S PRTGUI=1
+ ;
+ S PGL=56
+ ;
+ ;Get the standard referral letter
+ S BMCFTYPE=$O(^BMCTFORM("B","STANDARD IHS REFERRAL LETTER","")) Q:BMCFTYPE=""
+ ;
+ ;Do not print routing slip
+ S BMCPROUT=0
+ ;
+ ;Print the Letter
+ D PRT
+ Q
+ ;
+ ;GDIT/HS/BEE 10/19/17 - p12 CR#5450;Old PRINT tag changed to PRT
+ ;PRINT    ;print referral form
+PRT ;print referral form
+ NEW REFTO,BMCCHSAS,BMCCMT,BMCDA,BMCDFN,BMCFILE,BMCFTYP,BMCNODE,BMCPCON,BMCPG,BMCQUIT,BMCR0,BMCV,BMCVIEN,BMCX,BMCY
+ NEW DTOUT,I,X
+ ;
  S BMCR0=^BMCREF(BMCREF,0),BMCPG=0,BMCDFN=$P(BMCR0,U,3)
  D @("HEAD"_(2-($E(IOST,1,2)="C-")))
  S BMCQUIT=0
@@ -32,7 +70,10 @@ DEMO ;Demographic Data
  ;
 REFTO ;
  D L
- D @$$VALI^XBDIQ1(90001,BMCREF,.04) Q:BMCQUIT
+ ;GDIT/HS/BEE 10/19/17 - p12:Fixed code to address SAC issue
+ ;D @$$VALI^XBDIQ1(90001,BMCREF,.04) Q:BMCQUIT
+ S REFTO=$$VALI^XBDIQ1(90001,BMCREF,.04)
+ D @REFTO Q:BMCQUIT
  S X=$$VAL^XBDIQ1(90001,BMCREF,.02),N=0,C=0,T=64 D W Q:BMCQUIT
 DATE ;
  S X=$$VAL^XBDIQ1(90001,BMCREF,.14)_" Services                     "_$S($P(BMCR0,U,14)="I":"Admission Date",1:"Appointment Date")_":  "_$$AVDOS^BMCRLU(BMCREF,"E"),N=1,C=0,T=0 D W Q:BMCQUIT
@@ -57,7 +98,7 @@ PERTMED ;
  .S BMCNODE=1,BMCIOM=70,BMCFILE=90001.03,BMCDA=BMCCMT,BMCNODE=1
  .D WP K BMCIOM
  .S Y=0 F  S Y=$O(BMCWP(Y)) Q:Y'=+Y!(BMCQUIT)  D
- ..I $Y>(IOSL-3) D HEAD Q:BMCQUIT
+ ..I $Y>($S($G(PGL)]"":PGL,1:IOSL)-3) D HEAD Q:BMCQUIT   ;GDIT/HS/BEE 10/19/17 - p12 CR#5450:Changed IOSL to PGL
  ..W !?5,BMCWP(Y)
 ADDMED ;
  S X="Additional Medical Information Attached:  "_$S($$VAL^XBDIQ1(90001,BMCREF,.34)]"":$$VAL^XBDIQ1(90001,BMCREF,.34),1:" Not Documented by Provider"),C=0,T=0,N=2 D W Q:BMCQUIT
@@ -109,7 +150,7 @@ TEXT ;
  I $P(BMCR0,U,4)="I"!($P(BMCR0,U,4)="N") W ! S BMCWP(1)=""
  ;
  S BMCY=0 F  S BMCY=$O(BMCWP(BMCY)) Q:BMCY'=+BMCY!(BMCQUIT)  D
- .I $Y>(IOSL-3) D HEAD Q:BMCQUIT
+ .I $Y>($S($G(PGL)]"":PGL,1:IOSL)-3) D HEAD Q:BMCQUIT  ;GDIT/HS/BEE 10/19/17 - p12 CR#5450:Changed IOSL to PGL
  .W !,BMCWP(BMCY)
  ;
 LINE ;CHS Supervisor Signature (if Type=CHS)
@@ -129,7 +170,7 @@ W ;Entry Point
  Q:X=""
  NEW %
  S %=$L(X)
- I $Y>(IOSL-4) D HEAD Q:BMCQUIT
+ I $Y>($S($G(PGL)]"":PGL,1:IOSL)-4) D HEAD Q:BMCQUIT  ;GDIT/HS/BEE 10/19/17 - p12 CR#5450:Changed IOSL to PGL
  I N F I=1:1:N W !
  I $G(C) W ?(IOM-$L(X)/2),X Q
  S %=$S($G(T):T,1:0) W ?%,X
@@ -197,12 +238,23 @@ WPTXT ;
 WP ;
  D WP^BMCFDR
  Q
-HEAD ;
+ ;
+ ;GDIT/HS/BEE 10/19/17 - p12 CR#5450:Added references to PRTGUI to control GUI display formatting
+ ;HEAD     ;
+ ; NEW N,T,C,X,Y
+ ; I $E(IOST)="C",IO=IO(0) W ! S DIR(0)="EO" D ^DIR K DIR I Y=0!(Y="^")!($D(DTOUT)) S BMCQUIT=1 Q
+ ;HEAD1    ;
+ ; W:$D(IOF) @IOF
+ ;HEAD2    ;
+ ; I 'BMCPG S BMCPG=BMCPG+1 Q
+ ; S BMCPG=BMCPG+1 W:$D(IOF) @IOF W !,?(IOM-20),"Page ",BMCPG
+HEAD I $G(PRTGUI) Q
  NEW N,T,C,X,Y
- I $E(IOST)="C",IO=IO(0) W ! S DIR(0)="EO" D ^DIR K DIR I Y=0!(Y="^")!($D(DTOUT)) S BMCQUIT=1 Q
+ I '$G(PRTGUI),$E(IOST)="C",IO=IO(0) W ! S DIR(0)="EO" D ^DIR K DIR I Y=0!(Y="^")!($D(DTOUT)) S BMCQUIT=1 Q
 HEAD1 ;
- W:$D(IOF) @IOF
+ I '$G(PRTGUI) W:$D(IOF) @IOF
 HEAD2 ;
  I 'BMCPG S BMCPG=BMCPG+1 Q
- S BMCPG=BMCPG+1 W:$D(IOF) @IOF W !,?(IOM-20),"Page ",BMCPG
+ S BMCPG=BMCPG+1 I '$G(PRTGUI) W:$D(IOF) @IOF W !,?(IOM-20),"Page ",BMCPG
+ ;End of CR#5450 changes
  Q

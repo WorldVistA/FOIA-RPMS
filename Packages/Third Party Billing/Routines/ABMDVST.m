@@ -1,5 +1,5 @@
 ABMDVST ; IHS/ASDST/DMJ - PCC Visit Stuff ;     
- ;;2.6;IHS 3P BILLING SYSTEM;**10,19**;NOV 12, 2009;Build 300
+ ;;2.6;IHS 3P BILLING SYSTEM;**10,19,22**;NOV 12, 2009;Build 418
  ;Original;TMD;08/19/96 4:45 PM
  ;
  ; IHS/SD/SDR - V2.5 P8 - IM12246/IM17548 - Added code to put defaults on claim for CLIAs
@@ -12,6 +12,7 @@ ABMDVST ; IHS/ASDST/DMJ - PCC Visit Stuff ;
  ;    and only generate claim if at least one med wasn't billed by POS or was billed and rejected
  ;
  ;IHS/SD/SDR - 2.6*19 - HEAT251217 - Made change to populate SERVICE DATE FROM and SERVICE DATE TO all the time.
+ ;IHS/SD/SDR 2.6*22 HEAT335246 - Added call to claim splitter
  ; *********************************************************************
 VAR ;
  N ABMSRC,DA,DIE,DIK
@@ -147,6 +148,7 @@ NEW ;CREATE NEW CLAIM
  ;if routine BCMZINHO exists and there are tran codes in the table run BCMZINHO
  I $T(^BCMZINHO)]"",$O(^BCMTCA(0)) D:$D(^AUPNVSIT("AD",ABMVDFN)) ^BCMZINHO  ;IHS/CMI/LAB-chargemaster call
  K X,Y
+ D ^ABMPSPLT  ;abm*2.6*22 IHS/SD/SDR HEAT335246
  D MAIN^ABMASPLT(ABMP("CDFN"))
  ;I $P($G(^AUTNINS(+ABMP("INS"),2)),U)="R" D  ;abm*2.6*10 HEAT73780
  I $$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,+ABMP("INS"),".211","I"),1,"I")="R" D  ;abm*2.6*10 HEAT73780

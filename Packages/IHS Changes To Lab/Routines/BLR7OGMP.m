@@ -1,5 +1,5 @@
-BLR7OGMP ; IHS/OIT/MKK - Lab Interim Report for EHR ; 27-May-2016 06:40 ; MKK
- ;;5.2;IHS LABORATORY;**1028,1030,1031,1033,1039**;NOV 01, 1997;Build 38
+BLR7OGMP ; IHS/OIT/MKK - Lab Interim Report for EHR ; 13-Oct-2017 14:04 ;  MKK
+ ;;5.2;IHS LABORATORY;**1028,1030,1031,1033,1039,1041**;NOV 01, 1997;Build 23
  ;
  ; Cloned from LR7OGMP. This is a 127 column "report"
  ;
@@ -101,7 +101,8 @@ PRINT(OUTCNT) ; from LR7OGMC
  .. S LINE=$E($P(DATA,U,2),1,33)                           ; Test Description
  .. S:$L(VALUE)<31 $E(LINE,35)=$G(VALUE)                   ; Result
  .. S $E(LINE,67)=FLAG                                     ; Abnormal Flag
- .. S:+$G(UNITS) UNITS=$P($G(^BLRUCUM(UNITS,0)),"^")
+ .. ; S:+$G(UNITS) UNITS=$P($G(^BLRUCUM(UNITS,0)),"^")
+ .. S:UNITS?.N UNITS=$$GET1^DIQ(90475.3,UNITS,.01)         ; IHS/MSC/MKK - LR*5.2*1041
  .. S:$G(UNITS)'="" $E(LINE,70)=$E(UNITS,1,16)             ; Units
  .. ; S:$G(LRX)'="" $E(LINE,88)=$E(LRX,1,16)               ; Reference Range
  .. ; S:+$G(SITE) $E(LINE,106)="["_SITE_"]"                ; Site

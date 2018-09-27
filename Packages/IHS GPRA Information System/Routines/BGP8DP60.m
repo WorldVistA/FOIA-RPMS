@@ -1,93 +1,92 @@
-BGP8DP60 ; IHS/CMI/LAB - print ind H ;
- ;;8.0;IHS CLINICAL REPORTING;**2**;MAR 12, 2008
+BGP8DP60 ; IHS/CMI/LAB - print ind H 02 Feb 2018 1:59 PM ;
+ ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
  ;
  ;
 I1AGEP ;EP
- W !,"CURRENT REPORT PERIOD"
- W !,BGPHD2
- S T=30 F X=1:1:5 S V=$P(BGPDAC(X),U) W ?T,$$C(V,0,6) S T=T+9
- W !,"# Med Nutr Educ"
- S T=30 F X=1:1:5 S V=$P(BGPDAC(X),U,2) W ?T,$$C(V,0,6) S T=T+9
- W !,"% w/Med Nutr Educ"
- S T=29 F X=1:1:5 S V=$P(BGPDAC(X),U,3) W ?T,$J(V,6,1) S T=T+9
- W !!,"# w/spec nutr educ"
- S T=30 F X=1:1:5 S V=$P(BGPDAC(X),U,4) W ?T,$$C(V,0,6) S T=T+9
- W !,"% w/spec nutr ed"
- S T=29 F X=1:1:5 S V=$P(BGPDAC(X),U,5) W ?T,$J(V,6,1) S T=T+9
- W !!,"# w/exercise educ"
- S T=30 F X=1:1:5 S V=$P(BGPDAC(X),U,6) W ?T,$$C(V,0,6) S T=T+9
- W !,"% w/exercise ed"
- S T=29 F X=1:1:5 S V=$P(BGPDAC(X),U,7) W ?T,$J(V,6,1) S T=T+9
- W !!,"# w/other educ"
- S T=30 F X=1:1:5 S V=$P(BGPDAC(X),U,8) W ?T,$$C(V,0,6) S T=T+9
- W !,"% w/other educ"
- S T=29 F X=1:1:5 S V=$P(BGPDAC(X),U,9) W ?T,$J(V,6,1) S T=T+9
+ W:'$G(BGPSUMON) !,"CURRENT REPORT PERIOD"
+ W:'$G(BGPSUMON) !,BGPHD2
+ S T=30 F X=1:1:5 S V=$P(BGPDAC(X),U) W:'$G(BGPSUMON) ?T,$$C(V,0,6) S T=T+9
+ W:'$G(BGPSUMON) !,"# w/ Medical Nutrition",!?2,"Therapy"
+ S T=30 F X=1:1:5 S V=$P(BGPDAC(X),U,2) W:'$G(BGPSUMON) ?T,$$C(V,0,6) S T=T+9
+ W:'$G(BGPSUMON) !,"% w/ Medical Nutrition",!?2,"Therapy"
+ S T=29 F X=1:1:5 S V=$P(BGPDAC(X),U,3) W:'$G(BGPSUMON) ?T,$J(V,6,1) S T=T+9
+ W:'$G(BGPSUMON) !!,"# w/ Specific Nutrition Educ",!?2,"Provided"
+ S T=30 F X=1:1:5 S V=$P(BGPDAC(X),U,4) W:'$G(BGPSUMON) ?T,$$C(V,0,6) S T=T+9
+ W:'$G(BGPSUMON) !,"% w/ Specific Nutrition Educ",!?2,"Provided"
+ S T=29 F X=1:1:5 S V=$P(BGPDAC(X),U,5) W:'$G(BGPSUMON) ?T,$J(V,6,1) S T=T+9
+ W:'$G(BGPSUMON) !!,"# w/ Exercise Educ"
+ S T=30 F X=1:1:5 S V=$P(BGPDAC(X),U,6) W:'$G(BGPSUMON) ?T,$$C(V,0,6) S T=T+9
+ W:'$G(BGPSUMON) !,"% w/ Exercise Educ"
+ S T=29 F X=1:1:5 S V=$P(BGPDAC(X),U,7) W:'$G(BGPSUMON) ?T,$J(V,6,1) S T=T+9
+ W:'$G(BGPSUMON) !!,"# w/ Other Exercise or",!?2,"Nutrition Educ"
+ S T=30 F X=1:1:5 S V=$P(BGPDAC(X),U,8) W:'$G(BGPSUMON) ?T,$$C(V,0,6) S T=T+9
+ W:'$G(BGPSUMON) !,"% w/ Other Exercise or",!?2,"Nutrition Educ"
+ S T=29 F X=1:1:5 S V=$P(BGPDAC(X),U,9) W:'$G(BGPSUMON) ?T,$J(V,6,1) S T=T+9
 PR ; 
- I $Y>(BGPIOSL-12) D HEADER^BGP8DPH Q:BGPQUIT  W !,^BGPINDE(BGPIC,53,1,0) D H3
- W !!,"PREVIOUS YEAR PERIOD"
- W !,BGPHD2
- S T=30 F X=1:1:5 S V=$P(BGPDAP(X),U) W ?T,$$C(V,0,6) S T=T+9
- W !,"# Med Nutr Educ"
- S T=30 F X=1:1:5 S V=$P(BGPDAP(X),U,2) W ?T,$$C(V,0,6) S T=T+9
- W !,"% w/Med Nutr Educ"
- S T=29 F X=1:1:5 S V=$P(BGPDAP(X),U,3) W ?T,$J(V,6,1) S T=T+9
- W !!,"# w/spec nutr educ"
- S T=30 F X=1:1:5 S V=$P(BGPDAP(X),U,4) W ?T,$$C(V,0,6) S T=T+9
- W !,"% w/spec nutr ed"
- S T=29 F X=1:1:5 S V=$P(BGPDAP(X),U,5) W ?T,$J(V,6,1) S T=T+9
- W !!,"# w/exercise educ"
- S T=30 F X=1:1:5 S V=$P(BGPDAP(X),U,6) W ?T,$$C(V,0,6) S T=T+9
- W !,"% w/exercise ed"
- S T=29 F X=1:1:5 S V=$P(BGPDAP(X),U,7) W ?T,$J(V,6,1) S T=T+9
- W !!,"# w/other educ"
- S T=30 F X=1:1:5 S V=$P(BGPDAP(X),U,8) W ?T,$$C(V,0,6) S T=T+9
- W !,"% w/other educ"
- S T=29 F X=1:1:5 S V=$P(BGPDAP(X),U,9) W ?T,$J(V,6,1) S T=T+9
+ I $Y>(BGPIOSL-12),'$G(BGPSUMON) D HEADER^BGP8DPH Q:BGPQUIT  W:'$G(BGPSUMON) !,^BGPINDR(BGPIC,53,1,0) W:$D(^BGPINDR(BGPIC,53,2,0)) !,^BGPINDR(BGPIC,53,2,0) D H3
+ W:'$G(BGPSUMON) !!,"PREVIOUS YEAR PERIOD"
+ W:'$G(BGPSUMON) !,BGPHD2
+ S T=30 F X=1:1:5 S V=$P(BGPDAP(X),U) W:'$G(BGPSUMON) ?T,$$C(V,0,6) S T=T+9
+ W:'$G(BGPSUMON) !,"# w/ Medical Nutrition",!?2,"Therapy"
+ S T=30 F X=1:1:5 S V=$P(BGPDAP(X),U,2) W:'$G(BGPSUMON) ?T,$$C(V,0,6) S T=T+9
+ W:'$G(BGPSUMON) !,"% w/ Medical Nutrition",!?2,"Therapy"
+ S T=29 F X=1:1:5 S V=$P(BGPDAP(X),U,3) W:'$G(BGPSUMON) ?T,$J(V,6,1) S T=T+9
+ W:'$G(BGPSUMON) !!,"# w/ Specific Nutrition Educ",!?2,"Provided"
+ S T=30 F X=1:1:5 S V=$P(BGPDAP(X),U,4) W:'$G(BGPSUMON) ?T,$$C(V,0,6) S T=T+9
+ W:'$G(BGPSUMON) !,"% w/ Specific Nutrition Educ",!?2,"Provided"
+ S T=29 F X=1:1:5 S V=$P(BGPDAP(X),U,5) W:'$G(BGPSUMON) ?T,$J(V,6,1) S T=T+9
+ W:'$G(BGPSUMON) !!,"# w/ Exercise Educ"
+ S T=30 F X=1:1:5 S V=$P(BGPDAP(X),U,6) W:'$G(BGPSUMON) ?T,$$C(V,0,6) S T=T+9
+ W:'$G(BGPSUMON) !,"% w/ Exercise Educ"
+ S T=29 F X=1:1:5 S V=$P(BGPDAP(X),U,7) W:'$G(BGPSUMON) ?T,$J(V,6,1) S T=T+9
+ W:'$G(BGPSUMON) !!,"# w/ Other Exercise or",!?2,"Nutrition Educ"
+ S T=30 F X=1:1:5 S V=$P(BGPDAP(X),U,8) W:'$G(BGPSUMON) ?T,$$C(V,0,6) S T=T+9
+ W:'$G(BGPSUMON) !,"% w/ Other Exercise or",!?2,"Nutrition Educ"
+ S T=29 F X=1:1:5 S V=$P(BGPDAP(X),U,9) W:'$G(BGPSUMON) ?T,$J(V,6,1) S T=T+9
 PB ;
- I $Y>(BGPIOSL-12) D HEADER^BGP8DPH Q:BGPQUIT  W !,^BGPINDE(BGPIC,53,1,0) D H3
- I $Y>(BGPIOSL-12) D HEADER^BGP8DPH Q:BGPQUIT  W !,^BGPINDE(BGPIC,53,1,0) D H3
+ I $Y>(BGPIOSL-12),'$G(BGPSUMON) D HEADER^BGP8DPH Q:BGPQUIT  W !,^BGPINDR(BGPIC,53,1,0) W:$D(^BGPINDR(BGPIC,53,2,0)) !,^BGPINDR(BGPIC,53,2,0) D H3
  ;percentage changes
- W !!,"CHANGE FROM PREV YR %"
- W !,"Med Nutr Educ"
- S T=29 F X=1:1:5 S N=$P(BGPDAC(X),U,3),O=$P(BGPDAP(X),U,3) W ?T,$J($FN((N-O),"+,",1),6) S T=T+9
- W !,"Spec nutr ed"
- S T=29 F X=1:1:5 S N=$P(BGPDAC(X),U,5),O=$P(BGPDAP(X),U,5) W ?T,$J($FN((N-O),"+,",1),6) S T=T+9
- W !,"w/exercise ed"
- S T=29 F X=1:1:5 S N=$P(BGPDAC(X),U,7),O=$P(BGPDAP(X),U,7) W ?T,$J($FN((N-O),"+,",1),6) S T=T+9
- W !,"w/other educ"
- S T=29 F X=1:1:5 S N=$P(BGPDAC(X),U,9),O=$P(BGPDAP(X),U,9) W ?T,$J($FN((N-O),"+,",1),6) S T=T+9
+ W:'$G(BGPSUMON) !!,"CHANGE FROM PREV YR %"
+ W:'$G(BGPSUMON) !,"# w/ Medical Nutrition",!?2,"Therapy"
+ S T=29 F X=1:1:5 S N=$P(BGPDAC(X),U,3),O=$P(BGPDAP(X),U,3) W:'$G(BGPSUMON) ?T,$J($FN((N-O),"+,",1),6) S T=T+9
+ W:'$G(BGPSUMON) !,"# w/ Specific Nutrition Ed"
+ S T=29 F X=1:1:5 S N=$P(BGPDAC(X),U,5),O=$P(BGPDAP(X),U,5) W:'$G(BGPSUMON) ?T,$J($FN((N-O),"+,",1),6) S T=T+9
+ W:'$G(BGPSUMON) !,"# w/ Exercise Educ"
+ S T=29 F X=1:1:5 S N=$P(BGPDAC(X),U,7),O=$P(BGPDAP(X),U,7) W:'$G(BGPSUMON) ?T,$J($FN((N-O),"+,",1),6) S T=T+9
+ W:'$G(BGPSUMON) !,"# w/ Other Exercise or",!?2,"Nutrition Educ"
+ S T=29 F X=1:1:5 S N=$P(BGPDAC(X),U,9),O=$P(BGPDAP(X),U,9) W:'$G(BGPSUMON) ?T,$J($FN((N-O),"+,",1),6) S T=T+9
 BL ;
- I $Y>(BGPIOSL-12) D HEADER^BGP8DPH Q:BGPQUIT  W !,^BGPINDE(BGPIC,53,1,0) D H3
- W !!,"BASELINE REPORT PERIOD"
- W !,BGPHD2
- S T=30 F X=1:1:5 S V=$P(BGPDAB(X),U) W ?T,$$C(V,0,6) S T=T+9
- W !,"# Med Nutr Educ"
- S T=30 F X=1:1:5 S V=$P(BGPDAB(X),U,2) W ?T,$$C(V,0,6) S T=T+9
- W !,"% w/Med Nutr Educ"
- S T=29 F X=1:1:5 S V=$P(BGPDAB(X),U,3) W ?T,$J(V,6,1) S T=T+9
- W !!,"# w/spec nutr educ"
- S T=30 F X=1:1:5 S V=$P(BGPDAB(X),U,4) W ?T,$$C(V,0,6) S T=T+9
- W !,"% w/spec nutr ed"
- S T=29 F X=1:1:5 S V=$P(BGPDAB(X),U,5) W ?T,$J(V,6,1) S T=T+9
- W !!,"# w/exercise educ"
- S T=30 F X=1:1:5 S V=$P(BGPDAB(X),U,6) W ?T,$$C(V,0,6) S T=T+9
- W !,"% w/exercise ed"
- S T=29 F X=1:1:5 S V=$P(BGPDAB(X),U,7) W ?T,$J(V,6,1) S T=T+9
- W !!,"# w/other educ"
- S T=30 F X=1:1:5 S V=$P(BGPDAB(X),U,8) W ?T,$$C(V,0,6) S T=T+9
- W !,"% w/other educ"
- S T=29 F X=1:1:5 S V=$P(BGPDAB(X),U,9) W ?T,$J(V,6,1) S T=T+9
+ I $Y>(BGPIOSL-12),'$G(BGPSUMON) D HEADER^BGP8DPH Q:BGPQUIT  W !,^BGPINDR(BGPIC,53,1,0) W:$D(^BGPINDR(BGPIC,53,2,0)) !,^BGPINDR(BGPIC,53,2,0) D H3
+ W:'$G(BGPSUMON) !!,"BASELINE REPORT PERIOD"
+ W:'$G(BGPSUMON) !,BGPHD2
+ S T=30 F X=1:1:5 S V=$P(BGPDAB(X),U) W:'$G(BGPSUMON) ?T,$$C(V,0,6) S T=T+9
+ W:'$G(BGPSUMON) !,"# w/ Medical Nutrition",!?2,"Therapy"
+ S T=30 F X=1:1:5 S V=$P(BGPDAB(X),U,2) W:'$G(BGPSUMON) ?T,$$C(V,0,6) S T=T+9
+ W:'$G(BGPSUMON) !,"% w/ Medical Nutrition",!?2,"Therapy"
+ S T=29 F X=1:1:5 S V=$P(BGPDAB(X),U,3) W:'$G(BGPSUMON) ?T,$J(V,6,1) S T=T+9
+ W:'$G(BGPSUMON) !!,"# w/ Specific Nutrition Educ",!?2,"Provided"
+ S T=30 F X=1:1:5 S V=$P(BGPDAB(X),U,4) W:'$G(BGPSUMON) ?T,$$C(V,0,6) S T=T+9
+ W:'$G(BGPSUMON) !,"% w/ Specific Nutrition Educ",!?2,"Provided"
+ S T=29 F X=1:1:5 S V=$P(BGPDAB(X),U,5) W:'$G(BGPSUMON) ?T,$J(V,6,1) S T=T+9
+ W:'$G(BGPSUMON) !!,"# w/ Exercise Educ"
+ S T=30 F X=1:1:5 S V=$P(BGPDAB(X),U,6) W:'$G(BGPSUMON) ?T,$$C(V,0,6) S T=T+9
+ W:'$G(BGPSUMON) !,"% w/ Exercise Educ"
+ S T=29 F X=1:1:5 S V=$P(BGPDAB(X),U,7) W:'$G(BGPSUMON) ?T,$J(V,6,1) S T=T+9
+ W:'$G(BGPSUMON) !!,"# w/ Other Exercise or",!?2,"Nutrition Educ"
+ S T=30 F X=1:1:5 S V=$P(BGPDAB(X),U,8) W:'$G(BGPSUMON) ?T,$$C(V,0,6) S T=T+9
+ W:'$G(BGPSUMON) !,"% # w / Other Exercise or",!?2,"Nutrition Educ"
+ S T=29 F X=1:1:5 S V=$P(BGPDAB(X),U,9) W:'$G(BGPSUMON) ?T,$J(V,6,1) S T=T+9
 BP ;
  ;percentage changes
- W !!,"CHANGE FROM BASE YR %"
- W !,"Med Nutr Educ"
- S T=29 F X=1:1:5 S N=$P(BGPDAC(X),U,3),O=$P(BGPDAB(X),U,3) W ?T,$J($FN((N-O),"+,",1),6) S T=T+9
- W !,"Spec nutr ed"
- S T=29 F X=1:1:5 S N=$P(BGPDAC(X),U,5),O=$P(BGPDAB(X),U,5) W ?T,$J($FN((N-O),"+,",1),6) S T=T+9
- W !,"w/exercise ed"
- S T=29 F X=1:1:5 S N=$P(BGPDAC(X),U,7),O=$P(BGPDAB(X),U,7) W ?T,$J($FN((N-O),"+,",1),6) S T=T+9
- W !,"w/other educ"
- S T=29 F X=1:1:5 S N=$P(BGPDAC(X),U,9),O=$P(BGPDAB(X),U,9) W ?T,$J($FN((N-O),"+,",1),6) S T=T+9
+ W:'$G(BGPSUMON) !!,"CHANGE FROM BASE YR %"
+ W:'$G(BGPSUMON) !,"# w/ Medical Nutrition",!?2,"Therapy"
+ S T=29 F X=1:1:5 S N=$P(BGPDAC(X),U,3),O=$P(BGPDAB(X),U,3) W:'$G(BGPSUMON) ?T,$J($FN((N-O),"+,",1),6) S T=T+9
+ W:'$G(BGPSUMON) !,"# w/ Specific Nutrition Educ"
+ S T=29 F X=1:1:5 S N=$P(BGPDAC(X),U,5),O=$P(BGPDAB(X),U,5) W:'$G(BGPSUMON) ?T,$J($FN((N-O),"+,",1),6) S T=T+9
+ W:'$G(BGPSUMON) !,"# w/ Exercise Educ"
+ S T=29 F X=1:1:5 S N=$P(BGPDAC(X),U,7),O=$P(BGPDAB(X),U,7) W:'$G(BGPSUMON) ?T,$J($FN((N-O),"+,",1),6) S T=T+9
+ W:'$G(BGPSUMON) !,"# w/ Other Exercise or",!?2,"Nutrition Educ"
+ S T=29 F X=1:1:5 S N=$P(BGPDAC(X),U,9),O=$P(BGPDAB(X),U,9) W:'$G(BGPSUMON) ?T,$J($FN((N-O),"+,",1),6) S T=T+9
  Q
 SETN ;set numerator fields
  S BGPCYN=$$V^BGP8DP1C(1,BGPRPT,N,P)
@@ -99,15 +98,15 @@ SETN ;set numerator fields
  Q
 V(T,R,N,P) ;EP
  I $G(BGPAREAA) G VA
- I T=1 Q $P($G(^BGPGPDCE(R,N)),U,P)
- I T=2 Q $P($G(^BGPGPDPE(R,N)),U,P)
- I T=3 Q $P($G(^BGPGPDBE(R,N)),U,P)
+ I T=1 Q $P($G(^BGPGPDCR(R,N)),U,P)
+ I T=2 Q $P($G(^BGPGPDPR(R,N)),U,P)
+ I T=3 Q $P($G(^BGPGPDBR(R,N)),U,P)
  Q ""
 VA ;
  NEW X,V,C S X=0,C="" F  S X=$O(BGPSUL(X)) Q:X'=+X  D
- .I T=1 S C=C+$P($G(^BGPGPDCE(X,N)),U,P)
- .I T=2 S C=C+$P($G(^BGPGPDPE(X,N)),U,P)
- .I T=3 S C=C+$P($G(^BGPGPDBE(X,N)),U,P)
+ .I T=1 S C=C+$P($G(^BGPGPDCR(X,N)),U,P)
+ .I T=2 S C=C+$P($G(^BGPGPDPR(X,N)),U,P)
+ .I T=3 S C=C+$P($G(^BGPGPDBR(X,N)),U,P)
  .Q
  Q C
  ;
@@ -118,7 +117,8 @@ CTR(X,Y) ;EP - Center X in a field Y wide.
  Q $J("",$S($D(Y):Y,1:IOM)-$L(X)\2)_X
  ;----------
 H3 ;EP
+ Q:$G(BGPSUMON)
  W !!,$$CTR(BGPHD1,80)
  W !?40,"Age Distribution"
- W !,BGPHD2,?32,"6-11",?39,"12-19",?48,"20-39",?57,"40-59",?66,"=>60",!
+ W !,BGPHD2,?32,"6-11",?39,"12-19",?48,"20-39",?57,"40-59",?66,"60+",!
  Q

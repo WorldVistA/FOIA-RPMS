@@ -1,5 +1,5 @@
-BGP8GUA ; IHS/CMI/LAB - BGP Gui Utilities 10/29/2004 3:28:39 PM 19 Sep 2005 5:28 PM 27 Apr 2008 10:28 PM ;
- ;;8.0;IHS CLINICAL REPORTING;**2,3**;MAR 12, 2008
+BGP8GUA ; IHS/CMI/LAB - BGP Gui Utilities 10/29/2004 3:28:39 PM 19 Sep 2005 5:28 PM 27 Apr 2010 10:28 PM ;
+ ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
  ;
  ;
 DEBUG(RETVAL,BGPSTR) ;run the debugger
@@ -99,8 +99,8 @@ PATADO(PIEN) ;-- ado return
  . S BGPSX=$P($G(^DPT(BGPPI,0)),U,2)
  . S BGPCT=$$HRN^AUPNPAT(BGPPI,DUZ(2))
  . S BGPSSN=$P($G(^DPT(BGPPI,0)),U,9)
- . S BGPUPD=$P($G(^AUPNPAT(BGPPI,0)),U,3)  ;cmi/maw 5/17/2007 added last reg update
- . S BGPELG=$$GET1^DIQ(9000001,BGPPI,1111)  ;cmi/maw 5/17/2007 added class/ben for status bar
+ . S BGPUPD=$P($G(^AUPNPAT(BGPPI,0)),U,3)  ;cmi/maw 5/17/2009 added last reg update
+ . S BGPELG=$$GET1^DIQ(9000001,BGPPI,1111)  ;cmi/maw 5/17/2009 added class/ben for status bar
  . S BGPAGE=$$AGE^AUPNPAT(BGPPI,DT)
  . S BGPI=BGPI+1
  . S ^BGPTMP($J,BGPI)=BGPPI_U_BGPNM_U_BGPDB_U_BGPSX_U_BGPCT_U_BGPSSN_U_$G(BGPHD)_U_BGPUPD_U_BGPELG_U_BGPAGE_$C(30)
@@ -143,7 +143,7 @@ DEMO(RETVAL,BGPSTR) ;-- cmi/maw 8.0 p2 get demo patients based on Search Templat
  S ^BGPTMP($J,BGPI+1)=$C(31)
  Q
  ;
-DEMOS(RETVAL,BGPSTR) ;-- cmi/maw 6/11/2008 8.0 p1 save demo template
+DEMOS(RETVAL,BGPSTR) ;-- cmi/maw 6/11/2010 8.0 p1 save demo template
  N P,R,BGPI,BGPST,BGPSTI,BGPPATS,BGPFDA,BGPERR,BGPIENS
  S P="|",R="~"
  S BGPI=0
@@ -175,7 +175,7 @@ DEMOS(RETVAL,BGPSTR) ;-- cmi/maw 6/11/2008 8.0 p1 save demo template
  S ^BGPTMP($J,BGPI+1)=$C(31)
  Q
  ;
-CLNDEMO(STI) ;-- cmi/maw 6/11/2008 8.0 p1 clean up demo template first
+CLNDEMO(STI) ;-- cmi/maw 6/11/2010 8.0 p1 clean up demo template first
  N BGPDA
  S DA(1)=STI
  S DIK="^DIBT("_DA(1)_",1,"
@@ -209,5 +209,94 @@ VC(RETVAL,BGPSTR) ;-- get version number to see if client matches
  ;S ^BGPTMP($J,BGPI)=0_$C(30)  ;remove the line below when done with testing and uncomment this one
  S ^BGPTMP($J,BGPI)=1_$C(30)
  S ^BGPTMP($J,BGPI+1)=$C(31)
+ Q
+ ;
+DEMOCHK(RETVAL) ;-- check to see if the demo template exists
+ N BGPI,BGPMSG
+ S BGPI=0
+ S RETVAL="^BGPTMP("_$J_")"
+ K ^BGPTMP($J)
+ S @RETVAL@(BGPI)="T00080Message"_$C(30)
+ S BGPMSG=$$CHKDST^BGP8UTL2()
+ I +$G(BGPMSG) D  Q
+ . S BGPI=BGPI+1
+ . ;S @RETVAL@(BGPI)=$C(30)
+ . S @RETVAL@(BGPI+1)=$C(31)
+ S BGPMSG=$P(BGPMSG,U,2)
+ S BGPI=BGPI+1
+ S @RETVAL@(BGPI)=BGPMSG_$C(30)
+ S @RETVAL@(BGPI+1)=$C(31)
+ Q
+ ;
+COMCHK(BGPRET,BGPSTR) ;EP
+ S X="MERR^BGPGU",@^%ZOSF("TRAP") ; m error trap
+ N P,BGPOPT,BGPI,T
+ S P="|"
+ S BGPI=0
+ K ^BGPTMP($J)
+ S BGPRET="^BGPTMP("_$J_")"
+ S ^BGPTMP($J,BGPI)="T00200COMMUNITIES"_$C(30)
+ S BGPI=0
+ S T=$P(BGPSTR,P)
+ K BGPC
+ I '$G(T) Q 0
+ I '$D(^ATXAX(T)) Q 0
+ S X=0,G=0
+ F  S X=$O(^ATXAX(T,21,X)) Q:'X  D
+ .S C=$P(^ATXAX(T,21,X,0),U)
+ .S BGPI=BGPI+1
+ .I '$D(^AUTTCOM("B",C)) S ^BGPTMP($J,BGPI)="Warning "_C_" is in the taxonomy but not in the standard community table."_$C(30)
+ S ^BGPTMP($J,BGPI+1)=$C(31)
+ Q
+ ;
+LOGPAT(RETVAL,BGPSTR) ;-- log sensitive patient information
+ S X="MERR^BGPGU",@^%ZOSF("TRAP") ; m error trap
+ N BGPI,BGPERRR,BGPPAT,P,BGPFLAG,BGPDGMSG,BGPDGDA,RESULT
+ S P="|"
+ K ^BGPTMP($J)
+ S RETVAL="^BGPTMP("_$J_")"
+ S BGPI=0
+ S BGPPAT=$P(BGPSTR,P)
+ D DGSEC(.RESULT,BGPPAT,DUZ,0)  ;cmi/maw 3/4/2010 logging takes place in NOTICE^DGSEC4
+ I $G(RESULT(1))=4 S BGPFLAG=1
+ I $G(RESULT(1))=3 S BGPFLAG=1
+ I '$G(BGPFLAG),$G(RESULT(1))'=0 D NOTICE^DGSEC4(.RESULT,BGPPAT,"BGPGRPC^Behavioral Health GUI",3)
+ I $G(RESULT(1))=0,$$GET1^DIQ(43,1,9999999.01)="YES" D  ;ihs/cmi/maw 12/6/2010 added for track all
+ . D NOTICE^DGSEC4(.RESULT,BGPPAT,"BGPGRPC^Behavioral Health GUI",$S($P($G(^DGSL(38.1,BGPPAT,0)),U,2):3,1:1))
+ S @RETVAL@(BGPI)="T00001Return"_$C(30)
+ S BGPI=BGPI+1
+ S @RETVAL@(BGPI)=$G(RESULT)_$C(30)
+ S @RETVAL@(BGPI+1)=$C(31)
+ Q
+ ;
+DGSEC(RESULT,DFN,DUZ,DGMSG) ;EP -- mock the dgsec call but dont log, couldnt find a way to call PTSEC^DGSEC4 without logging
+ S DGMSG=$G(DGMSG,1)
+ I $$STATUS^BDGSPT2(DUZ,DFN,1)["RESTRICTED ACCESS" D  Q
+ .S RESULT(1)=5 Q:DGMSG'=1
+ .S RESULT(2)="Sorry, you are restricted from accessing this patient's record."
+ .S RESULT(3)="If you have questions, please contact your HIM department."
+ D OWNREC^DGSEC4(.RESULT,DFN,$G(DUZ),DGMSG)
+ I RESULT(1)=1 S RESULT(1)=3 Q
+ I RESULT(1)=2 S RESULT(1)=4 Q
+ K RESULT
+ D SENS^DGSEC4(.RESULT,DFN,$G(DUZ))
+ Q
+ ;
+CHKFQT(BGPX) ;EP - check for queued task (BGP AUTO GPRA EXTRACT and BGPSITE variable within the task
+ NEW X,BGPY,TASKJ
+ S BGPY=$P($G(^BGPGUIR(BGPX,0)),U,9)
+ I '$G(BGPY) Q 0
+ I '$D(^%ZTSK(BGPY,0)),$P($G(^BGPGUIR(BGPX,0)),U,6)="R" Q 1  ;v16.0 check for deleted task and mark as errored if so
+ I $P($G(^%ZTSK(BGPY,.1)),U)="C" Q 1
+ I $P($G(^%ZTSK(BGPY,.1)),U)="E" Q 1
+ S TASKJ=$P($G(^%ZTSK(BGPY,.1)),U,4)
+ I $G(TASKJ) S X=TASKJ D JOBPAR^%ZOSV I $G(Y)="" Q 1  ;v16.0 check to see if job is active
+ ;I $G(TASKJ),'$D(^$J(TASKJ)) Q 1
+ Q 0
+ ;
+UPLOG(GIEN,TSK) ;EP
+ S DIE="^BGPGUIR(",DR=".09///"_TSK
+ S DA=GIEN
+ D ^DIE
  Q
  ;

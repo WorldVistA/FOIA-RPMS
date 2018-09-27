@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2018-09-27 12:54:02">
+<Class name="AGMPI.Adapters.HLOGlobalInbound">
+<IncludeCode>EnsHL7</IncludeCode>
+<Super>Ens.InboundAdapter</Super>
+<TimeChanged>64203,49383.484811</TimeChanged>
+<TimeCreated>61592,31859.341221</TimeCreated>
+
+<Property name="ReceivingFacilityName">
+<Description>
+Name of the Receiving Facility to filter HL7 messages.</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
+</Property>
+
+<Property name="MaxNmbrMsgs">
+<Description>
+Maximum number of messages to retrieve/send per poll/task. </Description>
+<Type>%Integer</Type>
+</Property>
+
+<Property name="Throttle">
+<Description>
+Time to hang before processing another message,
+used to manage the throughput.</Description>
+<Type>%Integer</Type>
+</Property>
+
+<Property name="NmbrMsgsSnt">
+<Description>
+The number of messages retrieved.</Description>
+<Type>%Integer</Type>
+</Property>
+
+<Property name="AInfo">
+<Description>
+Information to send an alert from the business service
+ if populated.</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="SiteID">
+<Description>
+Site ID.  This is the STATION NUMBER</Description>
+<Type>%String</Type>
+</Property>
+
+<Parameter name="SETTINGS">
+<Type>%String</Type>
+<Default>ReceivingFacilityName, MaxNmbrMsgs, Throttle, SiteID</Default>
+</Parameter>
+
+<Method name="OnTask">
+<ReturnType>%Status</ReturnType>
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2018-09-27 12:54:34">
+<Class name="AGMPI.Adapters.HLOGlobalInbound">
+<IncludeCode>EnsHL7</IncludeCode>
+<Super>Ens.InboundAdapter</Super>
+<TimeChanged>64203,49383.484811</TimeChanged>
+<TimeCreated>61592,31859.341221</TimeCreated>
+
+<Property name="ReceivingFacilityName">
+<Description>
+Name of the Receiving Facility to filter HL7 messages.</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
+</Property>
+
+<Property name="MaxNmbrMsgs">
+<Description>
+Maximum number of messages to retrieve/send per poll/task. </Description>
+<Type>%Integer</Type>
+</Property>
+
+<Property name="Throttle">
+<Description>
+Time to hang before processing another message,
+used to manage the throughput.</Description>
+<Type>%Integer</Type>
+</Property>
+
+<Property name="NmbrMsgsSnt">
+<Description>
+The number of messages retrieved.</Description>
+<Type>%Integer</Type>
+</Property>
+
+<Property name="AInfo">
+<Description>
+Information to send an alert from the business service
+ if populated.</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="SiteID">
+<Description>
+Site ID.  This is the STATION NUMBER</Description>
+<Type>%String</Type>
+</Property>
+
+<Parameter name="SETTINGS">
+<Type>%String</Type>
+<Default>ReceivingFacilityName, MaxNmbrMsgs, Throttle, SiteID</Default>
+</Parameter>
+
+<Method name="OnTask">
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+  set $ZT="Trap", tSC=$$$OK
+
+  // Initialize a start time variable.
+  set tStartTime = $P($H,",",2)	
+  // Initialize the Alert Information property to the null string.
+  set ..AInfo=""
+  // Initialize the number of messages sent during this connection.
+  set ..NmbrMsgsSnt=0
+  // Initialize a variable(Flag) to use to quit when we reach the maximum
+  // number of messages.
+  set tQuitAll=0
+  // Set the field delimiter for the HLB data set.
+  set U = "^"
+  // Set the initial HLB index value to zero.
+  set tIENB=0
+  // Set the ^HLB QUEUE Node index variables.
+  set tQueue="", tLink=""
+  
+  // Indices of the HLB queue are;
+  // the string "QUEUE"
+  // the string "OUT"
+  // the HLO Logical Link and Port associated with it
+  // the Queue Type
+  // ^HLB("QUEUE","OUT",tLink,tQueue,tIENB)
+
+  // Outer loop going through the tLink values   
+  do { 
+	  // If the ReceivingFacilityName variable is not set we will not process any
+	  //  messages.
+	  if (""=..ReceivingFacilityName) {
+		  set ..AInfo=..AInfo_" No Receiving Facility Name is set for the Inbound HLO Global Adapter, no messages are being processed." 
+  	  	  do ..BusinessHost.SendAlert(##Class(Ens.AlertRequest).%New($LB(..BusinessHost.%ConfigName,"ERROR in Configuration", ..AInfo)))
+		  quit //exit the do loop
+  	  }
+
+	  // Get the tLink index
+	  set tLink = $O(^HLB("QUEUE","OUT",tLink))
+	
+	  // If the tLink variable is null we do not have any more nodes to process
+	  if (tLink="") { quit }
+	  
+	  // Loop through the tQueue values at the tLink index
+	  for {
+		  // Get the tQueue index
+		  set tQueue = $O(^HLB("QUEUE","OUT",tLink,tQueue))
+	  
+		  // If the tQueue variable is null we do not have any more nodes at this level to process.
+		  if (tQueue="") { quit }
+	  
+		  //Loop through the IENs at the tLink.tQueue index
+		  for {
+			  // Get the tIENB index
+			  set tIENB = $O(^HLB("QUEUE","OUT",tLink,tQueue,tIENB))
+	  
+			  // If the TIENB varible is zero we do not have an IEN to process
+			  if (tIENB="") { quit }
+	  
+			  // Initialize the Node Data variable.
+			  set tNodeData = ""
+	  
+			  // if there's no data within the node we skip this entry and go to the next
+			  if '($D(^HLB(tIENB,0),tNodeData)#10) { continue }
+	        
+			  // Get the message direction from the Node Data
+			  set tMessageDirection=$ZCONVERT($p(tNodeData,U,4),"U")
+	  
+			  // If the direction is not outbound we skip this entry and go to the next
+			  if '(tMessageDirection = "O") { continue }
+	  
+			  // Get the date processed from the Node Data
+			  set tDateProcessed=$p(tNodeData,U,16)
+	  
+			  // If the Date Processed is not empty, this message has already been processed, we
+			  //  skip this entry and go to the next
+			  if '(tDateProcessed="") { continue }
+	  
+			  // Get the A index 'tIENA' from the Node Data.
+			  set tIENA=$p(tNodeData,U,2)
+	  
+			  // Get the MSH segment from the HLB tIENB.1 and tIENB.2 node entries
+			  set tMSHsegment=$G(^HLB(tIENB,1))_$G(^HLB(tIENB,2)) 
+
+              // Reset the Field Separator variable to the empty string before 
+              //  reading the value from the current MSH segment
+              set tFieldSeparator=""
+         
+			  // The field separator is the 4th character of the MSH segment.
+			  set tFieldSeparator=$E(tMSHsegment,4)
+			  
+			  // If the field separator is missing we exit the loop
+			  if (tFieldSeparator="") {continue}
+			  
+			  // Reset the Copmponent Separator value to the empty string before 
+			  //  reading the value from the current MSH segment
+              set tComponentSeparator=""
+			  
+			  // The component separator is the 5th character of the MSH segment.
+			  set tComponentSeparator=$E(tMSHsegment,5)
+			  
+			  // If the component separator is missing we exit the loop
+			  if (tComponentSeparator="") {continue}
+
+              // Reset the Message Type variable to the empty string before 
+              //  reading the value from the current MSH segment
+              set tMessageType=""
+
+			  // Get the Message Type
+			  set tMessageType=$P(tMSHsegment,tFieldSeparator,9)
+			  
+			  // If the Message Type is missing we exit the loop
+			  if (tMessageType="") {continue}
+ 	  
+			  // We set the MessageType field to the MessageCode and Trigger Event subfields.
+			  set $p(tMSHsegment,tFieldSeparator,9) = $p(tMessageType,tComponentSeparator,1,2)
+ 	  
+			  // Get the segment name wthin the MSH segment, if we do not have a field separator
+			  //  we cannot get the segment name
+			  set tSegmentName = $p(tMSHsegment,tFieldSeparator,1)
+ 	  
+			  // If we do not have a MSH segment we do not process this message
+			  if '(tSegmentName = "MSH") { continue }
+
+			  // If the receiving facility of the message doesn't match the ReceivingFacility 
+			  //  in the parameter, we do not process this message.
+			  if '(..ReceivingFacilityName=$p(tMSHsegment,tFieldSeparator,5)) { continue }
+
+			  // -------------------------------------------------------------------------
+			  // We've identified a message that should be sent to the receiving facility
+			  // Build the HL7 message to send to the RPMS Service
+	  
+			  // Set the segment separator
+			  set tSegmentSeparator=$c(13)
+	        
+			  // Add the MSH segment to the text string
+			  set tMessageText=tMSHsegment_tSegmentSeparator
+            
+			  // Set the segment index to zero
+			  set tSegmentIndex=0
+      
+			  // Set the segment data to the null sting to begin with
+			  set tSegmentData=""
+			  set tSegmentData2=""
+
+
+			  // Loop through the ^HLA indices for the message segments.
+ 
+			  // This code uses the same logic as HLNEXT^HLOMSG.
+			  set start=0,tSegmentIndex=0
+			  for {
+				  // Loop through the segments
+				  set tSegmentIndex=$o(^HLA(tIENA,1,tSegmentIndex))
+				  quit:'tSegmentIndex
+				  set tSegmentData=$g(^HLA(tIENA,1,tSegmentIndex,0))
+				  // If this is a blank node and we previously had data, append the segment separator.
+				  if start && (tSegmentData="") { set tMessageText=tMessageText_tSegmentSeparator,start=0 }
+				  // If this node has data, append it. Don't append a segment separator, because there
+				  // might be more of this segment in the next node.
+				  if tSegmentData'="" { set tMessageText=tMessageText_tSegmentData,start=1 }
+			  }
+			  // Make sure we end with a segment separator if necessary.
+			  if start { set tMessageText=tMessageText_tSegmentSeparator }
+
+			  TStart
+
+			  // Create the HL7 message document to send to the business 
+			  //  host that will route the message
+			  set tHL7obj=##class(EnsLib.HL7.Message).ImportFromString(tMessageText)
+            
+			  // Check to see that the hl7obj is an object
+			  set tObjectError= $ISOBJECT(tHL7obj)
+	  
+			  // Send a message to the ENS.Alert Process if we fail to create an object to send
+			  If 'tObjectError {
+				  set tSC=%objlasterror
+				  set ..AInfo=" Failed to create an HL7 message with the information retrieved from the HLA global, IEN= "_tIENA
+				  set ..AInfo=..AInfo_" ERROR:= "_##class(%SYSTEM.Status).GetErrorText(tSC)
+				  do ..BusinessHost.SendAlert(##Class(Ens.AlertRequest).%New($LB(..BusinessHost.%ConfigName,"There was an issue creating a valid HL7 message in the HLOGlobalInbound Adapter: ", ..AInfo)))
+				  set ..AInfo=""
+				  tRollBack
+				  continue
+			  }
+			
+			  // Send the message to the Business Host  
+			  set tBusinessHostResponse=..BusinessHost.ProcessInput(tHL7obj)
+			  
+			  // Increase the number of messages we've sent this period
+			  set ..NmbrMsgsSnt=..NmbrMsgsSnt+1
+			  
+			  // If we sent a message to the production,we need to update the 16th field within
+			  //  the HLB global with the Fileman date.
+			  set $p(^HLB(tIENB,0),U,16)=..GetFilemanDateTime(0) 
+	  
+			  // Remove the ^HLB("QUEUE","OUT",tLink,tQueue,tIENB) entry
+			  kill ^HLB("QUEUE","OUT",tLink,tQueue,tIENB)
+	  
+			  // decrement the HLC counter, if it exist
+			  if (+$G(^HLC("QUEUECOUNT","OUT",tLink,tQueue))) {
+				  set tTemp = $i(^HLC("QUEUECOUNT","OUT",tLink,tQueue),-1) 
+			  }
+			
+			   TCommit
+			  If ( ..NmbrMsgsSnt =..MaxNmbrMsgs)  {
+				  set tQuitAll=1
+				  quit
+			  }
+			  // Set the Current Time variable
+			  set tCurrentTime = $P($H,",",2)
+			  // Set the processing time, if the start time is greater than the
+			  //  current time (we passed midnight) and will always set the 
+			  //  processing time to a value greater than the call interval. 
+			  If tStartTime > tCurrentTime {
+				  set tProcessingTime = tStartTime - tCurrentTime
+			  }
+			  else {
+				  set tProcessingTime = tCurrentTime - tStartTime
+			  }
+			  // If the processing time is greater than the Call Interval
+			  //  return control to the Service that called the adapter.
+			  if (tProcessingTime > ..CallInterval) {
+				  set tQuitAll=1
+				  quit
+			  }
+			  HANG (..Throttle/1000)
+			  if (tQuitAll) {quit}
+		  } // Close the IEN loop
+		  if tQuitAll {quit}
+	  } // Close the tQueue loop
+  }While '(tQuitAll) // Close the tLink loop
+  quit $$$OK
+
+Trap
+	// We erred out, set the error information and roll back the last transaction.
+	set $ZT=""
+	TRollback
+	set tSC=$$$EnsSystemError
+	do ..BusinessHost.SendAlert(##Class(Ens.AlertRequest).%New($LB(..BusinessHost.%ConfigName,"There was an error in the HLOGlobalInbound Adapter: ", tSC)))
+	quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetFilemanDateTime">
+<Description>
+Returns the date/time in FileManFormat</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pDays:%Integer=0</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	set tCurrentDateTime = $H
+	set $P(tCurrentDateTime,",",1)=$P(tCurrentDateTime,",",1)+pDays
+	set tFileManDate = ($ZDATETIME(tCurrentDateTime,8,1,9)-17000000)
+	set tCurrentTime = $P(tCurrentDateTime,",",2)
+	set tCurrentTimeFormatted = $ZTIME(tCurrentTime,2)
+	set tFileManTime = $P(tCurrentTimeFormatted,":",1)_$P(tCurrentTimeFormatted,":",2)
+	quit (tFileManDate_"."_tFileManTime)
+]]></Implementation>
+</Method>
+</Class>
+</Export>

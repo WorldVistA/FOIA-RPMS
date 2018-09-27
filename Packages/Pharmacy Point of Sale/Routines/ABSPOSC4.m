@@ -1,5 +1,5 @@
 ABSPOSC4 ; IHS/FCS/DRS - installation testing ;    
- ;;1.0;PHARMACY POINT OF SALE;;JUN 21, 2001
+ ;;1.0;PHARMACY POINT OF SALE;**48**;JUN 21, 2001;Build 27
  Q
  ; Send the NEBRASKA MEDICAID test claim
  ; Special naming assumptions:
@@ -138,6 +138,7 @@ IEN4MAKE() ; given INSNAME and FMTNAME
  I 'X W !,"Missing ",FMTNAME," from ^ABSPF(9002313.92)",! Q 0
  S FDA(9002313.4,IENS,100.01)=X
  D UPDATE^DIE(,"FDA","IENARR","MSG")
+ I $D(MSG) D LOG^ABSPOSL2("IEN4MAKE^ABSPOSC4",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  I $D(MSG) D ZWRITE^ABSPOS("MSG") Q 0
  Q $G(IENARR(1))
 IEN4DEL() ; delete the ABSP INSURER entry (because we temporarily created it)
@@ -145,6 +146,7 @@ IEN4DEL() ; delete the ABSP INSURER entry (because we temporarily created it)
  N FDA,MSG
  S FDA(9002313.4,IEN4_",",.01)=""
  D FILE^DIE(,"FDA","MSG")
+ I $D(MSG) D LOG^ABSPOSL2("IEN4DEL^ABSPOSC4",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  Q '$D(^ABSPEI(IEN4))
 SETUP31() ; fill in some fields in the 9002313.31 header ; ret true/false
  N FDA,MSG,FN,IENS S FN=9002313.31,IENS=IEN31_","
@@ -163,4 +165,5 @@ SETUP31() ; fill in some fields in the 9002313.31 header ; ret true/false
  S IENS414=IENS414_",1,"_IENS
  S FDA(9002313.3121,IENS414,.02)=DT
  D FILE^DIE(,"FDA","MSG")
+ I $D(MSG) D LOG^ABSPOSL2("SETUP31^ABSPOSC4",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  Q '$D(MSG)

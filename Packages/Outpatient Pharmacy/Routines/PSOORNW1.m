@@ -1,5 +1,5 @@
-PSOORNW1 ;ISC BHAM/SAB - continuation of finish of new order ;06-Dec-2012 20:13;PLS
- ;;7.0;OUTPATIENT PHARMACY;**23,46,78,117,131,133,172,1006,1013,148,222,268,206,1015**;DEC 1997;Build 62
+PSOORNW1 ;ISC BHAM/SAB - continuation of finish of new order ;28-Mar-2016 13:01;DU
+ ;;7.0;OUTPATIENT PHARMACY;**23,46,78,117,131,133,172,1006,1013,148,222,268,206,1015,1021**;DEC 1997;Build 14
  ;Reference ^YSCL(603.01 supported by DBIA 2697
  ;Reference ^PS(55 supported by DBIA 2228
  ;Reference ^PSDRUG( supported by DBIA 221
@@ -7,6 +7,7 @@ PSOORNW1 ;ISC BHAM/SAB - continuation of finish of new order ;06-Dec-2012 20:13;
  ; Modified - IHS/MSC/PLS - 04/02/08 - Line CT1+5  - Set PSONEW("NDC")
  ; Modified - IHS/MSC/PLS - 09/22/2011 - Line 2+6
  ;                          12/06/2012 - Line EDNEW+6
+ ;            IHS/MSC/PLS - 03/28/2016 - Added REASK label, Line REASK+3
 2 I $G(ORD) W !!,"Instructions: " D
  .S INST=0 F  S INST=$O(^PS(52.41,ORD,2,INST)) Q:'INST  S (MIG,INST(INST))=^PS(52.41,ORD,2,INST,0) D
  ..F SG=1:1:$L(MIG," ") W:$X+$L($P(MIG," ",SG)_" ")>IOM !?14 W $P(MIG," ",SG)_" "
@@ -32,8 +33,12 @@ PSOORNW1 ;ISC BHAM/SAB - continuation of finish of new order ;06-Dec-2012 20:13;
  I PSDC'=1 D
  .I $P($G(^PSDRUG(+$G(PSODRUG("IEN")),2)),"^")=$G(PSODRUG("OI")) Q
  .K PSODRUG("NAME"),PSODRUG("IEN")
+REASK ;IHS/MSC/PLS - 03/28/2016
  W ! D KV S DIR(0)="N^1:"_PSDC,DIR("A")="Select Drug by number" D ^DIR
  I $D(DIRUT) S OUT=1 G EX
+ ;IHS/MSC/PLS - 03/28/2016 - CR5951
+ I $$ERXONLY^APSPFNC6(+PSDC(Y)) D  S Y=-1 G REASK
+ .W !,"Drug is marked as ERX Only",*7,!
  D KV K PSOY S PSOY=PSDC(Y),PSOY(0)=^PSDRUG(PSOY,0),PSOCSIG=0
  I $G(PSOBDR("IEN")),PSOBDR("IEN")'=+PSOY D:$G(ORD)  G:$D(DIRUT) EX
  .D KV S DIR(0)="Y",DIR("B")="YES",DIR("A",1)="You have changed the dispense drug from",DIR("A",2)=PSOBDR("NAME")_" to "_$P(^PSDRUG(+PSOY,0),"^")_".",DIR("A")="Do You want to Edit the SIG"

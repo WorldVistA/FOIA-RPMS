@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2018-09-27 12:54:36">
+<Class name="csp.beddlogin">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeChanged>64672,29653.855341</TimeChanged>
+<TimeCreated>64672,29653.854049</TimeCreated>
+<GeneratedBy>/csp/foia_goldb/BEDDLogin.csp</GeneratedBy>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<BODY bgcolor=#DCDCDC>"
+	Write !,!,"</BODY>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<!-- BEDDLogin.csp - Main BEDD Main Entry Page -->"
+	Write !,"<!-- ;;2.0;IHS EMERGENCY DEPT DASHBOARD;**2**;Apr 02, 2014 -->"
+	Write !,!
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<HEAD>"
+	Write !,"	<TITLE>	BEDD Emergency Room Dashboard Login </TITLE>",!
+	Write !,"</HEAD>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<HTML>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,"</HTML>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+ 	Set duz=$Get(%request.Data("DUZ",1))
+ 	Set site=$Get(%request.Data("SITE",1))
+ 	Set loc=$Get(%request.Data("LOC",1))
+ 	Set %session.Data("ExtEHR")=""
+ 
+ 	If duz>0 {
+ 		
+ 		If loc="" {
+ 			Set loc="SA"
+ 		}
+ 		
+ 		//Record that we are coming from EHR
+ 		Set %session.Data("ExtEHR")=1
+ 		
+ 		If $$AUTH^BEDDUTIL(duz)=0 {
+ 			Set %response.Redirect=..Link("BEDDUA.csp")
+ 		}
+ 		
+ 		Else {
+ 		Set %session.Data("DUZ")=duz
+ 		Set %session.Data("SITE")=site
+ 		Set %session.Data("LOC")=loc
+ 		Set %response.Redirect=..Link("BEDD.csp?DUZ="_duz_"&SITE="_site_"&LOC="_loc)
+ 		}
+ 	}
+ 	Else {
+ 		Set %response.Redirect=..Link("BEDDLogin1.csp")
+ 	}
+ 	Quit 1	
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>D:\intersystems\E3IHS\CSP\foia_goldb\BEDDLogin.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/foia_goldb/BEDDLogin.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>64671,78210</Default>
+</Parameter>
+</Class>
+</Export>

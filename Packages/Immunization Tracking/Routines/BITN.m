@@ -1,5 +1,5 @@
 BITN ;IHS/CMI/MWR - BUILD ^BITN GLOBAL.
- ;;8.5;IMMUNIZATION;**14**;AUG 01,2017
+ ;;8.5;IMMUNIZATION;**15**;SEP 30,2017
  ;;* MICHAEL REMILLARD, DDS * CIMARRON MEDICAL INFORMATICS, FOR IHS *
  ;;  UTILITY: BUILD STANDARD ^BITN GLOBAL.
  ;
@@ -44,7 +44,7 @@ TABLE ; EP
  ;;106a;;Orimune^63^^^^^^^^^^^^Poliovirus vaccine, live, oral
  ;;107;;IPV^IPV^10^^7^^0^^2^SALK^90713^110,170^3160720^V04.0^99.41^0^1^.5^^^^
  ;;107a;;IPOL^54^^^^^^^^^^^^Poliovirus vaccine, inactivated
- ;;108;;INFLUENZA, NOS^FLU,NOS^88^^^^1^^10^Flu,NOS^90724^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185^^V04.8^99.52^0^1^.5^^^^
+ ;;108;;INFLUENZA, NOS^FLU,NOS^88^^^^1^^10^Flu,NOS^90724^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185,186^^V04.8^99.52^0^1^.5^^^^
  ;;108a;;^^^^^^^^^^^^^Influenza virus vaccine, NOS
  ;;110;;HEP B, NOS^HEP B,NOS^45^^6^^1^^4^RECOMBIVAX^90731^8,43,44,51,110,104^^V05.3^99.59^0^1^.5^^^^
  ;;110a;;Hepagene^56^^^^^^^^^^^^Hepatitis B vaccine, NOS
@@ -116,9 +116,9 @@ TABLE ; EP
  ;;146a;;Diphtheria antitoxin^^^^^^^^^^^^^Diphtheria antitoxin
  ;;147;;TIG^TIG^13^^^^0^^^^90389^^^^^0^1^
  ;;147a;;^^^^^^^^^^^^^Tetanus immune globulin
- ;;148;;INFLUENZA, SPLIT [TIVhx] (INCL PURIFIED)^FLU-TIVhx^15^^^^1^^10^Flu-TIVhx^90657^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185^^^^0^1^.5
+ ;;148;;INFLUENZA, SPLIT [TIVhx] (INCL PURIFIED)^FLU-TIVhx^15^^^^1^^10^Flu-TIVhx^90657^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185,186^^^^0^1^.5
  ;;148a;;^^^^^^^^^^^^^Influenza virus vaccine, split virus (incl. Purified surface antigen)^90658
- ;;149;;INFLUENZA, WHOLE^FLU-WHOLE^16^^^^1^^10^Flu-Whole^90659^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185^^^^0^1^.5
+ ;;149;;INFLUENZA, WHOLE^FLU-WHOLE^16^^^^1^^10^Flu-Whole^90659^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185,186^^^^0^1^.5
  ;;149a;;^54^^^^^^^^^^^^Influenza virus vaccine, whole virus
  ;;150;;RABIES, INTRAMUSCULAR INJECTION^RABIES,IM^18^^^^1^^^^90675^^3091006^^^0^1^.5
  ;;150a;;RabAvert^29^Imovax Rabies^54^Rabies Vaccine Absorbed^44^^^^^^^^Rabies vaccine - for intramuscular injection

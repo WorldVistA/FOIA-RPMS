@@ -1,8 +1,8 @@
 BQIIPPT ;VNGT/HS/ALA-IPC Patient Detail ; 30 Jun 2011  12:32 PM
- ;;2.3;ICARE MANAGEMENT SYSTEM;**1**;Apr 18, 2012;Build 43
+ ;;2.7;ICARE MANAGEMENT SYSTEM;;Dec 19, 2017;Build 23
  ;
  ;
-EN(DATA,OWNR,PLIEN,PLIST) ;EP - BQI GET IPC PATIENT DETAIL
+EN(DATA,OWNR,PLIEN,CRIPC,PLIST) ;EP - BQI GET IPC PATIENT DETAIL
  ;Description - Entry point for the panel
  ;Input Parameters
  ;  OWNR  - Owner of panel
@@ -17,8 +17,8 @@ EN(DATA,OWNR,PLIEN,PLIST) ;EP - BQI GET IPC PATIENT DETAIL
  NEW $ESTACK,$ETRAP S $ETRAP="D ERR^BQIGPRA1 D UNWIND^%ZTER" ; SAC 2006 2.2.3.3.2
  ;
  ;  get the current IPC definition
- NEW CRIPC,CRN
- S CRIPC=$P($G(^BQI(90508,1,11)),U,1)
+ S CRIPC=$G(CRIPC,"")
+ I CRIPC="" S CRIPC=$P($G(^BQI(90508,1,11)),U,1)
  S CRN=$O(^BQI(90508,1,22,"B",CRIPC,"")) I CRN="" Q
  ;
  ; If a list of DFNs, process them instead of entire panel

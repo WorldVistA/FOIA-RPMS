@@ -1,5 +1,5 @@
 ABSPOSQA ; IHS/FCS/DRS - POS background, Part 1 ;   
- ;;1.0;PHARMACY POINT OF SALE;**10,42,43,46,47**;JUN 1, 2001;Build 15
+ ;;1.0;PHARMACY POINT OF SALE;**10,42,43,46,47,48,49**;JUN 21, 2001;Build 27
  ;------------------------------------------------
  ;IHS/SD/lwj 03/10/04 patch 10
  ; Routine adjusted to call ABSPFUNC to retrieve
@@ -21,22 +21,27 @@ ONE59 ;EP - from ABSPOSQ1
  I ABSBRXR,'$D(^PSRX(ABSBRXI,1,ABSBRXR,0)) S ERROR=102 G ERRJOIN
  ;
  I $E(IEN59,$L(IEN59))=1 D  ; if it's a prescription claim,
- . I ABSBNDC]"" D  ; store NDC number if specified in the input
+ . ; /IHS/OIT/RAM 6 OCT 17 - Always retrieve NDC info from claim -
+ . ;  - disable ability to change NDC from POS claim screen. P49-CR09816
+ . I ABSBRXR S ABSBNDC=$$NDCVAL^ABSPFUNC(ABSBRXI,ABSBRXR) ;patch 10
+ . E  S ABSBNDC=$P(^PSRX(ABSBRXI,2),U,7),ABSBNDC=$TR(ABSBNDC,"-")
+ . ; /IHS/OIT/RAM 6 OCT 17 disable all code below - NDC is now "read only." - P49-CR09816
+ . ; I ABSBNDC]"" D  ; store NDC number if specified in the input
  . . ; store in refill if this is a refill, otherwise store in main
  . . ;IHS/SD/lwj 03/10/04 patch 10, nxt line rmkd out, new line added
  . . ;I ABSBRXR S $P(^PSRX(ABSBRXI,1,ABSBRXR,0),U,13)=ABSBNDC
- . . I ABSBRXR D RFNDC^ABSPFUNC(ABSBRXI,ABSBRXR,ABSBNDC) ;patch 10
+ . . ; I ABSBRXR D RFNDC^ABSPFUNC(ABSBRXI,ABSBRXR,ABSBNDC) ;patch 10
  . . ;IHS/SD/lwj 03/10/04 patch 10 end changes
- . . E  S $P(^PSRX(ABSBRXI,2),U,7)=ABSBNDC
+ . . ; E  S $P(^PSRX(ABSBRXI,2),U,7)=ABSBNDC
  . . ; and now that it's been stored, make it 11N for rest of proc'g
- . . I ABSBNDC'?11N S ABSBNDC=$$NDCF^ABSPECFM(ABSBNDC)
- . E  D  ; NDC number not specified, get it from prescription file
+ . . ; I ABSBNDC'?11N S ABSBNDC=$$NDCF^ABSPECFM(ABSBNDC)
+ . ; E  D  ; NDC number not specified, get it from prescription file
  . . ;IHS/SD/lwj 03/10/04 patch 10, nxt line rmkd out, new line added
  . . ;I ABSBRXR S ABSBNDC=$P(^PSRX(ABSBRXI,1,ABSBRXR,0),U,13)
- . . I ABSBRXR S ABSBNDC=$$NDCVAL^ABSPFUNC(ABSBRXI,ABSBRXR) ;patch 10
+ . . ; I ABSBRXR S ABSBNDC=$$NDCVAL^ABSPFUNC(ABSBRXI,ABSBRXR) ;patch 10
  . . ;IHS/SD/lwj 03/10/04 patch 10 end changes
  . . ;IHS/OIT/CASSEVERN/RCS patch43 3/21/2012 Strip out the dashes
- . . E  S ABSBNDC=$P(^PSRX(ABSBRXI,2),U,7),ABSBNDC=$TR(ABSBNDC,"-")
+ . . ; E  S ABSBNDC=$P(^PSRX(ABSBRXI,2),U,7),ABSBNDC=$TR(ABSBNDC,"-")
  ;
  ; Set up lots of info about this claim
  ;
@@ -166,6 +171,7 @@ FLAG23(INS,VAL) ; change field .23 of ^AUTNINS to appropriate value if needed
  N FDA,MSG ; okay, we're going to change it
  S FDA(9999999.18,INS_",",.23)=VAL
 F23A D FILE^DIE(,"FDA","MSG")
+ I $D(MSG) D LOG^ABSPOSL2("F23A^ABSPOSQA",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  Q:'$D(MSG)  ; success
  D ZWRITE^ABSPOS("FDA","MSG")
  G F23A:$$IMPOSS^ABSPOSUE("FM","TRI","FILE^DIE failed",,"FLAG23",$T(+0))

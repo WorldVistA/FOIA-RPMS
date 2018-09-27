@@ -1,19 +1,24 @@
-PSOSUTL ;BIR/RTR - Suspense utility routine ;29-May-2012 15:15;PLS
- ;;7.0;OUTPATIENT PHARMACY;**10,34,139,167,1008,1013,235,1015**;DEC 1997;Build 62
+PSOSUTL ;BIR/RTR - Suspense utility routine ;26-Jul-2016 15:09;DU
+ ;;7.0;OUTPATIENT PHARMACY;**10,34,139,167,1008,1013,235,1015,1021**;DEC 1997;Build 14
  ;External reference to ^PSDRUG supported by DBIA 221
  ;External reference to ^PSNDF supported by DBIA 2195
  ; Modified - IHS/MSC/PLS- 02/09/09 - Line AREC
  ;                         09/20/2011 - Line AREC1+6,AREC1+9
  ;                         11/29/2011 - Mod at AREC no longer needed.
+ ;                         07/26/2016 - Lines AREC1+5,AREC1+10
 AREC1 ;
  S $P(^PSRX(RX,"STA"),"^")=0
  S SFN=$O(^PS(52.5,"B",RX,0)) I 'SFN D CPMS Q
  D NOW^%DTC S DTTM=% S COM="Suspense "_$S($G(RXRP(RX)):"(Reprint) ",1:"")_"Label Pulled Early"_$S($G(RXP):" (Partial)",1:"") S CNT=0 F JJ=0:0 S JJ=$O(^PSRX(RX,"A",JJ)) Q:'JJ  S CNT=JJ
  D DEL S $P(^PSRX(RX,"STA"),"^")=0 K PSODEL S RFCNT=0 F RF=0:0 S RF=$O(^PSRX(RX,1,RF)) Q:'RF  S RFCNT=RF
- I 'RFCNT,'$G(RXP),'$D(RXRP(RX)) S (X,OLD)=$P(^PSRX(RX,2),"^",2) D  K DIE
+ ;IHS/MSC/PLS - 07/26/2016
+ ;I 'RFCNT,'$G(RXP),'$D(RXRP(RX)) S (X,OLD)=$P(^PSRX(RX,2),"^",2) D  K DIE
+ I 'RFCNT,'$G(RXP),('$D(RXRP(RX))!($D(RXRS(RX)))) S (X,OLD)=$P(^PSRX(RX,2),"^",2) D  K DIE
  .;K DIE S DA=RX,DR="22////"_DT_";101////"_DT_";25////"_DT,DIE=52 D ^DIE
  .K DIE S DA=RX,DR="22////"_DT_";101////"_DT_";25////"_DT_";20///"_PSOSITE,DIE=52 D ^DIE  ;IHS/MSC/PLS - 09/20/2011
- I RFCNT,'$G(RXP),'$D(RXRP(RX)) S (OLD,X)=+$P($G(^PSRX(RX,1,RFCNT,0)),"^") D  K DIE S $P(^PSRX(RX,3),"^")=DT
+ ;IHS/MSC/PLS - 07/26/2016
+ ;I RFCNT,'$G(RXP),'$D(RXRP(RX)) S (OLD,X)=+$P($G(^PSRX(RX,1,RFCNT,0)),"^") D  K DIE S $P(^PSRX(RX,3),"^")=DT
+ I RFCNT,'$G(RXP),('$D(RXRP(RX))!($D(RXRS(RX)))) S (OLD,X)=+$P($G(^PSRX(RX,1,RFCNT,0)),"^") D  K DIE S $P(^PSRX(RX,3),"^")=DT
  .;K DIE S DA(1)=RX,DA=RFCNT,DIE="^PSRX("_DA(1)_",1,",DR=".01///"_DT_";10.1///"_DT D ^DIE
  .K DIE S DA(1)=RX,DA=RFCNT,DIE="^PSRX("_DA(1)_",1,",DR=".01///"_DT_";10.1///"_DT_";8///"_PSOSITE D ^DIE  ;IHS/MSC/PLS - 09/20/2011
  S:'$D(PDUZ) PDUZ=DUZ S CNT=CNT+1,^PSRX(RX,"A",0)="^52.3DA^"_CNT_"^"_CNT

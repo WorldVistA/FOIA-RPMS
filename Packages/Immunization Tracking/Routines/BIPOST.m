@@ -1,5 +1,5 @@
 BIPOST ;IHS/CMI/MWR - POST-INIT ROUTINE; OCT 15, 2010
- ;;8.5;IMMUNIZATION;**14**;AUG 01,2017
+ ;;8.5;IMMUNIZATION;**15**;SEP 30,2017
  ;;* MICHAEL REMILLARD, DDS * CIMARRON MEDICAL INFORMATICS, FOR IHS *
  ;;  PATCH 3: Set MenCY-Hib (148) and Flu-nasal4 (149) and all Skin Tests
  ;;           in the Vaccine Table to Inactive.   START+30
@@ -21,6 +21,7 @@ BIPOST ;IHS/CMI/MWR - POST-INIT ROUTINE; OCT 15, 2010
  ;;  PATCH 13: Restandardize Vaccine Table, with updates from BITN (and BIMAN below).
  ;;  PATCH 14: Make old Rabies CVX 18 inactive.
  ;;            Set High Risk parameter selection = zero/none.
+ ;;  PATCH 15: Restandardize Vaccine Table, make CVX 186 Active.  START+54
  ;
  ;
  ;----------
@@ -78,12 +79,13 @@ START ;EP
  D RESTAND^BIRESTD()
  ;
  ;
- ;********** PATCH 12, v8.5, MAY 01,2016, IHS/CMI/MWR
+ ;********** PATCH 15, v8.5, SEP 30,2017, IHS/CMI/MWR
  ;---> Force vaccines Active or Inactive by CVX Code.
  ;---> Insert CVX Codes into For loop below.
  ;
  ;---> Make these CVX's ACTIVE:
- N BICVX F BICVX=150,158,168,185 D
+ ;N BICVX F BICVX=150,158,168,185 D
+ N BICVX F BICVX=186 D
  .N N S N=$$HL7TX^BIUTL2(BICVX)
  .;---> Quit if CVX is Unknown.
  .Q:(N=137)
@@ -93,7 +95,7 @@ START ;EP
  .;
  ;---> Make these CVX's INACTIVE:
  ;N BICVX F BICVX=123,125,126,127,147,160 D
- N BICVX F BICVX=25,29,37,40,51,62,118,183,184 D
+ ;N BICVX F BICVX=25,29,37,40,51,62,118,183,184 D
  .N N S N=$$HL7TX^BIUTL2(BICVX)
  .;---> Quit if CVX is Unknown.
  .Q:(N=137)
@@ -188,12 +190,12 @@ START ;EP
  ;---> Set High Risk parameter selection = zero/none. Install notes advise
  ;---> manager to revisit and reselect High Risk Factors.
  ;---> Update "Last Version Fully Installed" Field in BI SITE PARAMETER File.
- N N S N=0 F  S N=$O(^BISITE(N)) Q:'N  D
- .S $P(^BISITE(N,0),"^",15)=$$VER^BILOGO
- .S $P(^BISITE(N,0),"^",19)=0
- .;**********
+ ;N N S N=0 F  S N=$O(^BISITE(N)) Q:'N  D
+ ;.S $P(^BISITE(N,0),"^",15)=$$VER^BILOGO
+ ;.S $P(^BISITE(N,0),"^",19)=0
+ ;.;**********
  ;
- D TEXT2,DIRZ^BIUTL3()
+ ;D TEXT2,DIRZ^BIUTL3()
  D TEXT1,DIRZ^BIUTL3()
  ;
  D EXIT
@@ -219,7 +221,7 @@ TEXT1 ;EP
  ;;
  ;;                       * CONGRATULATIONS! *
  ;;
- ;;          You have successfully installed Immunization v8.5 p14.
+ ;;          You have successfully installed Immunization v8.5 p15.
  ;;
  ;;
  ;;

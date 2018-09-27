@@ -1,5 +1,5 @@
 AGMPPURG ; IHS/SD/TPF - MPI HLO MESSAGE PURGE
- ;;7.2;IHS PATIENT REGISTRATION;**1**;JAN 07, 2011
+ ;;7.2;IHS PATIENT REGISTRATION;**1,6**;JAN 07, 2011;Build 23
  Q
  ;
  ;NOT FINISHED
@@ -58,6 +58,9 @@ PURGE  ;EP PURGE MPI HL7 MESSAGES OLDER THAN 7DAYS
  Q
  ;USE TO CLEAN UP BODIES W/O HEADERS. RESET HLC
 SELKILL ;EP
+ ; 9/08/2017 - GCD - CR 7705 - Disabled this because it can delete data for any HLO application, not just MPI, among other issues.
+ Q
+ ;
  S IEN=0 F CNT=1:1 S IEN=$O(^HLA(IEN)) Q:IEN=""  D
  .Q:$D(^HLB(IEN))
  .S DA=IEN,DIK="^HLA(" D ^DIK

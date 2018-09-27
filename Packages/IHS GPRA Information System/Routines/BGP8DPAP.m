@@ -1,14 +1,11 @@
 BGP8DPAP ; IHS/CMI/LAB - COMP NATIONAL GPRA FOR PTS W/APPT ;
- ;;8.0;IHS CLINICAL REPORTING;**2**;MAR 12, 2008
+ ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
  ;
 EP ;EP - called from option interactive
  D EOJ
  W:$D(IOF) @IOF
- S BGPCTRL=$O(^BGPCTRL("B",2008,0))
+ S BGPCTRL=$O(^BGPCTRL("B",2018,0))
  S X=0 F  S X=$O(^BGPCTRL(BGPCTRL,58,X)) Q:X'=+X  W !,^BGPCTRL(BGPCTRL,58,X,0)
- ;W !!,"This option will produce a comprehensive National GPRA report for"
- ;W !,"a selected set of patients.  You will be able to enter a search "
- ;W !,"template of patients or enter individual patient names.",!
 PATS ;
  W !,"Enter a patient's HRN or name (HORSECHIEF,JOHN DOE or HORSECHIEF,JOHN)."
  W !,"A template can also be selected by typing a ""["" followed by"
@@ -37,26 +34,26 @@ SELPT ;
  I X=U K BGPSPAT W !,"All selections cancelled!"
  I '$O(BGPSPAT("")) W !,"No patients selected." D EOJ Q
 ZIS ;
- S BGPRTYPE=1,BGP8RPTH="",BGPCPPL=1,BGPINDT="G",BGP8GPU=1,BGPALLPT=1,BGPBEN=3
+ S BGPRTYPE=1,BGPYRPTH="",BGPCPPL=1,BGPINDG="G",BGPYGPU=1,BGPALLPT=1,BGPBEN=3
  S BGPHOME=$P($G(^BGPSITE(DUZ(2),0)),U,2)
 ENDDATE ;
  W !!
- S X=$O(^BGPCTRL("B",2008,0))
+ S X=$O(^BGPCTRL("B",2018,0))
  S Y=^BGPCTRL(X,0)
  S BGPBD=$P(Y,U,8),BGPED=$P(Y,U,9)
  S BGPPBD=$P(Y,U,10),BGPPED=$P(Y,U,11)
  S BGPBBD=$P(Y,U,12),BGPBED=$P(Y,U,13)
- S BGPPER=$P(Y,U,14),BGPQTR=3
+ S BGPPER=$P(Y,U,14),BGPQTR=4
  ;S BGPPER=""
- ;K DIR S DIR(0)="DO^::EXP",DIR("A")="Enter End Date of the Report Period",DIR("B")="June 30, 2008"
+ ;K DIR S DIR(0)="DO^::EXP",DIR("A")="Enter End Date of the Report Period",DIR("B")="June 30, 2018"
  ;D ^DIR G:Y<1 SELPT  S BGPUD=Y
  ;K DIR
  ;AI ;gather all gpra measures
- S X=0 F  S X=$O(^BGPINDE("GPRA",1,X)) Q:X'=+X  S BGPIND(X)=""
- ;S BGPPER=3080630
+ S X=0 F  S X=$O(^BGPINDR("GPRA",1,X)) Q:X'=+X  S BGPIND(X)=""
+ ;S BGPPER=3110630
  ;S BGPED=""
- ;I BGPUD=3080630 S BGPBD=3070701,BGPED=BGPUD,BGPPER=$E(BGPED,1,3)_"0000"
- ;I BGPUD'=3080630 S BGPBD=$$FMADD^XLFDT(BGPUD,-364),BGPED=BGPUD,BGPPER=$E(BGPED,1,3)_"0000"
+ ;I BGPUD=3110630 S BGPBD=3080701,BGPED=BGPUD,BGPPER=$E(BGPED,1,3)_"0000"
+ ;I BGPUD'=3110630 S BGPBD=$$FMADD^XLFDT(BGPUD,-364),BGPED=BGPUD,BGPPER=$E(BGPED,1,3)_"0000"
  ;S BGPVDT=3000000
  ;S X=$E(BGPPER,1,3)-$E(BGPVDT,1,3)
  ;S X=X_"0000"
@@ -88,13 +85,13 @@ BDMG(BGPBD,BGPED,BGPCLN) ;EP - GUI DMS Entry Point
  S BGPGUI=1
  N BGPOPT,BGPNOW,BGPIEN  ;maw
  S BGPOPT="List Patients on a Register w/an Appointment"
- S BGPRTYPE=1,BGP8RPTH="",BGPCPPL=1,BGPINDT="G",BGP8GPU=1
+ S BGPRTYPE=1,BGPYRPTH="",BGPCPPL=1,BGPINDG="G",BGPYGPU=1
  D NOW^%DTC
  S BGPNOW=$G(%)
  K DD,D0,DIC
  S X=DUZ_$$NOW^XLFDT
  S DIC("DR")=".02////"_DUZ_";.03////"_BGPNOW_";.06///"_$G(BGPOPT)_";.07////R"
- S DIC="^BGPGUIE(",DIC(0)="L",DIADD=1,DLAYGO=9001004.4
+ S DIC="^BGPGUIR(",DIC(0)="L",DIADD=1,DLAYGO=9001004.4
  D FILE^DICN
  K DIADD,DLAYGO,DIC,DA
  I Y=-1 S BGPIEN=-1 Q
@@ -113,9 +110,9 @@ GUIEP ;EP
  S X=0,C=0 F  S X=$O(^TMP($J,"BGP8DPAP",X)) Q:X'=+X  D
  .S BGPDATA=^TMP($J,"BGP8DPAP",X)
  .I BGPDATA="ZZZZZZZ" S BGPDATA=$C(12)
- .S ^BGPGUIE(BGPIEN,11,X,0)=BGPDATA,C=C+1
- S ^BGPGUIE(BGPIEN,11,0)="^^"_C_"^"_C_"^"_DT_"^"
- S DA=BGPIEN,DIK="^BGPGUIE(" D IX1^DIK
+ .S ^BGPGUIR(BGPIEN,11,X,0)=BGPDATA,C=C+1
+ S ^BGPGUIR(BGPIEN,11,0)="^^"_C_"^"_C_"^"_DT_"^"
+ S DA=BGPIEN,DIK="^BGPGUIR(" D IX1^DIK
  D ENDLOG
  K ^TMP($J,"BGP8DPAP")
  S ZTREQ="@"
@@ -124,7 +121,7 @@ GUIEP ;EP
 ENDLOG ;-- write the end of the log
  D NOW^%DTC
  S BGPNOW=$G(%)
- S DIE="^BGPGUIE(",DA=BGPIEN,DR=".04////"_BGPNOW_";.07////C"
+ S DIE="^BGPGUIR(",DA=BGPIEN,DR=".04////"_BGPNOW_";.07////C"
  D ^DIE
  K DIE,DR,DA
  Q
@@ -132,8 +129,7 @@ ENDLOG ;-- write the end of the log
 PROC ;
  D JRNL^BGP8UTL
  S BGPGPRAJ=$J,BGPGPRAH=$H
- S BGPCHWC=0
- S BGPCHSO=$P($G(^BGPSITE(DUZ(2),0)),U,6)
+ ;S BGPCHWC=0
  ;calculate 3 years before end of each time frame
  S BGP3YE=$$FMADD^XLFDT(BGPED,-1096)
  K ^XTMP("BGP8DPAP",BGPGPRAJ,BGPGPRAH)

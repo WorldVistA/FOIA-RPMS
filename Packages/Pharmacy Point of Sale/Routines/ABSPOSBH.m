@@ -1,5 +1,5 @@
 ABSPOSBH ; IHS/SD/RLT - POS billing - HOLD ;        [ 09/12/2007  11:18 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**22,28**;SEP 12, 2007;Build 15
+ ;;1.0;PHARMACY POINT OF SALE;**22,28**;SEP 12, 2007;Build 27
  ;
  ; Code to hold claims from being sent to 3PB if the site
  ; affiliation is IHS and the insurer does not have a tax id.
@@ -143,6 +143,7 @@ ABSPOSBH ; IHS/SD/RLT - POS billing - HOLD ;        [ 09/12/2007  11:18 AM ]
  ;. N FDA,IEN,MSG
  ;. S FDA(9002313.57,HOLD57_",",.15)=HOLDDA
  ;. D FILE^DIE(,"FDA","MSG")
+ ;. I $D(MSG) D LOG^ABSPOSL2("F^ABSPOSBX",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  ;
  ; Transaction processed remove entry from hold file
  ;D ^XBFMK      ;kill FileMan variables

@@ -1,5 +1,5 @@
 BJPNSPOV ;GDIT/HS/BEE-Prenatal Care Module POV Handling ; 08 May 2012  12:00 PM
- ;;2.0;PRENATAL CARE MODULE;**4,6,7**;Feb 24, 2015;Build 53
+ ;;2.0;PRENATAL CARE MODULE;**4,6,7,9**;Feb 24, 2015;Build 12
  ;
  Q
  ;
@@ -10,7 +10,7 @@ POV(DATA,INP,QUAL,INJ) ;EP - BJPN SET POV
  ;Input parameters
  ;  INP = VPOV IEN [1] 28 Visit IEN [2] 28 Problem IEN [3] 28 Patient IEN [4] 28 Prov Text [5] 28 Descriptive CT [6] 28
  ;        SNOMED CT [7] 28 ICD code [8] 28 Primary/Secondary [9] 28 Provider IEN [10] 28 asthma control [11] 28 Abnormal Findings [12]
- ;        28 Laterality Attribute|Qualifier [13]
+ ;        28 Laterality Attribute|Qualifier [13] 28 Fracture SNOMED
  ;  QUAL = Q[1] 28 TYPE [2] 28 IEN (If edit)  [3] 28 SNOMED [4] 28 BY [5] 28 WHEN [6] 28 DEL [7]
  ;  INJ  = Cause DX[1] 28 Injury Code [2] 28 Injury Place [3] 28 First/Revisit [4] 28 Injury Dt [5] 28 Onset Date [6]
  ;
@@ -100,6 +100,44 @@ POV(DATA,INP,QUAL,INJ) ;EP - BJPN SET POV
  S II=II+1,@DATA@(II)=RESULT_$C(30)
  ;
 XPOV S II=II+1,@DATA@(II)=$C(31)
+ Q
+ ;
+ ;
+FRACT(DATA,CONCID) ;EP - BJPN GET FRACTURE
+ ;
+ ;This RPC determines whether to prompt for fractures by returning the valid
+ ;fracture choices
+ ;
+ ;Input:
+ ; CONCID - The Concept ID
+ ;
+ ;Output:
+ ; DISPLAY^SNOMED
+ ;
+ NEW UID,II,RESULT,PC
+ ;
+ S UID=$S($G(ZTSK):"Z"_ZTSK,1:$J)
+ S DATA=$NA(^TMP("BJPNSPOV",UID))
+ K @DATA
+ I $G(DT)=""!($G(U)="") D DT^DICRW
+ ;
+ S II=0
+ NEW $ESTACK,$ETRAP S $ETRAP="D ERR^BJPNSPOV D UNWIND^%ZTER" ; SAC 2009 2.2.3.17
+ ;
+ ;Define Header
+ S @DATA@(II)="T00050DISPLAY_NAME^T00020SNOMED"_$C(30)
+ ;
+ ;Input validation
+ I $G(CONCID)="" S II=II+1,@DATA@(II)="-1^MISSING CONCEPT ID"_$C(30) G XFRACT
+ ;
+ ;Retrieve the fracture information
+ S RESULT=$P($$CONC^BSTSAPI(CONCID),U,11)
+ I RESULT]"" F PC=1:1:$L(RESULT,";") D
+ . NEW HEAL
+ . S HEAL=$P(RESULT,";",PC) Q:$TR(HEAL,"|")=""
+ . S II=II+1,@DATA@(II)=$P(HEAL,"|")_"^"_$P(HEAL,"|",2)_$C(30)
+ ;
+XFRACT  S II=II+1,@DATA@(II)=$C(31)
  Q
  ;
 UPPER(X) ;Convert to uppercase

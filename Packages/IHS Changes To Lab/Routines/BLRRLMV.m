@@ -1,5 +1,5 @@
-BLRRLMV ; cmi/anch/maw - BLR View/Refile Raw Reference Lab Messages ; 27-Jul-2015 06:30 ; MAW
- ;;5.2;LR;**1021,1030,1033,1035**;NOV 1, 1997;Build 5
+BLRRLMV ; cmi/anch/maw - BLR View/Refile Raw Reference Lab Messages ; 13-Oct-2017 14:04 ; MAW
+ ;;5.2;LR;**1021,1030,1033,1035,1041**;NOV 1, 1997;Build 23
  ;;1.0;BLR REFERENCE LAB;;MAR 14, 2005
  ;
  ;
@@ -45,11 +45,19 @@ LEDI  ;EP - main LEDI driver
  I '$G(BLRIN) D EOJ Q
  S BLRYN=$$RFL(BLRIN)
  I $G(BLRYN) D
- . N BLRMA
+ . ;N BLRMA
  . S BLRMA=$O(^HLMA("B",$G(BLRD(BLRYN)),0))
  . Q:'BLRMA
- . D REPROC^HLUTIL(BLRMA,"D ORU^LA7VHL")
+ . D EN^XBNEW("CALLHL^BLRRLMV","BLRMA")
+ . ;D REPROC^HLUTIL(BLRMA,"D ORU^LA7VHL")
  D EOJ
+ Q
+ ;
+CALLHL ;call the hl refiler
+ N ORIGDUZ
+ S ORIGDUZ=DUZ
+ D REPROC^HLUTIL(BLRMA,"D ORU^LA7VHL")
+ D DUZ^XUP(ORIGDUZ)
  Q
  ;
 EDITRFL() ;-- edit or just refile

@@ -1,5 +1,5 @@
 ABMEHGRV ; IHS/ASDST/DMJ - GET ANCILLARY SVCS REVENUE CODE INFO ;   
- ;;2.6;IHS 3P BILLING SYSTEM;**6,7,11,13,21**;NOV 12, 2009;Build 379
+ ;;2.6;IHS 3P BILLING SYSTEM;**6,7,11,13,21,22,23**;NOV 12, 2009;Build 427
  ;Original;DMJ;01/26/96 4:02 PM
  ; IHS/ASDS/DMJ - 09/06/00 - V2.4 Patch 3 (no NOIS)
  ;
@@ -9,10 +9,13 @@ ABMEHGRV ; IHS/ASDST/DMJ - GET ANCILLARY SVCS REVENUE CODE INFO ;
  ;   Made change to getting ambulance line items.  Found it wasn't
  ;   working right when they were doing new pt stmt in patch 11.
  ;
- ; IHS/SD/SDR - v2.6 CSV
- ; IHS/SD/SDR - abm*2.6*6 - line item control number
- ;IHS/SD/SDR - 2.6*13 - HEAT117086 - removed code to put T1015 as top line; doesn't work here.
- ;IHS/SD/SDR - 2.6*21 - HEAT205579 - code to put T1015 as top line in 837P file.
+ ;IHS/SD/SDR 2.6 CSV
+ ;IHS/SD/SDR 2.6*6 line item control number
+ ;IHS/SD/SDR 2.6*13 HEAT117086 - removed code to put T1015 as top line; doesn't work here.
+ ;IHS/SD/SDR 2.6*21 HEAT205579 - code to put T1015 as top line in 837P file.
+ ;IHS/SD/SDR 2.6*22 HEAT335246 Made it so if the insurer is setup to print the NDC it will do flat rate and itemized on a claim, with either the default CPT
+ ;  printing with the flat rate or the flat rate printing on the first line item.
+ ;IHS/SD/SDR 2.6*23 HEAT247169 Added code to check subfile 43 if visit type is 997.
  ;
 START ;START HERE
  K ABM,ABMRV
@@ -35,14 +38,16 @@ P1 ;EP - SET UP ABMRV ARRAY
  ; 
  ; if not flat rate .....
  D FRATE^ABMDF11
- I '$D(ABMP("FLAT")) D
+ ;I '$D(ABMP("FLAT")) D  ;abm*2.6*22 IHS/SD/SDR HEAT335246
+ I '$D(ABMP("FLAT"))!(($D(ABMP("FLAT")))&($P($G(^ABMNINS(DUZ(2),ABMP("INS"),0)),U,14)="Y")) D  ;abm*2.6*22 IHS/SD/SDR HEAT335246
  .N I
  .F I=21,23,25,27,33,35,37,39,43,45,47 D
  ..; dont get pharmacy if RX bill status is unbillable
  ..I $P($G(^AUTNINS(ABMP("INS"),2)),"^",3)="U",I=23 Q
  ..;this will make only viewable pages in CE show on bill, not everything
  ..I ABMP("VTYP")=998,((I'=33)&(I'=43)) Q  ;dental
- ..I ABMP("VTYP")=997,(I'=23) Q  ;pharmacy
+ ..;I ABMP("VTYP")=997,(I'=23) Q  ;pharmacy  ;abm*2.6*23 IHS/SD/SDR HEAT247169
+ ..I ABMP("VTYP")=997,((I'=23)&(I'=43)) Q  ;pharmacy  ;abm*2.6*23 IHS/SD/SDR HEAT247169
  ..I ABMP("VTYP")=996,(I'=37) Q  ;lab
  ..I ABMP("VTYP")=995,(I'=35) Q  ;rad
  ..I ABMP("CLIN")="A3",((I'=43)&(I'=47)) Q  ;ambulance
@@ -92,6 +97,7 @@ P1 ;EP - SET UP ABMRV ARRAY
  ;
  ; if flat rate ....
  I $D(ABMP("FLAT")) D
+ .I (($P($G(^ABMNINS(DUZ(2),ABMP("INS"),0)),U,14)="Y")&(+$P($G(^ABMNINS(DUZ(2),ABMP("INS"),1,ABMP("VTYP"),0)),U,16)=0)) Q  ;print the NDC and there's no default CPT  ;abm*2.6*22 IHS/SD/SDR HEAT335246
  .N I
  .F I=1:1:3 S ABM(I)=$P(ABMP("FLAT"),"^",I)
  .S ABMRV(1,1,1)=+ABM(2)_"^^^^"_ABM(3)_"^"_(ABM(1)*ABM(3))_"^^"_ABM(1)

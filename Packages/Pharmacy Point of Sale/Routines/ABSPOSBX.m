@@ -1,5 +1,5 @@
 ABSPOSBX ; IHS/FCS/DRS - Billing - FSI/ILC A/R v1,2;      
- ;;1.0;PHARMACY POINT OF SALE;;JUN 21, 2001
+ ;;1.0;PHARMACY POINT OF SALE;**48**;JUN 21, 2001;Build 27
  Q
 ENABLED() Q 1
 EN ; Taskman routine begins here
@@ -68,6 +68,7 @@ EN ; Taskman routine begins here
  . . S FDA(9002313.57,IEN57_",",.15)=PCNDFN
  . . D LOG^ABSPOSL("Transaction "_IEN57_" was already reversed; we did not post it.")
 F . I $D(FDA) D FILE^DIE("","FDA","MSG")
+ . I $D(MSG) D LOG^ABSPOSL2("F^ABSPOSBX",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  . I $D(MSG) D  G F:$$IMPOSS^ABSPOSUE("FM","TRI","FILE^DIE failed",.MSG,,$T(+0))
  . . D LOG^ABSPOSL("Failed - trying to store in fields .15 and 2")
  . . D LOGARRAY^ABSPOSL("FDA")

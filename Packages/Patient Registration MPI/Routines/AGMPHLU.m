@@ -1,12 +1,15 @@
 AGMPHLU ; IHS/SD/TPF - MPI HLO MSG UTILITIES ; 12/15/2007
- ;;7.2;IHS PATIENT REGISTRATION;**1,3**;MAY 20, 2010;Build 4
+ ;;7.2;IHS PATIENT REGISTRATION;**1,3,5,6**;MAY 20, 2010;Build 23
  Q
  ;
 DIRCON ;EP - SEND A DIRECT CONNECT VQQ-Q02
+ ; 09/06/2017 - GCD - CR 7693 - Disabled VQQ messages because they are buggy and not needed.
+ W !!,"THIS OPTION HAS BEEN DISABLED" Q
  W !!,"ENTER PATIENT YOU WISH TO QUERY THE MPI FOR:"
  W !
  D PTLK^AG
  Q:'$D(DFN)
+ I $$DEMOPAT(DFN) W !!,"Demo patients may not be uploaded to the MPI." G DIRCON  ; 9/13/2017 - GCD - CR 7713 - Don't upload demo patients.
  D CREATMSG^AGMPIHLO(DFN,"VTQ",,.SUCCESS)
  I SUCCESS D  Q
  .W !!,"Query message "_$G(SUCCESS)_" has been sent to the MPI"
@@ -17,6 +20,7 @@ A28 ;EP - SEND A A28 ADD A PATIENT
  W !!,"ENTER PATIENT YOU WISH TO ADD TO THE MPI:"
  D PTLK^AG
  Q:'$D(DFN)
+ I $$DEMOPAT(DFN) W !!,"Demo patients may not be uploaded to the MPI." G A28  ; 9/13/2017 - GCD - CR 7713 - Don't upload demo patients.
  D CREATMSG^AGMPIHLO(DFN,"A28",,.SUCCESS)
  I SUCCESS D  Q
  .W !!,"A28 Message "_SUCCESS_" has been sent to add patient "_$P(^DPT(DFN,0),U)_" to the MPI." H 2
@@ -30,6 +34,7 @@ A08 ;EP - SEND AN A08 UPDATE
  W !!,"EXAMPLE OF AN A08 UPDATE"
  D PTLK^AG
  Q:'$D(DFN)
+ I $$DEMOPAT(DFN) W !!,"Demo patients may not be uploaded to the MPI." G A08  ; 9/13/2017 - GCD - CR 7713 - Don't upload demo patients.
  D CREATMSG^AGMPIHLO(DFN,"A08","",.SUCCESS)
  I SUCCESS D  Q
  .W !!,"A08 Message "_SUCCESS_" has been sent to update patient "_$P(^DPT(DFN,0),U)_" on the MPI." H 2
@@ -43,6 +48,7 @@ VISITMSG ;EP - CREATE A NEW A01 OR A03
  W !!,"CREATE A VISIT HL7 MESSAGE"
  D PTLK^AG
  Q:'$D(DFN)
+ I $$DEMOPAT(DFN) W !!,"Demo patients may not be uploaded to the MPI." G VISITMSG  ; 9/13/2017 - GCD - CR 7713 - Don't upload demo patients.
  K DIR
  S DIR(0)="SO^A:ADMISSION;D:DISCHARGE;CIN:CHECK-IN;COUT:CHECK-OUT"
  D ^DIR
@@ -80,20 +86,30 @@ VISITMSG ;EP - CREATE A NEW A01 OR A03
  Q
  ;
 A40 ;EP - SEND A40 MERGE FROM/TO
+ N DFN1,DFN2,MRGDIR,NAME1,NAME2
 PT1 ;ASK FOR FROM PATIENT
+ ; AG*7.2*5/CR 7718 - Overhauled this entire section because normal patient lookups don't work on merged patients.
  W !,"ENTER PATIENT TO KEEP:"
- D PTLK^AG
- Q:'$D(DFN)
- S DFN2=DFN
- W !!,"ENTER PATIENT TO MERGE TO PATIENT ABOVE:"
- D PTLK^AG
- Q:'$D(DFN)
- S DFN1=DFN
- I $G(^DPT(DFN1,-9))'=DFN1 D  G A40
+ S DIC="^VA(15,",DIC(0)="AEMQ",DIC("A")="Select PATIENT NAME: " D ^DIC
+ Q:Y=-1
+ S IEN=$P(Y,"^")
+ S MRGDIR=$$GET1^DIQ(15,IEN_",",.04,"I")  ; 1=.01->.02, 2=.02->.01
+ S DFN1=$P($$GET1^DIQ(15,IEN_",",$S(MRGDIR=1:.01,1:.02),"I"),";")  ; From patient
+ S DFN2=$P($$GET1^DIQ(15,IEN_",",$S(MRGDIR=1:.02,1:.01),"I"),";")  ; To patient
+ I $$DEMOPAT(DFN1)!$$DEMOPAT(DFN2) W !!,"Demo patients may not be uploaded to the MPI." G PT1  ; 9/13/2017 - GCD - CR 7713 - Don't upload demo patients.
+ I $G(^DPT(DFN1,-9))'=DFN2 D  G PT1  ; AG*7.2*5/CR 7718 - Corrected condition -- now checks that patient was merged into DFN2.
  .W !,"THIS PATIENT HAS NOT BEEN MERGED TO FIRST PATIENT SUCCESSFULLY!"
  .K DIR
  .S DIR(0)="E"
  .D ^DIR
+ S NAME1=$P($G(^DPT(DFN1,0)),U)  ; ^DIQ doesn't work on merged patients
+ S NAME2=$$GET1^DIQ(2,DFN2_",",.01,"I")
+ W !
+ K DIR
+ S DIR(0)="Y",DIR("A")="Send A40 for "_NAME1_" merged into "_NAME2,DIR("B")="Yes"
+ D ^DIR
+ I Y="^" Q
+ I 'Y W ! G PT1
  D CREATMSG^AGMPIHLO(DFN2,"A40",DFN1,.SUCCESS)
  I SUCCESS D  Q
  .W !!,"A40 Message "_SUCCESS_" has been sent to merge patient"
@@ -196,3 +212,20 @@ CONDT(DATE) ;EP - CONVERT FM DATE INTO 2009-04-14 00:00:00
  S DATE=$TR(DATE,"."," ") S DATE=$E(DATE,4,14),NEWDATE=NEWDATE_DATE
  S NEWDATE=$E(NEWDATE,1,4)_"-"_$E(NEWDATE,5,6)_"-"_$E(NEWDATE,7,8)_" "_$E(NEWDATE,10,11)_":"_$E(NEWDATE,12,13)_":"_$E(NEWDATE,14,15)
  Q NEWDATE
+ ;
+DEMOPAT(DFN) ;EP - Check whether a patient is a demo patient and we are in a production environment.
+ ; This is a demo patient if any one of the following criteria is true:
+ ; a) TEST PATIENT INDICATOR (file 2, field 0.6) is set
+ ; b) First five digits of the SSN are 0
+ ; c) Patient's name matches 1"DEMO,PAT".E
+ ; d) Patient's name matches 1"DEMO,GIMC".E
+ Q:$G(DFN)="" 0
+ Q:'$$PROD^XUPROD() 0  ; We only care about demo patients in production environments.
+ N NODE,NAME
+ S NODE=$G(^DPT(DFN,0))
+ I $P(NODE,U,21) Q 1
+ I $E($P(NODE,U,9),1,5)="00000" Q 1
+ S NAME=$P(NODE,U)
+ I NAME?1"DEMO,PAT".E Q 1
+ I NAME?1"DEMO,GIMC".E Q 1
+ Q 0

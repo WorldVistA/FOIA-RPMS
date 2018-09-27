@@ -1,13 +1,13 @@
 BGP8CON ; IHS/CMI/LAB - measure AHR.A ;
- ;;8.0;IHS CLINICAL REPORTING;**2**;MAR 12, 2008
+ ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
  ;
  ;
 BETA(P,BDATE,EDATE,NMIB,NMIE) ;EP - BETA BLOCKER CONTRAINDICATION
  ;P - patient DFN
  ;BDATE - beginning date to search for contraindication
  ;EDATE - ending date of search for contraindication
- ;NMIB - beginning date to search for NMI refusal (not medically indicated)
- ;NMIE - ending date to search for NMI refusal (not medically indicated)
+ ;NMIB - beginning date to search for NMI Refusal (not medically indicated)
+ ;NMIE - ending date to search for NMI Refusal (not medically indicated)
  ;
  ;return value = piece 1 = 1 for yes, contraindication found
  ;                         BLANK for no, contraindication not found
@@ -18,10 +18,11 @@ BETA(P,BDATE,EDATE,NMIB,NMIE) ;EP - BETA BLOCKER CONTRAINDICATION
  ;heart block >1 degree diagnosis between bdate and edate
  ;sinus bradycardia 1 dx between bdate and edate
  ;COPD - 2 diagnoses between bdate and edate on different dates
- ;NMI refusal documented for beta blocker between NMIB and NMIE
+ ;NMI Refusal documented for beta blocker between NMIB and NMIE
  ;CPT G8011 between NMIB and NMIE
  ;
- G BETA^BGP8CON1
+ S NMIB=$G(NMIB),NMIE=$G(NMIE)
+ G BETACONT^BGP8D724
  ;
  ;
 ASA(P,BDATE,EDATE,NMIB,NMIE) ;EP - does patient have an aspirin CONTRAINDICATION
@@ -46,34 +47,34 @@ ACEI(P,BDATE,EDATE,NMIB,NMIE) ;EP does patient have an ACEI contraidication
  ;P - patient DFN
  ;BDATE - beginning date to search for contraindication
  ;EDATE - ending date of search for contraindication
- ;NMIBD - beginning date to search for NMI refusal (not medically indicated)
- ;NMIED - ending date to search for NMI refusal (not medically indicated)
+ ;NMIBD - beginning date to search for NMI Refusal (not medically indicated)
+ ;NMIED - ending date to search for NMI Refusal (not medically indicated)
  ;
  ;return value = piece 1 = 1 for yes, contraindication found
  ;                         blank for no, contraindication not found
  ;               piece 2 = text of what was found
  ;LOGIC:
  ;diagnosis between BDATE and EDATE in BGP CMS AORTIC STENOSIS DXS
- ;NMI refusal for drug in BGP HEDIS ACEI MEDS taxonomy between NMIB and NMIE
- ;NMI refusal for drug in BGP HEDIS ARB MEDS taxonomy between NMIB and NMIE
+ ;NMI Refusal for drug in BGP HEDIS ACEI MEDS taxonomy between NMIB and NMIE
+ ;NMI Refusal for drug in BGP HEDIS ARB MEDS taxonomy between NMIB and NMIE
  G ACEI^BGP8CON1
  ;
 STATIN(P,BDATE,EDATE,NMIB,NMIE) ;EP does patient have an STATIN contraidication
  ;P - patient DFN
  ;BDATE - beginning date to search for contraindication
  ;EDATE - ending date of search for contraindication
- ;NMIBD - beginning date to search for NMI refusal (not medically indicated)
- ;NMIED - ending date to search for NMI refusal (not medically indicated)
+ ;NMIBD - beginning date to search for NMI Refusal (not medically indicated)
+ ;NMIED - ending date to search for NMI Refusal (not medically indicated)
  ;
  ;return value = piece 1 = 1 for yes, contraindication found
  ;                         blank for no, contraindication not found
  ;               piece 2 = text of what was found
  ;LOGIC:
  ;PREGNANCY diagnosis between BDATE and EDATE 
- ;NMI refusal for drug in BGP HEDIS STATIN MEDS taxonomy between NMIB and NMIE
+ ;NMI Refusal for drug in BGP HEDIS STATIN MEDS taxonomy between NMIB and NMIE
  ;BREASTFEEDING education between BDATE and EDATE
  ;BREASTFEEDING POV between BDATE and EDATE
- ;alchohol hepatitis pov between BDATE and EDATE
+ ;alchohol Hepatitis pov between BDATE and EDATE
  ;
  G STATIN^BGP8CON1
  ;

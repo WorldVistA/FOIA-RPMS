@@ -1,0 +1,1770 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2018-09-27 12:54:35">
+<Class name="csp.bedd">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeChanged>64672,29652.477756</TimeChanged>
+<TimeCreated>64672,29652.44687</TimeCreated>
+<GeneratedBy>/csp/foia_goldb/BEDD.csp</GeneratedBy>
+
+<Method name="LogOut">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set %session.Data("SITE")=""
+ 	Set %session.Data("LOC")=""
+ 	Set %session.Data("DUZ")=""
+ 	Set %session.Data("Y")=""
+ 	QUIT ""
+ 
+]]></Implementation>
+</Method>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<BODY>"
+	Write !,!,"	Last update: &nbsp; <b> "_($$XNOW^BEDDUTIL())_"</b> &nbsp; &nbsp; ",!
+	Write "	",!
+	Write "	"
+	If $G(%session.Data("SITE"))'="Whiteboard" {
+	///Moved buttons to top of page
+	&html<<input type="button" name="btnAdmit" value="BEDD IN" onclick='rpfadmit();'> &nbsp; &nbsp;
+	<input type="button" id="btnDC" name="btnDC" value="Discharges" onclick='rpfeddc();'> &nbsp; &nbsp
+	<input type="button" name="btnMGR" value="Manager" onclick='rpfedmgr(#(duz)#);'> &nbsp; &nbsp;>
+	If $G(%session.Data("LOC"))'="EHR" {
+	&html<<input type="button" name="btnLogOut" value="Log Out" onclick='rpflogout();'> &nbsp; &nbsp;>
+	}
+	&html<<input type="button" id="btnRefresh" name="btnRefresh" value="Resume Refresh" 
+	disabled="true" onclick='RestartRefresh();'>&nbsp;&nbsp;
+	<br><br>>
+	}
+	Write "	",!
+	Write !,"<table border=1 >",!
+	Write !,"	"
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	&html<<tr><td><b>Check-In</b></td><td>Wtg</td><td>Avg Wtg</td><td bgcolor="#C0C0C0" rowspan="2">&nbsp;&nbsp;</td>
+	<td><b>Triaged</b></td><td>Wtg</td><td>Avg Wtg</td><td bgcolor="#C0C0C0" rowspan="2">&nbsp;&nbsp;</td>
+	<td><b>Rooms</b></td><td>Wtg</td><td>Avg Wtg</td><td bgcolor="#C0C0C0" rowspan="2">&nbsp;&nbsp;</b></td>
+	<td><b>Pend</b></td><td>Wtg</td><td>Avg Wtg</td><td bgcolor="#C0C0C0" rowspan="2">&nbsp;&nbsp;</b></td>
+	</tr>>
+	}
+	Write !,!,"	"
+	Write "<input type=""hidden"" id=""Whiteboard"" name=""Whiteboard"" value="""_(Whiteboard)_""" readonly/>"
+	Write !,"	"
+	Write "<input type=""hidden"" id=""RefreshID"" name=""RefreshID"" readonly/>"
+	Write !,"		",!
+	Write "	"
+	#; Retrieve List of Entries
+	Kill bedd
+	#;BEDD*2.0*1;Passed in site
+	Do BEDDLST^BEDDUTIL(.bedd,site)
+	Write !,"				",!
+	Write "	"
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	&html<<td> #($P($G(bedd("TSUM",1)),"^"))# &nbsp;</td>>
+	&html<<td> #($P($G(bedd("TSUM",1)),"^",2))# &nbsp;</td>>
+	&html<<td> #($P($G(bedd("TSUM",1)),"^",3))# &nbsp;</td>>	
+	}
+	Write !,!,"	"
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	&html<<td> #($P($G(bedd("TSUM",2)),"^"))# &nbsp;</td>>
+	&html<<td> #($P($G(bedd("TSUM",2)),"^",2))# &nbsp;</td>>
+	&html<<td> #($P($G(bedd("TSUM",2)),"^",3))# &nbsp;</td>>	
+	}
+	Write !,"  ",!
+	Write "	"
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	&html<<td> #($P($G(bedd("TSUM",3)),"^"))# &nbsp;</td>>
+	&html<<td> #($P($G(bedd("TSUM",3)),"^",2))# &nbsp;</td>>
+	&html<<td> #($P($G(bedd("TSUM",3)),"^",3))# &nbsp;</td>>	
+	}
+	Write !,!,"	"
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	&html<<td> #($P($G(bedd("TSUM",4)),"^"))# &nbsp;</td>>
+	&html<<td> #($P($G(bedd("TSUM",4)),"^",2))# &nbsp;</td>>
+	&html<<td> #($P($G(bedd("TSUM",4)),"^",3))# &nbsp;</td>>
+	}
+	Write !,"</table>",!
+	Write !,"<a name=""Check-In"" id=""Check-In"">"
+	Write " "
+	Write "</a>"
+	Write !,!,"	"
+	///Create dynamic anchor
+	Set %session.Data("AnchorCount")=$G(%session.Data("AnchorCount"))+1
+	Set iAnchor="Anchor"_%session.Data("AnchorCount")
+	Write !,!,"<table>",!
+	Write "	",!
+	Write "	<tr>",!
+	Write "		<td width=150>",!
+	Write "			<font color=""RED"" size=5> Check-In </font>",!
+	Write "			"
+	Write "<a name="_(iAnchor)," id="_(iAnchor),">"
+	Write " "
+	Write "</a>"
+	Write !,"		</td>",!
+	Write "		"
+	If $G(%session.Data("SITE"))'="Whiteboard" {
+	&html<<td width=75>
+	<a href="#Triage">Triage</a>
+	</td>
+	<td width=180>
+	<a href="#Room Management">Room Management</a>
+	</td>
+	<td width=200>
+	<a href="#Pending Documentation">Pending Documentation</a>
+	</td>>
+	}
+	Write !,"	</tr>",!
+	Write "</table>",!
+	Write !,"<table border=1 >",!
+	Write "	<tr>",!
+	Write "		"
+	&html<<th>Waiting</th>>
+	If $G(%session.Data("SITE"))'="Whiteboard" {			
+	&html<<th>Check-In</th>>
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	If '$D(beddsys("HideSEX")) {
+	&html<<th>Patient (gender)</th>>
+	}
+	If $D(beddsys("HideSEX")) {
+	&html<<th>Patient </th>>
+	}
+	If '$D(beddsys("HideDOB")) {
+	&html<<th>DOB (age) </th>>
+	}
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {
+	If $D(beddsys("PShowName"))&$D(beddsys("PShowAge")) {
+	&html<<th>Patient (Age)</th>>	
+	}
+	If $D(beddsys("PShowName"))&'$D(beddsys("PShowAge")) {
+	&html<<th>Patient</th>>	
+	}
+	If '$D(beddsys("PShowName"))&$D(beddsys("PShowAge")) {
+	&html<<th>Age</th>>
+	}				
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	&html<<th>Chart</th>>
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {	
+	If $D(beddsys("PShowChartNumber")) {
+	&html<<th>Chart</th>>
+	}
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	If '$D(beddsys("HideCOMP")) {
+	&html<<th>Presenting</th>>
+	}
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {	
+	If $D(beddsys("PShowComplaint")) {
+	&html<<th>Presenting</th>>
+	}
+	}
+	If ($D(beddsys("CLN"))) {
+	&html<<th>Clinic </th>>
+	}
+	If ($G(%session.Data("SITE"))'="Whiteboard")!$D(beddsys("PShowNotes")) {	
+	If ($D(beddsys("COMBRD")))!$D(beddsys("PShowNotes")) {
+	&html<<th>Info</th>>
+	}
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	If ($D(beddsys("AN"))) {
+	&html<<th>Actions</th>>
+	}
+	&html<<th>Reg</th>>
+	}
+	Write "		",!
+	Write "	</tr>",!
+	Write !,"	"
+	Set bgc="white" 
+	Set beddien=""
+	Set beddien=$O(bedd(1,beddien))
+	While(beddien]"") {
+	Do CHKLK^BEDDUTW(beddien,duz,$G(beddsys("TimeOut"))) ;Check Lock
+	Set edid=##class(BEDD.EDVISIT).%OpenId(beddien)
+	Set info=""
+	Set info=$$DSPINFO^BEDDUTW(beddien)
+	If (info="") {
+	Set info="."
+	}
+	Set ptpc=""
+	Set ptcc=""
+	Set ptpc=$$GETCHIEF^BEDDGET(edid.VIEN,edid.Complaint,"P")
+	Set ptcc=$$GETCHIEF^BEDDGET(edid.VIEN,edid.Complaint)
+	Set ptactivity=""
+	Set ptactivity=$$GETOSTAT^BEDDUTIL(edid.PtDFN)
+	If (ptactivity="") {
+	Set ptactivity="&nbsp;"
+	}
+	Set nrs=""
+	If (edid.AsgNrs'="") {
+	Set nrs=$$GETF^BEDDUTIL(200,edid.AsgNrs,.01)
+	}
+	ElseIf (edid.TrgNrs'="") {
+	Set nrs=$$GETF^BEDDUTIL(200,edid.TrgNrs,.01)
+	}
+	Set prv=""
+	If (edid.AsgPrv'=""&(edid.AsgPrv>0)) {
+	Set prv=$$GETF^BEDDUTIL(200,edid.AsgPrv,.01)
+	}
+	Set trrow=trrow+1
+	Set bgc=$Select(trrow#2:"#FFFFFF",1:"#C0C0C0")
+	&html<<tr bgcolor=#(bgc)#>>
+	&html<<td bgcolor=#(bgc)#> #(+edid.WtgTime)#</td>>
+	///Create dynamic anchor
+	Set %session.Data("AnchorCount")=$G(%session.Data("AnchorCount"))+1
+	Set iAnchor="Anchor"_%session.Data("AnchorCount")
+	If $G(%session.Data("SITE"))'="Whiteboard" {			
+	&html<<td> #(edid.PtCIDT)# </td>>
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	///Name and Gender
+	Set pName=$$NMFRMT^BEDDPREF(edid.PtName,$G(beddsys("NameFRMT")))
+	If '$D(beddsys("HideSEX")) {
+	&html<<td> <a name=#(iAnchor)# id=#(iAnchor)# href="BEDDLCKIT.csp?OBJID=#(beddien)#&DFN=#(edid.PtDFN)#"> #(pName)# (#(edid.Sex)#) </a> </td>>
+	}	
+	If $D(beddsys("HideSEX")) {
+	&html<<td> <a name=#(iAnchor)# id=#(iAnchor)# href="BEDDLCKIT.csp?OBJID=#(beddien)#&DFN=#(edid.PtDFN)#"> #(pName)# </a> </td>>
+	}
+	///DOB
+	If '$D(beddsys("HideDOB")) {
+	&html<<td> #(edid.DOB)# (#(edid.Age)#) </td>>
+	}
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {	
+	///Name and Age
+	If $D(beddsys("PShowName"))&$D(beddsys("PShowAge")) {
+	Set pName=$$NMFRMT^BEDDPREF(edid.PtName,"ILIF")
+	&html<<td> #(pName)# (#(edid.Age)#) </a> </td>>
+	}
+	If $D(beddsys("PShowName"))&'$D(beddsys("PShowAge")) {
+	Set pName=$$NMFRMT^BEDDPREF(edid.PtName,"ILIF")
+	&html<<td> #(pName)# </a> </td>>
+	}
+	If '$D(beddsys("PShowName"))&$D(beddsys("PShowAge")) {
+	&html<<td> #(edid.Age)# </a> </td>>
+	}
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	&html<<td> #(edid.Chart)# </td>>
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {	
+	If $D(beddsys("PShowChartNumber")) {
+	&html<<td> #(edid.Chart)# </td>>
+	}
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	If '$D(beddsys("HideCOMP")) {
+	&html<<td> #(ptpc)# </td>>
+	}
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {	
+	If $D(beddsys("PShowComplaint")) {
+	&html<<td> #(ptpc)# </td>>
+	}
+	}
+	If ($D(beddsys("CLN"))) {
+	&html<<td> #($$GETF^BEDDUTIL(40.7,edid.TrgCln,.01,"E"))# &nbsp; </td>>
+	}
+	If ($G(%session.Data("SITE"))'="Whiteboard")!$D(beddsys("PShowNotes")) {	
+	If ($D(beddsys("COMBRD")))!$D(beddsys("PShowNotes")) {
+	&html<<td> #(info)# &nbsp;</td>>
+	}
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	If ($D(beddsys("AN"))) {
+	&html< <td>  <input type="radio" name="ptpgt" onClick="rpfptpg(#(beddien)#,1);" />Trg Page
+	<input type="radio" name="ptpgr" onClick="rpfptpg(#(beddien)#,2);" />Rm Page
+	<input type="radio" name="ptobs" onClick="rpfptpg(#(beddien)#,3);" />Obsv
+	<input type="radio" name="pttrg" onClick="rpftrg(#(edid.PtDFN)#,4);" />TrgRpt
+	</td> >
+	}
+	}
+	Set dfn=edid.PtDFN
+	Set %H=$H
+	Do YX^%DTC
+	Set bedddt=X
+	Set regupd="Yes"
+	Set bgc="white"
+	If ($$GETF^BEDDUTIL(9000001,dfn_",",.03,"I")'=bedddt) {
+	Set regupd="NO",bgc="yellow" 
+	}
+	If ($$GETF^BEDDUTIL(9000001,dfn_",",1108,"E")="NON-INDIAN BENEFICIARY") {
+	Set regupd=regupd_"; NoBens"
+	}
+	Kill bedddt,X
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	&html< <td bgcolor=#(bgc)# > #(regupd)# </td> >
+	}
+	Set beddien=$O(bedd(1,beddien))
+	}
+	Write !,"	</tr>",!
+	Write "</table>",!
+	Write !,"<a name=""Triage"" id=""Triage"">"
+	Write " "
+	Write "</a>"
+	Write " ",!
+	Write !,"	"
+	///Create dynamic anchor
+	Set %session.Data("AnchorCount")=$G(%session.Data("AnchorCount"))+1
+	Set iAnchor="Anchor"_%session.Data("AnchorCount")
+	Write !,!,"<table>",!
+	Write "	<tr>",!
+	Write "		<td width=150>",!
+	Write "			<font color=""blue"" size=5> Triage </font>",!
+	Write "			"
+	Write "<a name="_(iAnchor)," id="_(iAnchor),">"
+	Write " "
+	Write "</a>"
+	Write !,"		</td>",!
+	Write "		"
+	If $G(%session.Data("SITE"))'="Whiteboard" {
+	&html<<td width=100>
+	<a href="#Check-In">Check-In</a>
+	</td>
+	<td width=180>
+	<a href="#Room Management">Room Management</a>
+	</td>
+	<td width=200>
+	<a href="#Pending Documentation">Pending Documentation</a>
+	</td>>
+	}
+	Write !,"		",!
+	Write "	</tr>",!
+	Write "</table>",!
+	Write !,"<table border=1 >",!
+	Write "	<tr>",!
+	Write "		"
+	&html<<th>Waiting</th>>
+	If $G(%session.Data("SITE"))'="Whiteboard" {			
+	&html<<th>Trg</th> <th>Time</th>>
+	}
+	If ($G(%session.Data("SITE"))="Whiteboard")&($D(beddsys("PShowAcuity"))) {
+	&html<<th>Trg</th>>
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	If '$D(beddsys("HideSEX")) {
+	&html<<th>Patient (gender)</th>>
+	}
+	If $D(beddsys("HideSEX")) {
+	&html<<th>Patient </th>>
+	}
+	If '$D(beddsys("HideDOB")) {
+	&html<<th>DOB (age) </th>>
+	}
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {
+	If $D(beddsys("PShowName"))&$D(beddsys("PShowAge")) {
+	&html<<th>Patient (Age)</th>>	
+	}
+	If $D(beddsys("PShowName"))&'$D(beddsys("PShowAge")) {
+	&html<<th>Patient</th>>	
+	}
+	If '$D(beddsys("PShowName"))&$D(beddsys("PShowAge")) {
+	&html<<th>Age</th>>
+	}				
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	&html<<th>Chart</th>>
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {	
+	If $D(beddsys("PShowChartNumber")) {
+	&html<<th>Chart</th>>
+	}
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	If '$D(beddsys("HideCOMP")) {
+	&html<<th>Chief Complaint</th>>
+	}
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {	
+	If $D(beddsys("PShowComplaint")) {
+	&html<<th>Chief Complaint</th>>
+	}
+	}
+	If ($G(%session.Data("SITE"))'="Whiteboard")!$D(beddsys("PShowOrders")) {	
+	&html<<th>Order Activity</th>>
+	}
+	If ($D(beddsys("CLN"))) {
+	&html<<th>Clinic</th>>
+	}
+	If ($D(beddsys("SN")))!($D(beddsys("PShowNurse"))) {
+	&html<<th>Nurse</th>>
+	}
+	If ($D(beddsys("PRV")))!($D(beddsys("PShowProv"))) {
+	&html<<th>Provider</th>>
+	}
+	If ($D(beddsys("CONS"))) {
+	&html<<th>Consult</th>>
+	}
+	If ($G(%session.Data("SITE"))'="Whiteboard")!$D(beddsys("PShowNotes")) {	
+	If ($D(beddsys("COMBRD")))!$D(beddsys("PShowNotes")) {
+	&html<<th>Info</th>>
+	}
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	If ($D(beddsys("AN"))) {
+	&html<<th>Actions</th>>
+	}
+	&html<<th>Reg</th>>
+	}
+	Write "		",!
+	Write "		",!
+	Write "	</tr>",!
+	Write !,"	"
+	Set bgc="white" 
+	Set beddtie=""
+	Set beddtie=$O(bedd(2,beddtie))
+	While(beddtie]"") {
+	Set beddien=""
+	Set beddien=$O(bedd(2,beddtie,beddien))
+	While(beddien]"") {
+	Do CHKLK^BEDDUTW(beddien,duz,$G(beddsys("TimeOut"))) ;Check Lock
+	Set edid=##class(BEDD.EDVISIT).%OpenId(beddien) 
+	Set info=""
+	Set info=$$DSPINFO^BEDDUTW(beddien)
+	If (info="") {
+	Set info="."
+	}
+	Set ptcc=""
+	Set ptcc=$$GETCHIEF^BEDDGET(edid.VIEN,edid.Complaint,,,1)
+	If (ptcc="") {
+	Set ptcc=edid.Complaint
+	}
+	Set ptactivity=""
+	Set ptactivity=$$GETOSTAT^BEDDUTIL(edid.PtDFN)
+	If (ptactivity="") {
+	Set ptactivity="&nbsp;"
+	}
+	Set nrs=""			
+	If (edid.AsgNrs'="") {
+	Set nrs=$$GETF^BEDDUTIL(200,edid.AsgNrs,.01)
+	}
+	ElseIf (edid.TrgNrs'="") {
+	Set nrs=$$GETF^BEDDUTIL(200,edid.TrgNrs,.01,"I")
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {
+	Set nrs=$$NMFRMT^BEDDPREF(nrs,"FNLI")
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {
+	Set nrs=$$NMFRMT^BEDDPREF(nrs,"LN")
+	}
+	Set prv=""
+	If (edid.AdmPrv'="") {
+	Set prv=$$GETF^BEDDUTIL(200,edid.AdmPrv,.01,"I")
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {
+	Set prv=$$NMFRMT^BEDDPREF(prv,"FLIF")
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {
+	Set prv=$$NMFRMT^BEDDPREF(prv,"LN")
+	}
+	Set econs="No"
+	If ($$EDCNT^BEDDUTIS(beddien)>0) {
+	Set econs="Yes"
+	}
+	Set trrow=trrow+1
+	Set bgc="#FFFFFF"
+	If (trrow#2=0) {
+	Set bgc="#C0C0C0"
+	}
+	&html<<tr bgcolor=#(bgc)#>>
+	&html<<td bgcolor=#(bgc)#> #(edid.WtgTime)# </td>>
+	If $G(%session.Data("SITE"))'="Whiteboard" {			
+	&html<<td> #(edid.TrgA)# </td>>
+	&html<<td> #($$HTIME^BEDDUTID(edid.TrgTm))# </td>>
+	}
+	If ($G(%session.Data("SITE"))="Whiteboard")&($D(beddsys("PShowAcuity"))) {
+	&html<<td> #(edid.TrgA)# </td>>
+	}
+	///Create dynamic anchor
+	Set %session.Data("AnchorCount")=$G(%session.Data("AnchorCount"))+1
+	Set iAnchor="Anchor"_%session.Data("AnchorCount")
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	///Name and Gender
+	Set pName=$$NMFRMT^BEDDPREF(edid.PtName,$G(beddsys("NameFRMT")))
+	If '$D(beddsys("HideSEX")) {
+	&html<<td> <a name=#(iAnchor)# id=#(iAnchor)# href="BEDDLCKIT.csp?OBJID=#(beddien)#&DFN=#(edid.PtDFN)#"> #(pName)# (#(edid.Sex)#) </a> </td>>
+	}	
+	If $D(beddsys("HideSEX")) {
+	&html<<td> <a name=#(iAnchor)# id=#(iAnchor)# href="BEDDLCKIT.csp?OBJID=#(beddien)#&DFN=#(edid.PtDFN)#"> #(pName)# </a> </td>>
+	}
+	///DOB
+	If '$D(beddsys("HideDOB")) {
+	&html<<td> #(edid.DOB)# (#(edid.Age)#) </td>>
+	}
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {	
+	///Name and Age
+	If $D(beddsys("PShowName"))&$D(beddsys("PShowAge")) {
+	Set pName=$$NMFRMT^BEDDPREF(edid.PtName,"ILIF")
+	&html<<td> #(pName)# (#(edid.Age)#) </a> </td>>
+	}
+	If $D(beddsys("PShowName"))&'$D(beddsys("PShowAge")) {
+	Set pName=$$NMFRMT^BEDDPREF(edid.PtName,"ILIF")
+	&html<<td> #(pName)# </a> </td>>
+	}
+	If '$D(beddsys("PShowName"))&$D(beddsys("PShowAge")) {
+	&html<<td> #(edid.Age)# </a> </td>>
+	}
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	&html<<td> #(edid.Chart)# </td>>
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {	
+	If $D(beddsys("PShowChartNumber")) {
+	&html<<td> #(edid.Chart)# </td>>
+	}
+	}	
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	If '$D(beddsys("HideCOMP")) {
+	&html<<td> #(ptcc)# &nbsp; </td>>
+	}
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {	
+	If $D(beddsys("PShowComplaint")) {
+	&html<<td> #(ptcc)# &nbsp; </td>>
+	}
+	}
+	If ($G(%session.Data("SITE"))'="Whiteboard")!$D(beddsys("PShowOrders")) {	
+	&html<<td> #(ptactivity)# &nbsp;</td>>
+	}
+	If ($D(beddsys("CLN"))) {
+	&html<<td> #($$GETF^BEDDUTIL(40.7,edid.TrgCln,.01,"E"))# &nbsp; </td>>
+	}
+	If ($D(beddsys("SN")))!($D(beddsys("PShowNurse"))) {
+	&html<<td> #(nrs)# &nbsp;</td>>
+	}
+	If ($D(beddsys("PRV")))!($D(beddsys("PShowProv"))) {
+	&html<<td> #(prv)# &nbsp;</td>>
+	}
+	If ($D(beddsys("CONS"))) {
+	&html<<td> #(econs)# &nbsp;</td>>
+	}
+	If ($G(%session.Data("SITE"))'="Whiteboard")!$D(beddsys("PShowNotes")) {	
+	If ($D(beddsys("COMBRD")))!$D(beddsys("PShowNotes")) {
+	&html<<td> #(info)# &nbsp;</td>>
+	}
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	If ($D(beddsys("AN"))) {
+	&html< <td>	
+	<input type="radio" name="ptpgr" onClick="rpfptpg(#(beddien)#,2);" />Rm Page
+	<input type="radio" name="ptobs" onClick="rpfptpg(#(beddien)#,3);" />Obsv
+	<input type="radio" name="pttrg" onClick="rpftrg(#(edid.PtDFN)#,4);" />TrgRpt
+	</td> >
+	}
+	}
+	Set dfn=edid.PtDFN
+	Set %H=$H
+	Do YX^%DTC
+	Set bedddt=X
+	Set regupd="Yes"
+	Set bgc="white"
+	If ($$GETF^BEDDUTIL(9000001,dfn_",",.03,"I")'=bedddt) {
+	Set regupd="NO",bgc="yellow"
+	}
+	If ($$GETF^BEDDUTIL(9000001,dfn_",",1108,"E")="NON-INDIAN BENEFICIARY") {
+	Set regupd=regupd_"; NoBens"
+	}
+	Kill bedddt,X
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	&html< <td bgcolor=#(bgc)# > #(regupd)# </td> >
+	}
+	Set edid=""
+	Set beddien=$O(bedd(2,beddtie,beddien))
+	}
+	Set beddtie=$O(bedd(2,beddtie))
+	}
+	Write !,"</tr>",!
+	Write "</table>",!
+	Write !,"<a name=""Room Management"" id=""Room Management"">"
+	Write "</a>"
+	Write " ",!
+	Write !,"	"
+	///Create dynamic anchor
+	Set %session.Data("AnchorCount")=$G(%session.Data("AnchorCount"))+1
+	Set iAnchor="Anchor"_%session.Data("AnchorCount")
+	Write !,!,"<table>",!
+	Write "	<tr>",!
+	Write "		<td width=275>",!
+	Write "			<font color=""black"" size=5> Room Management </font>",!
+	Write "			"
+	Write "<a name="_(iAnchor)," id="_(iAnchor),">"
+	Write " "
+	Write "</a>"
+	Write !,"		</td>",!
+	Write "		"
+	If $G(%session.Data("SITE"))'="Whiteboard" {
+	&html<<td width=100>
+	<a href="#Check-In">Check-In</a>
+	</td>
+	<td width=75>
+	<a href="#Triage">Triage</a>
+	</td>
+	<td width=200>
+	<a href="#Pending Documentation">Pending Documentation</a>
+	</td>>
+	}
+	Write !,"	</tr>",!
+	Write "</table>",!
+	Write !,"<table border=1 >",!
+	Write "	<tr>",!
+	Write "	"
+	&html<<th>Waiting</th>>
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	&html<<th>Room</th> <th>Trg</th>>
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {
+	If $D(beddsys("PShowRoom")) {
+	&html<<th>Room</th>>
+	}
+	}
+	If ($G(%session.Data("SITE"))="Whiteboard")&($D(beddsys("PShowAcuity"))) {
+	&html<<th>Trg</th>>
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	If '$D(beddsys("HideSEX")) {
+	&html<<th>Patient (gender)</th>>
+	}
+	If $D(beddsys("HideSEX")) {
+	&html<<th>Patient </th>>
+	}
+	If '$D(beddsys("HideDOB")) {
+	&html<<th>DOB (age) </th>>
+	}
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {
+	If $D(beddsys("PShowName"))&$D(beddsys("PShowAge")) {
+	&html<<th>Patient (Age)</th>>	
+	}
+	If $D(beddsys("PShowName"))&'$D(beddsys("PShowAge")) {
+	&html<<th>Patient</th>>	
+	}
+	If '$D(beddsys("PShowName"))&$D(beddsys("PShowAge")) {
+	&html<<th>Age</th>>
+	}				
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	&html<</th> <th>Chart</th>>
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {	
+	If $D(beddsys("PShowChartNumber")) {
+	&html<<th>Chart</th>>
+	}
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	If '$D(beddsys("HideCOMP")) {
+	&html<<th>Chief Complaint</th>>
+	}
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {	
+	If $D(beddsys("PShowComplaint")) {
+	&html<<th>Chief Complaint</th>>
+	}
+	}
+	If ($G(%session.Data("SITE"))'="Whiteboard")!$D(beddsys("PShowOrders")) {	
+	&html<<th>Order Activity</th>>
+	}
+	If ($D(beddsys("CLN"))) {
+	&html<<th>Clinic</th>>
+	}
+	If ($D(beddsys("SN")))!($D(beddsys("PShowNurse"))) {
+	&html<<th>Nurse</th>>
+	}
+	If ($D(beddsys("PRV")))!($D(beddsys("PShowProv"))) {
+	&html<<th>Provider</th>>
+	}
+	If ($D(beddsys("CONS"))) {
+	&html<<th>Consult</th>>
+	}
+	If ($G(%session.Data("SITE"))'="Whiteboard")!$D(beddsys("PShowNotes")) {	
+	If ($D(beddsys("COMBRD")))!$D(beddsys("PShowNotes")) {
+	&html<<th>Info</th>>
+	}
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	If ($D(beddsys("AN"))) {
+	&html<<th>Actions</th>>
+	}
+	&html<<th>Reg</th>>
+	}
+	Write "	",!
+	Write "	</tr>",!
+	Write "				",!
+	Write "	"
+	Set bgc="white" 
+	Set beddtie=""
+	Set beddtie=$O(bedd(3,beddtie))
+	While(beddtie]"") {
+	Set beddien=""
+	Set beddien=$O(bedd(3,beddtie,beddien))
+	While(beddien]"") {
+	Do CHKLK^BEDDUTW(beddien,duz,$G(beddsys("TimeOut"))) ;Check Lock
+	Set edid=##class(BEDD.EDVISIT).%OpenId(beddien)
+	Set info=""
+	Set info=$$DSPINFO^BEDDUTW(beddien)
+	If (info="") {
+	Set info="."
+	}
+	Set ptcc=""
+	Set ptcc=$$GETCHIEF^BEDDGET(edid.VIEN,edid.Complaint,,,1)
+	If (ptcc="") {
+	Set ptcc=edid.Complaint
+	}
+	Set ptactivity=""
+	Set ptactivity=$$GETOSTAT^BEDDUTIL(edid.PtDFN)
+	If (ptactivity="") {
+	Set ptactivity="&nbsp;"
+	}
+	Set nrs=""
+	If (edid.PrmNurse'="") {
+	Set nrs=$$GETF^BEDDUTIL(200,edid.PrmNurse,.01)
+	}
+	ElseIf (edid.AsgNrs'="") {
+	Set nrs=$$GETF^BEDDUTIL(200,edid.AsgNrs,.01)
+	}
+	ElseIf (edid.TrgNrs'="") {
+	Set nrs=$$GETF^BEDDUTIL(200,edid.TrgNrs,.01)
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {
+	Set nrs=$$NMFRMT^BEDDPREF(nrs,"FNLI")
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {
+	Set nrs=$$NMFRMT^BEDDPREF(nrs,"LN")
+	}
+	Set prv=""
+	If ((edid.AdmPrv'="")&&(edid.AdmPrv>0)) {
+	Set prv=$$GETF^BEDDUTIL(200,edid.AdmPrv,.01)
+	}		
+	If $G(%session.Data("SITE"))="Whiteboard" {
+	Set prv=$$NMFRMT^BEDDPREF(prv,"FLIF")
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {
+	Set prv=$$NMFRMT^BEDDPREF(prv,"LN")
+	}
+	Set econs="No"
+	If ($$EDCNT^BEDDUTIS(beddien)>0) {
+	Set econs="Yes"
+	}
+	Set trrow=trrow+1
+	Set bgc="#FFFFFF"
+	If (trrow#2=0) {
+	Set bgc="#C0C0C0"
+	}
+	&html<<tr bgcolor=#(bgc)#>>
+	&html<<td bgcolor=#(bgc)#> #(+edid.WtgTime)# </td>>
+	If $G(%session.Data("SITE"))'="Whiteboard" {			
+	&html<<td> #(edid.Room)# </td>>
+	&html<<td> #(edid.TrgA)# &nbsp;</td>>
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {
+	If $D(beddsys("PShowRoom")) {
+	&html<<td> #(edid.Room)# </td>>
+	}
+	}
+	If ($G(%session.Data("SITE"))="Whiteboard")&($D(beddsys("PShowAcuity"))) {
+	&html<<td> #(edid.TrgA)# &nbsp;</td>>	
+	}
+	///Create dynamic anchor
+	Set %session.Data("AnchorCount")=$G(%session.Data("AnchorCount"))+1
+	Set iAnchor="Anchor"_%session.Data("AnchorCount")
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	///Name and Gender
+	Set pName=$$NMFRMT^BEDDPREF(edid.PtName,$G(beddsys("NameFRMT")))
+	If '$D(beddsys("HideSEX")) {
+	&html<<td> <a name=#(iAnchor)# id=#(iAnchor)# href="BEDDLCKIT.csp?OBJID=#(beddien)#&DFN=#(edid.PtDFN)#"> #(pName)# (#(edid.Sex)#) </a> </td>>
+	}	
+	If $D(beddsys("HideSEX")) {
+	&html<<td> <a name=#(iAnchor)# id=#(iAnchor)# href="BEDDLCKIT.csp?OBJID=#(beddien)#&DFN=#(edid.PtDFN)#"> #(pName)# </a> </td>>
+	}
+	///DOB
+	If '$D(beddsys("HideDOB")) {
+	&html<<td> #(edid.DOB)# (#(edid.Age)#) </td>>
+	}
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {	
+	///Name and Age
+	If $D(beddsys("PShowName"))&$D(beddsys("PShowAge")) {
+	Set pName=$$NMFRMT^BEDDPREF(edid.PtName,"ILIF")
+	&html<<td> #(pName)# (#(edid.Age)#) </a> </td>>
+	}
+	If $D(beddsys("PShowName"))&'$D(beddsys("PShowAge")) {
+	Set pName=$$NMFRMT^BEDDPREF(edid.PtName,"ILIF")
+	&html<<td> #(pName)# </a> </td>>
+	}
+	If '$D(beddsys("PShowName"))&$D(beddsys("PShowAge")) {
+	&html<<td> #(edid.Age)# </a> </td>>
+	}
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	&html<<td> #(edid.Chart)# </td>>
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {	
+	If $D(beddsys("PShowChartNumber")) {
+	&html<<td> #(edid.Chart)# </td>>
+	}
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	If '$D(beddsys("HideCOMP")) {
+	&html<<td> #(ptcc)# </td>>
+	}
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {	
+	If $D(beddsys("PShowComplaint")) {
+	&html<<td> #(ptcc)# &nbsp; </td>>
+	}
+	}
+	If ($G(%session.Data("SITE"))'="Whiteboard")!$D(beddsys("PShowOrders")) {	
+	&html<<td> #(ptactivity)# </td>>
+	}
+	If ($D(beddsys("CLN"))) {
+	&html<<td> #($$GETF^BEDDUTIL(40.7,edid.TrgCln,.01,"E"))# &nbsp; </td>>
+	}
+	If ($D(beddsys("SN")))!($D(beddsys("PShowNurse"))) {
+	&html<<td> #(nrs)# &nbsp;</td>>
+	}
+	If ($D(beddsys("PRV")))!($D(beddsys("PShowProv"))) {
+	&html<<td> #(prv)# &nbsp;</td>>
+	}
+	If ($D(beddsys("CONS"))) {
+	&html<<td> #(econs)# &nbsp;</td>>
+	}
+	If ($G(%session.Data("SITE"))'="Whiteboard")!$D(beddsys("PShowNotes")) {	
+	If ($D(beddsys("COMBRD")))!$D(beddsys("PShowNotes")) {
+	&html<<td> #(info)# &nbsp;</td>>
+	}
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	If $D(beddsys("AN")) {
+	&html< <td>
+	<input type="radio" name="ptpgr" onClick="rpfptpg(#(beddien)#,2);" />Rm Page
+	<input type="radio" name="ptobs" onClick="rpfptpg(#(beddien)#,3);" />Obsv
+	<input type="radio" name="pttrg" onClick="rpftrg(#(edid.PtDFN)#,4);" />TrgRpt
+	</td> >
+	}
+	}
+	Set dfn=edid.PtDFN
+	Set %H=$H
+	Do YX^%DTC
+	Set bedddt=X
+	Set regupd="Yes"
+	Set bgc="white"
+	If ($$GETF^BEDDUTIL(9000001,dfn_",",.03,"I")'=bedddt) {
+	Set regupd="NO",bgc="yellow"
+	}
+	If ($$GETF^BEDDUTIL(9000001,dfn_",",1108,"E")="NON-INDIAN BENEFICIARY") {
+	Set regupd=regupd_"; NoBens"
+	}
+	Kill bedddt,X
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	&html< <td bgcolor=#(bgc)# > #(regupd)# </td> >
+	}
+	Set edid=""
+	Set beddien=$O(bedd(3,beddtie,beddien))
+	}
+	Set beddtie=$O(bedd(3,beddtie))
+	}
+	Write !,"	",!
+	Write "	</tr>",!
+	Write "</table>",!
+	Write !,"<a name=""Pending Documentation"" id=""Pending Documentation"">"
+	Write "</a>"
+	Write " ",!
+	Write !,!,"	"
+	///Create dynamic anchor
+	Set %session.Data("AnchorCount")=$G(%session.Data("AnchorCount"))+1
+	Set iAnchor="Anchor"_%session.Data("AnchorCount")
+	Write !,!,"<table>",!
+	Write "	<tr>",!
+	Write "		<td width=325>",!
+	Write "			<font color=""Green"" size=5> Pending Documentation </font>",!
+	Write "			"
+	Write "<a name="_(iAnchor)," id="_(iAnchor),">"
+	Write " "
+	Write "</a>"
+	Write !,"		</td>",!
+	Write "		"
+	If $G(%session.Data("SITE"))'="Whiteboard" {
+	&html<<td width=100>
+	<a href="#Check-In">Check-In</a>
+	</td>
+	<td width=75>
+	<a href="#Triage">Triage</a>
+	</td>
+	<td width=200>
+	<a href="#Room Management">Room Management</a>
+	</td>>
+	}
+	Write !,"	</tr>",!
+	Write "</table>",!
+	Write !,"<table border=1 >",!
+	Write "	<tr>",!
+	Write "	"
+	&html<<th>Waiting</th>>
+	If $G(%session.Data("SITE"))'="Whiteboard" {			
+	&html<<th>Trg</th> <th>Time</th>>
+	}
+	If ($G(%session.Data("SITE"))="Whiteboard")&($D(beddsys("PShowAcuity"))) {
+	&html<<th>Trg</th>>
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	If '$D(beddsys("HideSEX")) {
+	&html<<th>Patient (gender)</th>>
+	}
+	If $D(beddsys("HideSEX")) {
+	&html<<th>Patient </th>>
+	}
+	If '$D(beddsys("HideDOB")) {
+	&html<<th>DOB (age) </th>>
+	}
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {
+	If $D(beddsys("PShowName"))&$D(beddsys("PShowAge")) {
+	&html<<th>Patient (Age)</th>>	
+	}
+	If $D(beddsys("PShowName"))&'$D(beddsys("PShowAge")) {
+	&html<<th>Patient</th>>	
+	}
+	If '$D(beddsys("PShowName"))&$D(beddsys("PShowAge")) {
+	&html<<th>Age</th>>
+	}				
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	&html<</th> <th>Chart</th>>
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {	
+	If $D(beddsys("PShowChartNumber")) {
+	&html<<th>Chart</th>>
+	}
+	}	
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	If '$D(beddsys("HideCOMP")) {
+	&html<<th>Chief Complaint</th>>
+	}
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {	
+	If $D(beddsys("PShowComplaint")) {
+	&html<<th>Chief Complaint</th>>
+	}
+	}
+	If ($G(%session.Data("SITE"))'="Whiteboard")!$D(beddsys("PShowOrders")) {	
+	&html<<th>Order Activity</th>>
+	}
+	If ($D(beddsys("CLN"))) {
+	&html<<th>Clinic</th>>
+	}
+	If ($D(beddsys("SN")))!($D(beddsys("PShowNurse"))) {
+	&html<<th>Nurse</th>>
+	}
+	If ($D(beddsys("PRV")))!($D(beddsys("PShowProv"))) {
+	&html<<th>Provider</th>>
+	}
+	If ($D(beddsys("CONS"))) {
+	&html<<th>Consult</th>>
+	}
+	If ($G(%session.Data("SITE"))'="Whiteboard")!$D(beddsys("PShowNotes")) {	
+	If ($D(beddsys("COMBRD")))!$D(beddsys("PShowNotes")) {
+	&html<<th>Info</th>>
+	}
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	If ($D(beddsys("AN"))) {
+	&html<<th>Actions</th>>
+	}
+	&html<<th>Reg</th>>
+	}
+	Write "		",!
+	Write "		",!
+	Write "	</tr>",!
+	Write !
+	Set bgc="white" 
+	Set beddtie=""
+	Set beddtie=$O(bedd(4,beddtie))
+	While(beddtie]"") {
+	Set beddien=""
+	Set beddien=$O(bedd(4,beddtie,beddien))
+	While(beddien]"") {
+	Do CHKLK^BEDDUTW(beddien,duz,$G(beddsys("TimeOut"))) ;Check Lock
+	Set edid=##class(BEDD.EDVISIT).%OpenId(beddien) 
+	Set info=""
+	Set info=$$DSPINFO^BEDDUTW(beddien)
+	If (info="") {
+	Set info="."
+	}
+	Set ptcc=""
+	Set ptcc=$$GETCHIEF^BEDDGET(edid.VIEN,edid.Complaint,,,1)
+	If (ptcc="") {
+	Set ptcc=edid.Complaint
+	}
+	Set ptactivity=""
+	Set ptactivity=$$GETOSTAT^BEDDUTIL(edid.PtDFN)
+	If (ptactivity="") {
+	Set ptactivity="&nbsp;"
+	}
+	Set nrs=""			
+	If (edid.PrmNurse'="") {
+	Set nrs=$$GETF^BEDDUTIL(200,edid.PrmNurse,.01)
+	}
+	ElseIf (edid.AsgNrs'="") {
+	Set nrs=$$GETF^BEDDUTIL(200,edid.AsgNrs,.01)
+	}
+	ElseIf (edid.TrgNrs'="") {
+	Set nrs=$$GETF^BEDDUTIL(200,edid.TrgNrs,.01,"I")
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {
+	Set nrs=$$NMFRMT^BEDDPREF(nrs,"FNLI")
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {
+	Set nrs=$$NMFRMT^BEDDPREF(nrs,"LN")
+	}
+	Set prv=""
+	If (edid.AdmPrv'="") {
+	Set prv=$$GETF^BEDDUTIL(200,edid.AdmPrv,.01,"I")
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {
+	Set prv=$$NMFRMT^BEDDPREF(prv,"FLIF")
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {
+	Set prv=$$NMFRMT^BEDDPREF(prv,"LN")
+	}
+	Set econs="No"
+	If ($$EDCNT^BEDDUTIS(beddien)>0) {
+	Set econs="Yes"
+	}
+	Set trrow=trrow+1
+	Set bgc="#FFFFFF"
+	If (trrow#2=0) {
+	Set bgc="#C0C0C0"
+	}
+	&html<<tr bgcolor=#(bgc)#>>
+	&html<<td bgcolor=#(bgc)#> #(+edid.WtgTime)# </td>>
+	If $G(%session.Data("SITE"))'="Whiteboard" {			
+	&html<<td> #(edid.TrgA)# </td>>
+	&html<<td> #($$HTIME^BEDDUTID(edid.RClTm))# </td>>
+	}
+	If ($G(%session.Data("SITE"))="Whiteboard")&($D(beddsys("PShowAcuity"))) {
+	&html<<td> #(edid.TrgA)# </td>>
+	}
+	///Create dynamic anchor
+	Set %session.Data("AnchorCount")=$G(%session.Data("AnchorCount"))+1
+	Set iAnchor="Anchor"_%session.Data("AnchorCount")
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	///Name and Gender
+	Set pName=$$NMFRMT^BEDDPREF(edid.PtName,$G(beddsys("NameFRMT")))
+	If '$D(beddsys("HideSEX")) {
+	&html<<td> <a name=#(iAnchor)# id=#(iAnchor)# href="BEDDLCKIT.csp?OBJID=#(beddien)#&DFN=#(edid.PtDFN)#"> #(pName)# (#(edid.Sex)#) </a> </td>>
+	}	
+	If $D(beddsys("HideSEX")) {
+	&html<<td> <a name=#(iAnchor)# id=#(iAnchor)# href="BEDDLCKIT.csp?OBJID=#(beddien)#&DFN=#(edid.PtDFN)#"> #(pName)# </a> </td>>
+	}
+	///DOB
+	If '$D(beddsys("HideDOB")) {
+	&html<<td> #(edid.DOB)# (#(edid.Age)#) </td>>
+	}
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {	
+	///Name and Age
+	If $D(beddsys("PShowName"))&$D(beddsys("PShowAge")) {
+	Set pName=$$NMFRMT^BEDDPREF(edid.PtName,"ILIF")
+	&html<<td> #(pName)# (#(edid.Age)#) </a> </td>>
+	}
+	If $D(beddsys("PShowName"))&'$D(beddsys("PShowAge")) {
+	Set pName=$$NMFRMT^BEDDPREF(edid.PtName,"ILIF")
+	&html<<td> #(pName)# </a> </td>>
+	}
+	If '$D(beddsys("PShowName"))&$D(beddsys("PShowAge")) {
+	&html<<td> #(edid.Age)# </a> </td>>
+	}
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	&html<<td> #(edid.Chart)# </td>>
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {	
+	If $D(beddsys("PShowChartNumber")) {
+	&html<<td> #(edid.Chart)# </td>>
+	}
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	If '$D(beddsys("HideCOMP")) {
+	&html<<td> #(ptcc)# </td>>
+	}
+	}
+	If $G(%session.Data("SITE"))="Whiteboard" {	
+	If $D(beddsys("PShowComplaint")) {
+	&html<<td> #(ptcc)# &nbsp; </td>>
+	}
+	}
+	If ($G(%session.Data("SITE"))'="Whiteboard")!$D(beddsys("PShowOrders")) {	
+	&html<<td> #(ptactivity)# &nbsp;</td>>
+	}
+	If ($D(beddsys("CLN"))) {
+	&html<<td> #($$GETF^BEDDUTIL(40.7,edid.TrgCln,.01,"E"))# &nbsp; </td>>
+	}
+	If ($D(beddsys("SN")))!($D(beddsys("PShowNurse"))) {
+	&html<<td> #(nrs)# &nbsp;</td>>
+	}
+	If ($D(beddsys("PRV")))!($D(beddsys("PShowProv"))) {
+	&html<<td> #(prv)# &nbsp;</td>>
+	}
+	If ($D(beddsys("CONS"))) {
+	&html<<td> #(econs)# &nbsp;</td>>
+	}
+	If ($G(%session.Data("SITE"))'="Whiteboard")!$D(beddsys("PShowNotes")) {	
+	If ($D(beddsys("COMBRD")))!$D(beddsys("PShowNotes")) {
+	&html<<td> #(info)# &nbsp;</td>>
+	}
+	}
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	If ($D(beddsys("AN"))) {
+	&html< <td>	
+	<input type="radio" name="ptpgr" onClick="rpfptpg(#(beddien)#,2);" />Rm Page
+	<input type="radio" name="ptobs" onClick="rpfptpg(#(beddien)#,3);" />Obsv
+	<input type="radio" name="pttrg" onClick="rpftrg(#(edid.PtDFN)#,4);" />TrgRpt
+	</td> >
+	}
+	}
+	Set dfn=edid.PtDFN
+	Set %H=$H
+	Do YX^%DTC
+	Set bedddt=X
+	Set regupd="Yes"
+	Set bgc="white"
+	If ($$GETF^BEDDUTIL(9000001,dfn_",",.03,"I")'=bedddt) {
+	Set regupd="NO",bgc="yellow"
+	}
+	If ($$GETF^BEDDUTIL(9000001,dfn_",",1108,"E")="NON-INDIAN BENEFICIARY") {
+	Set regupd=regupd_"; NoBens"
+	}
+	Kill bedddt,X
+	If $G(%session.Data("SITE"))'="Whiteboard" {	
+	&html< <td bgcolor=#(bgc)# > #(regupd)# </td> >
+	}
+	Set edid=""
+	Set beddien=$O(bedd(4,beddtie,beddien))
+	}
+	Set beddtie=$O(bedd(4,beddtie))
+	}
+	Write !,"</tr>",!
+	Write "</table>",!
+	Write !,!,!,"<hr>",!
+	Write !,!,!,!,!,!,!,!,!,!,!,!,!,!,!,!,!,!,!,!,!,!,!,"</BODY>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<!-- BEDD.csp - Main BEDD ED Dashboard -->"
+	Write !,"<!-- ;;2.0;IHS EMERGENCY DEPT DASHBOARD;**1,2**;Apr 02, 2014 -->"
+	Write !,"<!-- BEDD*2.0*1;Modified page to hide DOB, Sex, Complaint, and format patient name -->"
+	Write !,"<!-- Added Whiteboard view -->"
+	Write !,"<!-- Added Screen Pause and Scroll to Previous Position -->"
+	Write !,"<!-- BEDD*2.0*2;Added Admit Button -->"
+	Write !,"<!-- BEDD*2.0*2;Added Log Out Button -->"
+	Write !,!
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<HEAD>"
+	Write !,!,!,"<!-- BEDD*2.0*1;Switching Refresh to Javascript -->"
+	Write !,"<!--<META HTTP-EQUIV=REFRESH CONTENT=60> -->"
+	Write !,"<TITLE>	Emergency Department Tracking Board </TITLE>",!
+	Write !
+	Set duz=%session.Data("DUZ")
+	Set site=%session.Data("SITE")
+	Set loc=%session.Data("LOC")
+	//Reset session variables
+	Set %session.Data("DFN")=""
+	Set %session.Data("OBJECTID")=""
+	Set %session.Data("EDVISITID")=""
+	///Save Current Anchor Count and Reset
+	Set %session.Data("AnchorCountPrev")=$G(%session.Data("AnchorCount"))
+	Set %session.Data("AnchorCount")=0
+	Kill beddsys
+	Do LOADSYS^BEDDUTW(.beddsys,site,duz)
+	Set %session.AppTimeout=172800  //Change Session Timeout
+	Set (cirow,trrow,rmrow)=0
+	Set Begdt=$P($H,",",1)
+	Set Whiteboard=0
+	If $G(%session.Data("SITE"))="Whiteboard" {	
+	Set Whiteboard=1
+	}
+	Write !,!,"<!-- Refresh Handling -->"
+	Write !,"<script language=""JavaScript"" type=""text/javascript"">"
+	Write !,!,"	window.onload = function() {",!
+	Write "		",!
+	Write "		var user = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".ReturnDUZ"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"') ;",!
+	Write !,"		//Redirect if no user",!
+	Write "		if (user == 0) {",!
+	Write "			document.location.href='BEDDLogin.csp';",!
+	Write "		}",!
+	Write !,"		"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".getWhiteboard"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"');",!
+	Write "		//There is no button for Whiteboard",!
+	Write "		var tWhiteboard = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".getWhiteboard"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"');",!
+	Write !,"   		if (tWhiteboard==0) {",!
+	Write "	   		document.getElementById('btnRefresh').style.visibility = 'hidden';",!
+	Write "   		}",!
+	Write "		document.body.style.background = ""#FFFFFF"";",!
+	Write "   		setInterval (""saveScroll()"",3000);",!
+	Write !,"    	if ((document.hasFocus)||(tWhiteboard==1)) {",!
+	Write "   			setInterval (""CheckFocus ()"", 2000);",!
+	Write "   		}",!
+	Write "   		setScroll();",!
+	Write "	}",!
+	Write !,"	function CheckFocus () {",!
+	Write !,"		var tWhiteboard = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".getWhiteboard"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"');",!
+	Write "	    if ((document.hasFocus ())||(tWhiteboard==1)) {",!
+	Write !,"   			if (tWhiteboard==0) {",!
+	Write "		    	document.getElementById('btnRefresh').style.visibility = 'hidden';",!
+	Write "   			}",!
+	Write "			var RefreshIDfocusIn = setInterval(""window.location.reload()"",45000);",!
+	Write "			var RefreshID = document.getElementById('RefreshID');",!
+	Write "			document.body.style.background = ""#FFFFFF"";",!
+	Write "			RefreshID.value = RefreshIDfocusIn;",!
+	Write "    	}",!
+	Write "    	else {",!
+	Write "   			if (tWhiteboard==0) {",!
+	Write "				var ClearID = document.getElementById(""RefreshID"");",!
+	Write "				clearInterval(ClearID.value);",!
+	Write "		   		document.getElementById('btnRefresh').style.visibility = 'visible';",!
+	Write "  				document.getElementById('btnRefresh').disabled = false;",!
+	Write "  				document.body.style.background = ""#D3D3D3"";",!
+	Write "    		}",!
+	Write "    	}",!
+	Write "	}",!
+	Write "    	",!
+	Write "	function RestartRefresh () {",!
+	Write "   ",!
+	Write "    	if (document.hasFocus ()) {",!
+	Write "    		document.getElementById('btnDC').focus();",!
+	Write "			var tWhiteboard = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".getWhiteboard"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"');",!
+	Write "   			if (tWhiteboard==0) {",!
+	Write "    			document.getElementById('btnRefresh').style.visibility = 'hidden';",!
+	Write "				var RefreshIDfocusIn = setInterval(""window.location.reload()"",200);",!
+	Write "				var RefreshID = document.getElementById('RefreshID');",!
+	Write "				RefreshID.value = RefreshIDfocusIn;",!
+	Write "				document.body.style.background = ""#FFFFFF"";",!
+	Write "				window.location.reload(true);",!
+	Write "   			}",!
+	Write "    	}",!
+	Write "	}",!
+	Write !,"</script>"
+	Write !,!,"<!-- BEDD*2.0*1 - New code handle refresh scrolling position -->"
+	Write !,"<!-- Code found from web search - returns x position as well but we only use y -->"
+	Write !,"<script language=""JavaScript"" type=""text/javascript"">"
+	Write !,!,"	//get scroll position",!
+	Write "	var get_scroll = function(){",!
+	Write "		var x = 0, y = 0;",!
+	Write "	",!
+	Write "		if( typeof( window.pageYOffset ) == 'number' ) {",!
+	Write "   			//Netscape compliant",!
+	Write "   			y = window.pageYOffset;",!
+	Write "   			x = window.pageXOffset;",!
+	Write "		}",!
+	Write "		else if( document.body && ( document.body.scrollLeft || document.body.scrollTop ) ) {",!
+	Write "   			//DOM compliant",!
+	Write "   			y = document.body.scrollTop;",!
+	Write "   			x = document.body.scrollLeft;",!
+	Write "		}",!
+	Write "		else if( document.documentElement && ( document.documentElement.scrollLeft || document.documentElement.scrollTop ) ) {",!
+	Write "   			//IE6 standards compliant mode",!
+	Write "   			y = document.documentElement.scrollTop;",!
+	Write "   			x = document.documentElement.scrollLeft; ",!
+	Write "		}",!
+	Write "		var obj = new Object();",!
+	Write "		obj.x = x;",!
+	Write "		obj.y = y;",!
+	Write "		return obj;",!
+	Write "	}",!
+	Write "		",!
+	Write "	function saveScroll(){",!
+	Write !,"		var scroll = get_scroll(); ",!
+	Write "		"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".setScrollY"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',scroll.y);",!
+	Write "				",!
+	Write "	}",!
+	Write !,"	function setScroll(){",!
+	Write "	",!
+	Write "		var ScrollY = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".getScrollY"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"');",!
+	Write !,"		//Get the display mode",!
+	Write "		var SAmode = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".getSAmode"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"');",!
+	Write !,"		//Standalone mode",!
+	Write "		if (SAmode == ""SA"") {",!
+	Write "			window.scrollTo(0,ScrollY);",!
+	Write "		}",!
+	Write !,"		//EHR mode",!
+	Write "		if (SAmode == ""EHR"") {",!
+	Write "			var astop = f_scrollTop();",!
+	Write !,"			//Loop through anchors",!
+	Write "			var AnchorMax = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".getAnchorMax"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"');",!
+	Write "			var AnchorPos=0;",!
+	Write "			AnchorPos = getAnchorPosition('Anchor3');",!
+	Write "			var AnchorName=""Anchor"";",!
+	Write "			for(i=AnchorMax; i>0; i--) {",!
+	Write "				AnchorName = ""Anchor"".concat(i);",!
+	Write "				AnchorPos = getAnchorPosition(AnchorName);",!
+	Write "				if ((ScrollY)>=AnchorPos.y) {",!
+	Write "					window.location.hash = AnchorName;",!
+	Write "					return;",!
+	Write "				}",!
+	Write "			}		",!
+	Write "		}",!
+	Write "	}",!
+	Write "	",!
+	Write "	function f_scrollTop() {",!
+	Write "    	",!
+	Write "    	var scrollTop;",!
+	Write "    	if(typeof(window.pageYOffset) == 'number' ){",!
+	Write "	        // DOM compliant, IE9+",!
+	Write "	        scrollTop = window.pageYOffset;",!
+	Write "	    }",!
+	Write "    	else {",!
+	Write "	        // IE6-8 workaround",!
+	Write "	        if(document.body && document.body.scrollTop) {",!
+	Write "            	// IE quirks mode",!
+	Write "            	scrollTop = document.body.scrollTop;",!
+	Write "        	}",!
+	Write "        	else if(document.documentElement && document.documentElement.scrollTop) {",!
+	Write "	            // IE6+ standards compliant mode",!
+	Write "    	        scrollTop = document.documentElement.scrollTop;",!
+	Write "    	    }",!
+	Write "    	}",!
+	Write "    	return scrollTop;",!
+	Write "	}",!
+	Write !,"</script>"
+	Write !,!,"<script language=""JavaScript"" type=""text/javascript"">"
+	Write !,!,"	function getAnchorPosition(anchorname) {",!
+	Write "	",!
+	Write "		// This function will return an Object with x and y properties",!
+	Write "		var useWindow=false;",!
+	Write "		var coordinates=new Object();",!
+	Write "		var x=0,y=0;",!
+	Write "		// Browser capability sniffing",!
+	Write "		var use_gebi=false, use_css=false, use_layers=false;",!
+	Write "		",!
+	Write "		if (document.getElementById) { use_gebi=true; }",!
+	Write "		",!
+	Write "		else if (document.all) { use_css=true; }",!
+	Write "		",!
+	Write "		else if (document.layers) { use_layers=true; }",!
+	Write "		",!
+	Write "		// Logic to find position",!
+	Write " 		if (use_gebi && document.all) {",!
+	Write "			x=AnchorPosition_getPageOffsetLeft(document.all[anchorname]);",!
+	Write "			y=AnchorPosition_getPageOffsetTop(document.all[anchorname]);",!
+	Write "		}",!
+	Write "		else if (use_gebi) {",!
+	Write "			var o=document.getElementById(anchorname);",!
+	Write "			x=AnchorPosition_getPageOffsetLeft(o);",!
+	Write "			y=AnchorPosition_getPageOffsetTop(o);",!
+	Write "		}",!
+	Write " 		else if (use_css) {",!
+	Write "			x=AnchorPosition_getPageOffsetLeft(document.all[anchorname]);",!
+	Write "			y=AnchorPosition_getPageOffsetTop(document.all[anchorname]);",!
+	Write "		}",!
+	Write "		else if (use_layers) {",!
+	Write "			var found=0;",!
+	Write "			for (var i=0; i<document.anchors.length; i++) {",!
+	Write "				if (document.anchors[i].name==anchorname) { found=1; break; }",!
+	Write "			}",!
+	Write "			if (found==0) {",!
+	Write "				coordinates.x=0; coordinates.y=0; return coordinates;",!
+	Write "			}",!
+	Write "			x=document.anchors[i].x;",!
+	Write "			y=document.anchors[i].y;",!
+	Write "		}",!
+	Write "		else {",!
+	Write "			coordinates.x=0; coordinates.y=0; return coordinates;",!
+	Write "		}",!
+	Write "		coordinates.x=x;",!
+	Write "		coordinates.y=y;",!
+	Write "		return coordinates;",!
+	Write "	}",!
+	Write !,"	//getAnchorWindowPosition(anchorname)",!
+	Write "	//   This function returns an object having .x and .y properties which are the coordinates",!
+	Write "	//   of the named anchor, relative to the window",!
+	Write "	function getAnchorWindowPosition(anchorname) {",!
+	Write "		",!
+	Write "		var coordinates=getAnchorPosition(anchorname);",!
+	Write "		var x=0;",!
+	Write "		var y=0;",!
+	Write "	",!
+	Write "		if (document.getElementById) {",!
+	Write "			if (isNaN(window.screenX)) {",!
+	Write "				x=coordinates.x-document.body.scrollLeft+window.screenLeft;",!
+	Write "				y=coordinates.y-document.body.scrollTop+window.screenTop;",!
+	Write "			}",!
+	Write "			else {",!
+	Write "				x=coordinates.x+window.screenX+(window.outerWidth-window.innerWidth)-window.pageXOffset;",!
+	Write "				y=coordinates.y+window.screenY+(window.outerHeight-24-window.innerHeight)-window.pageYOffset;",!
+	Write "			}",!
+	Write "		}",!
+	Write "		else if (document.all) {",!
+	Write "			x=coordinates.x-document.body.scrollLeft+window.screenLeft;",!
+	Write "			y=coordinates.y-document.body.scrollTop+window.screenTop;",!
+	Write "		}",!
+	Write "		else if (document.layers) {",!
+	Write "			x=coordinates.x+window.screenX+(window.outerWidth-window.innerWidth)-window.pageXOffset;",!
+	Write "			y=coordinates.y+window.screenY+(window.outerHeight-24-window.innerHeight)-window.pageYOffset;",!
+	Write "		}",!
+	Write "		coordinates.x=x;",!
+	Write "		coordinates.y=y;",!
+	Write "		return coordinates;",!
+	Write "	}",!
+	Write !,"	// Functions for IE to get position of an object",!
+	Write "	function AnchorPosition_getPageOffsetLeft (el) {",!
+	Write "		",!
+	Write "		var ol=el.offsetLeft;",!
+	Write "		while ((el=el.offsetParent) != null) { ol += el.offsetLeft; }",!
+	Write "		return ol;",!
+	Write "	}",!
+	Write "	",!
+	Write "	function AnchorPosition_getWindowOffsetLeft (el) {",!
+	Write "		",!
+	Write "		return AnchorPosition_getPageOffsetLeft(el)-document.body.scrollLeft;",!
+	Write "	}	",!
+	Write "	",!
+	Write "	function AnchorPosition_getPageOffsetTop (el) {",!
+	Write "		",!
+	Write "		var ot=el.offsetTop;",!
+	Write "		while((el=el.offsetParent) != null) { ot += el.offsetTop; }",!
+	Write "		return ot;",!
+	Write "	}",!
+	Write "	",!
+	Write "	function AnchorPosition_getWindowOffsetTop (el) {",!
+	Write "		",!
+	Write "		return AnchorPosition_getPageOffsetTop(el)-document.body.scrollTop;",!
+	Write "	}",!
+	Write !,"</script>"
+	Write !,!,"<script language=""JavaScript"" type=""text/javascript"">"
+	Write !,!,"	function popup(mylink, windowname) {",!
+	Write "		",!
+	Write "		if (! window.focus) { ",!
+	Write "			return true; ",!
+	Write "		}	",!
+	Write "		var href;",!
+	Write "		if (typeof(mylink) == 'string') {",!
+	Write "   			href=mylink;",!
+	Write "		}",!
+	Write "		else {",!
+	Write "   			href=mylink.href;",!
+	Write "			window.open(href, windowname, 'width=600,height=400,scrollbars=yes');",!
+	Write "			return false;",!
+	Write "		}",!
+	Write "	}",!
+	Write !,"	function rpfset(vutable,rpfchk) {",!
+	Write "		alert( 'tbl= ' + vutable + 'chk= ' + rpfchk  ); ",!
+	Write "		"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".setMyED"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',vutable,rpfchk) ",!
+	Write "  	}",!
+	Write !,"</script>"
+	Write !,!,"<script type=""text/javascript"">"
+	Write !,"	",!
+	Write "	function rpfadmit() {",!
+	Write "		location.replace(""BEDDAdmit.csp"");",!
+	Write "		//self.document.location = ""BEDDAdmit.csp"";",!
+	Write "		",!
+	Write "	}",!
+	Write "	",!
+	Write "	function rpflogout() {",!
+	Write "		",!
+	Write "		var my_datetm = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".LogOut"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"') ;",!
+	Write "		location.replace(""BEDDLogin.csp"");",!
+	Write "		//self.document.location = ""BEDDLogin.csp"";",!
+	Write "		",!
+	Write "	}",!
+	Write "	",!
+	Write "	function rpfeddc() {",!
+	Write "		",!
+	Write "		location.replace(""BEDDEDC.csp"");",!
+	Write "		//self.document.location = ""BEDDEDC.csp"";",!
+	Write "	",!
+	Write "	}",!
+	Write "	",!
+	Write "	function rpfedmgr(duz) {",!
+	Write "		",!
+	Write "		"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".keychk"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',duz);",!
+	Write "	",!
+	Write "	}",!
+	Write "	",!
+	Write "	function rpfptpg(objid,msg) {",!
+	Write "		",!
+	Write "		var duz = "_(%session.Data("DUZ"))_";",!
+	Write "		"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".ptpg"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',objid,msg,duz);",!
+	Write "		",!
+	Write "	}",!
+	Write "	",!
+	Write "	function rpftrg(dfn) {",!
+	Write "		",!
+	Write "		var duz = "_(%session.Data("DUZ"))_";",!
+	Write "		self.document.location = ""BEDDTRG.csp?DFN="" + dfn + ""&DUZ="" + duz;",!
+	Write "		",!
+	Write "	}",!
+	Write "	",!
+	Write "</script>"
+	Write " ",!
+	Write !,(..HyperEventHead(0,0))
+	Write !,"</HEAD>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<HTML>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,"</HTML>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+ 
+ If ('$D(^BEDD.EDSYSTEMD)) {
+ 	Set %response.Redirect="BEDDAPPL.EDSYSTEM.cls"
+ 	Quit 1
+ }
+ If ($Get(%session.Data("DUZ"))="") {
+ 	Set %response.Redirect="BEDDLogin.csp"
+ 	Quit 1
+ }
+ Quit 1
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="ReturnDUZ">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set user=$Get(%session.Data("DUZ"))
+ 	If (user<1) {
+ 		Set user=0
+ 	}
+ 
+ 	Quit user
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="getAnchorMax">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set Anchor=$G(%session.Data("AnchorCount"))	
+ 	Quit Anchor
+ 
+]]></Implementation>
+</Method>
+
+<Method name="getSAmode">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set SA=$G(%session.Data("LOC"))	
+ 	Quit SA
+ 
+]]></Implementation>
+</Method>
+
+<Method name="getScrollY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set ScrollY=+$G(%session.Data("Y"))	
+ 	Quit ScrollY
+ 
+]]></Implementation>
+</Method>
+
+<Method name="getWhiteboard">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set tWhiteboard=$G(%session.Data("SITE"))
+ 	Set Return=0
+ 		If tWhiteboard="Whiteboard" {
+ 		Set Return=1
+ 	}
+ 	
+ 	Quit Return
+ 
+]]></Implementation>
+</Method>
+
+<Method name="keychk">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>duz:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+     If (duz="") {
+ 	    Quit 1
+     }
+     Set XUF=0
+     Set U="^"
+     If ($$KEYCK^BEDDUTID(duz)) {
+ 	    &js<location.replace("BEDDAPPL.EDManager.cls")>
+ 	    //&js<self.document.location = "BEDDAPPL.EDManager.cls">
+     }
+     ElseIf ('$$KEYCK^BEDDUTID(duz)) {
+ 		&js<alert('RESTRICTED ACCESS');>
+     }
+     Quit 1
+ 
+]]></Implementation>
+</Method>
+
+<Method name="logEvent">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>Event:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ //Temporary call - used to debug issues
+ Do NOW^%DTC
+ Quit
+ 
+]]></Implementation>
+</Method>
+
+<Method name="ptpg">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>id:%String,msg:%String,duz:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set msgnt=""
+ 	If (msg=1) {
+ 		Set msgnt="Paged for Triage"
+ 	}
+ 	If (msg=2) {
+ 		Set msgnt="Paged for Room"
+ 	}
+ 	If (msg=3) {
+ 		Set msgnt="Pt Observed"
+ 	}
+ 	L +^BEDD.EDVISIT(id):15 If ($T) {
+ 		Set entry=##class(BEDD.EDVISIT).%OpenId(id)
+ 		Set rpfsize=entry.Info.SizeGet()
+ 		Set rpfinfo=entry.Info.Read(rpfsize)
+ 		Set myToday=$$XNOW^BEDDUTIL()
+ 		Set myToday=$P(myToday,"@",1)_" "_$P(myToday,"@",2)
+ 		Set rpfinfo=rpfinfo_msgnt_" on "_myToday_" by "_$$GETF^BEDDUTIL(200,duz,.01,"E")_"; "
+ 		Set message=msgnt_" on "_myToday_" by "_$$GETF^BEDDUTIL(200,duz,.01,"E")
+ 		Do entry.Info.Write(rpfinfo)
+ 		Set statchk=entry.%Save()
+ 
+ 		If (statchk'=1) {
+ 			&js<alert('not saved' );>
+ 		}
+ 		If (statchk=1) {
+ 			&js<alert('Message Added: #(message)#' );>
+ 		}
+ 		Set entry=""
+ 		Kill statchk,entry
+ 		Lock -^BEDD.EDVISIT(id)
+ 	}
+ 	Kill msgnt,msg
+ 	&js<javascript:location.reload(true)>
+ 	Quit
+ 
+]]></Implementation>
+</Method>
+
+<Method name="setMyED">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>vutable:%String,rpfchk:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	&js<alert('checkin ' + #(vutable)# + #(rpfchk)#);>
+ 	If (rpfchk="0") {
+ 		Set MYEDVU(vutable)=""
+ 	}
+ 	If (rpfchk="1") {
+ 		Kill MYEDVU(vutable)
+ 	}
+ 	Quit
+ 
+]]></Implementation>
+</Method>
+
+<Method name="setScrollY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>ScrollY:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set cvtScroll=ScrollY
+ 	Set %session.Data("Y")=+$G(cvtScroll)
+ 	Quit
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>D:\intersystems\E3IHS\CSP\foia_goldb\BEDD.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/foia_goldb/BEDD.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>64671,78187</Default>
+</Parameter>
+</Class>
+</Export>

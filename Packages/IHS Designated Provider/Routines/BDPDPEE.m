@@ -1,5 +1,5 @@
 BDPDPEE ; IHS/CMI/TMJ - UPDATE USING LISTMAN ; 
- ;;2.0;IHS PCC SUITE;**2,10**;MAY 14, 2009;Build 88
+ ;;2.0;IHS PCC SUITE;**2,10,20**;MAY 14, 2009;Build 25
  ;
  ;
 START ;
@@ -11,7 +11,7 @@ START ;
 PROV ;
  D ^XBFMK
  S BDPDP=""
- W !! S DIC("A")="Enter Designated Provider Name: ",DIC="^VA(200,",DIC(0)="AEMQ",DIC("B")=$P(^VA(200,DUZ,0),U) D ^DIC K DIC,DA,DR,DLAYGO,DIADD
+ W !! S DIC("A")="Enter Designated Provider Name: ",DIC="^VA(200,",DIC(0)="AEMQ" D ^DIC K DIC,DA,DR,DLAYGO,DIADD
  I Y<0 W !,"No Provider Selected." Q
  S BDPPIEN=+Y
  D EN

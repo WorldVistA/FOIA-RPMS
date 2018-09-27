@@ -1,5 +1,5 @@
 ABSPOSSC ;IHS/SD/lwj  - Set Cache device type in ABSP Dial out file [ 09/16/2002  9:37 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**2**;JUN 21, 2001;Build 15
+ ;;1.0;PHARMACY POINT OF SALE;**2,48**;JUN 21, 2001;Build 27
  ;
  ;IHS/SD/lwj 6/13/02
  ; This routine is a post-init routine called from the Kids 
@@ -24,6 +24,7 @@ CACHE ;EP  As of Patch 3, this routine is called from ABSPOSJ1 as part
  ; field 420.03 is on the DEVICE node and represents the Cache device
  S FDA(9002313.55,ABSPIEN_",",420.03)="|TCP|6802"  ;absp dial out file
  D FILE^DIE(,"FDA","MSG")
+ I $D(MSG) D LOG^ABSPOSL2("CACHE^ABSPOSSC",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  ;
  I $D(MSG) U 0 W !,"Error in setting Cache device...",! D ZWRITE^ABSPOS("MSG") Q
  ;

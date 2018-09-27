@@ -1,16 +1,17 @@
-BGP8DNG ; IHS/CMI/LAB - NATL COMP EXPORT 13 Nov 2006 12:31 PM ;
- ;;8.0;IHS CLINICAL REPORTING;**2**;MAR 12, 2008
+BGP8DNG ;IHS/CMI/LAB - NATL COM EXPORT;
+ ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
  ;
  ;
  W:$D(IOF) @IOF
- W !,$$CTR("IHS 2008 National GPRA Report",80)
+ W !,$$CTR("IHS 2018 National GPRA/GPRAMA Report",80)
 INTRO ;
  D XIT
- W !!,"This will produce a National GPRA report."
- W !,"You will be asked to provide the community taxonomy to determine which patients"
- W !,"will be included.  This report will be run for the Report Period July 1, 2007"
- W !,"through June 30, 2008 with a Baseline Year of July 1, 1999 through"
- W !,"June 30, 2000.  This report will include beneficiary population of "
+ S BGPX=$O(^BGPCTRL("B",2018,0))
+ W !!,"This will produce a National GPRA/GPRAMA report.  You will "
+ W !,"be asked to provide the community taxonomy to determine which patients"
+ W !,"will be included.  This report will be run for the Report Period ",$$VAL^XBDIQ1(90241.01,BGPX,.08)
+ W !,"through ",$$VAL^XBDIQ1(90241.01,BGPX,.09)," with a Baseline Year of ",$$VAL^XBDIQ1(90241.01,BGPX,.12)," through"
+ W !,$$VAL^XBDIQ1(90241.01,BGPX,.13),".  This report will include beneficiary population of "
  W !,"American Indian/Alaska Native only.",!
  W !!,"You can choose to export this data to the Area office.  If you"
  W !,"answer yes at the export prompt, a report will be produced in export format"
@@ -19,28 +20,24 @@ INTRO ;
  W !,"directly to the Area or the site will have to send the file manually.",!
  K DIR S DIR(0)="E",DIR("A")="Press enter to continue" D ^DIR K DIR
  ;
+ ;
  D TAXCHK^BGP8XTCN
+ S X=$$DEMOCHK^BGP8UTL2()
+ I 'X W !!,"Exiting Report....." D PAUSE^BGP8DU,XIT Q
 TP ;get time period
  D XIT
- S BGPRTYPE=1,BGP8RPTH=""
- S X=$O(^BGPCTRL("B",2008,0))
+ S BGPRTYPE=1,BGPYRPTH=""
+ S X=$O(^BGPCTRL("B",2018,0))
  S Y=^BGPCTRL(X,0)
  S BGPBD=$P(Y,U,8),BGPED=$P(Y,U,9)
  S BGPPBD=$P(Y,U,10),BGPPED=$P(Y,U,11)
  S BGPBBD=$P(Y,U,12),BGPBED=$P(Y,U,13)
- S BGPPER=$P(Y,U,14),BGPQTR=3
+ S BGPPER=$P(Y,U,14),BGPQTR=4
  ;BEGIN TEST STUFF
  G NT  ;comment out when testing in TEHR
- W !!,"for testing purposes only, please enter a report year",!
- D F
- I BGPPER="" W !!,"no year entered..bye" D XIT Q
- S BGPQTR=3
- S BGPBD=$E(BGPPER,1,3)_"0101",BGPED=$E(BGPPER,1,3)_"1231"
- S BGPPBD=($E(BGPPER,1,3)-1)_"0101",BGPPED=($E(BGPPER,1,3)-1)_"1231"
- W !!,"for testing purposes only, please enter a BASELINE year",!
- D B
- I BGPBPER="" W !!,"no year entered..bye" D XIT Q
- S BGPBBD=$E(BGPBPER,1,3)_"0101",BGPBED=$E(BGPBPER,1,3)_"1231"
+ D TESTDR^BGP8UTL3
+ I $D(DIRUT) D XIT Q
+ I 'BGPBD D XIT Q
 NT ;END TEST STUFF
  W !!,"The date ranges for this report are:"
  W !?5,"Report Period: ",?31,$$FMTE^XLFDT(BGPBD)," to ",?31,$$FMTE^XLFDT(BGPED)
@@ -76,67 +73,35 @@ COM1 ;
  .I $D(DIRUT) S BGPQUIT=1
  .I Y S BGPQUIT=1
  .Q
-MFIC K BGPQUIT
- I $P($G(^BGPSITE(DUZ(2),0)),U,8)=1 D  I BGPMFITI="" G COMM
- .S BGPMFITI=""
- .W !!,"Specify the LOCATION taxonomy to determine which patient visits will be"
- .W !,"used to determine whether a patient is in the denominators for the report."
- .W !,"You should have created this taxonomy using QMAN.",!
- .K BGPMFIT
- .S BGPMFITI=""
- .D ^XBFMK
- .S DIC("S")="I $P(^(0),U,15)=9999999.06",DIC="^ATXAX(",DIC(0)="AEMQ",DIC("A")="Enter the Name of the Location/Facility Taxonomy: "
- .S B=$P($G(^BGPSITE(DUZ(2),0)),U,9) I B S DIC("B")=$P(^ATXAX(B,0),U)
- .D ^DIC
- .I Y=-1 Q
- .S BGPMFITI=+Y
+ K BGPQUIT
+ ;
 BEN ;
  S BGPBEN=1
 HOME ;
  S BGPHOME=$P($G(^BGPSITE(DUZ(2),0)),U,2)
- ;I BGPHOME="" W !!,"Home Location not found in Site File!!",!,"PHN Visits counts to Home will be calculated using clinic 11 only!!" H 2 G AI
- ;W !,"Your HOME location is defined as: ",$P(^DIC(4,BGPHOME,0),U)," asufac:  ",$P(^AUTTLOC(BGPHOME,0),U,10)
 AI ;gather all gpra measures
- S X=0 F  S X=$O(^BGPINDE("GPRA",1,X)) Q:X'=+X  S BGPIND(X)=""
- S BGPINDT="G"
+ S X=0 F  S X=$O(^BGPINDR("GPRA",1,X)) Q:X'=+X  S BGPIND(X)=""
+ S BGPINDG="G"
 EXPORT ;export to area or not?
- S BGPEXPT="",BGPYWCHW=0
+ S BGPEXPT=""  ;,BGPYWCHW=0
  S DIR(0)="Y",DIR("A")="Do you wish to export this data to Area" KILL DA D ^DIR KILL DIR
  I $D(DIRUT) G COMM
- S BGPEXPT=Y I BGPEXPT S BGPYWCHW=$S($P($G(^BGPSITE(DUZ(2),0)),U,11)=0:0,1:1)
+ S BGPEXPT=Y
 EISSEX ;
  S BGPEXCEL=""
- S BGPUF=""
- I ^%ZOSF("OS")["PC"!(^%ZOSF("OS")["NT")!($P($G(^AUTTSITE(1,0)),U,21)=2) S BGPUF=$S($P($G(^AUTTSITE(1,1)),U,2)]"":$P(^AUTTSITE(1,1),U,2),1:"C:\EXPORT")
- I $P(^AUTTSITE(1,0),U,21)=1 S BGPUF="/usr/spool/uucppublic/"
- ;CHILDHOOD HT/WT
-CHW ;
- W !!,"Height and Weight data is contained in this report.  Do you wish to create"
- W !,"a file of all the heights and weights in this file?  You can use this file"
- W !,"to upload to another system like SAS or Microsoft ACCESS."
- W !,"WARNING:  This file can be very large as it contains 1 record for each"
- W !,"height and weight taken on the patients in the active clinical population."
- W !,"This file may be too large for EXCEL.  If you don't plan on using this"
- W !,"data for a study some kind, please answer NO to the next question.",!
- S DIR(0)="Y",DIR("A")="Do you wish to create a HEIGHT/WEIGHT Output file",DIR("B")="N" KILL DA D ^DIR KILL DIR
- I $D(DIRUT) G EXPORT
- I Y S BGPYWCHW=2 D  I BGPONEF="" G CHW
- .S BGPHWNOW=$$NOW^XLFDT() S BGPHWNOW=$P(BGPHWNOW,".")_"."_$$RZERO^BGP8UTL($P(BGPHWNOW,".",2),6)
- .I BGPUF="" W:'$D(ZTQUEUED) !!,"Cannot continue.....can't find export directory name. EXCEL file",!,"not written." Q
- .S BGPFN="CRSHW"_$P(^AUTTLOC(DUZ(2),0),U,10)_$$D^BGP8UTL(BGPBD)_$$D^BGP8UTL(BGPED)_$$D^BGP8UTL(BGPHWNOW)_"_001_of_001"_".TXT"
- .D ONEF
- .Q
+ S BGPUF=$$GETDIR^BGP8UTL2()
+ I BGPUF="" W !!!,"Cannot find export or pub directory.  Notify your IT staff." D XIT Q
+ ;
 SUM ;display summary of this report
  W:$D(IOF) @IOF
- W !,$$CTR("SUMMARY OF NATIONAL GPRA REPORT TO BE GENERATED")
+ W !,$$CTR("SUMMARY OF NATIONAL GPRA/GPRAMA REPORT TO BE GENERATED")
  W !!,"The date ranges for this report are:"
  W !?5,"Report Period: ",?31,$$FMTE^XLFDT(BGPBD)," to ",?31,$$FMTE^XLFDT(BGPED)
  W !?5,"Previous Year Period: ",?31,$$FMTE^XLFDT(BGPPBD)," to ",?31,$$FMTE^XLFDT(BGPPED)
  W !?5,"Baseline Period: ",?31,$$FMTE^XLFDT(BGPBBD)," to ",?31,$$FMTE^XLFDT(BGPBED)
  W !!,"The COMMUNITY Taxonomy to be used is: ",$P(^ATXAX(BGPTAXI,0),U)
- I $G(BGPMFITI) W !!,"The MFI Location Taxonomy to be used is: ",$P(^ATXAX(BGPMFITI,0),U)
- ;I BGPHOME W !,"The HOME location is: ",$P(^DIC(4,BGPHOME,0),U)," ",$P(^AUTTLOC(BGPHOME,0),U,10)
- ;I 'BGPHOME W !,"No HOME Location selected."
+ D TEXT^BGP8DSL
+ I $D(DIRUT) G EXPORT
  D PT^BGP8DSL
  I BGPROT="" G BEN
 ZIS ;call to XBDBQUE
@@ -144,20 +109,14 @@ ZIS ;call to XBDBQUE
  I $G(BGPQUIT) D XIT Q
  I BGPRPT="" D XIT Q
  I BGPEXPT D
- .W !!,"A file will be created called BG08",$P(^AUTTLOC(DUZ(2),0),U,10)_"."_BGPRPT," and will reside",!,"in the ",BGPUF," directory.",!
- .W !,"Depending on your site configuration, these files may need to be manually",!,"sent to your Area Office.",!
- ;I BGPYWCHW=2 D ONEF I BGPONEF="" G SUM
- ;.;W !,"A Height/Weight File will be created and called: ",!?5,BGPFN,!?5,"and will reside in the ",BGPUF," directory. "
- ;.;W !,"Only 65,536 records will be placed into a file.  If your site has"
- ;.;W !,"more than 65,536 ht/wt records you will have multiple files,"
- ;.;W !,"all having the same name with the last 10 characters of the filename"
- ;.;W !,"being counter of the number of files (e.g. 001_of_003).These files"
- ;.;W !,"can be used in Excel.",!
+ .W !!,"A file will be created called BG180",$P(^AUTTLOC(DUZ(2),0),U,10)_"."_BGPRPT," and will reside",!,"in the ",BGPUF," directory.",!
+ .W !,"Depending on your site configuration, this file may need to be manually",!,"sent to your Area Office.",!
  K IOP,%ZIS I BGPROT="D",BGPDELT="F" D NODEV,XIT Q
  K IOP,%ZIS W !! S %ZIS=$S(BGPDELT'="S":"PQM",1:"PM") D ^%ZIS
- I POP W !,"Report Aborted" S DA=BGPRPT,DIK="^BGPGPDCE(" D ^DIK K DIK D XIT Q
- I POP W !,"Report Aborted" S DA=BGPRPT,DIK="^BGPGPDPE(" D ^DIK K DIK D XIT Q
- I POP W !,"Report Aborted" S DA=BGPRPT,DIK="^BGPGPDBE(" D ^DIK K DIK D XIT Q
+ I POP W !,"Report Aborted" S DA=BGPRPT,DIK="^BGPGPDCR(" D ^DIK K DIK
+ I POP W !,"Report Aborted" S DA=BGPRPT,DIK="^BGPGPDPR(" D ^DIK K DIK
+ I POP W !,"Report Aborted" S DA=BGPRPT,DIK="^BGPGPDBR(" D ^DIK K DIK
+ I POP D XIT Q
  I $D(IO("Q")) G TSKMN
 DRIVER ;
  I $D(ZTQUEUED) S ZTREQ="@"
@@ -166,27 +125,6 @@ DRIVER ;
  D ^BGP8DP
  D ^%ZISC
  I BGPEXPT D GS^BGP8UTL
- ;I $G(BGPEXCEL) D EXCELGS^BGP8UTL
- I $G(BGPYWCHW)=2 D HWSF
- Q
- ;
-ONEF ;
- S BGPONEF=""
- W !!!,"A Height/Weight Export file will be created.  You can choose"
- W !,"to create one file of data or multiple files of data.  If you are"
- W !,"planning to review this data using Microsoft Excel please keep in"
- W !,"mind that Excel can only handle 65,536 records per file.  If you"
- W !,"expect that your site has more than 65,536 records you will need"
- W !,"to create multiple files in order to use this data in Excel.  If"
- W !,"you choose to create one file it will be called:"
- W !?5,BGPFN,!?5,"and will reside in the ",BGPUF," directory."
- W !,"If you have multiple files generated they will all have the"
- W !,"same name with the last 10 characters of the filename being"
- W !,"the number of files (e.g. 001_of_003)."
- ; 
- S DIR(0)="S^O:ONE File of data;M:MULTIPLE Files of data",DIR("A")="Do you want to create one file or multiple files",DIR("B")="M" KILL DA D ^DIR KILL DIR
- I $D(DIRUT) Q
- S BGPONEF=Y
  Q
 NODEV ;
  S XBRP="",XBRC="NODEV1^BGP8DNG",XBRX="XIT^BGP8DNG",XBNS="BGP"
@@ -198,8 +136,6 @@ NODEV1 ;
  D ^BGP8DP
  D ^%ZISC
  I BGPEXPT D GS^BGP8UTL
- ;I $G(BGPEXCEL) D EXCELGS^BGP8UTL
- I $G(BGPYWCHW)=2 D HWSF
  D XIT
  Q
 TSKMN ;EP ENTRY POINT FROM TASKMAN
@@ -207,7 +143,7 @@ TSKMN ;EP ENTRY POINT FROM TASKMAN
  I $G(IO("DOC"))]"" S ZTIO=ZTIO_";"_$G(IO("DOC"))
  I $D(IOM)#2,IOM S ZTIO=ZTIO_";"_IOM I $D(IOSL)#2,IOSL S ZTIO=ZTIO_";"_IOSL
  K ZTSAVE S ZTSAVE("BGP*")=""
- S ZTCPU=$G(IOCPU),ZTRTN="DRIVER^BGP8DNG",ZTDTH="",ZTDESC="NATIONAL GPRA REPORT 08" D ^%ZTLOAD D XIT Q
+ S ZTCPU=$G(IOCPU),ZTRTN="DRIVER^BGP8DNG",ZTDTH="",ZTDESC="NATIONAL GPRA REPORT 15" D ^%ZTLOAD D XIT Q
  Q
  ;
 XIT ;
@@ -249,7 +185,7 @@ CHKY ;
  Q
 F ;fiscal year
  S (BGPPER,BGPVDT)=""
- W !!,"Enter the year for the report.  Use a 4 digit ",!,"year, e.g. 2008"
+ W !!,"Enter the year for the report.  Use a 4 digit ",!,"year, e.g. 2018"
  S DIR(0)="D^::EP"
  S DIR("A")="Enter year"
  S DIR("?")="This report is compiled for a period.  Enter a valid date."
@@ -262,7 +198,7 @@ F ;fiscal year
  Q
 B ;fiscal year
  S (BGPBPER,BGPVDT)=""
- W !!,"Enter the BASELINE year for the report.  Use a 4 digit ",!,"year, e.g. 2000"
+ W !!,"Enter the BASELINE year for the report.  Use a 4 digit ",!,"year, e.g. 2010"
  S DIR(0)="D^::EP"
  S DIR("A")="Enter BASELINE year"
  S DIR("?")="This report is compiled for a period.  Enter a valid date."
@@ -272,40 +208,4 @@ B ;fiscal year
  S BGPVDT=Y
  I $E(Y,4,7)'="0000" W !!,"Please enter a year only!",! G F
  S BGPBPER=BGPVDT
- Q
-HWSF ;EP
- I '$D(ZTQUEUED) W !!,"Writing out Ht/Wt file...."
- ;count up total # of records and divide by 65,536
- I BGPONEF="O" D HWSF1 Q
- S BGPX=0,BGPTOT=0 F  S BGPX=$O(^BGPGPDCE(BGPRPT,88888,BGPX)) Q:BGPX'=+BGPX  S BGPTOT=BGPTOT+1
- S BGPNF1=BGPTOT/65536
- S BGPNF=$S($P(BGPNF1,".",2)]"":$P(BGPNF1,".")+1,1:BGPNF1)
- S BGPNF=$P(BGPNF,".")
- S BGPX=0,BGPLX=0
- F BGPZ=1:1:BGPNF D
- .S BGPFN="CRSHW"_$P(^AUTTLOC(DUZ(2),0),U,10)_$$D^BGP8UTL(BGPBD)_$$D^BGP8UTL(BGPED)_$$D^BGP8UTL(BGPHWNOW)_"_"_$$LZERO^BGP8UTL(BGPZ,3)_"_of_"_$$LZERO^BGP8UTL(BGPNF,3)_".TXT"
- .S Y=$$OPEN^%ZISH(BGPUF,BGPFN,"W")
- .I Y=1 W:'$D(ZTQUEUED) !!,"Cannot open host file." Q
- .U IO
- .W "SERVICE UNIT^ASUFAC^UNIQUE DB ID^DATE RUN^BEG DATE^END DATE^PATIENT UID^DOB^TRIBE CODE^GENDER^STATE OF RESIDENCE^UNIQUE VISIT ID^DATE OF VISIT^TIME OF VISIT^HT CM^WT KG",!
- .S BGPC=1,BGPX=$S(BGPLX:BGPLX,1:0)
- .F  S BGPX=$O(^BGPGPDCE(BGPRPT,88888,BGPX)) Q:BGPX'=+BGPX!(BGPC>65535)  D
- ..W $G(^BGPGPDCE(BGPRPT,88888,BGPX,0)),!
- ..S BGPC=BGPC+1
- ..S BGPLX=BGPX
- .D ^%ZISC
- Q
-HWSF1 ;EP
- ;write out one flie only
- S BGPZ=1,BGPFN="CRSHW"_$P(^AUTTLOC(DUZ(2),0),U,10)_$$D^BGP8UTL(BGPBD)_$$D^BGP8UTL(BGPED)_$$D^BGP8UTL(BGPHWNOW)_"_001_of_001.TXT"
- I '$D(ZTQUEUED) U IO W !?10,BGPFN
- S Y=$$OPEN^%ZISH(BGPUF,BGPFN,"W")
- I Y=1 W:'$D(ZTQUEUED) !!,"Cannot open host file." Q
- U IO
- W "SERVICE UNIT^ASUFAC^UNIQUE DB ID^DATE RUN^BEG DATE^END DATE^PATIENT UID^DOB^TRIBE CODE^GENDER^STATE OF RESIDENCE^UNIQUE VISIT ID^DATE OF VISIT^TIME OF VISIT^HT CM^WT KG",!
- S BGPC=1,BGPX=0
- F  S BGPX=$O(^BGPGPDCE(BGPRPT,88888,BGPX)) Q:BGPX'=+BGPX  D
- .W $G(^BGPGPDCE(BGPRPT,88888,BGPX,0)),!
- .S BGPC=BGPC+1
- D ^%ZISC
  Q

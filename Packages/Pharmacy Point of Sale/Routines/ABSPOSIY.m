@@ -1,5 +1,5 @@
 ABSPOSIY ; IHS/FCS/DRS - Filing with .51,.59 ;    [ 08/30/2002  10:26 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**3,34**;JUN 21, 2001;Build 15
+ ;;1.0;PHARMACY POINT OF SALE;**3,34,48**;JUN 21, 2001;Build 27
  ; continuation of ABSPOSIZ
  ;----------------------------------------------------------------
  ;IHS/SD/lwj 8/30/02  NCPDP 5.1 changes
@@ -102,6 +102,7 @@ SETUP59(N,ORIGIN,ABSPUSR) ;EP - from ABSPOSIZ -  given the INPUT array - IHS/OIT
  . S FDA(FN,REC,1.06)=FDA(FN,REC,701) ; INSURER
  ; 500's, 600's, 700's done above
  D FILE^DIE("","FDA","MSG") ; NO "E" FLAG - DATA IS IN INTERNAL FORMAT!
+ I $D(MSG) D LOG^ABSPOSL2("SETUP59^ABSPOSIY",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  ;I $D(MSG) ZW MSG
  Q $S($D(MSG):0,1:1)
 ACTIVEWT(IEN59,IEN51,IEN512) ;EP - from ABSPOSIZ

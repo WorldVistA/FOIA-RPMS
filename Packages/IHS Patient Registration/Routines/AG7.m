@@ -1,5 +1,7 @@
 AG7 ; IHS/ASDS/EFG - ENTER PRIVATE INSURANCE DATA ;   
- ;;7.1;PATIENT REGISTRATION;**1,2,3**;JAN 31, 2007
+ ;;7.1;PATIENT REGISTRATION;**1,2,3,12**;AUG 25, 2005;Build 1
+ ;
+ ;IHS/OIT/NKD AG*7.1*12 INSURER TYPE
  ;
 L1 K AGADD
  I AGOPT(5)'="Y" G ^AG8
@@ -41,7 +43,8 @@ AGAIN ;EP
  K DIC,DIE,DA,DIR,DR,ADDCHK,AGNEWINS
  S DIC="^AUTNINS("
  S DIC(0)="AEMQZ"
- S DIC("S")="I $P($G(^(1)),U,7)'=0,($P($G(^(2)),U)=""P"")"
+ ;S DIC("S")="I $P($G(^(1)),U,7)'=0,($P($G(^(2)),U)=""P"")"
+ S DIC("S")="I $P($G(^(1)),U,7)'=0,$$INSTYP^AGUTL(Y)=""P"""  ;IHS/OIT/NKD AG*7.1*12
  D ^DIC
  K DIC,DIE,DA,DIR,DR
  I +Y<1 W !!,"Must enter an existing private insurer" H 2 G AGAIN

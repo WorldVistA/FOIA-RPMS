@@ -1,7 +1,8 @@
 ABMDF35E ; IHS/SD/SDR - Set HCFA1500 (02/12) Print Array - Part 5 ;  
- ;;2.6;IHS 3P BILLING SYSTEM;**13,21**;NOV 12, 2009;Build 379
+ ;;2.6;IHS 3P BILLING SYSTEM;**13,21,22**;NOV 12, 2009;Build 418
  ;IHS/SD/SDR - 2.6*21 - HEAT223194 - Fixed EPSDT field so it will print either the second character from the referral
  ;  or an 'U' for no referral.
+ ;IHS/SD/SDR 2.6*22 HEAT335246 Added code to print the appropriate CPT based on if the NDC prompt is answered or not.
  ;
  ; *********************************************************************
  ;
@@ -63,7 +64,9 @@ PROC ;EP for setting the procedure portion of the ABMF array
  ..S $P(ABMR(ABMS,ABMLN),U,3)=23
  ;
  ; Set CPT/HCPCS                        ; Form locator 24D
+ I $P($G(^ABMNINS(DUZ(2),ABMP("INS"),0)),U,14)="Y" S $P(ABMR(ABMS,ABMLN),U,5)=$P(ABMS(ABMS),U,4)  ;abm*2.6*22 IHS/SD/SDR HEAT335246
  I $P($G(^ABMNINS(DUZ(2),ABMP("INS"),1,ABMP("VTYP"),0)),U,16)]"" D
+ .I $P($G(^ABMNINS(DUZ(2),ABMP("INS"),0)),U,14)="Y" Q  ;don't write default CPT if they want NDC to print  ;abm*2.6*22 IHS/SD/SDR HEAT335246
  .S $P(ABMR(ABMS,ABMLN),U,5)=$P($$CPT^ABMCVAPI($P(^ABMNINS(DUZ(2),ABMP("INS"),1,ABMP("VTYP"),0),U,16),ABMP("VDT")),U,2)  ;CSV-c
  E  I $P($G(ABMS(ABMS)),U,4)]"" D  I 1
  .S $P(ABMR(ABMS,ABMLN),U,5)=" "_$P(ABMS(ABMS),U,4)

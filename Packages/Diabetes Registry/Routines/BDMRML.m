@@ -1,5 +1,5 @@
-BDMRML ; IHS/CMI/LAB - patients w/o dm on problem list ;
- ;;2.0;DIABETES MANAGEMENT SYSTEM;**9,10**;JUN 14, 2007;Build 12
+BDMRML ; IHS/CMI/LAB - patients w/o dm on problem list ; 28 Nov 2017  1:25 PM
+ ;;2.0;DIABETES MANAGEMENT SYSTEM;**9,10,11**;JUN 14, 2007;Build 30
  ;
  ;
 START ;
@@ -276,8 +276,8 @@ BDMG(BDMIEN,BDMREG,BDMAGET,BDMSTAT,BDMCOMT,BDMCOMM,BDMSEX,BDMCM,BDMWF,BDMSORT1,B
  S BDMLDAT=$G(BDMLDAT)
  I BDMAGET="" K BDMAGET
  I BDMSTMP]"" S BDMSNAM=$P(^DIBT(BDMSTMP,0),U)
- S BDMSOR1T=$S(BDMSORT1="P":"Patient Name","S":"Register Status","A":"Age","C":"Community","G":"Gender","M":"Case Manager","W":"Where Followed",1:"")
- S BDMSOR2T=$S(BDMSORT2="P":"Patient Name","S":"Register Status","A":"Age","C":"Community","G":"Gender","M":"Case Manager","W":"Where Followed",1:"Patient Name")
+ S BDMSOR1T=$S(BDMSORT1="P":"Patient Name",BDMSORT1="S":"Register Status",BDMSORT1="A":"Age",BDMSORT1="C":"Community",BDMSORT1="G":"Gender",BDMSORT1="M":"Case Manager",BDMSORT1="W":"Where Followed",1:"")
+ S BDMSOR2T=$S(BDMSORT2="P":"Patient Name",BDMSORT2="S":"Register Status",BDMSORT2="A":"Age",BDMSORT2="C":"Community",BDMSORT2="G":"Gender",BDMSORT2="M":"Case Manager",BDMSORT2="W":"Where Followed",1:"Patient Name")
  I BDMSORT2="" S BDMSORT2="P"
  NEW BDMNOW,BDMOPT,BDMIEN
  S BDMOPT="Master List"

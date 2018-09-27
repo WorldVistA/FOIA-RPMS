@@ -1,11 +1,12 @@
 BIDX ;IHS/CMI/MWR - RISK FOR FLU & PNEUMO, CHECK FOR DIAGNOSES.; MAY 10, 2010
- ;;8.5;IMMUNIZATION;**14**;AUG 01,2017
+ ;;8.5;IMMUNIZATION;**15**;SEP 30,2017
  ;;* MICHAEL REMILLARD, DDS * CIMARRON MEDICAL INFORMATICS, FOR IHS *
  ;;  CHECK FOR DIAGNOSES IN A TAXONOMY RANGE, WITHIN A GIVE DATE RANGE.
  ;;  FROM LORI BUTCHER, 9-18-05
  ;;  PATCH 5: New code to check for Smoking Health Factors.   HFSMKR+23
  ;;  PATCH 9: Changes to include Hep B Risk.  RISK+9, RISK+41
  ;;  PATCH 13: Changes to check for Flu High Risk.   RISK+25, HASDX+38
+ ;;  PATCH 15: Changes to check for Flu High Risk (removed in p14).   RISKAB+19
  ;
  ;
  ;********** PATCH 14, v8.5, AUG 01,2017, IHS/CMI/MWR
@@ -80,6 +81,28 @@ RISKAB(BIDFN,BIFDT,BIRISKF) ;EP Return Hep A & Hep B High Risk.
  ;S BIRISKF=1 Q  ;Uncomment to test. MWRZZZ
  I Y=1 S BIRISKF=1
  Q
+ ;
+ ;
+ ;********** PATCH 15, v8.5, SEP 30,2017, IHS/CMI/MWR
+ ;---> Return Flu High Risk Value.
+ ;----------
+RISKF(BIDFN,BIFDT,BIRISKF) ;EP Return Flu High Risk.
+ ;---> Determine if this patient is in the Flu High Risk Taxonomy.
+ ;---> Generally patients passed are >18 yrs and <50 yrs.
+ ;---> Parameters:
+ ;     1 - BIDFN   (req) Patient IEN.
+ ;     2 - BIFDT   (opt) Forecast Date (date used for forecast).
+ ;     3 - BIRISKF (ret) 1=Patient has Risk of Influenza; otherwise 0.
+ ;
+ ;---> Check Flu Risk Taxonomy(2 Dx's within 3 yrs prior to the date passed).
+ S BIRISKF=0
+ Q:'$G(BIDFN)
+ S:'$G(BIFDT) BIFDT=$G(DT)
+ N BIBEGDT,Y S BIBEGDT=$$FMADD^XLFDT(BIFDT,-(3*365))
+ S Y=+$$HASDX(BIDFN,"BI HIGH RISK FLU",2,BIBEGDT,BIFDT)
+ S:(Y>0) BIRISKI=1
+ Q
+ ;**********
  ;
  ;
  ;----------

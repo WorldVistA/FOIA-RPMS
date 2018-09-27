@@ -1,8 +1,9 @@
 AUMSCB ;IHS/OIT/NKD - SCB UPDATE ENVIRONMENT CHECK/PRE/POST INSTALL 3/08/2013 ;
- ;;17.0;TABLE MAINTENANCE;**3**;AUG 18,2016;Build 1
+ ;;18.0;TABLE MAINTENANCE;**1**;AUG 14,2017;Build 1
  ; 03/12/14 - Removed use of AUMPRE for pre-install, changed to just remove AUMDATA entries
  ; 12/16/14 - Removed old/unused code, added support for future environment checking
  ; 03/11/15 - Modified environment checking display to write to screen
+ ; 12/04/17 - Removed confirmation prompt from environment checker
  ;
  I '$G(DUZ) W !,"DUZ UNDEFINED OR 0." D SORRY(2) Q
  ;
@@ -14,7 +15,7 @@ AUMSCB ;IHS/OIT/NKD - SCB UPDATE ENVIRONMENT CHECK/PRE/POST INSTALL 3/08/2013 ;
  ;
  S:'$$VCHK("XU","8.0") XPDQUIT=2
  S:'$$VCHK("DI","22.0") XPDQUIT=2
- S:'$$PCHK("AUM","17.0","2") XPDQUIT=2
+ S:'$$PCHK("AUM","17.0","4") XPDQUIT=2
  S:'$$VCHK("AUT","98.1","27") XPDQUIT=2
  ;
  NEW DA,DIC
@@ -36,7 +37,7 @@ AUMSCB ;IHS/OIT/NKD - SCB UPDATE ENVIRONMENT CHECK/PRE/POST INSTALL 3/08/2013 ;
  . S (XPDDIQ("XPZ1"),XPDDIQ("XPZ2"))=0
  .Q
  ;
- I '$$DIR^XBDIR("E","","","","","",1) D SORRY(2)
+ ;I '$$DIR^XBDIR("E","","","","","",1) D SORRY(2)  ;IHS/OIT/NKD AUM*18.0*1 REMOVED CONFIRMATION PROMPT
  Q
  ;
 SORRY(X) ;

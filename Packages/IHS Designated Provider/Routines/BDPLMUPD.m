@@ -1,5 +1,5 @@
 BDPLMUPD ; IHS/CMI/TMJ - UPDATE USING LISTMAN ; 
- ;;2.0;IHS PCC SUITE;**2,10**;MAY 14, 2009;Build 88
+ ;;2.0;IHS PCC SUITE;**2,10,20**;MAY 14, 2009;Build 25
  ;
  ;
 START ;
@@ -124,7 +124,7 @@ ADD ;EP - add a new dp
  .W !,"Please use the CH (Change Provider) action item to change this provider."
  ;get provider name for this category
  W !
- S DIC=200,DIC(0)="AEMQ",DIC("A")="Enter Provider Name: ",DIC("B")=$P(^VA(200,DUZ,0),U)
+ S DIC=200,DIC(0)="AEMQ",DIC("A")="Enter Provider Name: " ;,DIC("B")=$P(^VA(200,DUZ,0),U)
  I $$GET1^DIQ(90360.3,BDPCIEN,.01)'="MESSAGE AGENT" S DIC("S")="I $D(^VA(200,""AK.PROVIDER"",$P($G(^VA(200,+Y,0)),U),+Y)),$P($G(^VA(200,+Y,""PS"")),U,4)="""""
  I $$GET1^DIQ(90360.3,BDPCIEN,.01)="MESSAGE AGENT" S DIC("S")="I $D(^BDPMSGA(+Y,0)),'$P(^BDPMSGA(+Y,0),U,3)" K DIC("B")
  D ^DIC K DIC
@@ -149,7 +149,7 @@ CHANGE ;EP - change existing DP
  I '$G(BDPRIEN) D PAUSE,BACK Q
  I 'BDPRIEN W !,"No item selected to change." D PAUSE,BACK Q
  S BDPCIEN=$P(^BDPRECN(BDPRIEN,0),U)
- W ! S DIC("A")="Enter New Designated "_$$VAL^XBDIQ1(90360.1,BDPRIEN,.01)_": ",DIC="^VA(200,",DIC(0)="AEMQ",DIC("B")=$P(^VA(200,DUZ,0),U)
+ W ! S DIC("A")="Enter New Designated "_$$VAL^XBDIQ1(90360.1,BDPRIEN,.01)_": ",DIC="^VA(200,",DIC(0)="AEMQ" ;,DIC("B")=$P(^VA(200,DUZ,0),U)
  I $$GET1^DIQ(90360.3,BDPCIEN,.01)="MESSAGE AGENT" S DIC("S")="I $D(^BDPMSGA(+Y,0)),'$P(^BDPMSGA(+Y,0),U,3)" K DIC("B")
  D ^DIC K DIC,DA,DR,DLAYGO,DIADD
  I Y<0 W !,"No Provider Selected." D PAUSE,BACK Q
@@ -171,8 +171,12 @@ DELETE ;EP - delete exisiting DP
  S BDPCIEN=$P(^BDPRECN(BDPRIEN,0),U)
  W !!,"Are you sure you want to DELETE ",$$VAL^XBDIQ1(90360.1,BDPRIEN,.03),!?3,"as the designated ",$$VAL^XBDIQ1(90360.1,BDPRIEN,.01),"?"
  K DIR S DIR(0)="Y",DIR("A")="Please confirm",DIR("B")="N" KILL DA D ^DIR KILL DIR
+ I $D(DIRUT) D PAUSE,BACK Q
+ I 'Y D PAUSE,BACK Q
  S BDPPROV=$$VALI^XBDIQ1(90360.1,BDPRIEN,.03)
- NEW DA,DIE,DR
+ NEW DA,DIE,DR,BDPLINKI  ;P19
+ S BDPLINKI=1
+ ;NEW DA,DIE,DR
  S DA=BDPRIEN,DIE="^BDPRECN(",DR=".03///@" D ^DIE
  W !!,"Provider ",$P(^VA(200,BDPPROV,0),U)," successfully DELETED as",!," the designated ",$P(^BDPTCAT(BDPCIEN,0),U)," provider.",!
  D PAUSE

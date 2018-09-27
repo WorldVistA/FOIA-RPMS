@@ -1,5 +1,5 @@
 AUMSCBD ;IHS/OIT/NKD - SCB UPDATE - DRIVER 12/07/2012 ;
- ;;17.0;TABLE MAINTENANCE;**1**;AUG 18,2016;Build 1
+ ;;18.0;TABLE MAINTENANCE;**1**;AUG 14,2017;Build 1
  ; 03/12/14 - Modified processing/display for ADD/DEL tags
  ;          - Modified debug to include ADD changes
  ; 12/16/14 - Removed old/unused code

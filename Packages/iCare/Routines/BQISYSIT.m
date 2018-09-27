@@ -1,5 +1,5 @@
 BQISYSIT ;APTIV/HC/ALA-System Site Parameters for iCare ; 11 Apr 2008  3:43 PM
- ;;2.5;ICARE MANAGEMENT SYSTEM;;May 24, 2016;Build 27
+ ;;2.7;ICARE MANAGEMENT SYSTEM;;Dec 19, 2017;Build 23
  ;
 GET(DATA,FAKE) ;EP -- BQI GET SYSTEM PARAMETERS
  ; Get specific iCare system parameters from the Site Parameter file
@@ -56,7 +56,7 @@ JOB(DATA,FAKE) ; EP - BQI GET SYSTEM JOB DATA
  S OPTN=$$FIND^BQISCHED("BQI UPDATE TASK")
  I $O(^DIC(19.2,"B",OPTN,""))="" S BQSCHED="Not scheduled"
  S JOB="WEEKLY",FLDS="Diagnostic Tags;4.01;4.02;4.03;24.04^Natl Measures;4.04;4.05;4.06;24.05^Reminders;4.07;4.08;4.09;24.06^Best Practice Prompts;4.1;4.11;4.12;24.02" D RET
- S JOB="WEEKLY",FLDS="Care Mgmt Update;4.13;4.14;4.15;24.03" D RET
+ S JOB="WEEKLY",FLDS="Care Mgmt Update;4.13;4.14;4.15;24.03^IPC;4.19;4.2;4.21;11.06" D RET
  ;
  S JOB="MONTHLY",FLDS="IPC Update;8.1;8.11;8.12;24.08" D RET
  ;
@@ -88,6 +88,13 @@ RET ; Retrieve data
  .. I TYP="Reminders" D OPRET("BQI UPDATE ALL REMINDERS")
  .. I TYP="Best Practice Prompts" D OPRET("BQI UPDATE TREATMENT")
  .. I TYP="Care Mgmt Update" D OPRET("BQI UPDATE CARE MGMT")
+ .. I TYP="IPC" D
+ ... NEW CDOW,DFL,WDATE
+ ... S CDOW=$$DOW^XLFDT(DT,1) I CDOW'=0 D
+ ... S DFL=0
+ ... F I=1:1 Q:DFL  D  Q:DFL
+ .... S WDATE=$$FMADD^XLFDT(DT,+I),CDOW=$$DOW^XLFDT(WDATE,1)
+ .... I CDOW=0 S DFL=1,BQSCHED=WDATE_"."_$P($P($G(^BQI(90508,1,4)),"^",19),".",2),BQSCHED=$$FMTE^BQIUL1(BQSCHED)
  . ;
  . I JOB="MONTHLY" D
  .. I TYP="MU Clinical Quality" D

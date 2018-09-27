@@ -1,5 +1,5 @@
-BDMS9B2 ; IHS/CMI/LAB - DIABETIC CARE SUMMARY SUPPLEMENT ;
- ;;2.0;DIABETES MANAGEMENT SYSTEM;**3,4,5,6,7,8,9,10**;JUN 14, 2007;Build 12
+BDMS9B2 ; IHS/CMI/LAB - DIABETIC CARE SUMMARY SUPPLEMENT ; 09 Nov 2017  3:25 PM
+ ;;2.0;DIABETES MANAGEMENT SYSTEM;**3,4,5,6,7,8,9,10,11**;JUN 14, 2007;Build 30
  ;
  ;
 MORE ;EP
@@ -7,12 +7,21 @@ MORE ;EP
  S X="   Influenza vaccine (since August 1st): ",$E(X,41)=$$FLU^BDMS9B3(BDMSDFN) D S(X)
  S X="   Pneumococcal vaccine (ever):",$E(X,41)=$$PNEU^BDMS9B4(BDMSDFN) D S(X)
  S X="   Td/Tdap (in past 10 yrs):",$E(X,41)=$$TD^BDMS9B3(BDMSDFN,(DT-100000),DT) D S(X)
- S X="   Tdap (ever):",$E(X,41)=$P($$TDAP^BDMDE1B(BDMSDFN,DT,"H"),"  ",2,99) D S(X)
- S X="   Hepatitis B series complete (ever): ",$E(X,41)=$P($$HEP^BDMDE13(BDMSDFN,DT),"  ",2,99) D S(X)
+ S X="   Tdap (ever):",$E(X,41)=$P($$TDAP^BDMDF1B(BDMSDFN,DT,"H"),"  ",2,99) D S(X)
+ S X="   Hepatitis B series complete (ever): ",$E(X,41)=$P($$HEP^BDMDF13(BDMSDFN,DT),"  ",2,99) D S(X)
  S Y=$$PPDS^BDMS9B4(BDMSDFN) S J=1 I Y]"" S X="TB - Status:",$E(X,30)=Y D S(X,1) S J=0
  S Y=$$PPD^BDMS9B4(BDMSDFN) S X="TB - Last Documented Test:",$E(X,30)=$P(Y,"  ",4)_"  "_$P(Y,"  ",1) D S(X,J)
  S X="",$E(X,6)="TB Test Result:",$E(X,30)=$P(Y,"  ",2)_"  "_$P(Y,"  ",3) D S(X)
  S X="     TB Treatment Completed: ",$E(X,30)=$$TB(BDMSDFN) D S(X)
+HEPC ;2018 AUDIT
+ D S("Hepatitis C",1)
+ S X=$$HEPCDX^BDMDF1D(BDMSDFN,DT) D S("Diagnosed with HCV ever: "_$P(X,"  ",2))
+ ;SCREEN 1945-1965
+ S B=$$DOB^AUPNPAT(BDMSDFN)
+ I B<2450101!(B>2651231) G R  ;patch 12 - add if screened ever
+ I $E(X)'=1 D S("DOB 1945-1965 screened ever: "_$P($$HEPSCR^BDMDF1D(BDMSDFN,DT),"  ",2))
+R ;retinopathy
+ S X=$$DMRETDX^BDMDF1D(BDMSDFN,DT) D S("Retinopathy Diagnosed: "_$S($E(X)=1:"Yes",1:"No"),1)
 L ;
  S X="Laboratory Results (most recent):",$E(X,55)="RPMS LAB TEST NAME" D S(X,1)
  S X=" A1C:" S Y=$$HBA1C(BDMSDFN),$E(X,25)=$P(Y,"|||"),$E(X,44)=$$DATE^BDMS9B1($P(Y,"|||",2)),$E(X,55)=$P(Y,"|||",3) D S(X)
@@ -37,11 +46,6 @@ EDUCD D S(" ")
  K BDMX
  D EDUC
  I $D(BDMX) D
- .;S C=0
- .;S %=0 F  S %=$O(BDMX(%)) Q:%'=+%  D
- .;.S C=C+1
- .;.I (C#2) S X="" S X="  "_BDMX(%) Q
- .;.S $E(X,41)=BDMX(%) D S(X) S X=""
  .S %="" F  S %=$O(BDMX(%)) Q:%=""  D S(BDMX(%))
  ;I X]"" D S(X)
  K BDMX,BDMY,%
@@ -66,7 +70,7 @@ S1 ;
  S ^TMP("APCHS",$J,"DCS",%)=X
  Q
 EDUC ;EP - gather up all education provided in past year in BDMX
- K BDMX,BDMY,BDMP S %=BDMSDFN_"^ALL EDUC;DURING "_$$DATE^BDMS9B1(BDMSBEG)_"-"_$$DATE^BDMS9B1(DT) S E=$$START1^APCLDF(%,"BDMY(") ;IHS/CMI/LAB patch 3 1/13/98 added $$DATE^BDMS9B1 to _DT replaced " - " with "-"
+ K BDMX,BDMY,BDMP S %=BDMSDFN_"^ALL EDUC;DURING "_$$DATE^BDMS9B1(BDMSBEG)_"-"_$$DATE^BDMS9B1(DT) S E=$$START1^APCLDF(%,"BDMY(") ;
  I '$D(BDMY) S BDMX(1)="   <No Education Topics recorded in past year>" K BDMY Q
  NEW X K BDMP S X=0,E="" F  S X=$O(BDMY(X)) Q:X'=+X  D
  .S E=+$P(BDMY(X),U,4)
@@ -85,7 +89,7 @@ EPRV(I) ;
  S P=$$VALI^XBDIQ1(9000010.16,I,1202) I P S D=$$PROVCLS^XBFUNC1(P) S %="",%=$E($P(^VA(200,P,0),U,1),1,18),$E(%,24)=$E(D,1,15) Q %
  S P=$$PRIMPROV^APCLV($P(^AUPNVPED(I,0),U,3),"I") I P S D=$$PROVCLS^XBFUNC1(P) S %="",%=$E($P(^VA(200,P,0),U,1),1,18),$E(%,20)=$E(D,1,15)
  Q ""
-EDUCREF ;EP - gather up all education provided in past year in BDMR
+EDUCREF ;EP - gather up all education provided in past year
  K BDMX,BDMY
  S BDMY=0 F  S BDMY=$O(^AUPNPREF("AA",BDMSPAT,9999999.09,BDMY)) Q:BDMY'=+BDMY  I $$EDT(BDMY) S BDMD=$O(^AUPNPREF("AA",BDMSPAT,9999999.09,BDMY,0)) I BDMD<(9999999-BDMSBEG) D
  .Q:$D(BDMP($$UP^XLFSTR($P(^AUTTEDT(BDMY,0),U))))  ;already displayed
@@ -111,7 +115,7 @@ EDT(E) ;
  I $P(T,"-",2)="N" Q 1
  I $P(T,"-",2)="DT" Q 1
  ;SNOMED
- I $P(T,"-",1)]"",$$SNOMED^BDMUTL(2016,"DIABETES DIAGNOSES",$P(T,"-",1)) Q 1
+ I $P(T,"-",1)]"",$$SNOMED^BDMUTL($$LE(),"PXRM DIABETES",$P(T,"-",1)) Q 1
  NEW CODE
  S G=""
  S CODE=$P($$CODEN^BDMUTL($P(T,"-",1),80),"~")
@@ -120,6 +124,11 @@ EDT(E) ;
  .S TAX=$O(^ATXAX("B","SURVEILLANCE DIABETES",0))
  .I $$ICD^BDMUTL(CODE,$P(^ATXAX(TAX,0),U),9) S G=1
  Q G
+LE() ;EP
+ NEW A,B
+ S B=""
+ S A=0 F  S A=$O(^BDMSNME("B",A)) Q:A=""  S B=A
+ Q B
 TB(P) ;
  I '$G(P) Q ""
  NEW BDMS,E,X
@@ -174,8 +183,6 @@ NONHDL(P) ;
  NEW V,D,TC,HDL,TCD,HDLD,NT
  I '$G(P) Q ""
  S V=""
- ;NEW T S T=$O(^ATXLAB("B","DM AUDIT NON-HDL TESTS",0)),LT=$O(^ATXAX("B","BGP NON-HDL LOINC CODES",0)) I 'T Q "<Taxonomy Missing>"
- ;S V=$$LAB(P,T,LT) ;,V=$P(V,"|||"),D=$P(V,"|||",2),NT=$P(V,"|||",3),V=$P(V,"|||")
  NEW T S T=$O(^ATXLAB("B","DM AUDIT CHOLESTEROL TAX",0)),LT=$O(^ATXAX("B","BGP TOTAL CHOLESTEROL LOINC",0)) I 'T Q "<Taxonomy Missing>"
  S TC=$$LAB(P,T,LT),TCD=$P(TC,"|||",2),TC=$$STRIP^XLFSTR($P(TC,"|||")," ")
  I TC="" Q V
@@ -218,7 +225,7 @@ LAB(P,T,LT,YEAR) ;EP
  ...Q
  ..Q
  .Q
- I 'G Q ""  ;S R=$$REF(P,T) Q $S(R:"||||||"_R,1:"") ;NO REFUSALS AS THERE ARE NO REFUSALS ON THE AUDIT
+ I 'G Q ""
  S R=$$LBLK($P(^AUPNVLAB(G,0),U,4),6)_" "_$P($G(^AUPNVLAB(G,11)),U)_"|||"
  S R=R_$P($P($G(^AUPNVSIT($P(^AUPNVLAB(G,0),U,3),0)),U),".")_"|||"_$E($$VAL^XBDIQ1(9000010.09,G,.01),1,25)_"|||"_$$REF(P,T,$P($P($G(^AUPNVSIT($P(^AUPNVLAB(G,0),U,3),0)),U),"."))_"|||"_G
  Q R
@@ -247,7 +254,7 @@ REF1(P,F,I,D,T) ; ;
  I $G(D)="" S D=""
  I $G(T)="" S T="E"
  NEW X,N S X=$O(^AUPNPREF("AA",P,F,I,0))
- I 'X Q ""  ;none of this item was refused
+ I 'X Q ""
  S N=$O(^AUPNPREF("AA",P,F,I,X,0))
  NEW Y S Y=9999999-X
  I D]"",Y>D Q $S(T="I":Y,1:$$TYPEREF(N)_"-"_$$DATE(Y))
@@ -268,7 +275,6 @@ NLHGB(P) ;return next to last HGBA1C
  .S X=0 F  S X=$O(^AUPNVLAB("AE",P,D,X)) Q:X'=+X!(G=2)  D
  ..S Y=0 F  S Y=$O(^AUPNVLAB("AE",P,D,X,Y)) Q:Y'=+Y!(G=2)  D
  ...I $D(^ATXLAB(T,21,"B",X)),$P(^AUPNVLAB(Y,0),U,4)]"" S G=G+1,E=Y Q
- ...;Q  ;IHS/CMI/LAB - DON'T CHECK LOINC CODES FOR NOW
  ...Q:'LT
  ...S J=$P($G(^AUPNVLAB(Y,11)),U,13) Q:J=""
  ...Q:'$$LOINC(J,LT)
@@ -319,7 +325,6 @@ LDLLAB ;EP
  ...I $D(^ATXLAB(T,21,"B",X)) D   Q
  ....S R=$P(^AUPNVLAB(Y,0),U,4) Q:R'=+R
  ....S BDMX(Y)=R_"^"_(9999999-D),G=G+1
- ...;Q  ;IHS/CMI/LAB - don't check loinc codes for now
  ...Q:'LT
  ...S J=$P($G(^AUPNVLAB(Y,11)),U,13) Q:J=""
  ...Q:'$$LOINC(J,LT)

@@ -1,5 +1,5 @@
 ABSPOSIV ; IHS/FCS/DRS - Old-style input ;    [ 09/12/2002  10:11 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**3,10**;JUN 21, 2001;Build 15
+ ;;1.0;PHARMACY POINT OF SALE;**3,10,48**;JUN 21, 2001;Build 27
  ; old-style kept for those who want it
  ;EP - Branched to here from ABSPOSI
  ;----------------------------------------------------------------------
@@ -76,6 +76,7 @@ FILEARAY ; TO BE MOVED TO ABSPOSIZ:   D INCSTAT^ABSPOSUD($T(+0),1)
  . S FDA(SUBF,IENS,1.04)=PAT
  ; next line changed from UPDATE^DIE 09/21/2000
 FA5 D FILE^DIE("","FDA","MSG")
+ I $D(MSG) D LOG^ABSPOSL2("FA5^ABSPOSIV",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  I $D(MSG) D  G F5:$$IMPOSS^ABSPOSUE("FM","TRI","FILE^DIE failed",,"FILEARAY",$T(+0))
  . W !,"Unexpected error in FILEARAY^"_$T(+0),!
  . D ZWRITE^ABSPOS("ABSBRXI","ABSBRXR","ABSBNDC","MSG")

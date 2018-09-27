@@ -1,0 +1,1131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2018-09-27 12:54:36">
+<Class name="csp.beddinj">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeChanged>64672,29653.80662</TimeChanged>
+<TimeCreated>64672,29653.775492</TimeCreated>
+<GeneratedBy>/csp/foia_goldb/BEDDINJ.csp</GeneratedBy>
+
+<Method name="ClearSession">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 
+ 	Set %session.Data("InjLocat")=""
+ 	Set %session.Data("InjDtTm")=""
+ 	Set %session.Data("CodeIEN")=""
+ 	Set %session.Data("IS")=""
+ 	Set %session.Data("ISE")=""
+ 	Set %session.Data("MVCLoc")=""
+ 	Set %session.Data("wrk")=""
+ 	Set %session.Data("Notes")=""
+ 	Set %session.Data("AFPN")=""
+ 	Set %session.Data("AFPA")=""
+ 	Set %session.Data("AFI")=""
+ 	Set %session.Data("AFIA")=""
+ 	Set %session.Data("AFIP")=""
+ 	Set %session.Data("AFNotes")=""
+ 	Set %session.Data("EmpN")= ""
+ 	Set %session.Data("EmpAd")= ""
+ 	Set %session.Data("EmpCSZ")= ""
+ 	Set %session.Data("EmpPhn")= ""
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="MyXdate">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>rawDtTm:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set val=$$XDATE^BEDDUTID(rawDtTm)
+ 	Quit val
+ 
+]]></Implementation>
+</Method>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPagePREHTML()
+	Do ..OnPageCSPROOT()
+	Do ..OnPagePOSTHTML()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<BODY bgcolor=""#CCCCFF"" onload=""setFocus()"">"
+	Write !,!,"<!-- use CSP:OBJECT tag to create a reference to an instance of the class -->"
+	Write !
+	If ((%session.Data("OBJECTID"))'="") {
+	Set injForm = ##class(BEDD.EDVISIT).%OpenId((%session.Data("OBJECTID")))
+	} Else {
+	Set injForm = ##class(BEDD.EDVISIT).%New()
+	}
+	Write !,!,"<!--<form name=""form"" cspbind=""injForm"" cspjs=""All"" onsubmit='return form_validate();'>-->"
+	Write !,"<form name=""form"" action=""BEDDINJ.csp"" method=""POST"" onsubmit=""return CheckForm();"">"
+	Write !,..InsertHiddenFields("BEDDINJ.csp?OBJID="_(%session.Data("OBJECTID"))),!
+	Write !,!
+	Set objid=%session.Data("OBJECTID")
+	Set (dfn,ptdfn)=%session.Data("DFN")
+	Set vien=injForm.VIEN
+	Set VisitDate=$P($$GETF^BEDDUTIL(9000010,vien_",",".01","I"),".")
+	Set EDVISITID=""
+	//Audit the activity
+	Set duz=%session.Data("DUZ")
+	Do LOG^BEDDUTIU(duz,"P","Q","BEDDINJ.csp","BEDD: User displayed patient injury information",dfn)
+	//Name and Gender
+	Set ptname=injForm.PtName
+	Set ptsex=injForm.Sex
+	//DOB, Age and Chart
+	Set ptdob=injForm.DOB
+	Set ptage=injForm.Age
+	Set ptchart=injForm.Chart
+	//Admission Information
+	Set ptcidt=injForm.PtCIDT
+	//Injury Information
+	Set injury=injForm.Injury
+	Set injwhr=injForm.PtInjury.InjLocat
+	Set injcas=$$GETF^BEDDUTIL(9009083,injForm.PtInjury.InjCause,".01","I")
+	Set injset=injForm.PtInjury.InjSet
+	Set injdtm=$$FMTE^BEDDUTIL(injForm.PtInjury.InjDtTm)
+	Set injsaf=injForm.PtInjury.SafetyEquip
+	Set injwrk=injForm.PtInjury.WrkRel
+	Set dxsrch=""
+	Set dxien=""
+	Set dxname=""
+	Set dxcode=""
+	//MVC Location
+	Set mvcloc=injForm.PtInjury.MVCLoc
+	//Notes
+	Set notesize=injForm.PtInjury.InjuryDetails.SizeGet()
+	Set notes=injForm.PtInjury.InjuryDetails.Read(notesize)
+	//At Fault Party Name
+	Set afpn=injForm.PtInjury.AtFaultName
+	//Injury Cause - New method for BEDD v2.0
+	Set dxien=injForm.PtInjury.InjCauseIEN
+	Set icdinfo=$$ICD^BEDDPOV(dxien,VisitDate)
+	Set dxcode=$P(icdinfo,"^",2)
+	Set dxname=$P(icdinfo,"^",4)
+	//At Fault Party Address
+	Set afpa=injForm.PtInjury.AtFaultAddress
+	//At Fault Insurance Name
+	Set afi= injForm.PtInjury.AtFaultInsurance
+	//At Fault Insurance Address
+	Set afia= injForm.PtInjury.AtFaultInsAdd
+	//At Fault Insurance Policy Number
+	Set afip=injForm.PtInjury.AtFaultInsPolicy
+	//At Fault Notes
+	Set afnotesize=injForm.PtInjury.AtFaultOther.SizeGet()
+	Set afnotes=injForm.PtInjury.AtFaultOther.Read(afnotesize)
+	//Employer Name
+	Set empn=injForm.PtInjury.EmplName
+	//Employer Address
+	Set empad=injForm.PtInjury.EmplAddress
+	//Employer City, ST, Zip
+	Set empcsz=injForm.PtInjury.EmplCitySt
+	//Employer Phone
+	Set empphn=injForm.PtInjury.EmplPh
+	Write !,!
+	Set %value = $$$HTMLENCODE($get(%request.Data("ID",1),$ZSTRIP($select(injForm="":"",1:(injForm.%Id())),">W")))
+	Write "<input value="""_(%value)_""" type=""hidden"" id=""ID"" name=""ID"" readonly/>"
+	Write !,!
+	Set %value = $$$HTMLENCODE($get(%request.Data("PtDFN",1),$ZSTRIP($select(injForm="":"",1:(injForm.PtDFNLogicalToDisplay(injForm.PtDFN))),">W")))
+	Write "<input value="""_(%value)_""" type=""hidden"" id=""PtDFN"" name=""PtDFN"" readonly/>"
+	Write !,"<input type=""hidden"" id=""FormIsOkay"" name=""FormIsOkay"" value=""""/>"
+	Write !,"<input type=""hidden"" id=""SaveCheck"" name=""SaveCheck"" value=""""/>"
+	Write !,"<input name=""%noname"" type=""hidden"" id=""AStmp"" value='"_(ptcidt)_"' readonly/>"
+	Write !,"<input type=""hidden"" id=""VisitDate"" name=""VisitDate"" value='"_(VisitDate)_"' readonly/>"
+	Write !,!,"<center><b><font size=6>Injury Worksheet</font></b></center>",!
+	Write "<br>",!
+	Write !,"<label for=""PtName"">Patient (Gender)</label> "
+	Write "<input name=""%noname"" type=""text"" id=""PtName"" value='"_(ptname)_" ("_(ptsex)_")' size=""40"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write "<label for=""PtDOB"">DOB (Age)</label> "
+	Write "<input name=""%noname"" type=""text"" id=""PtDOB"" value='"_(ptdob)_" ("_(ptage)_")' size=""25"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp;",!
+	Write "<label for=""PtChart"">Chart</label> "
+	Write "<input name=""%noname"" type=""text"" id=""PtChart"" value='"_(ptchart)_"' size=""8"" readonly style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,"&nbsp; &nbsp;",!
+	Write "<input type=""Submit"" name=""btnSave"" value=""Save"" onclick='chkInj();'>"
+	Write !,"&nbsp; &nbsp;",!
+	Write !,"<input type=""button"" name=""btnClose"" value=""Cancel"" onclick='close_page();'>"
+	Write !,"<br>",!
+	Write "<hr>",!
+	Write !,"<b><font size=4>Injury Information</font></b><br><br>",!
+	Write !
+	Set %value = $$$HTMLENCODE($get(%request.Data("ptstat",1),$ZSTRIP($select(injForm="":"",1:(injForm.PtStatLogicalToDisplay(injForm.PtStat))),">W")))
+	Write "<input value="""_(%value)_""" type=""hidden"" id=""ptstat"" name=""ptstat"" readonly size=""1"" style=""color: #000000; font-family: Tahoma; font-weight: bold; font-size: 14px; background-color: #C0C0C0;""/>"
+	Write !,!,"<label for=""InjLocat"">* Town/village where injury occurred</label>",!
+	Write "	"
+	Write "<input type=""InjLocat"" name=""InjLocat"" id=""InjLocat"" value='"_(injwhr)_"' size=""35""/>"
+	Write !,"&nbsp;",!
+	Write !,"<label for=""InjDtTm"">* Date and time of injury</label> ",!
+	Write "<input type=""InjDtTm"" id=""InjDtTm"" name=""InjDtTm"" size=""18"" value='"_(injdtm)_"' onchange=""doInjDtTmDateCheck()"" style=""color: #000000; font-family: Tahoma; font-weight: normal; font-size: 14px; background-color: #FFFFFF;""/>"
+	Write !,"<br><br>",!
+	Write !,"Cause Lookup:",!
+	Write "<input type=""text"" name=""DXSearch"" id=""DXSearch"" size=20 value='"_(dxsrch)_"' onchange=""doDXSearch();"">"
+	Write "<td>",!
+	Write "<label for=""DXdata"">* Cause:</label>",!
+	Write "<select name=""DXdata"" id=""DXdata"" onchange=""setDXdata();"">"
+	Write "		",!
+	Write "	if dxsrch]"""" {",!
+	Write "		"
+	Write "<option selected value="""_(dxien)_""">"
+	Write " "_(dxcode)_" - "_(dxname)_"  </option>",!
+	Write "	}",!
+	Write "</select>"
+	Write "	",!
+	Write !
+	Set %value = $$$HTMLENCODE($get(%request.Data("CodeIEN",1),$ZSTRIP($select(injForm="":"",1:($select(injForm.PtInjury="":"",1:(injForm.PtInjury.InjCauseIENLogicalToDisplay(injForm.PtInjury.InjCauseIEN))))),">W")))
+	Write "<input type=""hidden"" name=""CodeIEN"" id=""CodeIEN"" value='"_(%value)_"'>"
+	Write !,!,"<br><br>",!
+	Write !,"<label for=""IS"">* Setting</label>",!
+	Write "<input type=""hidden"" name=""injs"" id=""injs"" size=""10"" value='"_(injset)_"'>"
+	Write !,"	"
+	Write "<select id=""IS"" name=""IS"">"
+	Write !,"	"
+	Kill scen
+	Do SCEN^BEDDUTIU(.scen)
+	&html<<option> </option>>
+	Set scen=$O(scen(""))
+	While(+scen'=0) {
+	&html<<option value="#($P(scen(scen),"^"))#"> #($P(scen(scen),"^",2))#  </option>>
+	Set scen=$O(scen(scen))
+	}
+	Write !,"	"
+	Write "</select>"
+	Write !,"&nbsp;",!
+	Write !,"<label for=""ISE"">Safety Used</label>",!
+	Set %value = $$$HTMLENCODE($get(%request.Data("injsfty",1),$ZSTRIP($select(injForm="":"",1:($select(injForm.PtInjury="":"",1:(injForm.PtInjury.SafetyEquipLogicalToDisplay(injForm.PtInjury.SafetyEquip))))),">W")))
+	Write "<input value="""_(%value)_""" type=""hidden"" name=""injsfty"" id=""injsfty"" size=""10"">"
+	Write !,"	"
+	Write "<select id=""ISE"" name=""ISE"">"
+	Write !,"	"
+	Kill safe
+	Do SAFE^BEDDUTIU(.safe)
+	&html<<option> </option>>
+	Set safe=$O(safe(""))
+	While(+safe'=0) {
+	&html<<option value="#($P(safe(safe),"^"))#"> #($P(safe(safe),"^",2))#  </option>>
+	Set safe=$O(safe(safe))
+	}
+	Write !,"	"
+	Write "</select>"
+	Write !,"<br><br>",!
+	Write !,"<label for=""InjLocat"">Exact MVC Location</label>",!
+	Write "<input type=""MVCLoc"" name=""MVCLoc"" id=""MVCLoc"" value='"_(mvcloc)_"' size=""100""/>"
+	Write !,"<br><br>",!
+	Write !," Was this Work Related?",!
+	Write "<input "_($select(($get(%request.Data("wrk",1))="NO")||(($get(%request.Data("wrk",1))="")&&(($select(injForm="":"",1:($select(injForm.PtInjury="":"",1:(injForm.PtInjury.WrkRelLogicalToDisplay(injForm.PtInjury.WrkRel))))))="NO")):" checked",1:""))," type=""radio"" id=""wrk"" name=""wrk"" value=""NO"" onclick=""wInjuryNo()""/>"
+	Write "No",!
+	Write "<input "_($select(($get(%request.Data("wrk",1))="YES")||(($get(%request.Data("wrk",1))="")&&(($select(injForm="":"",1:($select(injForm.PtInjury="":"",1:(injForm.PtInjury.WrkRelLogicalToDisplay(injForm.PtInjury.WrkRel))))))="YES")):" checked",1:""))," type=""radio"" id=""wrk"" name=""wrk"" value=""YES"" onclick=""wInjuryYes()""/>"
+	Write "Yes",!
+	Write !,"<br><br>",!
+	Write !,"Injury Details",!
+	Write "<br>",!
+	Write !,"<textarea id=""Notes"" name=""Notes"" cols=""85"" rows=""6"" style=""color: #000000; font-family: Tahoma; font-weight: normal; font-size: 14px; background-color: #FFFFFF;"">"
+	Write (notes)
+	Write "</textarea>"
+	Write !,"<br>",!
+	Write "<hr>",!
+	Write !,"<b><font size=4>At Fault Information</font></b><br><br>",!
+	Write !,"<b>Please Collect the following Information (if applicable):</b>",!
+	Write "<br><br>",!
+	Write !,"<label for=""AFPN"">At Fault Party Name</label>",!
+	Write "<input type=""text"" name=""AFPN"" id=""AFPN"" size=""55"" value='"_(afpn)_"' style=""color: #000000; font-family: Tahoma; font-weight: normal; font-size: 14px; background-color: #FFFFFF;""/>"
+	Write !,"<br><br>",!
+	Write !,"<label for=""AFPA"">At Fault Party Address</label>",!
+	Write "<input type=""text"" name=""AFPA"" id=""AFPA"" size=80 value='"_(afpa)_"' style=""color: #000000; font-family: Tahoma; font-weight: normal; font-size: 14px; background-color: #FFFFFF;""/>"
+	Write !,"<br><br>",!
+	Write !,"<label for=""AFI"">Driver Insurance Name</label>",!
+	Write "<input type=""text"" name=""AFI"" id=""AFI"" size=55 value='"_(afi)_"' style=""color: #000000; font-family: Tahoma; font-weight: normal; font-size: 14px; background-color: #FFFFFF;""/>"
+	Write !,"<br><br>",!
+	Write !,"<label for=""AFIA"">Driver Insurance Address</label>",!
+	Write "<input type=""text"" name=""AFIA"" id=""AFIA"" size=80 value='"_(afia)_"' style=""color: #000000; font-family: Tahoma; font-weight: normal; font-size: 14px; background-color: #FFFFFF;""/>"
+	Write !,"<br><br>",!
+	Write !,"<label for=""AFIP"">Driver Insurance Policy Number</label>",!
+	Write "<input type=""text"" name=""AFIP"" id=""AFIP"" size=20 value='"_(afip)_"' style=""color: #000000; font-family: Tahoma; font-weight: normal; font-size: 14px; background-color: #FFFFFF;""/>"
+	Write !,"<br><br>",!
+	Write !,"If at fault party is some other than the name of Insured,",!
+	Write "<br>",!
+	Write "Please list name and phone number where you may be reached:",!
+	Write "<br>",!
+	Write !,"<textarea id=""AFNotes"" name=""AFNotes"" cols=""85"" rows=""3"" style=""color: #000000; font-family: Tahoma; font-weight: normal; font-size: 14px; background-color: #FFFFFF;"">"
+	Write (afnotes)
+	Write "</textarea>"
+	Write !,"<hr>",!
+	Write !,"<b><font size=4>Worker's Compensation Information</font></b><br><br>",!
+	Write !,"<label for=""EmpN"">Employer Name</label>",!
+	Write "<input type=""text"" name=""EmpN"" id=""EmpN"" size=50 value='"_(empn)_"' style=""color: #000000; font-family: Tahoma; font-weight: normal; font-size: 14px; background-color: #FFFFFF;""/>"
+	Write !,"<br><br>",!
+	Write !,"<label for=""EmpAd"">Employer Address</label>",!
+	Write "<input type=""text"" name=""EmpAd"" id=""EmpAd"" size=55 value='"_(empad)_"' style=""color: #000000; font-family: Tahoma; font-weight: normal; font-size: 14px; background-color: #FFFFFF;""/>"
+	Write !,"<br><br>",!
+	Write !,"<label for=""EmpCSZ"">Employer City, ST Zip</label>",!
+	Write "<input type=""text"" name=""EmpCSZ"" id=""EmpCSZ"" size=55 value='"_(empcsz)_"' style=""color: #000000; font-family: Tahoma; font-weight: normal; font-size: 14px; background-color: #FFFFFF;""/>"
+	Write !,"&nbsp; &nbsp;",!
+	Write !,"<label for=""EmpPhn"">Employer Phone</label>",!
+	Write "<input type=""text"" name=""EmpPhn"" id=""EmpPhn"" size=20 value='"_(empphn)_"' style=""color: #000000; font-family: Tahoma; font-weight: normal; font-size: 14px; background-color: #FFFFFF;""/>"
+	Write !,"<hr>",!
+	Write !,"<input type=""Submit"" name=""btnSave"" value=""Save"" onclick='chkInj();'>"
+	Write !,"&nbsp; &nbsp;",!
+	Write !,"<input type=""button"" name=""btnClose"" value=""Cancel"" onclick='close_page();'>"
+	Write !,!,"<input id=""OBJID"" name=""OBJID"" type=""hidden"" value="""_($select(injForm="":"",1:injForm.%Id()))_""">"
+	Write "</form>"
+	Write !,!,!,!,!,"	",!
+	Write "	"
+	Write !,!,!,!,"<!--Clear out Session Variables -->"
+	Write !,!,!,!,!,!,!,!,!,!,!,!,!,!,"</BODY>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<!-- BEDDINJ.csp - BEDD Injury Worksheet -->"
+	Write !,"<!-- ;;2.0;IHS EMERGENCY DEPT DASHBOARD;;Apr 02, 2014 -->"
+	Write !,"<!-- BEDD*2.0*1;Reworked class to enable log out feature -->"
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<HEAD>"
+	Write !,!
+	Set U="^",site=%session.Data("SITE")
+	Do LOADSYS^BEDDUTW(.beddsys,site)
+	Set timeout=$G(beddsys("TimeOut"))
+	Write !,!,"<META HTTP-EQUIV=""Refresh"" CONTENT="""_( timeout )_"; URL=BEDD.csp"">"
+	Write !,!,"<TITLE>	ERS INJURY RECORD</TITLE>",!
+	Write !,!,!,"<SCRIPT language=""JavaScript"">"
+	Write !,!,"//BEDD*2.0*1;Reworked code to use Javascript for page switching to enable Log Out feature",!
+	Write !,"function wInjuryYes() {	",!
+	Write "	"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".SaveWorkInj"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',""YES"") ;		",!
+	Write "}",!
+	Write !,"function wInjuryNo() {	",!
+	Write "	"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".SaveWorkInj"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',""NO"") ;	",!
+	Write "}",!
+	Write !,"function SaveSessionVar() {",!
+	Write "		",!
+	Write "	//Injury Location",!
+	Write "	var InjLocat = document.getElementById('InjLocat');",!
+	Write "	",!
+	Write "	//Injury Date and Time",!
+	Write "	var InjDtTm = document.getElementById('InjDtTm');",!
+	Write "	",!
+	Write "	//Injury Cause IEN",!
+	Write "	var CodeIEN = document.getElementById('CodeIEN');	",!
+	Write "	",!
+	Write "	//Injury Setting",!
+	Write "	var IS = document.getElementById('IS');",!
+	Write "	",!
+	Write "	//Injury Safety Equipment",!
+	Write "	var ISE = document.getElementById('ISE');",!
+	Write "	",!
+	Write "	//Exact MVC Location",!
+	Write "	var MVCLoc = document.getElementById('MVCLoc');",!
+	Write "	",!
+	Write "	//Notes",!
+	Write "	var Notes = document.getElementById('Notes');",!
+	Write "		",!
+	Write "	//Save Injury Info",!
+	Write "	"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".SaveSessInj"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',InjLocat.value,InjDtTm.value,CodeIEN.value,IS.value,ISE.value,MVCLoc.value,Notes.value) ;	",!
+	Write !,"	//At Fault Party Name",!
+	Write "	var AFPN = document.getElementById('AFPN');",!
+	Write "	",!
+	Write "	",!
+	Write "	//At Fault Party Address",!
+	Write "	var AFPA = document.getElementById('AFPA');",!
+	Write "	",!
+	Write "	//At Fault Insurance Name",!
+	Write "	var AFI = document.getElementById('AFI');",!
+	Write "	",!
+	Write "	//At Fault Insurance Address",!
+	Write "	var AFIA = document.getElementById('AFIA');",!
+	Write !,"	//At Fault Insurance Policy Number",!
+	Write "	var AFIP = document.getElementById('AFIP');",!
+	Write "	",!
+	Write "	//At Fault Notes",!
+	Write "	var AFNotes = document.getElementById('AFNotes');",!
+	Write "	",!
+	Write "	//Save At Fault Info",!
+	Write "	"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".SaveSessAF"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',AFPN.value,AFPA.value,AFI.value,AFIA.value,AFIP.value,AFNotes.value)",!
+	Write "	",!
+	Write "	//Employer Name",!
+	Write "	var EmpN = document.getElementById('EmpN');",!
+	Write "	",!
+	Write "	//Employer Address",!
+	Write "	var EmpAd = document.getElementById('EmpAd');",!
+	Write "	",!
+	Write "	//Employer City, ST, Zip",!
+	Write "	var EmpCSZ = document.getElementById('EmpCSZ');",!
+	Write "	",!
+	Write "	//Employer Phone",!
+	Write "	var EmpPhn = document.getElementById('EmpPhn');",!
+	Write "	",!
+	Write "	//Save Employer info",!
+	Write "	"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".SaveSessEmp"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',EmpN.value,EmpAd.value,EmpCSZ.value,EmpPhn.value)",!
+	Write "}",!
+	Write !,"function chkInj() {",!
+	Write "	submitOK=""true"";",!
+	Write "	",!
+	Write "	<!--Injury Where Occurred Check-->",!
+	Write "	var iwhr = document.getElementById('InjLocat');",!
+	Write "	if (iwhr.value=="""") {",!
+	Write "		alert(""Town/village Where Occurred is Required"");",!
+	Write "		submitOK=""false"";",!
+	Write "	}",!
+	Write !,"	<!--Injury Date Check-->",!
+	Write "	var injdt = document.getElementById('InjDtTm');",!
+	Write "	if (injdt.value=="""") {",!
+	Write "		alert(""Injury Date/Time is Required"");",!
+	Write "		submitOK=""false"";",!
+	Write "	}",!
+	Write "	if (injdt.value.length>0) {",!
+	Write "		if (injdt.value.length<11) {",!
+	Write "			alert(""Both Injury Date and Time are Required"");",!
+	Write "			submitOK=""false"";",!
+	Write "		}",!
+	Write "		if (injdt.value.length>10) {",!
+	Write "			var admdt = document.getElementById('AStmp');",!
+	Write "			var mess = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".getDtChk"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',injdt.value,admdt.value,""P"") ;",!
+	Write "			",!
+	Write "			if (mess==""P"") {",!
+	Write "				alert(""Injury Date/Time must be before Admit Date/Time"");",!
+	Write "				submitOK=""false"";",!
+	Write "			}",!
+	Write !,"		}",!
+	Write "	}",!
+	Write "	<!--Injury Cause Check-->",!
+	Write "	var cause = document.getElementById('DXdata');",!
+	Write "	if (cause.value=="""") {",!
+	Write "		alert(""Injury Cause is Required"");",!
+	Write "		submitOK=""false"";",!
+	Write "	}",!
+	Write "	",!
+	Write "	<!--Injury Setting Check-->",!
+	Write "	var setting = document.getElementById('IS');",!
+	Write "	if (setting.value=="""") {",!
+	Write "		alert(""Injury Setting is Required"");",!
+	Write "		submitOK=""false"";",!
+	Write "	}",!
+	Write !,"	if (submitOK==""true"") {",!
+	Write !,"		//Save to Session variables",!
+	Write "		SaveSessionVar();",!
+	Write "		",!
+	Write "		//Get user",!
+	Write "		var user = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".ReturnDUZ"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"') ;",!
+	Write "		",!
+	Write "		//Save information",!
+	Write "		"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".Save"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',user);",!
+	Write "		",!
+	Write "		//Clear Session variables",!
+	Write "		"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".ClearSession"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"');",!
+	Write "		",!
+	Write "		//Return to Dashboard",!
+	Write "		self.document.location.replace = ""BEDDEDIT1.csp?OBJID="_(%session.Data("OBJECTID"))_"&DFN="_(%session.Data("DFN"))_""" ;",!
+	Write !,"	} ",!
+	Write "	",!
+	Write "}",!
+	Write !,"function setFocus(){",!
+	Write !,"	//Make sure user is logged in",!
+	Write !,"	//Get user",!
+	Write "	var user = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".ReturnDUZ"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"') ;",!
+	Write !,"	if (user == 0) {",!
+	Write "		location.replace='BEDDLogin.csp';",!
+	Write "		return true;",!
+	Write "	}",!
+	Write !,"	setWrk();",!
+	Write "	setISet();",!
+	Write "	setISfty();",!
+	Write "}",!
+	Write !,"function setWrk() {",!
+	Write "		var x1 = document.getElementById(""wrk"");",!
+	Write "		var myVal = document.form.wrk.value ;",!
+	Write "		set_radio(x1, myVal);",!
+	Write " 	}",!
+	Write !,"function set_radio(rObj,myValue) {",!
+	Write "		if (myValue > 0) {",!
+	Write "			for(i=0; i<rObj.length; i++){",!
+	Write "				if (rObj[i].value == ""Yes"") {",!
+	Write "					rObj[i].checked = true;",!
+	Write "				}",!
+	Write "			}",!
+	Write "		} else {",!
+	Write "			for(i=0; i<rObj.length; i++){",!
+	Write "				if (rObj[i].value == ""No"") {",!
+	Write "					rObj[i].checked = true;",!
+	Write "				}",!
+	Write "			}",!
+	Write "		}",!
+	Write " 	}",!
+	Write !,"function setISet() {",!
+	Write "	var x = document.getElementById(""IS"") ;",!
+	Write "	var injs = document.form.injs.value ;",!
+	Write "	for (i=0; i<x.options.length; i++){",!
+	Write "		if (x.options[i].value == injs) {",!
+	Write "			x.selectedIndex = i ;",!
+	Write "		}",!
+	Write "	}",!
+	Write "}",!
+	Write "	",!
+	Write "function setISfty() {",!
+	Write "	var x = document.getElementById(""ISE"") ;",!
+	Write "	var injsfty = document.form.injsfty.value ;",!
+	Write "	for (i=0; i<x.options.length; i++){",!
+	Write "		if (x.options[i].value == injsfty) {",!
+	Write "			x.selectedIndex = i ;",!
+	Write "		}",!
+	Write "	}",!
+	Write "}",!
+	Write !,"function doDXSearch() {",!
+	Write "	var x1 = document.getElementById(""DXSearch"");",!
+	Write "	",!
+	Write "	//Clear out current list",!
+	Write "	var curList=document.getElementById(""DXdata"");",!
+	Write "	while(curList.length > 0)",!
+	Write "  	{",!
+	Write "   		curList.remove(0);",!
+	Write "  	}",!
+	Write "	",!
+	Write "	//Perform the search",!
+	Write "	"_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".getDXSearch"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',x1.value) ;",!
+	Write "	",!
+	Write "	//No results",!
+	Write "	if (curList.length == 0) {",!
+	Write "		alert(""No results returned. Please try another search"");",!
+	Write "	}",!
+	Write "	",!
+	Write "}",!
+	Write !,"function setDXdata() {",!
+	Write "	var Selected = document.form.DXdata.selectedIndex;",!
+	Write "   	var SelectedOption = document.form.DXdata.options[Selected].value;",!
+	Write "   	var x1 = document.getElementById(""CodeIEN"");",!
+	Write "   	",!
+	Write "	var myData = SelectedOption.split("" - "");",!
+	Write "	if (myData[0] != undefined) {",!
+	Write "		x1.value = myData[0];",!
+	Write "	}",!
+	Write "	else {",!
+	Write "		x1.value = """";",!
+	Write "	}",!
+	Write "			",!
+	Write "}",!
+	Write !,"function close_page(){",!
+	Write "	self.document.location.replace = ""BEDDEDIT1.csp?OBJID="_(objid)_""" ;",!
+	Write "}",!
+	Write !,"function doInjDtTmDateCheck()	{",!
+	Write "		var my_info = document.getElementById(""InjDtTm"");",!
+	Write "		var my_datetm = "_("cspHttpServerMethod")_"('"_(..Encrypt($listbuild($classname()_".MyXdate"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',my_info.value) ;",!
+	Write "		my_info.value=my_datetm;",!
+	Write "	}",!
+	Write !,"function setFormOK() {",!
+	Write "	var x=document.getElementById(""FormIsOkay"");",!
+	Write "	x.value = ""YES"";",!
+	Write "}",!
+	Write !,"function CheckForm() {",!
+	Write "	var x1= document.getElementById(""SaveCheck"") ;",!
+	Write "	var x2=document.getElementById(""FormIsOkay"");",!
+	Write "	if ( x2.value == ""YES"" ) {",!
+	Write "		return true;",!
+	Write "	}",!
+	Write "	if ( x1.value == ""YES"" ) {",!
+	Write "		return true;",!
+	Write "	} else {",!
+	Write "		return false;",!
+	Write "	}",!
+	Write "	",!
+	Write "	// Default answer is we save the page",!
+	Write "	return true;",!
+	Write "}",!
+	Write "</SCRIPT>"
+	Do ..formGenJS()
+	Write !,(..HyperEventHead(0,0))
+	Write !,"</HEAD>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<HTML>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,"</HTML>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPagePOSTHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[	Set injForm=$$$NULLOREF
+]]></Implementation>
+</Method>
+
+<Method name="OnPagePREHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[	Set injForm=$$$NULLOREF
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+ 	Set U="^"
+ 	
+ 	//Check for access information
+ 	If ('$D(%session.Data("DUZ"))) {
+ 		Set %response.Redirect="BEDDLogin.csp"
+ 	}
+ 
+ 	Set objid=$Get(%session.Data("OBJECTID"))
+ 	
+  	Quit 1
+ 
+]]></Implementation>
+</Method>
+
+<Method name="ReturnDUZ">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set user=$Get(%session.Data("DUZ"))
+ 	If (user<1) {
+ 		Set user=0
+ 	}
+ 
+ 	Quit user
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="Save">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>myUser:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set duz=%session.Data("DUZ")
+ 	Set site=%session.Data("SITE")
+ 	Set objid=$Get(%session.Data("OBJECTID"))
+ 
+ 	//Audit the activity
+ 	Set dfn=$G(%session.Data("DFN"))
+ 	Do LOG^BEDDUTIU(duz,"P","E","BEDDINJ.csp","BEDD: User saved patient injury information",dfn)
+ 
+ 	Set entry=##class(BEDD.EDVISIT).%OpenId(objid)
+ 	
+ 	//Injury Location
+ 	Set entry.PtInjury.InjLocat=$Get(%session.Data("InjLocat"))
+ 	
+ 	//Injury Date and Time
+ 	Set entry.PtInjury.InjDtTm=$$DATE^BEDDUTIU($Get(%session.Data("InjDtTm")))
+  	
+ 	//Injury Cause IEN - New for BEDD v2.0
+ 	Set entry.PtInjury.InjCauseIEN=$Get(%session.Data("CodeIEN"))
+  	
+  	//Injury Setting
+ 	Set entry.PtInjury.InjSet=$Get(%session.Data("IS"))
+  	
+  	//Injury Safety Used
+ 	Set entry.PtInjury.SafetyEquip=$Get(%session.Data("ISE"))
+ 	
+ 	//Exact MVC Location
+ 	Set entry.PtInjury.MVCLoc=$Get(%session.Data("MVCLoc"))
+ 	
+ 	//Injury YES/NO
+ 	Set injwrk=$Get(%session.Data("wrk"))
+ 	If (injwrk = "YES")||(injwrk = "NO") {
+ 		Set entry.PtInjury.WrkRel=$Get(%session.Data("wrk"))
+ 	}
+ 	
+  	//Injury Details
+  	Set note=""
+ 	Set note=%session.Data("Notes")
+ 	Do entry.PtInjury.InjuryDetails.Write(note)
+ 	
+ 	//At Fault Party Name
+ 	Set entry.PtInjury.AtFaultName=$Get(%session.Data("AFPN"))
+ 	
+ 	//At Fault Party Address
+ 	Set entry.PtInjury.AtFaultAddress=$Get(%session.Data("AFPA"))
+ 	
+ 	//At Fault Insurance Name
+ 	Set entry.PtInjury.AtFaultInsurance=$Get(%session.Data("AFI"))
+ 	
+ 	//At Fault Insurance Address
+ 	Set entry.PtInjury.AtFaultInsAdd=$Get(%session.Data("AFIA"))
+ 	
+ 	//At Fault Insurance Policy Number
+ 	Set entry.PtInjury.AtFaultInsPolicy=$Get(%session.Data("AFIP"))
+ 	
+  	//At Fault Notes
+  	Set afnote=""
+ 	Set afnote=$Get(%session.Data("AFNotes"))
+ 	Do entry.PtInjury.AtFaultOther.Write(afnote)
+ 	
+ 	//Employer Name
+ 	Set entry.PtInjury.EmplName=$Get(%session.Data("EmpN"))
+ 	
+ 	//Employer Address
+ 	Set entry.PtInjury.EmplAddress=$Get(%session.Data("EmpAd"))
+ 	
+ 	//Employer City, ST, Zip
+ 	Set entry.PtInjury.EmplCitySt=$Get(%session.Data("EmpCSZ"))
+ 	
+ 	//Employer Phone
+ 	Set entry.PtInjury.EmplPh=$Get(%session.Data("EmpPhn"))
+ 	
+ 	//Save entry into class
+ 	Set rc=entry.%Save()
+ 	Quit
+ 	
+ 	
+]]></Implementation>
+</Method>
+
+<Method name="SaveSessAF">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>AFPN:%String,AFPA:%String,AFI:%String,AFIA:%String,AFIP:%String,AFNotes:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	//Called by: #server(..SaveSessAF(AFPN.value,AFPA.value,AFI.value,AFIA.value,AFIP.value,AFNotes.value))#
+ 
+ 	Set %session.Data("AFPN")=AFPN
+ 	Set %session.Data("AFPA")=AFPA
+ 	Set %session.Data("AFI")=AFI
+ 	Set %session.Data("AFIA")=AFIA
+ 	Set %session.Data("AFIP")=AFIP
+ 	Set %session.Data("AFNotes")=AFNotes
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="SaveSessEmp">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>EmpN:%String,EmpAd:%String,EmpCSZ:%String,EmpPhn:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	//Called by: #server(..SaveSessEmp(EmpN.value,EmpAd.value,EmpCSZ.value,EmpPhn.value))#
+ 
+ 	Set %session.Data("EmpN")=EmpN
+ 	Set %session.Data("EmpAd")=EmpAd
+ 	Set %session.Data("EmpCSZ")=EmpCSZ
+ 	Set %session.Data("EmpPhn")=EmpPhn
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="SaveSessInj">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>InjLocat:%String,InjDtTm:%String,CodeIEN:%String,IS:%String,ISE:%String,MVCLoc:%String,Notes:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	//Called by: #server(..SaveSessInj(InjLocat.value,InjDtTm.value,CodeIEN.value,IS.value,ISE.value,MVCLoc.value,Notes.value))# ;
+ 
+ 	Set %session.Data("InjLocat")=InjLocat
+ 	Set %session.Data("InjDtTm")=InjDtTm
+ 	Set %session.Data("CodeIEN")=CodeIEN
+ 	Set %session.Data("IS")=IS
+ 	Set %session.Data("ISE")=ISE
+ 	Set %session.Data("MVCLoc")=MVCLoc
+ 	Set %session.Data("Notes")=Notes
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Method name="SaveWorkInj">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>wrk:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 
+ 	Set %session.Data("wrk")=wrk
+ 	
+ 
+]]></Implementation>
+</Method>
+
+<Method name="formGenJS">
+<Description><![CDATA[
+Called to render JavaScript code that is required for form <var>form</var>.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<Language>cache</Language>
+<ReturnType/>
+<Implementation><![CDATA[
+	Write !,"<script language=""JavaScript"" type=""text/javascript"">",!
+	Write "<!--",!
+	Write "function form_new()",!
+	Write "{",!
+	Write "   // invoke #server(csp.beddinj.formLoad())",!
+	Write "   return ("_"cspHttpServerMethod"_"('",..Encrypt($listbuild("csp.beddinj.formLoad"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""),"','') == 1);",!
+	Write "}",!
+	Write "function form_save()",!
+	Write "{",!
+	Write "   var form = self.document.form;",!
+	Write "   var objid = form.OBJID.value;",!
+	Write "   var result = 0;",!
+	Write "   if (form_validate()) {",!
+	Do ..formSavJS()
+	Write "   }",!
+	Write "   return (result == 1);",!
+	Write "}",!
+	Write "function form_validate()",!
+	Write "{",!
+	Write "   var errorMsg = '';",!
+	Write "   var missingMsg = '';",!
+	Write "   var invalidMsg = '';",!
+	Write "   var missingArray = new Array();",!
+	Write "   var invalidArray = new Array();",!
+	Write "   var valid;",!
+	Write "   missingMsg = form_testRequired(missingArray);",!
+	Write "   invalidMsg = form_testValid(invalidArray);",!
+	Write "   if ((missingMsg == '') && (invalidMsg == '')) {",!
+	Write "      return true;",!
+	Write "   }",!
+	Write "   errorMsg   = "_..QuoteJS(%response.GetText("","%CSPBind","SaveErrorLine","_______________________________________________________________"))_"+'\n\n';",!
+	Write "   errorMsg  += "_..QuoteJS(%response.GetText("","%CSPBind","SaveError","The form was not saved because of the following error(s)."))_"+'\n';",!
+	Write "   errorMsg  += "_..QuoteJS(%response.GetText("","%CSPBind","SaveCorrect","Please correct these error(s) and try again."))_"+'\n';",!
+	Write "   errorMsg  += "_..QuoteJS(%response.GetText("","%CSPBind","SaveErrorLine","_______________________________________________________________"))_"+'\n\n';",!
+	Write "   if (missingMsg!= '') {",!
+	Write "      errorMsg += "_..QuoteJS(%response.GetText("","%CSPBind","SaveRequiredError","The following required field(s) are empty: "))_" + missingMsg + '\n';",!
+	Write "   }",!
+	Write "   if (invalidMsg != '') {",!
+	Write "      errorMsg += "_..QuoteJS(%response.GetText("","%CSPBind","SaveInvalidError","The following field(s) contain invalid values: "))_" + invalidMsg + '\n';",!
+	Write "   }",!
+	Write "   alert(errorMsg);",!
+	Write "   return false;",!
+	Write "}",!
+	Write "function form_testRequired(missingArray)",!
+	Write "{",!
+	Write "   var missingMsg = '';",!
+	Do ..formReqJS()
+	Write "   return missingMsg;",!
+	Write "}",!
+	Write "function form_testValid(invalidArray)",!
+	Write "{",!
+	Write "   var valid;",!
+	Write "   var invalidMsg = '';",!
+	Do ..formValJS()
+	Write "   return invalidMsg;",!
+	Write "}",!
+	Write "// -->",!
+	Write "</script>",!
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="formLoad">
+<Description><![CDATA[
+Updates the form <var>form</var> from the specified object instance by sending JavaScript to the client.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>objid:%String,obj:%Integer=""</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	If '..formLoadJS(.objid,obj) {
+		Write "CSPPage.alert("_..QuoteJS("formLoad: "_%response.GetText("","%CSPBind","OpenObjectError","Unable to open object."))_");",!
+		Do ..formLoadJS(objid,obj,1)
+	}
+	Quit 1
+]]></Implementation>
+</Method>
+
+<Method name="formLoadJS">
+<Description><![CDATA[
+Updates the form <var>form</var> from the specified object instance by sending JavaScript to the client.  Error reporting is left to the caller.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>objid:%String,obj:%Integer="",alwaysLoad:%Boolean=0</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	New close,ok
+	Set close=0,ok=1
+	If (obj'=$$$NULLOREF) {
+		Set objid = obj.%Id()
+	} Else {
+		If (objid'="") {
+			Set obj = ##class(BEDD.EDVISIT).%OpenId(objid)
+		} Else {
+			Set obj = ##class(BEDD.EDVISIT).%New()
+		}
+		If (obj=$$$NULLOREF) {
+			If 'alwaysLoad Quit 0
+			Set ok=0
+		} Else {
+			Set close=1
+		}
+	}
+	Write "var form = CSPPage.document.form;",!
+	Write "if (form.ID != null && form.ID != null) { form.ID.value = ",..QuoteJS($select(obj="":"",1:(obj.%Id()))),";}",!
+	Write "if (form.PtDFN != null && form.PtDFN != null) { form.PtDFN.value = ",..QuoteJS($select(obj="":"",1:($select(obj.PtDFN=$c(0):"",1:(obj.PtDFNLogicalToDisplay(obj.PtDFN)))))),";}",!
+	Write "if (form.ptstat != null && form.ptstat != null) { form.ptstat.value = ",..QuoteJS($select(obj="":"",1:($select(obj.PtStat=$c(0):"",1:(obj.PtStatLogicalToDisplay(obj.PtStat)))))),";}",!
+	Write "if (form.CodeIEN != null && form.CodeIEN != null) { form.CodeIEN.value = ",..QuoteJS($select(obj="":"",1:($select(obj.PtInjury="":"",1:($select(obj.PtInjury.InjCauseIEN=$c(0):"",1:(obj.PtInjury.InjCauseIENLogicalToDisplay(obj.PtInjury.InjCauseIEN)))))))),";}",!
+	Write "if (form.injsfty != null && form.injsfty != null) { form.injsfty.value = ",..QuoteJS($select(obj="":"",1:($select(obj.PtInjury="":"",1:($select(obj.PtInjury.SafetyEquip=$c(0):"",1:(obj.PtInjury.SafetyEquipLogicalToDisplay(obj.PtInjury.SafetyEquip)))))))),";}",!
+	Write "if (form.wrk != null && form.wrk[0] != null) { form.wrk[0].checked = ",(($select(obj="":"",1:($select(obj.PtInjury="":"",1:($select(obj.PtInjury.WrkRel=$c(0):"",1:(obj.PtInjury.WrkRelLogicalToDisplay(obj.PtInjury.WrkRel))))))))="NO"),";}",!
+	Write "if (form.wrk != null && form.wrk[1] != null) { form.wrk[1].checked = ",(($select(obj="":"",1:($select(obj.PtInjury="":"",1:($select(obj.PtInjury.WrkRel=$c(0):"",1:(obj.PtInjury.WrkRelLogicalToDisplay(obj.PtInjury.WrkRel))))))))="YES"),";}",!
+	Write "if (form.OBJID != null) { form.OBJID.value = ",..QuoteJS(objid),";}",!
+	If close=1 Set obj=""
+	Quit ok
+]]></Implementation>
+</Method>
+
+<Method name="formReqJS">
+<Description><![CDATA[
+Called during rendering of this page to write out JavaScript code to do required field tests for form <var>form</var>.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<Language>cache</Language>
+<ReturnType/>
+<Implementation><![CDATA[	Quit
+]]></Implementation>
+</Method>
+
+<Method name="formSavJS">
+<Description><![CDATA[
+Called during rendering of this page to write out JavaScript code to invoke the server-side save method for form <var>form</var>.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<Language>cache</Language>
+<ReturnType/>
+<Implementation><![CDATA[
+	Write "      //invoke #server(csp.beddinj.formSave())"
+	Write !,"      result = "_"cspHttpServerMethod"_"('",..Encrypt($listbuild("csp.beddinj.formSave"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""),"',1,'',objid"
+	Write ",",!,"         (form.CodeIEN == null || form.CodeIEN == null) ? null : cspTrim(form.CodeIEN.value)" ;%in1
+	Write ",",!,"         (form.injsfty == null || form.injsfty == null) ? null : cspTrim(form.injsfty.value)" ;%in2
+	Write ",",!,"         cspGetRadioValue(form.wrk)" ;%in3
+	Write ");",!
+	Quit
+]]></Implementation>
+</Method>
+
+<Method name="formSave">
+<Description><![CDATA[
+Saves the data sent from the form <var>form</var> into the specified object instance. If successful, updates the values on the form.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec><![CDATA[respond:%Boolean=0,&errmsg:%String="",objid:%String="",%in1:%String,%in2:%String,%in3:%String]]></FormalSpec>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	New obj,sc,value,in,error,sverror,err,i,ok
+	Set sc=$$$OK
+	Set ok=1
+	Set error=""
+	Set sverror=""
+	If (objid="") {
+		Set obj = ##class(BEDD.EDVISIT).%New()
+	} ElseIf '$isobject(objid) {
+		Set obj = ##class(BEDD.EDVISIT).%OpenId(objid)
+	} Else {
+		Set obj = objid
+	}
+	If (obj=$$$NULLOREF) {
+		If (respond) {
+			Write "CSPPage.alert("_..QuoteJS(%response.GetText("","%CSPBind","SaveObjectError","Unable to open object for saving"))_");",!
+		} Else {
+			Set errmsg = %response.GetText("","%CSPBind","SaveObjectError","Unable to open object for saving")
+		}
+		Quit 0
+	}
+	Try {
+ ; InjCauseIEN 
+ If $data(%in1) {
+   Set value=$select(%in1="":"",1:##class(BEDD.EDInjury).InjCauseIENDisplayToLogical(%in1))
+   If (%in1'=""),(value="") {
+     Set error=error_%response.GetText("","%CSPBind","InvalidValue","%1 has an invalid value.","CodeIEN")_"\n"
+   } Else {
+     Set obj.PtInjury.InjCauseIEN=value
+   }
+ }
+ ; SafetyEquip 
+ If $data(%in2) {
+   Set value=$select(%in2="":"",1:##class(BEDD.EDInjury).SafetyEquipDisplayToLogical(%in2))
+   If (%in2'=""),(value="") {
+     Set error=error_%response.GetText("","%CSPBind","InvalidValue","%1 has an invalid value.","injsfty")_"\n"
+   } Else {
+     Set obj.PtInjury.SafetyEquip=value
+   }
+ }
+ ; WrkRel 
+ If $data(%in3) {
+   Set value=$select(%in3="":"",1:##class(BEDD.EDInjury).WrkRelDisplayToLogical(%in3))
+   If (%in3'=""),(value="") {
+     Set error=error_%response.GetText("","%CSPBind","InvalidValue","%1 has an invalid value.","wrk")_"\n"
+   } Else {
+     Set obj.PtInjury.WrkRel=value
+   }
+ }
+	Set:error'="" ok=0
+	Set:error="" sc=obj.%Save()
+	} Catch ex {
+		Set ok=0
+		If ($classname(ex)'="%Exception.SystemException") || (ex.Name'="<MAXSTRING>") || (error="") {
+			Set sc=ex.AsStatus(),error=""
+		}
+	}
+	If $$$ISERR(sc) {
+		Set ok=0
+		Do DecomposeStatus^%apiOBJ(sc,.err,"",%response.MatchLanguage())
+		For i=1:1:err {
+			If (respond) {
+				Set sverror=sverror_" + "_..QuoteJS(err(i))_" + '\n'"
+			} Else {
+				Set sverror=sverror_..EscapeHTML(err(i))_"\n"
+			}
+		}
+	}
+	If (respond) {
+		If (ok) {
+			Do ..formLoad("",obj)
+		} Else {
+			Write "CSPPage.alert(",!
+			Write ..QuoteJS(%response.GetText("","%CSPBind","SaveErrorLine","_______________________________________________________________"))_"+'\n\n'+",!
+			Write ..QuoteJS(%response.GetText("","%CSPBind","SaveError","The form was not saved because of the following error(s)."))_"+'\n'+",!
+			Write ..QuoteJS(%response.GetText("","%CSPBind","SaveCorrect","Please correct these error(s) and try again."))_"+'\n'+",!
+			Write ..QuoteJS(%response.GetText("","%CSPBind","SaveErrorLine","_______________________________________________________________"))_"+'\n\n'+",!
+			Write "'",error,"'",sverror,");",!
+		}
+	} Else {
+		Set errmsg=..EscapeHTML(error)_sverror
+	}
+	Quit ok
+]]></Implementation>
+</Method>
+
+<Method name="formSubmit">
+<Description><![CDATA[
+Translates a submit request from form <var>form</var> into a call to <METHOD>formSave</METHOD>.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec><![CDATA[&errmsg:%String="",objid]]></FormalSpec>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+ New v
+ Set v("PtInjury.InjCauseIEN")=$ZSTRIP($get(%request.Data("CodeIEN",1)),">W")
+ Set v("PtInjury.SafetyEquip")=$ZSTRIP($get(%request.Data("injsfty",1)),">W")
+ Set v("PtInjury.WrkRel#1")=$get(%request.Data("wrk",1))
+	If $get(objid)="" Set objid=$get(%request.Data("OBJID",1))
+	Quit ..formSave(0,.errmsg,objid,v("PtInjury.InjCauseIEN"),v("PtInjury.SafetyEquip"),v("PtInjury.WrkRel#1"))
+]]></Implementation>
+</Method>
+
+<Method name="formValJS">
+<Description><![CDATA[
+Called during rendering of this page to write out JavaScript code to do field validation tests for form <var>form</var>.]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<Language>cache</Language>
+<ReturnType/>
+<Implementation><![CDATA[	Quit
+]]></Implementation>
+</Method>
+
+<Method name="getDXSearch">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>dxTerm:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ 	Set tDUZ=%session.Data("DUZ")
+ 	Set objid=$G(%session.Data("OBJECTID"))
+ 	Do DXLKP^BEDDUTID(dxTerm,objid,tDUZ,1)
+ 	Set U="^",cnt=0
+ 	Set idx=$O(^TMP("BEDDDX",$J,""))
+ 	If (idx]"") {
+ 		// Zero out the search results
+ 		&js<
+ 			CSPPage.document.form.DXdata.options.length=0;
+ 			CSPPage.document.form.DXdata.options[0]=new Option(" ", " ", false, false);
+ 			>		
+ 	}
+ 	While idx]"" {
+ 		Set zz=^TMP("BEDDDX",$J,idx)
+ 		Set myien=$p(zz,U,1)
+ 		Set mycd=$p(zz,U,2)
+ 		Set mynar=$p(zz,U,3)
+ 		Set cnt=cnt+1
+ 		// Put this data into the page
+ 		&js<
+ 			CSPPage.document.form.DXdata.options[#(cnt)#]=new Option("#(mycd)# - #(mynar)#", "#(myien)# - #(mycd)# - #(mynar)#", false, false,"#(myien)# - #(mycd)# - #(mynar)#");
+ 		>
+ 		Set idx=$O(^TMP("BEDDDX",$J,idx))
+ 	}
+ 	Quit
+ 
+]]></Implementation>
+</Method>
+
+<Method name="getDtChk">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>date:%String,admdt:%String,chk:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+ Quit $$DTCHK^BEDDUTIU(date,admdt,chk,"")
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>D:\intersystems\E3IHS\CSP\foia_goldb\BEDDINJ.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/foia_goldb/BEDDINJ.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>64671,78204</Default>
+</Parameter>
+</Class>
+</Export>

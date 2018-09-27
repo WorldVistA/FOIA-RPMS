@@ -1,5 +1,5 @@
 ABSPOSAE ; IHS/SD/lwj - send/receive E1 trans ;   [ 10/07/2005  2:11 pM ]
- ;;1.0;PHARMACY POINT OF SALE;**14,16,17,21,28,42,47**;JUN 1, 2001;Build 15
+ ;;1.0;PHARMACY POINT OF SALE;**14,16,17,21,28,42,47,48**;JUN 21, 2001;Build 27
  ;
  ;  ABSPOSAE is the main program for send/receive communications
  ;  with the Envoy switch for E1 transactions.  It was originally
@@ -122,15 +122,15 @@ PRCRESP ; this subroutine is responsible for facilitating the parsing of the
  ; raw response and storing the information in ^ABSPE. We will leave
  ; the displaying of the data up to ^ABSPOSE1/^ABSPOSE2.
  ;
- N FDATA
- N WP,I,RREC
+ N FDATA,WP,I,RREC,ZERR  ; /IHS/OIT/RAM ; 12 JUN 17 ; ADD DBS CALL ERROR RETURN VARIABLE
  N DIE,DR,DA
  ;
  M RREC=RESPMSG
  ;
  ; let's go ahead and write out the raw response to ^ABSPE
  F I=1:100:$L(RREC) S WP(I/100+1,0)=$E(RREC,I,I+99)
- D WP^DIE(9002313.7,E1IEN_",",2000,"","WP")
+ D WP^DIE(9002313.7,E1IEN_",",2000,"","WP","ZERR") ; /IHS/OIT/RAM ; 12 JUN 17 ; UPDATE DBS CALL TO ALLOW FOR ERROR RETURN.
+ I $D(ZERR) D LOG^ABSPOSL2("PRCRESP^ABSPOSAE",.ZERR) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  ;
  ;start here when we are ready to parse data out again
  ; next let's parse the data out into the actual fields
@@ -406,7 +406,6 @@ CALLOIT ; this is standard for all messages when we are communicating
   ;IHS/OIT/SCR 09/23/08 patch 28 - BEGIN changed support info
  ;W "*  If the problem persist, please contact the       *",!
  W "*   If the problem persist, please contact          *",!
- ;W "*  OIT support desk at 1-888-830-7280.              *",!
  W "*                 your local helpdesk.              *",!
  ;IHS/OIT/SCR 09/23/08 patch 28 - END changed support info
  W "*****************************************************",!!
@@ -417,9 +416,10 @@ CALLOIT ; this is standard for all messages when we are communicating
 RECERR ; this will record that the response was not received in the 9999999
  ; field in the ^ABSPE file
  ;
- N DIE,DA,DR
+ N DIE,DA,DR,ZERR  ; /IHS/OIT/RAM ; 12 JUN 17 ; ADD DBS CALL ERROR RETURN VARIABLE
  ;
- D WP^DIE(9002313.7,E1IEN_",",2000,"","WP")  ;raw resp data
+ D WP^DIE(9002313.7,E1IEN_",",2000,"","WP","ZERR") ; /IHS/OIT/RAM ; 12 JUN 17 ; UPDATE DBS CALL TO ALLOW FOR ERROR RETURN.
+ I $D(ZERR) D LOG^ABSPOSL2("RECERR^ABSPOSAE",.ZERR) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  ;
  S DA=E1IEN
  S DIE="^ABSPE("

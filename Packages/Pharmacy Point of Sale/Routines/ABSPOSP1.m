@@ -1,5 +1,5 @@
 ABSPOSP1 ; IHS/FCS/DRS - POS Writeoffs batch ;    [ 09/12/2002  10:17 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**3**;JUN 21, 2001;Build 15
+ ;;1.0;PHARMACY POINT OF SALE;**3,48**;JUN 21, 2001;Build 27
  Q
 INDEX() Q "APBWO" ; which one is the index for these?
 ISEMPTY() Q '$O(^ABSBITMS(9002302,$$INDEX,1,0)) ; true if there's none to do
@@ -63,6 +63,7 @@ CLRFLAG(PCNDFN)    ;
  N FDA,MSG
  S FDA(9002302,PCNDFN_",",600.01)=0
 C5 D FILE^DIE("","FDA","MSG")
+ I $D(MSG) D LOG^ABSPOSL2("C5^ABSPOSP1",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  Q:'$D(MSG)  ; success
  D ZWRITE^ABSPOS("FDA","MSG")
  G C5:$$IMPOSS^ABSPOSUE("FM","TRI","FILE^DIE failed",,"CLRFLAG",$T(+0))

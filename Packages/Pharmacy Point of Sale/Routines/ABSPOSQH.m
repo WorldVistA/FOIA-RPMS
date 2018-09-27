@@ -1,5 +1,5 @@
 ABSPOSQH ; IHS/FCS/DRS - JWS 10:46 AM 7 Jan 1997 ;
- ;;1.0;PHARMACY POINT OF SALE;;JUN 21, 2001
+ ;;1.0;PHARMACY POINT OF SALE;**48**;JUN 21, 2001;Build 27
  ;prepare claims for transmission (eg assemble into ASCII record format)
  ; Called from ABSPOSQG, usually from ABSPOSQ2
  ; Also used by certification, called from ABSPOSC2
@@ -36,6 +36,7 @@ PASCII1 ;EP - from above and also ABSPOSC2 ;
  ;Store NCPDP Ascii formatted record in ^ABSPECX($J,"C",CLAIMIEN,..)
  ;transmission scratch global
  N PREFIX S PREFIX=$P($G(^ABSP(9002313.55,DIALOUT,"NDC")),U,2)
+ N ZERR  ; /IHS/OIT/RAM ; 12 JUN 17 ; ADD DBS CALL ERROR RETURN VARIABLE
  ; If test mode for NDC, then change that prefix from HN* to HN.
  ; (Actually, I don't understand when or where that test mode really
  ;  means anything.)
@@ -44,7 +45,8 @@ PASCII1 ;EP - from above and also ABSPOSC2 ;
  ; And save a copy of the original transmitted record in
  ; ^ABSPC(CLAIMIEN,"M")
  N WP,I F I=1:100:$L(AREC) S WP(I/100+1,0)=$E(AREC,I,I+99)
- D WP^DIE(9002313.02,CLAIMIEN_",",9999,"","WP")
+ D WP^DIE(9002313.02,CLAIMIEN_",",9999,"","WP","ZERR") ; /IHS/OIT/RAM ; 12 JUN 17 ; UPDATE DBS CALL TO ALLOW FOR ERROR RETURN.
+ I $D(ZERR) D LOG^ABSPOSL2("PASCII1^ABSPOSQH",.ZERR) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  ;
  ;Increment claim counter
  S COUNT=COUNT+1

@@ -1,19 +1,18 @@
 ABMEHGR3 ; IHS/ASDST/DMJ - GET ANCILLARY SVCS REVENUE CODE INFO ;     
- ;;2.6;IHS Third Party Billing;**1,3,6,9**;NOV 12, 2009
+ ;;2.6;IHS Third Party Billing;**1,3,6,9,23**;NOV 12, 2009;Build 427
  ;Original;DMJ;03/20/96 9:07 AM
  ;
- ; IHS/SD/SDR - v2.5 p9 -split routine from ABMEHGR2
- ; IHS/SD/SDR - v2.5 p10 - IM20395
- ;   Split lines bundled by rev code
- ; IHS/SD/SDR - v2.5 p10 - IM21539
- ;   Changed anes amt to just use base charge
+ ;IHS/SD/SDR 2.5 p9 split routine from ABMEHGR2
+ ;IHS/SD/SDR 2.5 p10 IM20395 Split lines bundled by rev code
+ ;IHS/SD/SDR 2.5 p10 IM21539 Changed anes amt to just use base charge
  ;
- ; IHS/SD/SDR - v2.6 CSV
- ; IHS/SD/SDR - abm*2.6*1 - HEAT6566 - populate anes based on MCR vs non-MCR
- ; IHS/SD/SDR - abm*2.6*1 - HEAT8498 - Use start/stop time, not service dates for anes
- ; IHS/SD/SDR - abm*2.6*3 - HEAT12742 - Correction to MCR/non-MCR; removed 6566 changes
- ; IHS/SD/SDR - abm*2.6*6 - 5010 - added prompts for SV5 segment
- ; IHS/SD/SDR - abm*2.6*6 - 5010 - added test date to 37 multiple
+ ;IHS/SD/SDR v2.6 CSV
+ ;IHS/SD/SDR 2.6*1 HEAT6566 - populate anes based on MCR vs non-MCR
+ ;IHS/SD/SDR 2.6*1 HEAT8498 - Use start/stop time, not service dates for anes
+ ;IHS/SD/SDR 2.6*3 HEAT12742 - Correction to MCR/non-MCR; removed 6566 changes
+ ;IHS/SD/SDR 2.6*6 5010 - added prompts for SV5 segment
+ ;IHS/SD/SDR 2.6*6 5010 - added test date to 37 multiple
+ ;IHS/SD/AML 2.6*23 HEAT247169 for subfile 43 add NDC to array of data
  ;
 35 ;EP - Radiology
  S DA=0
@@ -117,6 +116,7 @@ ABMEHGR3 ; IHS/ASDST/DMJ - GET ANCILLARY SVCS REVENUE CODE INFO ;
  .S $P(ABMRV(43,DA,ABMLCNT),U,10)=ABM(7)  ;Service from date/time
  .S $P(ABMRV(43,DA,ABMLCNT),U,11)=ABM(6)  ;corresponding dx
  .S $P(ABMRV(43,DA,ABMLCNT),U,12)=ABM(9)  ;3rd Modifier
+ .S $P(ABMRV(43,DA,ABMLCNT),U,19)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),43,DA,0)),U,19)  ;NDC  ;abm*2.6*23 IHS/SD/AML HEAT247169
  .S ABM(13)=$O(^ABMDBILL(DUZ(2),ABMP("BDFN"),43,DA,"P","C","R",0))  ;rendering provider
  .I +$G(ABM(13))'=0 S $P(ABMRV(43,DA,ABMLCNT),U,13)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),43,DA,"P",ABM(13),0)),U)
  .S ABM(21)=$O(^ABMDBILL(DUZ(2),ABMP("BDFN"),43,DA,"P","C","D",0))  ;ordering provider

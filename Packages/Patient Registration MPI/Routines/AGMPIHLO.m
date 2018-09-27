@@ -1,5 +1,5 @@
 AGMPIHLO ;IHS/SD/TPF - Patient Registration MPI HLO Interface ALL HLO MESSAGES
- ;;7.2;IHS PATIENT REGISTRATION;**1,3**;MAY 20, 2010;Build 4
+ ;;7.2;IHS PATIENT REGISTRATION;**1,3,5,6**;MAY 20, 2010;Build 23
  ;BADEHL1 was used as a template for this routine
  Q
  ;FOR PATIENT MERGE A40
@@ -23,7 +23,26 @@ NEWMSG(BPMRY) ;EP - FOR PATIENT MERGE
  ;SEND VQQ TO GET A REGULAR HL7 MESSAGE
 CREATMSG(DFN,EVNTTYPE,DFN2,SUCCESS) ;EP - START FOR MOST PAT REG TRIGGERS
  ;S AGMPSTOP=1
+ ; 9/07/2017 - GCD - CR 7693 - Disabled VQQ messages.
+ I $G(EVNTTYPE)="VTQ"!($G(EVNTTYPE)="VQQ") S SUCCESS=0 Q
+ ;MODIFIED  11/28/2016 - SWH
+ I '($G(AGMPCHKFLG)),$G(^AGMPCHK(0)),'($G(^AGMPCHK(DUZ(2),1))="VALID") D  Q  ; CHECK TO SEE IF WE HAVE THE GLOBAL BUILT AND IF THE SITE CAN TRIGGER MESSAGES.
+ .S SUCCESS=0
+ .I '($G(^AGMPCHK(DUZ(2)))) D NOTIF("","Site "_DUZ(2)_"isn't defined within the ^AGMPCHK global.")  Q
+ .I '($G(DFN2)) S DFN2=""
+ .D UPDMSGQ^AGMPCHK(DFN,DFN2,EVNTTYPE,DUZ(2))
+ .I '($G(ZTQUEUED)) W !,"Site "_DUZ(2)_" / "_$G(^AGMPCHK(DUZ(2)))_" is disabled in ^AGMPCHK, the message was not sent!"
+ .I $D(^AGMPCHK(DUZ(2),"NT")) D
+ ..I (+($P(^AGMPCHK(DUZ(2),"NT"),",")))=(+($p($H,","))) S TCHCK=((+($P($H,",",2)))-(+($P(^AGMPCHK(DUZ(2),"NT"),",",2))))
+ ..I '((+($P(^AGMPCHK(DUZ(2),"NT"),",")))=(+($p($H,",")))) S TCHCK=3600
+ ..I TCHCK>3599 D
+ ...D NOTIF("","The "_DUZ(2)_" / "_$G(^AGMPCHK(DUZ(2),1))_" site is disabled.")
+ ...S ^AGMPCHK(DUZ(2),"NT")=$H
+ ;
  I $G(AGMPSTOP) S SUCCESS=1 Q
+ ; 9/13/2017 - GCD - CR 7713 - Don't upload demo patients.
+ I $$DEMOPAT^AGMPHLU($G(DFN)) S SUCCESS=0 Q
+ I $G(DFN2)'="",$$DEMOPAT^AGMPHLU(DFN2) S SUCCESS=0 Q
  N A40ERR
  S SUCCESS=1
  S A40ERR=0
@@ -133,7 +152,7 @@ DOSEND ;EP
  ..D NOTIF(DFN,"STATION NUMBER NULL IN FILE 4 ")
  .; 05/24/2013 - KJH - TFS8008 - Remove extraneous locks on the HLO globals.
  .S SUCCESS=$$SENDONE^HLOAPI1(.HLST,.APPARMS,.WHO,.ERR)
- .I EVNTTYPE="A40" D NOTIF(DFN,"AN A40 MESSAGE HAS BEEN CREATED "_SUCCESS)
+ .;I EVNTTYPE="A40" D NOTIF(DFN,"AN A40 MESSAGE HAS BEEN CREATED "_SUCCESS)  ; AG*7.2*5/CR 7718 - NOTIF sets SUCCESS to 0 and we don't need this call.
  .I 'SUCCESS D
  ..D NOTIF(DFN,"Unable to create HL7 message."_$S($D(ERR):" ERR:"_$G(ERR),1:""))
  I $D(ERR) D

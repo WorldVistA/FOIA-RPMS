@@ -1,5 +1,5 @@
 ABSPOSUU ; IHS/OIT/CNI/RAN REPORT - utilities[ 05/04/2010  5:18 PM ]
- ;;1.0;PHARMACY POINT OF SALE;**38,39,40,44,47**;JUN 1, 2001;Build 15
+ ;;1.0;PHARMACY POINT OF SALE;**38,39,40,44,47**;JUN 21, 2001;Build 27
  Q
  ;----------------------------------------------------------------------
  ;IHS/OIT/CNI/RAN 05042010 patch 38 - Following two subroutines are new and facilitate paging.

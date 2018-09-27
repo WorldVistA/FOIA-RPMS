@@ -1,5 +1,5 @@
 ABSPOSIZ ; IHS/FCS/DRS - Filing with .51,.59 ;    [ 11/04/2002  2:01 PM ]
- ;;1.0;PHARMACY POINT OF SALE;**3,6,23,34**;JUN 01, 2001;Build 15
+ ;;1.0;PHARMACY POINT OF SALE;**3,6,23,34,48**;JUN 01, 2001;Build 27
  Q
  ; Locking:
  ; 1. Locking this routine's code.
@@ -99,6 +99,7 @@ DELEMPTY ; the multiple probably has some empty entries - delete them
  . . S FDA(FN,ENTRY_","_IEN_",",.01)=""
  Q:'$D(FDA)  ; nothing to delete
 D5 D FILE^DIE("","FDA","MSG")
+ I $D(MSG) D LOG^ABSPOSL2("D5^ABSPOSIZ",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  Q:'$D(MSG)  ; success
  D ZWRITE^ABSPOS("FDA","MSG")
  G D5:$$IMPOSS^ABSPOSUE("FM","TRI","FILE^DIE failed",,"DELEMPTY",$T(+0))
@@ -124,6 +125,7 @@ INSUR(IEN,ENTRY,ECHO)        ; ^ABSP(9002313.51,IEN,2,ENTRY,"I",*)
  ;N FDA,MSG,FN
  ;S FDA(9002313.512,ENTRY_","_IEN_",",100)=""
  ;D FILE^DIE("","FDA","MSG")
+ ;I $D(MSG) D LOG^ABSPOSL2("INSUR^ABSPOSIZ",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  ;I $D(MSG) W "at INSUR^",$T(+0),! ZW MSG IMPOSS^ABSPOSUE call, too
  Q
 FILE1(IEN,ENTRY,ECHO)   ; ^ABSP(9002313.51,IEN,2,ENTRY,...)
@@ -219,6 +221,7 @@ NEW59(N) ; send N = desired IEN in file 9002313.59
  S FN=9002313.59
  S (IEN(1),FDA(FN,X,.01))=N
  D UPDATE^DIE(FLAGS,"FDA","IEN","MSG")
+ I $D(MSG) D LOG^ABSPOSL2("NEW59^ABSPOSIZ",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  I $D(MSG) Q 0
  Q IEN(1)
 CLEAR59(N)         ;
@@ -232,6 +235,7 @@ CLEAR59(N)         ;
  . . ;S FDA(FN,X,FIELD)=$E("[Previously: "_$$GET1^DIQ(FN,X,FIELD)_"]",1,200)
  . E  S FDA(FN,X,FIELD)="" ; delete
  D FILE^DIE(FLAGS,"FDA","MSG")
+ I $D(MSG) D LOG^ABSPOSL2("CLEAR59^ABSPOSIZ",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  D PREVISLY(N) ; for result text field 202
  Q
 PREVISLY(IEN59)    ;EP ; Bracket result text with [Previously: ], if not null
@@ -240,7 +244,9 @@ PREVISLY(IEN59)    ;EP ; Bracket result text with [Previously: ], if not null
  Q:X=""
  S X=$E("[Previously: "_X_"]",1,200)
  N FN,FDA,MSG S FDA(9002313.59,IEN59_",",202)=X
-PR5 D FILE^DIE("","FDA","MSG") Q:'$D(MSG)
+PR5 D FILE^DIE("","FDA","MSG")
+ I $D(MSG) D LOG^ABSPOSL2("PR5^ABSPOSIZ",.MSG) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
+ Q:'$D(MSG)  ;;; /IHS/OIT/RAM ; YES, I REALIZE THIS IS STARTING 'SPAGHETTI CODE' ISSUES... TRYING TO KEEP WITH 'MINIMAL CHANGES' FOR NOW.
  D ZWRITE^ABSPOS("FDA","MSG","IEN59","X")
  G PR5:$$IMPOSS^ABSPOSUE("FM","TRI","FILE^DIE failed",,"PREVISLY",$T(+0))
  Q

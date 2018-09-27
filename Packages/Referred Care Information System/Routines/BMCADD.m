@@ -1,7 +1,9 @@
 BMCADD ; IHS/PHXAO/TMJ - ADD A NEW REFERRAL ;         [ 07/12/2006  3:48 PM ]
- ;;4.0;REFERRED CARE INFO SYSTEM;**2,8,9*;JAN 09, 2006;Build 51
+ ;;4.0;REFERRED CARE INFO SYSTEM;**2,8,9,12*;JAN 09, 2006;Build 92
  ;4.0*2 IHS/OIT/FCJ Marked EP for API routine
  ;4.0*8 IHS/OIT/FCJ Added selecting a visit and adding a v ref entry
+ ;4.0*9 IHS/OIT/FCJ ADDED TEST FOR PREVIOUS REFERRALS
+ ;4.0*12 IHS/OIT/FCJ ADDED CALL IN BY AND CALL IN NOTIFICATION DATE And V Ref change to Visit provider
  ;
  ;IHS/OIT/FCJ Messages are no longer triggered.  Prompts
  ;    user if they would like to send a message.
@@ -121,6 +123,18 @@ PROV ; GET REQUESTING PROVIDER
  S BMCPROV=+Y,BMCRPROV=$P(Y,U,2)
  S BMCQ=0
  Q
+CALLIN ;GET CALL IN BY AND DATE  ;BMC*4.0*12 IHS/OIT/FCJ NEW SECTION
+ W !
+ S (BMCCDT,BMCCBY)="",BMCQ=1
+ S DIR(0)="90001,103",DIR("A")="Enter Call in Notification date" K DA D ^DIR K DIR
+ Q:$D(DIRUT)!(+Y<1)
+ S BMCCDT=Y
+ W !
+ S DIR(0)="90001,104",DIR("A")="Enter Call in Notification By" K DA D ^DIR K DIR
+ Q:$D(DIRUT)!(Y'?1A)
+ S BMCCBY=Y
+ S BMCQ=0
+ Q
 NUMBER ; GENERATE REFERRAL NUMBER
  S BMCQ=1
  S X=$$REFN^BMC
@@ -137,10 +151,13 @@ ADD ; ADD NEW REFERRAL RECORD
  E  S BMCRR=""
  D PROV
  Q:BMCQ
+ I $G(BMCOUTR) D CALLIN  ;BMC*4.0*12 OIT/IHS/FCJ CALL DATE AND BY
+ Q:BMCQ                  ;BMC*4.0*12 OIT/IHS/FCJ CALL DATE AND BY
  I BMCRR="" D  Q
  .;BMC*4.0*8 SPLIT NXT LINE AND ADDED TOC STATUS FIELD 1304
  .S DIC="^BMCREF(",DIC(0)="L",DLAYGO=90001,X=BMCRDATE
  .S DIC("DR")=".02////"_BMCRNUMB_";.03////"_BMCDFN_";.06////"_BMCPROV_";.15////A;.25////"_DUZ_";.26////"_DT_";.27////"_DT_";1304////P"
+ .I $G(BMCOUTR) S DIC("DR")=DIC("DR")_";103////"_BMCCDT_";104////"_BMCCBY  ;BMC*4.0*12 OIT/IHS/FCJ CALL DATE AND BY
  .D FILE^BMCFMC
  .I Y<0 W !,"Error creating REFERRAL.",!,"Notify programmer.",! D EOP^BMC Q
  .W !!,"REFERRAL number : ",BMCRNUMB,!
@@ -180,7 +197,9 @@ RR ;routine referral selected
  ;
 ADDVREF ;EP FR BMCADDFY AND BMCADDS;ADD ENTRY TO V REF FILE ;BMC*4.0*8 NEW SECTION
  S DIC="^AUPNVREF(",DIC(0)="L",DLAYGO=9000010.59,X=BMCSCOD
- S DIC("DR")=".02////"_BMCDFN_";.03////"_BMCVDFN_";.06////"_BMCRIEN_";1201////"_$$NOW^XLFDT_";1202////"_BMCPROV_";1204////"_BMCPROV_";1216////"_$$NOW^XLFDT
+ ;BMC*4.0*12 MODIFIED NEXT LINE TO SET VISIT PROVIDER ENCOUNTER IN V REF
+ ;S DIC("DR")=".02////"_BMCDFN_";.03////"_BMCVDFN_";.06////"_BMCRIEN_";1201////"_$$NOW^XLFDT_";1202////"_BMCPROV_";1204////"_BMCPROV_";1216////"_$$NOW^XLFDT
+ S DIC("DR")=".02////"_BMCDFN_";.03////"_BMCVDFN_";.06////"_BMCRIEN_";1201////"_$$NOW^XLFDT_";1202////"_BMCPROV_";1204////"_$$PRIMPROV^APCLV(BMCVDFN,"I")_";1216////"_$$NOW^XLFDT
  D FILE^BMCFMC
  I +Y<0 W !,"Error creating V REFERRAL.",!,"Notify programmer.",! D EOP^BMC Q
  S BMCVRIE=+Y
@@ -197,7 +216,7 @@ ADD2 ;add if routine referrals have been defined
  K BMCDISP,BMCSEL,BMCHIGH,BMCRR,BMCOUTR,BMCMINI,BMCMINIX
  S BMCHIGH=1,BMCSEL(1)="Mini Referral"
  S BMCHIGH=2,BMCSEL(2)="Complete Referral (all referral data)"
- S BMCHIGH=3,BMCSEL(3)="Call In Notification by outside facility"
+ S BMCHIGH=3,BMCSEL(3)="Call In Notification"                 ;BMC*4.0*12 REMOVED- BY OUTSITE FACILITY
  S BMCHIGH=4,BMCSEL(4)="Abbreviated entry for clinicians"
  W:$D(IOF) @IOF
  W !,"Please select the referral form you wish to use."
@@ -208,7 +227,8 @@ ADD2 ;add if routine referrals have been defined
  S (X,BMCRRC)=0 F  S X=$O(^BMCRTNRF("B",X)) Q:X=""  S BMCRRC=BMCRRC+1
  W:BMCRRC<31 !!?5,"Locally-defined Routine Referral Templates:",!
  S X=0 F  S X=$O(^BMCRTNRF("B",X)) Q:X=""  S Y=$O(^BMCRTNRF("B",X,"")) S BMCHIGH=BMCHIGH+1,BMCSEL(BMCHIGH)=Y_U_$E($P(^BMCRTNRF(Y,0),U))_$E($$LOW^XLFSTR($P(^BMCRTNRF(Y,0),U)),2,999)
-L16 I BMCRRC<16 D
+L16 ;
+ I BMCRRC<16 D
  .S I=4 F  S I=$O(BMCSEL(I)) Q:I'=+I  W !?5,I,".  ",$P(BMCSEL(I),U,2)
  .D GETANS
  I BMCRRC>15&(BMCRRC<31) D

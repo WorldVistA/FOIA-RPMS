@@ -1,5 +1,5 @@
 ABSPDB2A ; IHS/OIT/CASSevern/Pieran ran 1/19/2011 - Handling of NCPDP Reversal "B2" Claims for D.0 (Claim Segment)
- ;;1.0;PHARMACY POINT OF SALE;**42,47**;JUN 1, 2001;Build 15
+ ;;1.0;PHARMACY POINT OF SALE;**42,47**;JUN 21, 2001;Build 27
  ;
 CLAIM ;EP CALLED FROM ABSPDB2 to set up CLAIM SEGMENT
  N FIELD

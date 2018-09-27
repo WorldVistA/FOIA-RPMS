@@ -1,5 +1,5 @@
 ABSPOSAB ; IHS/FCS/DRS - various modem commands ;     [ 06/28/2002  5:28 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**2**;JUN 21, 2001;Build 15
+ ;;1.0;PHARMACY POINT OF SALE;**2**;JUN 21, 2001;Build 27
  Q
  ; Low-level IO routines which:
  ; *   take DIALOUT as an argument
@@ -13,7 +13,7 @@ ABSPOSAB ; IHS/FCS/DRS - various modem commands ;     [ 06/28/2002  5:28 AM ]
  ;IHS/SD/lwj  06/10/02  Changes made to make the open and
  ; use commands Cache compliant.  Open command for Cache must
  ; be in the format of:
- ;  O "|TCP|6802":(199.244.222.6:6802:"M"):3
+ ;  O "|TCP|6802":(999.999.999.9:6802:"M"):3
  ; (the "M" is very important in extending the buffer for the
  ; large claims.)
  ; Changes tested on the Parker Cache test data base and will
@@ -42,7 +42,7 @@ OPEN(DIALOUT) ;EP - return 0 if okay, nonzero if error
  . ; IHS/SD/lwj 06/10/02 begin changes for Cache
  . I ^%ZOSF("OS")["OpenM" D  Q     ;Cache system
  .. S RETVAL=0
- .. O IO:(SERVER:PORT:"M"):3 ;O "|TCP|6802":("199.244.222.6":6802:"M"):3
+ .. O IO:(SERVER:PORT:"M"):3 ;O "|TCP|6802":("999.999.999.9":6802:"M"):3
  .. I '$T S RETVAL=1,X=$T(+0)_" - |TCP|:("_SERVER_":"_PORT_")" ;failed
  .. I 'RETVAL U IO
  .. Q

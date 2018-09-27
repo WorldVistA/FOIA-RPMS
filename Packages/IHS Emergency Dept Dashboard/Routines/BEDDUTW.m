@@ -196,6 +196,21 @@ GSITE(ERID,SITE,BEDDSYS,UDUZ) ; EP - Retrieve individual site info
 	I EREF.WhiteboardShowRoom=1 S BEDDSYS("PShowRoom")=""
 	I EREF.WhiteboardShowName=1 S BEDDSYS("PShowName")=""
 	I EREF.WhiteboardShowAcuity=1 S BEDDSYS("PShowAcuity")=""
+	I EREF.MedRec=1 S BEDDSYS("MRec")=""
+	I EREF.PtRtSheet=1 S BEDDSYS("PRouting")=""
+	I EREF.PtArmBand=1 S BEDDSYS("EmbCard")=""
+	I EREF.PrintLabel=1 S BEDDSYS("defLabel")=""
+	I EREF.PrintRouting=1 S BEDDSYS("defRouting")=""
+	S BEDDSYS("LabelPrinter")=EREF.LabelPrinter
+	S BEDDSYS("RoutingPrinter")=EREF.RoutingPrinter
+	S BEDDSYS("MRecPrinter")=EREF.MedRecPrinter
+	S BEDDSYS("PRoutingPrinter")=EREF.PRoutingPrinter
+	S BEDDSYS("EmbCardPrinter")=EREF.EmbCardPrinter
+	S BEDDSYS("LabelCopies")=EREF.LabelCopies
+	S BEDDSYS("RoutingCopies")=EREF.RoutingCopies
+	S BEDDSYS("MRecCopies")=EREF.MedRecCopies
+	S BEDDSYS("PRoutingCopies")=EREF.PRoutingCopies
+	S BEDDSYS("EmbCardCopies")=EREF.EmbCardCopies
 	;
 	;BEDD*2.0*1;Added user preferences
 	;Get user preferences

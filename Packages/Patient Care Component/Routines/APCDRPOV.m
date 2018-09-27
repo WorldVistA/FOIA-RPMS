@@ -1,5 +1,5 @@
 APCDRPOV ; IHS/CMI/LAB - DISPLAY VISIT ;
- ;;2.0;IHS PCC SUITE;**2,10,11**;MAY 14, 2009;Build 58
+ ;;2.0;IHS PCC SUITE;**2,10,11,20**;MAY 14, 2009;Build 25
  ;
  W !!,"This option is used to resequence the purpose of visit (diagnoses)"
  W !,"on a visit.  This allows you to determine which will be the first diagnosis"
@@ -36,8 +36,13 @@ DSPLY ;
  S DFN=$P(APCDVR0,U,5)
  S Y=DFN D ^AUPNPAT
  ;W !,"Patient Name: ",$$VAL^XBDIQ1(2,DFN,.01),?50,"HRN: ",$$HRN^AUPNPAT(DFN,DUZ(2))
- S DA=APCDVSIT,DIC="^AUPNVSIT(" D EN^DIQ
+ I '$G(APCDNVDS) S DA=APCDVSIT,DIC="^AUPNVSIT(" D EN^DIQ
  D POVDISP
+ Q
+ENDE(VIEN) ;EP CALLED FROM DATA ENTRY TEMPLATE
+ S APCDNVDS=1
+ D EN^XBNEW("EN^APCDRPOV(VIEN)","APCDNVDS;VIEN")
+ K APCDNVDS
  Q
  ;
 EOJ ; EP - EOJ HOUSE KEEPING - this ep called by the BVP package (View patient record)

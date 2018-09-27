@@ -1,5 +1,5 @@
 BEDDUTID ;VNGT/HS/BEE-BEDD Utility Routine 2 ; 08 Nov 2011  12:00 PM
- ;;2.0;BEDD DASHBOARD;**1**;Jun 04, 2014;Build 22
+ ;;2.0;BEDD DASHBOARD;**1,2**;Jun 04, 2014;Build 26
  ;
  ;Adapted from BEDDUTL1/CNDH/RPF
  ;
@@ -355,11 +355,21 @@ PROV(PROV) ;EP - Return List of Providers
  ;Output:
  ; PROV Array - List of Providers
  ;
- NEW CNT,PNAME,PIEN
+ NEW CNT,PNAME,PIEN,X
+ ;
+ ;Make sure initial variables are set
+ S X="S:$G(U)="""" U=""^""" X X
+ S X="S:$G(DT)="""" DT=$$DT^XLFDT" X X
+ ;
  K PROV
  S CNT=0,PNAME="" F  S PNAME=$O(^VA(200,"AK.PROVIDER",PNAME)) Q:PNAME=""  D
  . S PIEN=0 F  S PIEN=$O(^VA(200,"AK.PROVIDER",PNAME,PIEN)) Q:+PIEN=0  D
- .. I $$GET1^DIQ(200,PIEN_",","9.2","I")]"" Q
+ .. ;BEDD*2.0*2;Handle future termination dates
+ .. ;I $$GET1^DIQ(200,PIEN_",","9.2","I")]"" Q
+ .. NEW TERM
+ .. S TERM=$$GET1^DIQ(200,PIEN_",","9.2","I")
+ .. I TERM]"",TERM<DT Q
+ .. ;
  .. S CNT=CNT+1
  .. S PROV(CNT)=PIEN_"^"_PNAME
  ;

@@ -1,5 +1,5 @@
 ABSPOSIO ; IHS/FCS/DRS - NCPDP Overrides form ;   [ 06/03/2002  4:40 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**1**;JUN 21, 2001;Build 15
+ ;;1.0;PHARMACY POINT OF SALE;**1,48**;JUN 21, 2001;Build 27
  ; Property of Indian Health Service
  ;
  ; IHS/OKCAO/POS  IHS/ASDST/lwj  1/9/02  added logic for overrides
@@ -12,8 +12,8 @@ ABSPOSIO ; IHS/FCS/DRS - NCPDP Overrides form ;   [ 06/03/2002  4:40 AM ]
  Q
 NEWENTRY ;EP - create new entry if needed
  I '$$GET^DDSVAL(DIE,.DA,1.09) D
- .;W "Creating a new entry for Overrides",! R ">> ",%,!
- .D PUT^DDSVAL(DIE,.DA,1.09,$$NEW^ABSPOSO2,,"I")
+ . ;W "Creating a new entry for Overrides",! R ">> ",%,!
+ . D PUT^DDSVAL(DIE,.DA,1.09,$$NEW^ABSPOSO2,,"I")
  ;W "Field 1.09 = ",$$GET^DDSVAL(DIE,.DA,1.09,,"I"),!
  ;N % R ">>",%,!
  Q
@@ -33,7 +33,7 @@ NEWENTR2 ;EP - IHS/OKCAO/POS  IHS/ASDST/lwj 1/9/02  updating of overrides
  ;  If there is a RX, and it doesn't have overrides, a new override
  ;   will be created to store with the transaction
  ;
- N RXI,RXR,OVERRIDE,FFDA,STRING
+ N RXI,RXR,OVERRIDE,FFDA,STRING,ZERR  ; /IHS/OIT/RAM ; 12 JUN 17 ; ADD DBS CALL ERROR RETURN VARIABLE
  ;
  ; get the prescription information
  S RXI=$$GET^DDSVAL(DIE,.DA,1.01)    ;RX IEN
@@ -56,12 +56,14 @@ NEWENTR2 ;EP - IHS/OKCAO/POS  IHS/ASDST/lwj 1/9/02  updating of overrides
  . D HLP^DDSUTL(.STRING)
  . ;
  . I '+$G(RXR) D     ;if not a refill
- .. S FFDA(52,RXI_",",9999999.12)=OVERRIDE
- .. D FILE^DIE("","FFDA","")
+ . . S FFDA(52,RXI_",",9999999.12)=OVERRIDE
+ . . D FILE^DIE("","FFDA","ZERR") ; /IHS/OIT/RAM ; 12 JUN 17 ; UPDATE DBS CALL TO ALLOW FOR ERROR RETURN.
+ . . I $D(ZERR) D LOG^ABSPOSL2("NEWENTR2+37^ABSPICNV",.ZERR) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  . ;
  . I +$G(RXR) D     ;refill
- .. S FFDA(52.1,RXR_","_RXI_",",9999999.12)=OVERRIDE
- .. D FILE^DIE("","FFDA","")
+ . . S FFDA(52.1,RXR_","_RXI_",",9999999.12)=OVERRIDE
+ . . D FILE^DIE("","FFDA","ZERR") ; /IHS/OIT/RAM ; 12 JUN 17 ; UPDATE DBS CALL TO ALLOW FOR ERROR RETURN.
+ . . I $D(ZERR) D LOG^ABSPOSL2("NEWENTR2+42^ABSPICNV",.ZERR) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  ;
  ; now- update the input data file with the override code
  D PUT^DDSVAL(DIE,.DA,1.09,OVERRIDE,,"I")

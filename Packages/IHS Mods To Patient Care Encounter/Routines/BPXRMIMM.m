@@ -1,5 +1,5 @@
-BPXRMIMM ; IHS/MSC/MGH - Computed Findings for Immunizations. ;02-Jun-2014 14:13;du
- ;;2.0;CLINICAL REMINDERS;**1001,1002,1003**;Feb 04, 2005;Build 21
+BPXRMIMM ; IHS/MSC/MGH - Computed Findings for Immunizations. ;05-Oct-2017 17:26;DU
+ ;;2.0;CLINICAL REMINDERS;**1001,1002,1003,1008**;Feb 04, 2005;Build 10
  ;=================================================================
  ;This routine is designed to evaluate the immunication forcast
  ;data to determine if an immunization is due for a child requiring a

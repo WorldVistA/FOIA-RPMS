@@ -1,5 +1,5 @@
 OSEHRA ZGO Export: BGP 05 CMS INDICATORS
-17-OCT-2017 09:11:40 ZWR
+27-SEP-2018 11:54:32 ZWR
 ^BGPCMSIF(0)="BGP 05 CMS INDICATORS^90373.01I^3^3"
 ^BGPCMSIF(1,0)="1^1^Heart Attack (Acute Myocardial Infarction or AMI) Treatment^Heart Attack (Acute Myocardial Infarction or AMI) Treatment^^1"
 ^BGPCMSIF(1,1)="D AMI^BGP5C1"

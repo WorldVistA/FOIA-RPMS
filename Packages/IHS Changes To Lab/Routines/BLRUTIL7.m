@@ -1,5 +1,5 @@
-BLRUTIL7 ;IHS/MSC/MKK - MISC IHS LAB UTILITIES (Cont) ; 26-Mar-2015 06:30 ; MKK
- ;;5.2;IHS LABORATORY;**1035**;NOV 01, 1997;Build 5
+BLRUTIL7 ;IHS/MSC/MKK - MISC IHS LAB UTILITIES (Cont) ; 13-Oct-2017 14:04 ;  MKK
+ ;;5.2;IHS LABORATORY;**1035,1041**;NOV 01, 1997;Build 23
  ;
 EEP ; Ersatz EP
  D EEP^BLRGMENU
@@ -116,7 +116,8 @@ OERRSTSO(LRODT,LRSN,LROT) ; EP - Change OERR Status from PENDING to DISCOUNTINUE
 FORCEIT(LABEL,ARRY1,ARRY2,ARRY3) ; EP - Force the Audting of Varibles, even if TAKE SNAPSHOTS is set to OFF
  ; Code cloned from ENTRYAUD^BLRUTIL
  ;
- D DISABLE^%NOJRN       ; Disable Journaling of ^BLRENTRY global
+ ; D DISABLE^%NOJRN       ; Disable Journaling of ^BLRENTRY global
+ D:$G(^%ZOSF("OS"))["OpenM" DISABLE^%NOJRN       ; Disable Journaling of ^BLRENTRY global - IHS/MSC/MKK - LR*5.2*1041 - Cache/Ensemble only
  ;
  N ORIGX,ORIGY,%ORIG    ; Want to see what %, X & Y variables are
  M ORIGX=X,ORIGY=Y
@@ -131,24 +132,30 @@ FORCEIT(LABEL,ARRY1,ARRY2,ARRY3) ; EP - Force the Audting of Varibles, even if T
  S $P(^BLRENTRY,U)=ENTRYNUM
  S ^BLRENTRY(DUZ,NOW,ENTRYNUM,LABEL)=""
  ;
- D CAPVARS^BLRUTIL("BLRVARS","^BLRENTRY(DUZ,NOW,ENTRYNUM,LABEL)")
+ ; D CAPVARS^BLRUTIL("BLRVARS","^BLRENTRY(DUZ,NOW,ENTRYNUM,LABEL)")
  ;
- I $L($G(ARRY1)) D      ; Have an array that needs to be monitored; Merge it  
- . M ^BLRENTRY(DUZ,NOW,ENTRYNUM,LABEL,ARRY1)=@ARRY1
+ ; I $L($G(ARRY1)) D      ; Have an array that needs to be monitored; Merge it
+ ; . M ^BLRENTRY(DUZ,NOW,ENTRYNUM,LABEL,ARRY1)=@ARRY1
  ;
- I $L($G(ARRY2)) D      ; Have another array that needs to be monitored; Merge it  
- . M ^BLRENTRY(DUZ,NOW,ENTRYNUM,LABEL,ARRY2)=@ARRY2
+ ; I $L($G(ARRY2)) D      ; Have another array that needs to be monitored; Merge it
+ ; . M ^BLRENTRY(DUZ,NOW,ENTRYNUM,LABEL,ARRY2)=@ARRY2
  ;
- I $L($G(ARRY3)) D      ; Have another array that needs to be monitored; Merge it  
- . M ^BLRENTRY(DUZ,NOW,ENTRYNUM,LABEL,ARRY3)=@ARRY3
+ ; I $L($G(ARRY3)) D      ; Have another array that needs to be monitored; Merge it
+ ; . M ^BLRENTRY(DUZ,NOW,ENTRYNUM,LABEL,ARRY3)=@ARRY3
  ;
- M ^BLRENTRY(DUZ,NOW,ENTRYNUM,LABEL,"DUZ")=DUZ   ; Always merge in the DUZ array
- I $D(ORIGX)>1 M ^BLRENTRY(DUZ,NOW,ENTRYNUM,LABEL,"ORIGX")=ORIGX
- I $D(ORIGY)>1 M ^BLRENTRY(DUZ,NOW,ENTRYNUM,LABEL,"ORIGY")=ORIGY
+ ; M ^BLRENTRY(DUZ,NOW,ENTRYNUM,LABEL,"DUZ")=DUZ   ; Always merge in the DUZ array
+ ; I $D(ORIGX)>1 M ^BLRENTRY(DUZ,NOW,ENTRYNUM,LABEL,"ORIGX")=ORIGX
+ ; I $D(ORIGY)>1 M ^BLRENTRY(DUZ,NOW,ENTRYNUM,LABEL,"ORIGY")=ORIGY
+ ;
+ ; ----- BEGIN IHS/MSC/MKK - LR*5.2*1041 - Use Kernel Call.  It handles ALL arrays automatically.
+ S X="^BLRENTRY("_DUZ_","_NOW_","_ENTRYNUM_","_$C(34)_LABEL_$C(34)_","
+ D DOLRO^%ZOSV
+ ; ----- END IHS/MSC/MKK - LR*5.2*1041 - Use Kernel Call
  ;
  D GETSTACK^BLRUTIL6    ; Merge in the $STACK
  ;
- D ENABLE^%NOJRN        ; Enable Journaling again
+ ; D ENABLE^%NOJRN        ; Enable Journaling again
+ D:$G(^%ZOSF("OS"))["OpenM" ENABLE^%NOJRN   ; Enable Journaling again - IHS/MSC/MKK - LR*5.2*1041 - Cache/Ensemble only
  Q
  ;
  ;
@@ -253,6 +260,8 @@ PURGALRT ; EP - Purge ALL Alerts for user
  Q
  ;
 GETUCIS(ARRAY) ; EP - Create an Array of UCIs
+ Q:$G(^%ZOSF("OS"))'["OpenM" 0    ; MSC/MKK - LR*5.2*1041 - Only for Cache systems.
+ ;
  NEW obj,X
  NEW CNT,UCI,MSG,MSGLINE
  ;
@@ -372,7 +381,8 @@ GLODUMP ; EP - "Dump" a global using $Q
  D ^DIR
  I $L(X)<1!(+$G(DIRUT)) D BADSTUFF("No/Invalid Input.")  Q
  ;
- S GLOBAL=X
+ ; S GLOBAL=X
+ S GLOVAR=X   ; IHS/MSC/MKK - LR*5.2*1041
  I $E(GLOVAR)'=U S GLOVAR=U_GLOVAR
  ;
  S FRSTPART=$P(GLOVAR,")")
@@ -389,11 +399,13 @@ SETBLRVS(TWO) ; EP - Set BLRVERN variable(s)
  S:$L($G(TWO)) BLRVERN2=TWO
  Q
  ;
-PLURAL(CNT) ; EP - Return "s" if CNT>1, else return "".
- Q $S(CNT>1:"s",1:"")
+PLURAL(CNT) ; EP - Return "" if CNT=1, else return "s".
+ ; Q $S(CNT>1:"s",1:"")
+ Q $S(CNT=1:"",1:"s")   ; MSC/MKK - LR*5.2*1041
  ;
-PLURALI(CNT) ; EP - Return "ies" if CNT>1, else return the letter "y".
- Q $S(CNT>1:"ies",1:"y")
+PLURALI(CNT) ; EP - Return the letter "y" if CNT=1, else return "ies".
+ ; Q $S(CNT>1:"ies",1:"y")
+ Q $S(CNT=1:"y",1:"ies")     ; MSC/MKK - LR*5.2*1041
  ;
 LJZEROF(NUM,JW) ; EP - Left Justify, ZERO Fill - JW = Justify Width
  Q $TR($$LJ^XLFSTR(NUM,JW)," ","0")

@@ -1,5 +1,5 @@
 BDMDE1 ; IHS/CMI/LAB - IHS Diabetes Audit 2017 ;
- ;;2.0;DIABETES MANAGEMENT SYSTEM;**10**;JUN 14, 2007;Build 12
+ ;;2.0;DIABETES MANAGEMENT SYSTEM;**10,11**;JUN 14, 2007;Build 30
  ;
 BEGIN ;EP - called from option
  D TAXCHK^BDMDE19
@@ -17,7 +17,7 @@ GETDATES ;
  S BDMSTP=0 D TIME I BDMSTP D XIT1,XIT Q
 TYPE ;
  S BDMSTP=0
- K ^XTMP("BDMDMDATA",BDMJOB,BDMBTH),^TMP($J,"PATS")
+ K ^XTMP("BDMDM17",BDMJOB,BDMBTH),^TMP($J,"PATS")
  S BDMTYPE=""
  S DIR(0)="S^P:Individual Patients;S:Search Template of Patients;C:Members of a CMS Register",DIR("A")="Run the audit for",DIR("B")="P" KILL DA D ^DIR KILL DIR
  G:$D(DIRUT) GETDATES
@@ -61,17 +61,17 @@ IAEP ;EP
  S BDMSTP=0
  G IF2
 P ;
- S BDMSTP=0 K ^XTMP("BDMDMDATA",BDMJOB,BDMBTH),^TMP($J,"PATS")
+ S BDMSTP=0 K ^XTMP("BDMDM17",BDMJOB,BDMBTH),^TMP($J,"PATS")
  S BDMBEN=3
 P1 ;
  K DIC S DIC="^AUPNPAT(",DIC(0)="AEMQ" D ^DIC K DIC
- I Y=-1,'$D(^XTMP("BDMDMDATA",BDMJOB,BDMBTH,"PATS")) W !,"No patients selected" S BDMSTP=1 Q
+ I Y=-1,'$D(^XTMP("BDMDM17",BDMJOB,BDMBTH,"PATS")) W !,"No patients selected" S BDMSTP=1 Q
  I Y=-1 Q
- S ^XTMP("BDMDMDATA",BDMJOB,BDMBTH,"PATS",+Y)=""
+ S ^XTMP("BDMDM17",BDMJOB,BDMBTH,"PATS",+Y)=""
  G P1
  ;
 S ; Get patient name or cohort
- K ^XTMP("BDMDMDATA",BDMJOB,BDMBTH),^TMP($J,"PATS") S BDMSTP=0
+ K ^XTMP("BDMDM17",BDMJOB,BDMBTH),^TMP($J,"PATS") S BDMSTP=0
  K DIC S DIC("A")="Enter Search Template Name: ",DIC("S")="I $P(^(0),U,4)=2!($P(^(0),U,4)=9000001)"
  S DIC="^DIBT(",DIC(0)="AEMQ" D ^DIC K DIC
  I Y=-1 S BDMSTP=1 W !,"No template selected." Q
@@ -118,7 +118,7 @@ CC ;current community
  W !!,C," patients will be used in the audit.",!
  Q
 C ;get register, status, random or not
- K ^XTMP("BDMDMDATA",BDMJOB,BDMBTH),^TMP($J,"PATS")
+ K ^XTMP("BDMDM17",BDMJOB,BDMBTH),^TMP($J,"PATS")
  S BDMCMS="",BDMSTP=0
  S DIC="^ACM(41.1,",DIC(0)="AEMQ",DIC("A")="Enter the Name of the Register: " D ^DIC K DIC
  I Y=-1 W !,"No register selected." S BDMSTP=1 Q
@@ -188,12 +188,12 @@ RAND ;random sample or not
  W !!,"There are ",BDMCNT," patients selected so far to be used in the audit.",!
  S DIR(0)="S^A:ALL Patients selected so far;R:RANDOM Sample of the patients selected so far",DIR("A")="Do you want to select",DIR("B")="A" KILL DA D ^DIR KILL DIR
  G:$D(DIRUT) C
- I Y="A" S C=0 F  S C=$O(^TMP($J,"PATS",C)) Q:C'=+C  S X=$O(^TMP($J,"PATS",C,0)),^XTMP("BDMDMDATA",BDMJOB,BDMBTH,"PATS",X)=""
+ I Y="A" S C=0 F  S C=$O(^TMP($J,"PATS",C)) Q:C'=+C  S X=$O(^TMP($J,"PATS",C,0)),^XTMP("BDMDM17",BDMJOB,BDMBTH,"PATS",X)=""
  I Y="A" K ^TMP($J,"PATS") Q
  S DIR(0)="N^2:"_BDMCNT_":0",DIR("A")="How many patients do you want in your random sample" KILL DA D ^DIR KILL DIR
  ;get random sample AND set xtmp
  I $D(DIRUT) S BDMSTP=1 Q
- S C=0 F N=1:1:BDMCNT Q:C=Y  S I=$R(BDMCNT) I I,$D(^TMP($J,"PATS",I)) S X=$O(^TMP($J,"PATS",I,0)),^XTMP("BDMDMDATA",BDMJOB,BDMBTH,"PATS",X)="",C=C+1 K ^TMP($J,"PATS",I,X)
+ S C=0 F N=1:1:BDMCNT Q:C=Y  S I=$R(BDMCNT) I I,$D(^TMP($J,"PATS",I)) S X=$O(^TMP($J,"PATS",I,0)),^XTMP("BDMDM17",BDMJOB,BDMBTH,"PATS",X)="",C=C+1 K ^TMP($J,"PATS",I,X)
  K ^TMP($J,"PATS")
  Q
 TIME ;PEP - called from BDM Get fiscal year or time frame
@@ -211,7 +211,7 @@ TIME ;PEP - called from BDM Get fiscal year or time frame
 XIT1 ;
  K ^BDMDATA($J),^BDMDATA("BDMEPI",$J)
  K ^XTMP("BDMTAX",BDMJOB,BDMBTH)  ;cmi/maw kill tmp storage of taxonomies
- K ^XTMP("BDMDMDATA",BDMJOB,BDMBTH),BDMJOB,BDMBTH
+ K ^XTMP("BDMDM17",BDMJOB,BDMBTH),BDMJOB,BDMBTH
 XIT ;
  I '$D(BDMGUI) D EN^XBVK("BDM"),EN^XBVK("AUPN")
  D ^XBFMK,KILL^AUPNPAT
@@ -263,7 +263,7 @@ WRITEF ;EP write flat file
  K XBGL,XBMED,XBTLE,XBFN,XBF,XBQ,XBFLT,XBE
  K ^BDMDATA($J)
  K ^XTMP("BDMTAX",BDMJOB,BDMBTH)
- K ^XTMP("BDMDMDATA",BDMJOB,BDMBTH),BDMJOB,BDMBTH
+ K ^XTMP("BDMDM17",BDMJOB,BDMBTH),BDMJOB,BDMBTH
  Q
 BDMG(BDMJOB,BDMBTH,BDMDMRG,BDMADAT,BDMTYPE,BDMSTMP,BDMPDP,BDMCOM,BDMRAND,BDMRCNT,BDMCMS,BDMSTAT,BDMPREP,BDMFILE,BDMDSP,BDMGIEN,BDMSDPI,BDMSDPG,BDMPPN,BDMDUZ2,BDMDEMO,BDMBEN) ;PEP - gui call
  I $G(BDMJOB)="" S BDMIEN=-1 Q
@@ -308,19 +308,19 @@ BDMG(BDMJOB,BDMBTH,BDMDMRG,BDMADAT,BDMTYPE,BDMSTMP,BDMPDP,BDMCOM,BDMRAND,BDMRCNT
 GUIEP ;EP - called from taskman
  D ^BDMDE10
  I BDMPREP=2,'$G(BDMDSP) D ENDLOG Q
- K ^TMP($J,"BDMDMDATA")
+ K ^TMP($J,"BDMDM17")
  I $G(BDMDSP),BDMPREP=2 Q
  S IOM=80  ;cmi/maw added
- D GUIR^XBLM("^BDMDE1P","^TMP($J,""BDMDMDATA"",")
+ D GUIR^XBLM("^BDMDE1P","^TMP($J,""BDMDM17"",")
  Q:$G(BDMDSP)  ;quit if to screen
- S X=0,C=0 F  S X=$O(^TMP($J,"BDMDMDATA",X)) Q:X'=+X  D
- .S BDMDATA=^TMP($J,"BDMDMDATA",X)
+ S X=0,C=0 F  S X=$O(^TMP($J,"BDMDM17",X)) Q:X'=+X  D
+ .S BDMDATA=^TMP($J,"BDMDM17",X)
  .;I BDMDATA="ZZZZZZZ" ;S BDMDATA=$C(12)
  .S ^BDMGUI(BDMIEN,11,X,0)=BDMDATA,C=C+1
  S ^BDMGUI(BDMIEN,11,0)="^^"_C_"^"_C_"^"_DT_"^"
  S DA=BDMIEN,DIK="^BDMGUI(" D IX1^DIK
  D ENDLOG
- K ^TMP($J,"BDMDMDATA")
+ K ^TMP($J,"BDMDM17")
  S ZTREQ="@"
  Q
  ;

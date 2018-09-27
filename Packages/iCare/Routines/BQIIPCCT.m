@@ -1,0 +1,163 @@
+BQIIPCCT ;GDIT/HCSD/ALA-Continuity of Care Team ; 03 Oct 2017  9:37 AM
+ ;;2.7;ICARE MANAGEMENT SYSTEM;;Dec 19, 2017;Build 23
+ ;
+ ;
+EN(BQDATE,BQFROM,BQTHRU) ;EP
+ NEW BQDTE,BQMON,EDAY,ENDT,CYR,PYR,ID,FAC,BQITOTV,BQITOTR,BD,VISIT
+ NEW DFN,VD,X,Y,BQA,DPCP,CLN,QFL,BEGDT,BQITOTP,FC,PRV,CRST,CRIPC,CRN
+ NEW GLOB1,GLOB2,TOTP,TOTV,BQITOTM,GLOB3
+ ;
+ S QFL=0
+ S CRST=$P($G(^BQI(90508,1,11)),U,2) S:CRST="" CRST=1
+ S CRST="0"_CRST
+ S CRIPC=$P($G(^BQI(90508,1,11)),U,1)
+ S CRIPC="IPCMH"
+ S CRN=$O(^BQI(90508,1,22,"B",CRIPC,"")) I CRN="" Q
+ S GLOB3=$NA(^XTMP("BQITEAM")) K @GLOB3
+ S @GLOB3@(0)=$$FMADD^XLFDT(DT,7)_U_DT_U_"Team IPC Compilation"
+ ;
+ I $G(BQDATE)'="",$G(WEEK)="" D
+ . S BEGDT=$E(BQDATE,1,5)_"01",CYR=$E(BQDATE,1,3),BQMON=$E(BQDATE,4,5)
+ . I $L(BQMON)=1 S BQMON="0"_BQMON
+ . S EDAY="31^"_($$LEAP^XLFDT2(CYR)+28)_"^31^30^31^30^31^31^30^31^30^31"
+ . S ENDT=$E(BQDATE,1,5)_$P(EDAY,U,+BQMON)
+ ;
+ I $G(BQDATE)="",$G(WEEK)="" D  Q:QFL
+ . I $E(DT,6,7)'=CRST S QFL=1 Q
+ . S BQMON=$E(DT,4,5)-1,CYR=$E(DT,1,3),PYR=CYR-1
+ . S BQDTE=$P($T(BQM+BQMON),";;",2)
+ . I $L(BQMON)=1 S BQMON="0"_BQMON
+ . S BEGDT=@($P(BQDTE,U,2))_$P(BQDTE,U,1)_"01"
+ . S EDAY="31^"_($$LEAP^XLFDT2(CYR)+28)_"^31^30^31^30^31^31^30^31^30^31"
+ . S ENDT=@($P(BQDTE,U,2))_$P(BQDTE,U,1)_$P(EDAY,U,+$P(BQDTE,U,1))
+ . S BQDATE=$S(BQMON="01":PYR,1:CYR)_BQMON_"00"
+ ;
+ I $G(WEEK)="" D
+ . S GLOB2=$NA(^XTMP("BQICCTM")) K @GLOB2
+ . S @GLOB2@(0)=$$FMADD^XLFDT(DT,14)_U_DT_U_"IPC Monthly Visits"
+ I $G(WEEK)=1 D
+ . S BEGDT=BQFROM-.9999,ENDT=BQTHRU,CRIPC="IPCMH",CRN=3
+ . S GLOB2=$NA(^XTMP("BQICCTW")) K @GLOB2
+ . S @GLOB2@(0)=$$FMADD^XLFDT(DT,14)_U_DT_U_"IPC Weekly Visits"
+ ;
+ S ID="IPC_CCTM"
+ ;
+ ; check for divisions
+ I $O(^BQI(90508,1,25,0))'="" D
+ . S FAC="" F  S FAC=$O(^BQI(90508,1,25,"B",FAC)) Q:FAC=""  D
+ .. D VIS K BQITOTM,@GLOB2
+ .. D STOR
+ ;
+ I $O(^BQI(90508,1,25,0))="" S FAC=$$HME^BQIGPUTL() D
+ . D VIS K BQITOTM,@GLOB2
+ . D STOR
+ ;
+ S FAC=0,TNUM=0,TDEN=0
+ F  S FAC=$O(@GLOB3@(FAC)) Q:FAC=""  D
+ . S TEAM=""
+ . F  S TEAM=$O(@GLOB3@(FAC,TEAM)) Q:TEAM=""  D
+ .. I $P(@GLOB3@(FAC,TEAM),"^",1)=0,$P(@GLOB3@(FAC,TEAM),"^",2)=0 Q
+ .. I $G(DEBUG)=1 W !,FAC,"|",TEAM,"|",@GLOB3@(FAC,TEAM)
+ .. ;S TNUM=TNUM+$P(@GLOB3@(FAC,TEAM),"^",1),TDEN=TDEN+$P(@GLOB3@(FAC,TEAM),"^",2)
+ .. S TNUM=TNUM+$P(@GLOB3@(FAC,TEAM),"^",1),TDEN=$P(@GLOB3@(FAC,TEAM),"^",2)
+ .. I $G(WEEK)="" D STORT^BQIIPUTL(TEAM,ID,BQDATE,$P(@GLOB3@(FAC,TEAM),"^",2),$P(@GLOB3@(FAC,TEAM),"^",1))
+ .. I $G(WEEK)=1 D STORTW^BQIIPUTL(TEAM,ID,BQFROM,BQTHRU,$P(@GLOB3@(FAC,TEAM),"^",2),$P(@GLOB3@(FAC,TEAM),"^",1))
+ ;
+ S FAC=$$HME^BQIGPUTL(),ID="IPC_CCTM"
+ I $G(WEEK)="" D STORF^BQIIPUTL(FAC,ID,BQDATE,TDEN,TNUM)
+ I $G(WEEK)=1 D STORFW^BQIIPUTL(FAC,ID,BQFROM,BQTHRU,TDEN,TNUM)
+ Q
+ ;
+STOR ;Store the data
+ S TMN=0 F  S TMN=$O(^BSDPCT(TMN)) Q:'TMN  D
+ . S TEAM=$P(^BSDPCT(TMN,0),"^",1)
+ . I '$D(@GLOB3@(FAC,TEAM)) S @GLOB3@(FAC,TEAM)="0^0"
+ Q
+ ;
+VIS ; Find visits
+ S BQITOTV=0,BQITOTR=0
+ D TMS
+ ;
+ S BD=BEGDT
+ F  S BD=$O(^AUPNVSIT("B",BD)) Q:BD=""!(BD\1>ENDT)  D
+ . S VISIT=""
+ . F  S VISIT=$O(^AUPNVSIT("B",BD,VISIT)) Q:VISIT=""  D
+ .. I $G(^AUPNVSIT(VISIT,0))="" Q
+ .. I $P(^AUPNVSIT(VISIT,0),U,11) Q
+ .. ; skip E:EVENT (HISTORICAL);D:DAILY HOSP DATA;X:ANCILLARY PACKAGE DAILY visits
+ .. Q:"EDX"[$P(^AUPNVSIT(VISIT,0),U,7)
+ .. ; location of visit not facility
+ .. S FC=$P(^AUPNVSIT(VISIT,0),U,6) Q:'FC
+ .. Q:FC'=FAC
+ .. ; if no diagnoses
+ .. Q:'$D(^AUPNVPOV("AD",VISIT))
+ .. S DFN=$P(^AUPNVSIT(VISIT,0),U,5) I DFN="" Q
+ .. I $G(^AUPNPAT(DFN,0))="" Q
+ .. I $G(^DPT(DFN,0))="" Q
+ .. ; If no HRN for this facility
+ .. I $G(^AUPNPAT(DFN,41,FAC,0))="" Q
+ .. S VD=$P(^AUPNVSIT(VISIT,0),U,1)\1
+ .. ; HRN is inactive
+ .. S X=$S($P($G(^AUPNPAT(DFN,41,FAC,0)),U,3)="":1,$P($G(^AUPNPAT(DFN,41,FAC,0)),U,3)>VD:1,1:0)
+ .. I 'X Q
+ .. ; patient is deceased
+ .. I $P($G(^DPT(DFN,.35)),U,1)'="" Q
+ .. ; If no DPCP
+ .. S DPCP=$P(^AUPNPAT(DFN,0),U,14) I DPCP="" Q
+ .. S CLN=$P(^AUPNVSIT(VISIT,0),U,8) I CLN="" Q
+ .. ; check against primary care clinic list
+ .. I '$D(^BQI(90508,1,23,"B",CLN)) Q
+ .. ; No primary provider
+ .. S BQA=$$PRIMPROV^APCLV(VISIT,"I") I BQA="" Q
+ .. S BQITOTV=BQITOTV+1 ; Denominator
+ .. ; primary provider of visit
+ .. S @GLOB2@(DFN,BQA)=""
+ ;
+ D TMB
+ S TEAM=""
+ F  S TEAM=$O(BQITOTM(FAC,TEAM)) Q:TEAM=""  D
+ . I $P(BQITOTM(FAC,TEAM),"^",1)'=0 S $P(BQITOTM(FAC,TEAM),"^",2)=BQITOTV,@GLOB3@(FAC,TEAM)=BQITOTM(FAC,TEAM)
+ Q
+ ;
+TMS ;EP - Team setup
+ I $G(WEEK)="" D
+ . K ^XTMP("BQITEAMM")
+ . S ^XTMP("BQITEAMM",0)=$$FMADD^XLFDT(DT,14)_U_DT_U_"IPC Monthly Compile"
+ . S GLOB1=$NA(^XTMP("BQITEAMM"))
+ I $G(WEEK)=1 D
+ . K ^XTMP("BQITEAMW")
+ . S ^XTMP("BQITEAMW",0)=$$FMADD^XLFDT(DT,14)_U_DT_U_"IPC Weekly Compile"
+ . S GLOB1=$NA(^XTMP("BQITEAMW"))
+ ; 
+ S TMN=0 F  S TMN=$O(^BSDPCT(TMN)) Q:'TMN  D
+ . S TEAM=$P(^BSDPCT(TMN,0),"^",1)
+ . S BQITOTM(FAC,TEAM)="0^0"
+ . S TMM="" F  S TMM=$O(^BSDPCT(TMN,1,"B",TMM)) Q:TMM=""  D
+ .. S DFN="" F  S DFN=$O(^AUPNPAT("AK",TMM,DFN)) Q:DFN=""  S @GLOB1@(FAC,TEAM,DFN)=""
+ Q
+ ;
+TMB ;EP - Is provider member of a team?
+ S DFN=0,TOTP=0,TOTV=0
+ F  S DFN=$O(@GLOB2@(DFN)) Q:DFN=""  D
+ . S PRV=""
+ . F  S PRV=$O(@GLOB2@(DFN,PRV)) Q:PRV=""  D
+ .. S TOTP=$G(TOTP)+1
+ .. S TMN=$O(^BSDPCT("AB",PRV,"")) I TMN="" Q
+ .. S TEAM=$P(^BSDPCT(TMN,0),"^",1)
+ .. I $D(@GLOB1@(FAC,TEAM,DFN)) S $P(BQITOTM(FAC,TEAM),"^",1)=$P($G(BQITOTM(FAC,TEAM)),"^",1)+1
+ .. S TOTV=TOTV+1
+ Q
+ ;
+BQM ;
+ ;;12^PYR
+ ;;01^CYR
+ ;;02^CYR
+ ;;03^CYR
+ ;;04^CYR
+ ;;05^CYR
+ ;;06^CYR
+ ;;07^CYR
+ ;;08^CYR
+ ;;09^CYR
+ ;;10^CYR
+ ;;11^CYR

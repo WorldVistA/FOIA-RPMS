@@ -1,17 +1,21 @@
 ABME5L10 ; IHS/ASDST/DMJ - Header 
- ;;2.6;IHS Third Party Billing System;**6,8,10,11,19,21**;NOV 12, 2009;Build 379
+ ;;2.6;IHS Third Party Billing System;**6,8,10,11,19,21,22,23**;NOV 12, 2009;Build 427
  ;Header Segments
  ;IHS/SD/SDR - 2.6*19 - HEAT116949 - Include LIN segment in 837I if line item has an NDC.
  ;IHS/SD/SDR - 2.6*21 - HEAT106899 - Updated to print operating.  Fixed so it would print both
  ;   oper. and rend. if both populated.  Also made correction to patch 19 code.  There was a QUIT that was
  ;   causing none of the line item provider lines to print if there wasn't an NDC on the line.
  ;IHS/SD/SDR - 2.6*21 - HEAT120880 - Made change for OK Medicaid to print date range in loop 2400.
+ ;IHS/SD/SDR 2.6*22 HEAT335246 check new parameter for itemized but with the flat rate on first line, zeros for the rest
+ ;IHS/SD/SDR 2.6*23 HEAT247169 Added checks for NDC in piece 19 of ABMRV array
  ;
 EP ;START HERE
  S ABMLXCNT=0
  K ABM
  D FRATE^ABMDF11
  D ^ABMERGRV
+ S ABMITMZ=$P($G(^ABMNINS(DUZ(2),ABMP("INS"),1,ABMP("VTYP"),0)),"^",12)  ;abm*2.6*22 IHS/SD/SDR HEAT335246
+ I +ABMITMZ&($P($G(^ABMNINS(DUZ(2),ABMP("INS"),0)),U,14)="Y")&(+$G(ABMP("FLAT"))'=0) D START^ABMERGR4  ;abm*2.6*22 IHS/SD/SDR HEAT335246
  S ABMI=""
  F  S ABMI=$O(ABMRV(ABMI)) Q:ABMI=""  D
  .Q:ABMI=9999
@@ -80,12 +84,15 @@ LOOP ;
  ;..D EP^ABME5REF("XZ",$P(ABMRV(ABMI,ABMJ,ABMK),U,14))
  ;..D WR^ABMUTL8("REF")
  ;end old start new abm*2.6*21 IHS/SD/SDR HEAT106899
+ I +$G(NDC)=0 S NDC=$P(ABMRV(ABMI,ABMJ,ABMK),U,19)  ;abm*2.6*23 IHS/SD/SDR HEAT247169
  S NDC=$TR(NDC,"-")
  I NDC&(($L(NDC)=10)!($L(NDC)=11)) D
- .I $P($P(ABMRV(ABMI,ABMJ,ABMK),U,9)," ")'="" D
+ .;I $P($P(ABMRV(ABMI,ABMJ,ABMK),U,9)," ")'="" D  ;abm*2.6*23 IHS/SD/SDR HEAT247169
+ .I $P($P(ABMRV(ABMI,ABMJ,ABMK),U,9)," ")'=""!$P(ABMRV(ABMI,ABMJ,ABMK),U,19)'="" D  ;abm*2.6*23 IHS/SD/SDR HEAT247169
  ..D EP^ABME5LIN
  ..D WR^ABMUTL8("LIN")
- .I +$P(ABMRV(ABMI,ABMJ,ABMK),U,5) D
+ .;I +$P(ABMRV(ABMI,ABMJ,ABMK),U,5) D  ;abm*2.6*22 IHS/SD/SDR HEAT335246
+ .I +$P(ABMRV(ABMI,ABMJ,ABMK),U,5)!($P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),0)),U,14)="Y") D  ;abm*2.6*22 IHS/SD/SDR HEAT335246
  ..D EP^ABME5CTP
  ..D WR^ABMUTL8("CTP")
  .I $P($G(ABMRV(ABMI,ABMJ,ABMK)),U,14)'="" D

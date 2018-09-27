@@ -1,5 +1,5 @@
 ABSPOSE1 ; IHS/SD/lwj - E1 gereration routine ; [ 10/24/2005 10:09:07 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**14,15,16**;JUN 21, 2001;Build 15
+ ;;1.0;PHARMACY POINT OF SALE;**14,15,16,48**;JUN 21, 2001;Build 27
  ;
  ;IHS/SD/lwj 10/24/05  Medicare Part D E1 Transmission routine
  ;  This routine will:
@@ -355,10 +355,11 @@ INSURER ; this subroutine will pull together the information
  Q
 RAWTRANS ; create the raw transmission entry in ^ABSPE
  ;
- N WP,I
+ N WP,I,ZERR  ; /IHS/OIT/RAM ; 12 JUN 17 ; ADD DBS CALL ERROR RETURN VARIABLE
  ;
  F I=1:100:$L(TDATA) S WP(I/100+1,0)=$E(TDATA,I,I+99)
- D WP^DIE(9002313.7,E1IEN_",",1000,"","WP")
+ D WP^DIE(9002313.7,E1IEN_",",1000,"","WP","ZERR") ; /IHS/OIT/RAM ; 12 JUN 17 ; UPDATE DBS CALL TO ALLOW FOR ERROR RETURN.
+ I $D(ZERR) D LOG^ABSPOSL2("RAWTRANS^ABSPOSE1",.ZERR) ; /IHS/OIT/RAM ; 12 JUN 17 ; AND LOG IT IF AN ERROR OCCURS.
  ;
  Q
 DISPLAY(E1IEN) ;EP - display the E1's results

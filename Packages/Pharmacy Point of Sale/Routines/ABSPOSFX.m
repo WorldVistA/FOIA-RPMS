@@ -1,5 +1,5 @@
 ABSPOSFX ; IHS/FCS/DRS - Print NCPDP claim ;   [ 09/12/2002  10:09 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**3**;JUN 21, 2001;Build 15
+ ;;1.0;PHARMACY POINT OF SALE;**3**;JUN 21, 2001;Build 27
  ;----------------------------------------------------------------------
  Q
 ALIGN ;EP - from ABSPOSF
@@ -16,15 +16,15 @@ ALIGN ;EP - from ABSPOSF
  S ABSP("Site","City")="BOROUGH OF MANSFIELD"
  S ABSP("Site","State")="PA"
  S ABSP("Site","Zip")="16933-1234"
- S ABSP("Site","Phone")="570 662-0000"
- S ABSP("Site","Fax")="570 662-0000"
+ S ABSP("Site","Phone")="999 999-9999"
+ S ABSP("Site","Fax")="999 999-9999"
  S ABSP("Site","Tax ID #")="12-3456789"
  S NCPDP(315)="SOUTHERN TIOGA INDUSTRIES"
  S NCPDP(316)="177 INDUSTRIAL WAY"
  S NCPDP(317)="COVINGTON TOWNSHIP"
  S NCPDP(318)="PA",NCPDP(319)="16917-0000"
  S NCPDP(327)="WORKERS COMP CARRIER CO."
- S ABSP("Employer","Phone")="570 659-0000"
+ S ABSP("Employer","Phone")="999 999-9999"
  N RXN F RXN=1,2 D
  . S NCPDP("RX",RXN,434)=20010319
  . S NCPDP("RX",RXN,435)="1234567890-ABCDE"

@@ -1,17 +1,17 @@
 BJPNUTIL ;GDIT/HS/BEE-Prenatal Care Module Utility Calls ; 08 May 2012  12:00 PM
- ;;2.0;PRENATAL CARE MODULE;**6,7,8**;Feb 24, 2015;Build 25
+ ;;2.0;PRENATAL CARE MODULE;**6,7,8,9**;Feb 24, 2015;Build 12
  ;
  Q
  ;
 GETCOI(DATA,TEXT,VIEN,COUNT) ;BJPN SELECT INJURY CAUSE
  ;
- ;Accept search string and return list of matching Cause of Injury values to choose
- ;Uses a call to the Lexicon to generate the list
+ ;Accept search string, return list of matching Cause of Injury values to choose
+ ;Uses call to Lexicon to generate list
  ;
  ;Input
- ; TEXT - The string to search on
- ; VIEN - The visit IEN
- ;COUNT - The number of records to return (optional - default to 25)
+ ; TEXT - String to search on
+ ; VIEN - Visit IEN
+ ;COUNT - Number records to return (optional - default to 25)
  ;
  NEW UID,II,VDT,SEX,DFN,RET
  ;
@@ -35,7 +35,7 @@ GETCOI(DATA,TEXT,VIEN,COUNT) ;BJPN SELECT INJURY CAUSE
  S DFN=$$GET1^DIQ(9000010,VIEN_",",.05,"I")
  S SEX=$$GET1^DIQ(2,DFN_",",.02,"I")
  ;
- ;Make the call
+ ;Make call
  D LEX(TEXT,COUNT,1,VDT,SEX,.RET)
  S RET="" F  S RET=$O(RET(RET)) Q:RET=""  S II=II+1,@DATA@(II)=RET(RET)_$C(30)
  ;
@@ -45,11 +45,11 @@ XGETCOI S II=II+1,@DATA@(II)=$C(31)
 LEX(SEARCH,COUNT,FILTER,DATE,GENDER,RET) ;EP - Perform Lexicon Lookup
   ;
  ; SEARCH - String to search on (Required)
- ; COUNT - Number of records to return (Optional) - Default 999
+ ; COUNT - Number records to return (Optional) - Def 999
  ; FILTER - 0 - Regular Search - Filter out Cause of Injury Codes (Default)
  ;  1 - Cause of Injury Search - Return only Cause of Injury Codes
  ;  2 - Full Search - Return all results - no filtering
- ;  DATE - Date to search on (default to today)
+ ;  DATE - Date to search on (def to today)
  ; GENDER - Patient gender (M/F/U) (Optional)
  ;  RET - Return array
  ;
@@ -79,7 +79,7 @@ LEX(SEARCH,COUNT,FILTER,DATE,GENDER,RET) ;EP - Perform Lexicon Lookup
  ;Search
  D LOOK^LEXA(SEARCH,$G(CSET),$G(COUNT),$G(CSET),$G(DATE))
  ;
- ;Determine the delimiter
+ ;Determine delimiter
  S DELIMITER=$S(ICD10=0:"ICD-9-CM ",1:"ICD-10-CM ")
  ;
  S TOTREC=0,LEX="0" F  S LEX=$O(LEX("LIST",LEX)) Q:LEX=""  D
@@ -177,7 +177,7 @@ CHKDX1     ;CODING SYSTEM 1 - ICD9
  ;Skip inactive codes
  I '$P(%,U,10) Q 0  ;INACTIVE
  ;
- ;If 'USE WITH SEX' field has a value check that value against AUPNSEX
+ ;If 'USE WITH SEX' field has value check that value against AUPNSEX
  I '$D(AUPNSEX) Q 1
  I $P(%,U,11)]"",$P(%,U,11)'=AUPNSEX Q 0
  Q 1
@@ -192,13 +192,13 @@ CHKDX30   ;coding system 30-ICD10
  . NEW EXC
  . S EXC=$E($P(%,U,2),1,3)
  . ;
- . ;Handle exceptions to the list
+ . ;Handle exceptions to list
  . I EXC'="Y92",EXC'="Y93" S RET=1
  . S RET=0
  ;
  I '$P(%,U,10) S RET=0  ;STATUS IS INACTIVE
  ;
- ;If 'USE WITH SEX' field has a value check against AUPNSEX
+ ;If 'USE WITH SEX' field has value check against AUPNSEX
  I '$D(AUPNSEX) Q RET
  I $P(%,U,11)]"",$P(%,U,11)'=AUPNSEX S RET=0
  Q RET
@@ -213,7 +213,7 @@ LOG(BJPNCAT,BJPNACT,BJPNCALL,BJPNDESC,BJPNVDFN) ;EP - Log Prenatal Audit entry
  ;See if BUSA has been installed
  S X="BUSAAPI" X ^%ZOSF("TEST") I '$T Q "BUSA has not been installed"
  ;
- ;Check the input
+ ;Check input
  I ",S,P,D,O,"'[(","_$G(BJPNCAT)_",") Q "Invalid Audit Category"
  I (BJPNCAT="P"),(",A,D,Q,P,E,C,"'[(","_$G(BJPNACT)_",")) Q "Invalid Audit Action"
  I $G(BJPNDESC)="" Q "Invalid Audit Log Description"
@@ -395,7 +395,7 @@ COMP(DFN,UID,VIEN,PRBIEN) ;EP - Call EHR API and format results into usable data
  ;Reset compile global - data to be used by this call and future RPC calls
  K ^TMP("BJPNIPL",UID)
  ;
- ;Populate information
+ ;Populate info
  S TMP=$NA(^TMP("BJPNIPL",UID))
  S (T,BGO)="" F  S BGO=$O(@RET@(BGO)) Q:BGO=""  D
  . NEW N
@@ -420,7 +420,7 @@ COMP(DFN,UID,VIEN,PRBIEN) ;EP - Call EHR API and format results into usable data
  . S PVLST=""
  . D GET^BGOVPOV(.RET,VIEN)
  . S BGO="" F  S BGO=$O(@RET@(BGO)) Q:BGO=""  D
- .. NEW N,P,PS,PENT,B,PVIEN
+ .. NEW N,P,PS,PENT,B,PVIEN,RETDATA
  .. S N=$G(@RET@(BGO))
  .. S P=$P(N,U,24)   ;Problem
  .. ;
@@ -435,7 +435,7 @@ COMP(DFN,UID,VIEN,PRBIEN) ;EP - Call EHR API and format results into usable data
  .. ;
  .. ;Look for episodicity and injury info
  .. I $G(FINFO(P))="" D
- ... NEW EP,REV,INJCASS,PLC,INJDT,INJCEXT,INJCINT,AF
+ ... NEW EP,REV,INJCASS,PLC,INJDT,INJCEXT,INJCINT,AF,FRACT
  ... S EP=$P(N,U,6) S:EP]"" FINFO(P)=1 ;Episodicity
  ... S REV=$P(N,U,11) S:REV]"" FINFO(P)=1 ;Injury Revisit
  ... S INJCASS=$P(N,U,12) S:INJCASS]"" FINFO(P)=1 ;Inj Association
@@ -447,6 +447,9 @@ COMP(DFN,UID,VIEN,PRBIEN) ;EP - Call EHR API and format results into usable data
  ... S AF=$P($P(N,U,28),";")
  ... S:AF]"" AF=$O(^BSTS(9002318.6,"C","AF",AF,""))
  ... S:AF]"" FINFO(P)=1 ;Abnormal Findings
+ ... ;BJPN*2.0*9;Include Fracture
+ ... S FRACT=$P(N,U,30)
+ ... S FINFO(P,"FRACT")=FRACT
  ... S FINFO(P,"AF")=AF
  ... S FINFO(P,"EP")=EP
  ... S FINFO(P,"REV")=REV
@@ -456,9 +459,11 @@ COMP(DFN,UID,VIEN,PRBIEN) ;EP - Call EHR API and format results into usable data
  ... S FINFO(P,"INJCEXT")=INJCEXT
  ... S FINFO(P,"INJCINT")=INJCINT
  .. ;
- .. ;BJPN*2.0*7;Moved from 20-29 to 30-39 because IPL API returns more fields now
- .. ;Set the Primary/Secondary,POV IEN, and Episodicity in the problem entry
- .. S $P(@TMP@("P",P,B),U,30,39)=$G(FNDPS(P))_U_PVLST_U_$G(FINFO(P,"EP"))_U_$G(FINFO(P,"REV"))_U_$G(FINFO(P,"PLC"))_U_$G(FINFO(P,"INJDT"))_U_$G(FINFO(P,"INJCEXT"))_U_$G(FINFO(P,"INJCINT"))_U_$G(FINFO(P,"INJCASS"))_U_$G(FINFO(P,"AF"))
+ .. ;BJPN*2.0*9;Added fracture in 40
+ .. ;Set the Primary/Secondary,POV IEN, Episodicity in the problem entry
+ .. S RETDATA=$G(FNDPS(P))_U_PVLST_U_$G(FINFO(P,"EP"))_U_$G(FINFO(P,"REV"))_U_$G(FINFO(P,"PLC"))
+ .. S RETDATA=RETDATA_U_$G(FINFO(P,"INJDT"))_U_$G(FINFO(P,"INJCEXT"))_U_$G(FINFO(P,"INJCINT"))_U_$G(FINFO(P,"INJCASS"))_U_$G(FINFO(P,"AF"))_U_$G(FINFO(P,"FRACT"))
+ .. S $P(@TMP@("P",P,B),U,30,40)=RETDATA
  ;
  Q
  ;

@@ -1,5 +1,5 @@
 ABSPDB1G ; IHS/OIT/CASSevern/Pieran ran 1/19/2011 - Handling of outgoing NCPDP Billing "B1" and Reversal "B2" Claims for D.0
- ;;1.0;PHARMACY POINT OF SALE;**42,46**;JUN 21, 2001;Build 15
+ ;;1.0;PHARMACY POINT OF SALE;**42,46,48**;JUN 21, 2001;Build 27
  ;
  ; This routine will replace the ABSPOSCF for D.0, so that we no
  ; longer need to use the formats file.
@@ -395,7 +395,7 @@ PATIENT ;PATIENT Segment
 350SET S $P(^ABSPC(ABSP(9002313.02),350),U,1)=ABSP("X")
  Q
  ;Patient Residence
-384GET I '$D(SPECIAL(384)) S ABSP("X")=$G(ABSP("Patient","Location"))
+384GET I '$D(SPECIAL(384)) S ABSP("X")=$G(ABSP("Patient","Residence")) ; /IHS/OIT/RAM 22 MAY 17; bug in code; "Location" already existed for field 307! Created a data integrety issue.
  ELSE  X SPECIAL(384)
  Q
 384FMT S:ABSP("X")'="" ABSP("X")="4X"_$$ANFF^ABSPECFM($G(ABSP("X")),2)

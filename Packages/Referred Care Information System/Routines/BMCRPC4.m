@@ -1,5 +1,5 @@
 BMCRPC4 ; IHS/CAS/AU - GUI REFERRED CARE INFO SYSTEM (4/4);     
- ;;4.0;REFERRED CARE INFO SYSTEM;**7,8**;JAN 09, 2006;Build 51
+ ;;4.0;REFERRED CARE INFO SYSTEM;**7,8**;JAN 09, 2006;Build 92
  ;
  ; RPC code for RCIS GUI Application
  ; Routines contains code for Creating Entry in V Referral and creating message for GUI
