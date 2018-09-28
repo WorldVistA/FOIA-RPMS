@@ -1,5 +1,5 @@
 BGP8DH ;IHS/CMI/LAB - HEADER;
- ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
+ ;;18.1;IHS CLINICAL REPORTING;**1**;MAY 25, 2018;Build 65
  ;
  S BGPQHDR=0,BGPHPG=0
  D HDR
@@ -18,23 +18,24 @@ BGP8DH ;IHS/CMI/LAB - HEADER;
  I BGPRTYPE=1,$G(BGPYGPU),$G(BGPSEAT) D GPUPPHDR^BGP8DH1
  I BGPRTYPE=6 D PEHDR
  I BGPRTYPE=7 D ONMHDR
+ I BGPRTYPE=2 D IPCHDR
 N1 I BGPPTYPE="P" Q:BGPQHDR
  I BGPPTYPE="P",$Y>(BGPIOSL-3) D HDR Q:BGPQHDR
  I $G(BGPEXPT),BGPRTYPE=1 D   ;,'$G(BGPNGR09) D
- .D W^BGP8DP("A file will be created called BG180"_$P(^AUTTLOC(DUZ(2),0),U,10)_"."_BGPRPT,0,2,BGPPTYPE)
+ .D W^BGP8DP("A file will be created called BG"_$$FV^BGP8BAN()_$P(^AUTTLOC(DUZ(2),0),U,10)_"."_BGPRPT,0,2,BGPPTYPE)
  .D W^BGP8DP("It will reside in the "_BGPUF_" directory.",0,1,BGPPTYPE)
  .D W^BGP8DP("This file should be sent to your Area Office.",0,1,BGPPTYPE)
  .D W^BGP8DP("",0,1,BGPPTYPE)
  I BGPPTYPE="P",$Y>(BGPIOSL-3) D HDR Q:BGPQHDR
  I $G(BGPEXPT),BGPRTYPE=7 D
- .D W^BGP8DP("A file will be created called BG180"_$P(^AUTTLOC(DUZ(2),0),U,10)_".ONM"_BGPRPT,0,2,BGPPTYPE)
+ .D W^BGP8DP("A file will be created called BG"_$$FV^BGP8BAN()_$P(^AUTTLOC(DUZ(2),0),U,10)_".ONM"_BGPRPT,0,2,BGPPTYPE)
  .D W^BGP8DP("It will reside in the "_BGPUF_" directory.",0,1,BGPPTYPE)
  .D W^BGP8DP("This file should be sent to your Area Office.",0,1,BGPPTYPE)
  .D W^BGP8DP("",0,1,BGPPTYPE)
  I BGPPTYPE="P",$Y>(BGPIOSL-3) D HDR Q:BGPQHDR
  I BGPRTYPE=6,$G(BGPPEEXP) D  Q:BGPQHDR
  .I BGPPTYPE="P",$Y>(BGPIOSL-3) D HDR Q:BGPQHDR
- .D W^BGP8DP("A file will be created called BG180"_$P(^AUTTLOC(DUZ(2),0),U,10)_".PED"_BGPRPT_" and will reside",0,1,BGPPTYPE)
+ .D W^BGP8DP("A file will be created called BG"_$$FV^BGP8BAN()_$P(^AUTTLOC(DUZ(2),0),U,10)_".PED"_BGPRPT_" and will reside",0,1,BGPPTYPE)
  .D W^BGP8DP("in the "_BGPUF_" directory.  This file should be sent to your Area Office.",0,1,BGPPTYPE)
  .D W^BGP8DP("",0,1,BGPPTYPE)
  I BGPROT'="P",'$D(BGPGUI) D  I BGPPTYPE="P" Q:BGPQHDR
@@ -67,6 +68,7 @@ MD ;EP
  I BGPRTYPE=4 D W^BGP8DP("Measures: "_$P($T(@BGPINDG),";;",2),0,1,BGPPTYPE) Q
  I BGPRTYPE=1 D W^BGP8DP("Measures: GPRA Developmental, GPRA/GPRAMA Denominators and Numerators and",0,1,BGPPTYPE),W^BGP8DP("Selected Other Clinical Denominators and Numerators",0,1,BGPPTYPE) Q
  I BGPRTYPE=7 D W^BGP8DP("Measures: Key Clinical Denominators and Numerators for Non-GPRA National",0,1,BGPPTYPE),W^BGP8DP("Reporting",0,1,BGPPTYPE) Q
+ I BGPRTYPE=2 D W^BGP8DP("Measures: IPC Performance Measures",0,1,BGPPTYPE) Q
  Q
  ;
 PD ;EP
@@ -78,6 +80,8 @@ PD ;EP
  I BGPRTYPE=6,'$G(BGPSEAT) D W^BGP8DP("Population: "_$S(BGPBEN=1:"AI/AN Only (Classification 01)",BGPBEN=2:"non AI/AN Only (Classification NOT 01)",BGPBEN=3:"All (Both AI/AN and non AI/AN)",1:""),0,1,BGPPTYPE)
  I BGPRTYPE=6,$G(BGPSEAT) D W^BGP8DP("Patient Population:  "_$P(^DIBT(BGPSEAT,0),U),0,2,BGPPTYPE)
  I BGPRTYPE=7 D W^BGP8DP("Population: "_$S(BGPBEN=1:"AI/AN Only (Classification 01)",BGPBEN=2:"non AI/AN Only (Classification NOT 01)",BGPBEN=3:"All (Both AI/AN and non AI/AN)",1:""),0,1,BGPPTYPE)
+ I BGPRTYPE=2,'$G(BGPSEAT) D W^BGP8DP("Population: "_$S(BGPBEN=1:"AI/AN Only (Classification 01)",BGPBEN=2:"non AI/AN Only (Classification NOT 01)",BGPBEN=3:"All (Both AI/AN and non AI/AN)",1:""),0,1,BGPPTYPE)
+ I BGPRTYPE=2,$G(BGPSEAT) D W^BGP8DP("Patient Population:  "_$P(^DIBT(BGPSEAT,0),U),0,2,BGPPTYPE)
  Q
  ;
 HDR ;EP
@@ -100,6 +104,7 @@ HDR1 ;
  I BGPRTYPE=1,'$G(BGPYGPU),$G(BGPSUMON) D W^BGP8DP("*** IHS 2018 National GPRA/GPRAMA Report Clinical Performance Summaries ***",1,2,BGPPTYPE)
  I BGPRTYPE=1,$G(BGPYGPU) D W^BGP8DP("*** IHS 2018 GPRA/GPRAMA Performance Report ***",1,2,BGPPTYPE)
  I BGPRTYPE=7 D W^BGP8DP("*** IHS 2018 Other National Measures Report ***",1,2,BGPPTYPE)
+ I BGPRTYPE=2 D W^BGP8DP("*** IHS 2018 IPC Measures Report ***",1,2,BGPPTYPE)
 N ;
  I $G(BGPCPPL) D W^BGP8DP("** Including Comprehensive Patient List **",1,1,BGPPTYPE)
  D W^BGP8DP($$RPTVER^BGP8BAN,1,1,BGPPTYPE)
@@ -157,6 +162,16 @@ COMHDRA ;EP
  .D W^BGP8DP(^BGPCTRL(BGPX,BGPNODEP,BGPY,0),0,1,BGPPTYPE)
  .Q
  I $G(BGPYGPU) D W^BGP8DP("See last pages of this report for Performance Summaries.",0,2,BGPPTYPE)
+ Q
+IPCHDR ;;IPC COVER PAGE TEXT
+ D W^BGP8DP("",0,1,BGPPTYPE)
+ ;Q:$G(BGPSEAT)
+ S BGPX=$O(^BGPCTRL("B",2018,0))
+ S BGPY=0 F  S BGPY=$O(^BGPCTRL(BGPX,9802,BGPY)) Q:BGPY'=+BGPY!(BGPQHDR)  D
+ .I BGPPTYPE="P",$Y>(BGPIOSL-2) D HDR Q:BGPQHDR
+ .D W^BGP8DP(^BGPCTRL(BGPX,9802,BGPY,0),0,1,BGPPTYPE)
+ .Q
+ D W^BGP8DP("",0,1,BGPPTYPE)
  Q
 GPRAHDR ;
  D W^BGP8DP("",0,1,BGPPTYPE)

@@ -1,5 +1,5 @@
 ABSPOSIY ; IHS/FCS/DRS - Filing with .51,.59 ;    [ 08/30/2002  10:26 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**3,34,48**;JUN 21, 2001;Build 27
+ ;;1.0;PHARMACY POINT OF SALE;**3,34,48**;JUN 21, 2001;Build 38
  ; continuation of ABSPOSIZ
  ;----------------------------------------------------------------
  ;IHS/SD/lwj 8/30/02  NCPDP 5.1 changes

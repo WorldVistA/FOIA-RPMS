@@ -1,5 +1,5 @@
-PXRMEXFI ;SLC/PKR/PJH - Exchange utilities for file entries. ;24-Mar-2015 10:39;DU
- ;;2.0;CLINICAL REMINDERS;**6,1001,12,18,24,26,1005**;Feb 04, 2005;Build 23
+PXRMEXFI ;SLC/PKR/PJH - Exchange utilities for file entries. ;17-Apr-2018 12:06;DU
+ ;;2.0;CLINICAL REMINDERS;**6,1001,12,18,24,26,1005,1009**;Feb 04, 2005;Build 17
  ;IHS/MSC/MGH Patch 1001 Restrict file entries that IHS cannot create
  ;==============================================
 DELALL(FILENUM,NAME) ;Delete all file entries named NAME.
@@ -129,10 +129,10 @@ CHK ;
  I IEN D
  .;If the entry already exists compare the existing entry checksum
  .;with the packed entry checksum.
- .;IHS/MSC/MGH cannot rely on checksums, normally sites need to make
- .;changes to taxonomies
+ .;IHS/MSC/MGH 1009 Removed change made a long time ago
  . S CSUM=$$FILE^PXRMEXCS(ATTR("FILE NUMBER"),IEN)
- . S SAME=$S(ATTR("CHECKSUM")=CSUM:1,FILENUM=811.2:1,1:0)
+ . ;S SAME=$S(ATTR("CHECKSUM")=CSUM:1,FILENUM=811.2:1,1:0)
+ . S SAME=$S(ATTR("CHECKSUM")=CSUM:1,1:0)
  . D FEIMSG(SAME,.ATTR)
  . I SAME S ACTION="S"
  . I 'SAME D

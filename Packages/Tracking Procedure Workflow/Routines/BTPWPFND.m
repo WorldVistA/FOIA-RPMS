@@ -1,5 +1,5 @@
 BTPWPFND ;VNGT/HS/ALA-Find Events for Tracking ; 22 Apr 2008  7:15 PM
- ;;1.1;CARE MANAGEMENT EVENT TRACKING;;Apr 01, 2015;Build 25
+ ;;1.2;CARE MANAGEMENT EVENT TRACKING;**1**;JUL 07,2017;Build 5
  ;
  ;
 EN(JOB) ;EP - Entry point
@@ -63,16 +63,20 @@ EN(JOB) ;EP - Entry point
  .... I $$GET1^DIQ(9000010,VISIT,.11,"I")=1 Q
  .... ; if the visit has no dependents, quit
  .... I $$GET1^DIQ(9000010,VISIT,.09,"I")=0 Q
- .... S VSDTM=$$GET1^DIQ(9000010,VISIT,.01,"I")\1 Q:VSDTM=0
+ .... S VSDTM=$P($G(^AUPNVSIT(VISIT,0)),U,1)\1 Q:VSDTM=0
  .... Q:"DXCTI"[$P(^AUPNVSIT(VISIT,0),U,7)
  .... I $D(MOD)>0 S QFL=0,MN=0 D  Q:QFL
  ..... NEW BTJ
  ..... F  S MN=$O(MOD(MN)) Q:MN=""  D  Q:QFL
  ...... S OPER=MOD(MN)
+ ...... F BTJ=.08,.09 I $$GET1^DIQ(FREF,IEN,BTJ,"I")="" S QFL=2
  ...... F BTJ=.08,.09 I $$GET1^DIQ(FREF,IEN,BTJ,"I")=MN,OPER="E" S QFL=1
  ...... F BTJ=.08,.09 I $$GET1^DIQ(FREF,IEN,BTJ,"I")=MN,OPER="I" S QFL=0
  .... S BTPWIEN=$O(^BWPCD("AD",VISIT,""))
  .... I BTPWIEN'="",$P($G(^BWPCD(BTPWIEN,"PCC")),U,2)'=IEN S BTPWIEN=""
+ .... ; Check Mastectomy for bilateral, unilateral or unspecified
+ .... I PRCN=36,$D(@TGLOB@(DFN,25,VSDTM)) Q
+ .... I PRCN=46,$D(@TGLOB@(DFN,25,VSDTM))!($D(@TGLOB@(DFN,36,VSDTM))) Q
  .... S @TGLOB@(DFN,PRCN,VSDTM,ORD,VISIT,IEN)=BTPWIEN_U_FREF_U_$P(^DIC(FREF,0),U,1)
  ;
  S DFN=""
@@ -94,7 +98,8 @@ EN(JOB) ;EP - Entry point
  .. S VISIT=$P($G(^BWPCD(PIEN,"PCC")),U,1),IEN=$P($G(^BWPCD(PIEN,"PCC")),U,2)
  .. I $$UP^XLFSTR($$GET1^DIQ(9002086.1,PIEN_",",.05,"E"))["ERROR" D  Q
  ... S:VISIT="" VISIT="~" S:IEN="" IEN="~"
- ... I '$D(^BTPWQ("C",DFN,PRCN,VISIT,IEN,FRN)) Q
+ ... ;I '$D(^BTPWQ("C",DFN,PRCN,VISIT,IEN,FRN)) Q
+ ... I '$D(^BTPWQ("D",DFN,PRCN,VSDTM)) Q
  ... NEW QIEN,DA,DIK
  ... S QIEN=$O(^BTPWQ("C",DFN,PRCN,VISIT,IEN,FRN,"")) I QIEN="" Q
  ... I $P(^BTPWQ(QIEN,0),U,8)="P" S DA=QIEN,DIK="^BTPWQ(" D ^DIK
@@ -129,12 +134,16 @@ STOR ; Store the records found
  .. I FREF'="" S FRIL=$O(^BTPW(90621.1,"C",FREF,""))
  .. I FRIL="" S FREF=$P(BQARRAY(BCT),U,5) I FREF'="" S FRIL=$O(^BTPW(90621.1,"B",FREF,""))
  .. ; Check for existence of the record already in the queue file
- .. I DFN'="",PRCN'="",VISIT'="",RIEN'="",FRIL'="",$D(^BTPWQ("C",DFN,PRCN,VISIT,RIEN,FRIL)) Q
+ .. I DFN'="",PRCN'="",VSDTM'="",$D(^BTPWQ("D",DFN,PRCN,VSDTM)) Q
+ .. ;I DFN'="",PRCN'="",VISIT'="",RIEN'="",FRIL'="",$D(^BTPWQ("C",DFN,PRCN,VISIT,RIEN,FRIL)) Q
  .. ;
  .. I TMFRAME'="",VSDTM<ENDT Q
  .. ;
- .. I $P($G(^AUPNVSIT(VISIT,0)),U,37)'="" S VISIT=$P($G(^AUPNVSIT(VISIT,0)),U,37)
- .. I DFN'="",PRCN'="",VISIT'="",RIEN'="",FRIL'="",$D(^BTPWQ("C",DFN,PRCN,VISIT,RIEN,FRIL)) Q
+ .. ; Check if the visit has been merged to another visit
+ .. I $P($G(^AUPNVSIT(VISIT,0)),U,37)'="" S VISIT=$P($G(^AUPNVSIT(VISIT,0)),U,37),MVSDTM=$P($G(^AUPNVSIT(VISIT,0)),U,1)\1
+ .. I DFN'="",PRCN'="",$G(MVSDTM)'="",$D(^BTPWQ("D",DFN,PRCN,MVSDTM)) Q
+ .. I DFN'="",PRCN'="",VSDTM'="",$D(^BTPWQ("D",DFN,PRCN,VSDTM)) Q
+ .. ;I DFN'="",PRCN'="",VISIT'="",RIEN'="",FRIL'="",$D(^BTPWQ("C",DFN,PRCN,VISIT,RIEN,FRIL)) Q
  .. ;
  .. I FREF=9000010.09 D
  ... I RIEN'="~",RIEN'="" S ACCN=$P($G(^AUPNVLAB(RIEN,0)),U,6)

@@ -1,5 +1,5 @@
 BDPCOMA ; IHS/CMI/TMJ - ADD RECORDS FOR A PARTICULAR COMMUNITY ;
- ;;2.0;IHS PCC SUITE;**10**;MAY 14, 2009;Build 88
+ ;;2.0;IHS PCC SUITE;**10,21**;MAY 14, 2009;Build 34
  ;
  ;This routine adds patient living in a selected community
  ;for a selected Provider and Provider Type
@@ -80,6 +80,7 @@ PROV ; GET DESIGNATED PROVIDER
  S DIC("A")="Select New Designated Provider: ",DIC="^VA(200,",DIC(0)="AEMQ" D ^DIC K DIC,DA S:$D(DUOUT) DIRUT=1,BDPQ=1
  Q:$D(DIRUT)
  I +Y<1 S BDPQ=1 Q
+ S X=$$CHKPROV^BDPDPEE(+Y) I X S BDPQ=1 Q
  S BDPPROV=+Y,BDPRPROV=$P(Y,U,2)
  S BDPRPRVP=$P(^VA(200,BDPPROV,0),U,1) ;Provider Print Name
  S BDPQ=0
@@ -114,7 +115,7 @@ ADDCOM ;Add Patients in this Community to File
  . Q:BDPPAT=""
  . Q:BDPTYPE=""
  . Q:BDPPROV=""
- . S X=$$CREATE^BDPPASS(BDPPAT,BDPTYPE,BDPPROV) Q
+ . S X=$$CREATE^BDPAMA(BDPPAT,BDPTYPE,BDPPROV) Q
  . ;
  ;
  ;
@@ -136,8 +137,10 @@ EOJ ; END OF JOB
  ;
 INFORM ;Data Entry Explanation
  ;
- W !,?3,"This Option allows automatic UPDATE of existing Records for a Patients",!,?15,"Living in a Selected C0MMUNITY",!
- W ?3,"The User is prompted for the COMMUNITY Name and the desired Provider Name.",!
+ W !,?3,"This Option allows automatic UPDATE of Existing Records for Patients",!,?15,"Living in a Selected C0MMUNITY",!
+ W !?3,"The patient must  have been assigned a provider for the category ",!,"you select in the past in order to be updated by this option."
+ W !?3,"If the patient has never been assigned a provider in the category you select",!?3,"they will not be updated even though they live in the community you select."
+ W !,?3,"The User is prompted for the COMMUNITY Name and the desired Provider Name.",!
  W ?3,"Once the desired Provider Category Type is selected by the User,",!
  W ?3,"the Program will automatically LOOP through all existing Patient Records and",!,?3,"Update the selected Current Provider for this Category Type.",!!
  W ?3,"If the patient's Current Provider/Category Type/Community",!,?3,"are the same, no updating will occur.",!

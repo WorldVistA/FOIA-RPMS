@@ -1,5 +1,5 @@
 ACHSADTR ;IHS/OIT/FCJ - Display all transactions for a document [ 03/20/97  5:38 PM ]
- ;;3.1;CONTRACT HEALTH MGMT SYSTEM;**26**;JUN 11, 2001;Build 37
+ ;;3.1;CONTRACT HEALTH MGMT SYSTEM;**26**;JUN 11, 2001;Build 43
  ;Orig rtn frm Dina Hanson
  ;
  S ACHS("LN")=0

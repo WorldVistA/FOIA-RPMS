@@ -1,5 +1,5 @@
 BDPAPI ; IHS/CMI/TMJ - ADD A NEW DESIGNATED PROVIDER ;
- ;;2.0;IHS PCC SUITE;**2,10**;MAY 14, 2009;Build 88
+ ;;2.0;IHS PCC SUITE;**2,10,21**;MAY 14, 2009;Build 34
  ;
 AEDWH(BDPPAT,BDPIEN,BDPRET) ;PEP - called to add, edit or delete a WOMEN's HEALTH CASE MANAGER
  ;
@@ -61,6 +61,7 @@ AEDAP(BDPPAT,BDPIEN,BDPTYPE,BDPRET) ;PEP - called to add, edit or delete any des
  ;
 ADD1(BDPDFN,BDPTYPE) ;EP - add to top level of file for this category
  NEW X S X=$O(^BDPRECN("AA",BDPDFN,BDPTYPE,0)) I X Q X
+ K DIC
  S DIC="^BDPRECN(",DIC(0)="L",DLAYGO=90360.1,DIC("DR")=".02////"_BDPDFN,X=BDPTYPE
  D FILE^BDPFMC
  I Y<0 Q "0^UNABLE TO ADD - FILEMAN FAILED"
@@ -68,28 +69,41 @@ ADD1(BDPDFN,BDPTYPE) ;EP - add to top level of file for this category
  ;
 EDIT(BDPRIEN,BDPTYPE,BDPPROV) ;EP - edit/add to multiple
  I '$G(BDPRIEN) Q "0^RECORD IEN INVALID"
- NEW X,BDPLIEN,C,BDPLNUM
+ I '$G(BDPTYPE) Q "0^PROVIDER TYPE INVALID"
+ I '$D(BDPPROV) Q "0^PROVIDER IEN INVALID"
+ NEW X,BDPLIEN,C,BDPLNUM,BDPNIEN
  S:'$D(^BDPRECN(BDPRIEN,1,0)) $P(^(0),U,2)="90360.11P"
  S (X,BDPLIEN,BDPLNUM)=0
  F  S X=$O(^BDPRECN(BDPRIEN,1,X)) Q:X'=+X  S BDPLIEN=X,BDPLNUM=BDPLNUM+1  ;get last ien in multiple
- S BDPLIEN=BDPLIEN+1
+ S BDPNIEN=BDPLIEN+1
  S BDPLNUM=BDPLNUM+1
- S $P(^BDPRECN(BDPRIEN,1,0),U,3)=BDPLIEN
+ S $P(^BDPRECN(BDPRIEN,1,0),U,3)=BDPNIEN
  S $P(^BDPRECN(BDPRIEN,1,0),U,4)=BDPLNUM
- S BDPLINKI=1  ;tell fileman you are coming from bdp
- S DR=".01///"_"`"_BDPPROV
- L +^BDPRECN(BDPRIEN):10 I '$T Q "0^UNABLE TO LOCK GLOBAL"
- S DIE="^BDPRECN("_BDPRIEN_",1,",DA(1)=BDPRIEN,DA=BDPLIEN D ^DIE K DIE,DR,DA,DINUM
- L -^BDPRECN(BDPRIEN)
- I $D(Y) Q "0^ADDING PROVIDER TO LOG FAILED"
+ ;INACTIVE PREVIOUS ONE
+ S BDPLINKI=1  ;tell fileman you are coming from BDP
+ K DIE,DA,DR
+ I BDPNIEN'=1,$P(^BDPRECN(BDPRIEN,1,BDPLIEN,0),U,5)="" S DIE="^BDPRECN("_BDPRIEN_",1,",DA(1)=BDPRIEN,DA=BDPLIEN,DR=".02////"_DUZ_";.03////"_DT_";.05////"_DT D ^DIE K DIE,DR,DA,DINUM
+ ;S DR=".01///"_"`"_BDPPROV
+ S ^BDPRECN(BDPRIEN,1,BDPNIEN,0)=BDPPROV_U_DUZ_U_DT_U_DT
+ ;L +^BDPRECN(BDPRIEN):10 I '$T Q "0^UNABLE TO LOCK GLOBAL"
+ ;S DIE="^BDPRECN("_BDPRIEN_",1,",DA(1)=BDPRIEN,DA=BDPLIEN D ^DIE K DIE,DR,DA,DINUM
+ ;L -^BDPRECN(BDPRIEN)
+ ;REINDEX MULTIPLE ENTRY
+ NEW DIK
+ S DA(1)=BDPRIEN,DA=BDPNIEN,DIK="^BDPRECN("_BDPRIEN_",1," D IX^DIK K DIC,DA
+ ;I $D(Y) Q "0^ADDING PROVIDER TO LOG FAILED"
  Q 1
  ;
 DEL1(BDPPAT,BDPTYPE) ;
  NEW BDPX
  S BDPX=$O(^BDPRECN("AA",BDPPAT,BDPTYPE,0))
  I 'BDPX Q 1  ;doesn't have one so can't delete it
- NEW DA,DIE,DR
- S DA=BDPX,DIE="^BDPRECN(",DR=".03///@" D ^DIE
+ NEW DA,DIE,DR,X,Y,DINUM
+ S DA=BDPX,DIE="^BDPRECN(",DR=".03///@;.04////"_DUZ_";.05////"_DT D ^DIE   ;IHS/CMI/LAB = added .04/.05 updating patch 22
+ ;NOW WE HAVE TO UPDATE THE INACTIVE DATE IN THE MULTIPLE FOR THIS ONE BEING DELETED
+ ;FIND THE MULTIPLE AND SET .05 EQUAL TO DT, .02 AND .03
+ S X=0 F  S X=$O(^BDPRECN(BDPX,1,X)) Q:X'=+X  S Y=X
+ I Y,$P(^BDPRECN(BDPX,1,Y,0),U,5)="" S DIE="^BDPRECN("_BDPX_",1,",DA(1)=BDPX,DA=Y,DR=".02////"_DUZ_";.03////"_DT_";.05////"_DT D ^DIE K DIE,DR,DA,DINUM
  Q 1
  ;
 WHPCP(BDPPAT,BDPRET) ;PEP - return WH case managers and DPCP
@@ -179,7 +193,7 @@ SETV1 ;
  Q
 MA(P) ;PEP - called to get message agent for a patient
  ;input - DFN
- ;output - message agent IEN from file 200^message agent name^message agent email address from messagea agent file
+ ;output - message agent IEN from file 200^message agent name^message agent email address from message agent file
  ;if no message agent assigned to the patient null is returned
  I '$G(P) Q ""
  I '$D(^DPT(P,0)) Q ""

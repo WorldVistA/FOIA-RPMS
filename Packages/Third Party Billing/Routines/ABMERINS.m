@@ -1,22 +1,16 @@
 ABMERINS ; IHS/ASDST/DMJ - UB92 EMC Set up Insurer Information ;   
- ;;2.6;IHS Third Party Billing System;**3**;NOV 12, 2009
+ ;;2.6;IHS Third Party Billing System;**3,10,26**;NOV 12, 2009;Build 440
  ;Original;DMJ;06/25/96 12:43 PM
- ; IHS/SD/SDR - V2.5 P3 - 1/24/03 - NEA-0301-180044
- ;     Modified to display patient info when workers comp
- ; IHS/SD/SDR - v2.5 p8 - IM14799
- ;    Modified BCBS line tag to kill possible pre-existing calue of
- ;    ABME("LOC")
- ; IHS/SD/SDR - v2.5 p9 - IM18990
- ;    Correction for <UNDEFINED>PH+9^ABMERINS
- ; IHS/SD/SDR - v2.5 p10 - IM19963
- ;   Changed relationship code to use X12 code
- ; IHS/SD/SDR - v2.5 p10 - IM20000
- ;   Added code to look at CARD NAME in Policy Holder file
- ; IHS/SD/SDR - v2.5 p10 - IM21619
- ;   Made change to print worker's comp claim number
- ; IHS/SD/SDR v2.5 p11 - IM24315
- ;   Added check for new parameter for UB Relationship code
- ; IHS/SD/SDR - abm*2.6*3 - HEAT8996 - get group name/# for Medicaid
+ ;IHS/SD/SDR V2.5 P3 1/24/03 - NEA-0301-180044 Modified to display patient info when workers comp
+ ;IHS/SD/SDR v2.5 p8 IM14799 Modified BCBS line tag to kill possible pre-existing calue of ABME("LOC")
+ ;IHS/SD/SDR v2.5 p9 IM18990 Correction for <UNDEFINED>PH+9^ABMERINS
+ ;IHS/SD/SDR v2.5 p10 IM19963 Changed relationship code to use X12 code
+ ;IHS/SD/SDR v2.5 p10 IM20000 Added code to look at CARD NAME in Policy Holder file
+ ;IHS/SD/SDR v2.5 p10 IM21619 Made change to print worker's comp claim number
+ ;IHS/SD/SDR v2.5 p11 IM24315 Added check for new parameter for UB Relationship code
+ ;
+ ;IHS/SD/SDR - abm*2.6*3 - HEAT8996 - get group name/# for Medicaid
+ ;IHS/SD/SDR 2.6*26 CR9265 and CR9863 Changed to use AUPN API for MBI or default to HIC number
  ;
  ; *********************************************************************
  ;
@@ -24,7 +18,8 @@ START ;START HERE
  ;
 ISET ;SET UP DEPENDING ON INSURER
  K ABME("BCBS")
- S ABME("ITYPE")=$P(^AUTNINS(ABME("INS"),2),U) ; Type of insurer
+ ;S ABME("ITYPE")=$P(^AUTNINS(ABME("INS"),2),U) ; Type of insurer  ;abm*2.6*10 HEAT73780
+ S ABME("ITYPE")=$$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,ABME("INS"),".211","I"),1,"I") ; Type of insurer  ;abm*2.6*10 HEAT73780
  Q:"I"[ABME("ITYPE")
  S ABME("INM")=$P(^AUTNINS(ABME("INS"),0),U)  ; Ins name
  K ABME("PH"),ABME("PHNM"),ABME("PPP")
@@ -44,7 +39,15 @@ RR ;RAILROAD RETIREMENT
  S ABME("PHNM")=$G(ABM(9000005,DA,2101,"E"))  ; Railroad patient name
  S:ABME("PHNM")="" ABME("PHNM")=$G(ABM(9000005,DA,.01,"E")) ; Pat IEN
  S ABME("PPP")=ABMP("PDFN")  ; Patient IEN
- S ABMR(30,70)=$G(ABM(9000005,DA,.03,"E"))_$G(ABM(9000005,DA,.04,"E"))  ; Prefix IEN_rr#
+ ;S ABMR(30,70)=$G(ABM(9000005,DA,.03,"E"))_$G(ABM(9000005,DA,.04,"E"))  ; Prefix IEN_rr#  ;abm*2.6*26 IHS/SD/SDR CR9265
+ ;start new abm*2.6*26 IHS/SD/SDR CR9265
+ K ABMMBI
+ S ABMMBI=""
+ S ABMMBI=$$HISTMBI^AUPNMBI(ABME("PPP"),.ABMMBI)
+ S ABMMBI=+$O(ABMMBI(999999999),-1)
+ S:(ABMMBI'=0) ABMR(30,70)=$P(ABMMBI(ABMMBI),U)
+ I $G(ABMR(30,70))="" S ABMR(30,70)=$G(ABM(9000005,DA,.03,"E"))_$G(ABM(9000005,DA,.04,"E"))
+ ;end new abm*2.6*26 IHS/SD/SDR CR9265
  Q
  ;
 MCR ;MEDICARE INSURER
@@ -58,7 +61,15 @@ MCR ;MEDICARE INSURER
  S ABME("PHNM")=$G(ABM(9000003,DA,2101,"E"))
  S:ABME("PHNM")="" ABME("PHNM")=$G(ABM(9000003,DA,.01,"E"))
  S ABME("PPP")=ABMP("PDFN")
- S ABMR(30,70)=$G(ABM(9000003,DA,.03,"E"))_$G(ABM(9000003,DA,.04,"E"))
+ ;S ABMR(30,70)=$G(ABM(9000003,DA,.03,"E"))_$G(ABM(9000003,DA,.04,"E"))  ;abm*2.6*26 IHS/SD/SDR CR9265
+ ;start new abm*2.6*26 IHS/SD/SDR CR9265
+ K ABMMBI
+ S ABMMBI=""
+ S ABMMBI=$$HISTMBI^AUPNMBI(ABME("PPP"),.ABMMBI)
+ S ABMMBI=+$O(ABMMBI(999999999),-1)
+ S:(ABMMBI'=0) ABMR(30,70)=$P(ABMMBI(ABMMBI),U)
+ I $G(ABMR(30,70))="" S ABMR(30,70)=$G(ABM(9000003,DA,.03,"E"))_$G(ABM(9000003,DA,.04,"E"))
+ ;end new abm*2.6*26 IHS/SD/SDR CR9265
  Q
  ;
 MCD ;MEDICAID INSURER

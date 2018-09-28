@@ -1,21 +1,21 @@
 BGP8PDLB ; IHS/CMI/LAB - print ind 03 Jul 2010 12:41 PM 07 Dec 2010 12:18 PM 09 Sep 2014 12:17 PM ;
- ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
+ ;;18.1;IHS CLINICAL REPORTING;;MAY 25, 2018;Build 66
  ;
  ;
 I1AGE ;EP
  I BGPINDG="I" Q
  S BGPHD1="ACTIVE CLINICAL TOBACCO USERS/IN CESSATION",BGPHD2="Active Clinical Tobacco Users/In Cessation"
  S X=" " D S(X,1,1) D H3 S X=" " D S(X,1,1)
- K BGPDAC,BGPDAP,BGPDAB S (C,D,E,F,G)=0 F BGPX="114.5.1","114.5.2","114.5.3" D I1AGE1,I1AGE2,I1AGE4
+ K BGPDAC,BGPDAP,BGPDAB S (C,D,E,F,G)=0 F BGPX="114.10.1","114.10.2","114.10.3" D I1AGE1,I1AGE2,I1AGE4
  D I1AGEP
  S BGPHD1="MALE ACTIVE CLINICAL TOBACCO USERS/IN CESSATION",BGPHD2="# Male AC Tobacco Users/in Cessation"
  D H3
- K BGPDAC,BGPDAP,BGPDAB S (C,D,E,F,G)=0 F BGPX="114.6.1","114.6.2","114.6.3" D I1AGE1,I1AGE2,I1AGE4
+ K BGPDAC,BGPDAP,BGPDAB S (C,D,E,F,G)=0 F BGPX="114.11.1","114.11.2","114.11.3" D I1AGE1,I1AGE2,I1AGE4
  D I1AGEP
 FEM ;
  S BGPHD1="FEMALE ACTIVE CLINICAL TOBACCO USERS/IN CESSATION",BGPHD2="# Female AC Tobacco Users/in Cessation"
  D H3
- K BGPDAC,BGPDAP,BGPDAB S (C,D,E,F,G)=0 F BGPX="114.7.1","114.7.2","114.7.3" D I1AGE1,I1AGE2,I1AGE4
+ K BGPDAC,BGPDAP,BGPDAB S (C,D,E,F,G)=0 F BGPX="114.12.1","114.12.2","114.12.3" D I1AGE1,I1AGE2,I1AGE4
  D I1AGEP
  Q
 I1AGE1 ;
@@ -78,81 +78,82 @@ I1AGEP ;
  S X="CURRENT REPORT PERIOD" D S(X,1,1) S X=" " D S(X,1,1)
  S X=BGPHD2 D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAC(X),U) S Y=V D S(Y,,X+1)
- S X="# w/ Tobacco Cessation Counseling or Rx for Cessation Aid-No Refusals" D S(X,1,1)
+ S X="# w/ Tobacco Cessation Counseling or Rx for Cessation Aid or Quit-No Refusals" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAC(X),U,2) S Y=V D S(Y,,X+1)
- S X="% w/ Tobacco Cessation Counseling or Rx for Cessation Aid-No Refusals" D S(X,1,1)
+ S X="% w/ Tobacco Cessation Counseling or Rx for Cessation Aid or Quit-No Refusals" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAC(X),U,3) S Y=$$SB($J(V,6,1)) D S(Y,,X+1)
- S X=" " D S(X,1,1) S X="# Quit" D S(X,1,1)
+ S X=" " D S(X,1,1) S X="# w/ Tobacco Cessation Counseling or Rx for Cessation Aid-No Refusals" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAC(X),U,4) S Y=V D S(Y,,X+1)
- S X="% Quit" D S(X,1,1)
+ S X="% w/ Tobacco Cessation Counseling or Rx for Cessation Aid-No Refusals" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAC(X),U,5) S Y=$$SB($J(V,6,1)) D S(Y,,X+1)
  ;S X=" " D S(X,1,1) S X="A. # in cessation who quit" D S(X,1,1)
  ;F X=1:1:3 S V=$P(BGPDAC(X),U,6) S Y=V D S(Y,,X+1)
  ;S X="A. % in cessation who quit" D S(X,1,1)
  ;F X=1:1:3 S V=$P(BGPDAC(X),U,7) S Y=$$SB($J(V,6,1)) D S(Y,,X+1)
- S X=" " D S(X,1,1) S X="# w/ Tobacco Cessation Counseling, Rx for cessation aid or who quit-No Refusals" D S(X,1,1)
- F X=1:1:3 S V=$P(BGPDAC(X),U,8) S Y=V D S(Y,,X+1)
- S X="% w/ Tobacco Cessation Counseling, Rx for cessation aid or who quit-No Refusals" D S(X,1,1)
- F X=1:1:3 S V=$P(BGPDAC(X),U,9) S Y=$$SB($J(V,6,1)) D S(Y,,X+1)
-PR ; 
- S X=" " D S(X,1,1) S X="PREVIOUS YEAR PERIOD" D S(X,1,1)
- S X=" " D S(X,1,1) S X=BGPHD2 D S(X,1,1)
- F X=1:1:3 S V=$P(BGPDAP(X),U) S Y=V D S(Y,,X+1)
- S X="# w/ Tobacco Cessation Counseling or Rx for Cessation Aid-No Refusals" D S(X,1,1)
- F X=1:1:3 S V=$P(BGPDAP(X),U,2) S Y=V D S(Y,,X+1)
- S X="% w/ Tobacco Cessation Counseling or Rx for Cessation Aid-No Refusals" D S(X,1,1)
- F X=1:1:3 S V=$P(BGPDAP(X),U,3) S Y=$$SB($J(V,6,1)) D S(Y,,X+1)
  S X=" " D S(X,1,1) S X="# Quit" D S(X,1,1)
- F X=1:1:3 S V=$P(BGPDAP(X),U,4) S Y=V D S(Y,,X+1)
+ F X=1:1:3 S V=$P(BGPDAC(X),U,8) S Y=V D S(Y,,X+1)
  S X="% Quit" D S(X,1,1)
+ F X=1:1:3 S V=$P(BGPDAC(X),U,9) S Y=$$SB($J(V,6,1)) D S(Y,,X+1)
+PR ;
+ S X=" " D S(X,1,1)
+ S X="PREVIOUS REPORT PERIOD" D S(X,1,1) S X=" " D S(X,1,1)
+ S X=BGPHD2 D S(X,1,1)
+ F X=1:1:3 S V=$P(BGPDAP(X),U) S Y=V D S(Y,,X+1)
+ S X="# w/ Tobacco Cessation Counseling or Rx for Cessation Aid or Quit-No Refusals" D S(X,1,1)
+ F X=1:1:3 S V=$P(BGPDAP(X),U,2) S Y=V D S(Y,,X+1)
+ S X="% w/ Tobacco Cessation Counseling or Rx for Cessation Aid or Quit-No Refusals" D S(X,1,1)
+ F X=1:1:3 S V=$P(BGPDAP(X),U,3) S Y=$$SB($J(V,6,1)) D S(Y,,X+1)
+ S X=" " D S(X,1,1) S X="# w/ Tobacco Cessation Counseling or Rx for Cessation Aid-No Refusals" D S(X,1,1)
+ F X=1:1:3 S V=$P(BGPDAP(X),U,4) S Y=V D S(Y,,X+1)
+ S X="% w/ Tobacco Cessation Counseling or Rx for Cessation Aid-No Refusals" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAP(X),U,5) S Y=$$SB($J(V,6,1)) D S(Y,,X+1)
  ;S X=" " D S(X,1,1) S X="A. # in cessation who quit" D S(X,1,1)
  ;F X=1:1:3 S V=$P(BGPDAP(X),U,6) S Y=V D S(Y,,X+1)
  ;S X="A. % in cessation who quit" D S(X,1,1)
  ;F X=1:1:3 S V=$P(BGPDAP(X),U,7) S Y=$$SB($J(V,6,1)) D S(Y,,X+1)
- S X=" " D S(X,1,1) S X="# w/ Tobacco Cessation Counseling, Rx for cessation aid or who quit-No Refusals" D S(X,1,1)
+ S X=" " D S(X,1,1) S X="# Quit" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAP(X),U,8) S Y=V D S(Y,,X+1)
- S X="% w/ Tobacco Cessation Counseling, Rx for cessation aid or who quit-No Refusals " D S(X,1,1)
+ S X="% Quit" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAP(X),U,9) S Y=$$SB($J(V,6,1)) D S(Y,,X+1)
  ;percentage changes
  S X=" " D S(X,1,1) S X="CHANGE FROM PREV YR %" D S(X,1,1)
- S X="# w/ Tobacco Cessation Counseling or Rx for Cessation Aid-No Refusals" D S(X,1,1)
+ S X="# w/ Tobacco Cessation Counseling or Rx for Cessation Aid or Quit-No Refusals" D S(X,1,1)
  F X=1:1:3 S N=$P(BGPDAC(X),U,3),O=$P(BGPDAP(X),U,3) S Y=$$SB($J((N-O),6,1)) D S(Y,,X+1)
- S X="# Quit" D S(X,1,1)
+ S X="# w/ Tobacco Cessation Counseling or Rx for Cessation Aid-No Refusals" D S(X,1,1)
  F X=1:1:3 S N=$P(BGPDAC(X),U,5),O=$P(BGPDAP(X),U,5) S Y=$$SB($J((N-O),6,1)) D S(Y,,X+1)
  ;S X="A. # in cessation who quit" D S(X,1,1)
  ;F X=1:1:3 S N=$P(BGPDAC(X),U,7),O=$P(BGPDAP(X),U,7) S Y=$$SB($J((N-O),6,1)) D S(Y,,X+1)
- S X="w/ Tobacco Cessation Counseling, Rx for cessation aid, or Quit-No Refusals" D S(X,1,1)
+ S X="# Quit" D S(X,1,1)
  F X=1:1:3 S N=$P(BGPDAC(X),U,9),O=$P(BGPDAP(X),U,9) S Y=$$SB($J((N-O),6,1)) D S(Y,,X+1)
 BL ;
  S X=" " D S(X,1,1) S X="BASELINE REPORT PERIOD" D S(X,1,1)
  S X=" " D S(X,1,1) S X=BGPHD2 D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAB(X),U) S Y=V D S(Y,,X+1)
- S X="# w/ Tobacco Cessation Counseling or Rx for Cessation Aid-No Refusals" D S(X,1,1)
+ S X="# w/ Tobacco Cessation Counseling or Rx for Cessation Aid or Quit-No Refusals" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAB(X),U,2) S Y=V D S(Y,,X+1)
- S X="% w/ Tobacco Cessation Counseling or Rx for Cessation Aid-No Refusals" D S(X,1,1)
+ S X="% w/ Tobacco Cessation Counseling or Rx for Cessation Aid or Quit-No Refusals" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAB(X),U,3) S Y=$$SB($J(V,6,1)) D S(Y,,X+1)
- S X=" " D S(X,1,1) S X="# Quit" D S(X,1,1)
+ S X=" " D S(X,1,1) S X="# w/ Tobacco Cessation Counseling or Rx for Cessation Aid-No Refusals" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAB(X),U,4) S Y=V D S(Y,,X+1)
- S X="% Quit" D S(X,1,1)
+ S X="% w/ Tobacco Cessation Counseling or Rx for Cessation Aid-No Refusals" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAB(X),U,5) S Y=$$SB($J(V,6,1)) D S(Y,,X+1)
  ;S X=" " D S(X,1,1) S X="A. # in cessation who quit" D S(X,1,1)
  ;F X=1:1:3 S V=$P(BGPDAB(X),U,6) S Y=V D S(Y,,X+1)
  ;S X="A. % in cessation who quit" D S(X,1,1)
  ;F X=1:1:3 S V=$P(BGPDAB(X),U,7) S Y=$$SB($J(V,6,1)) D S(Y,,X+1)
- S X=" " D S(X,1,1) S X="# w/ Tobacco Cessation Counseling, Rx for cessation aid or who quit-No Refusals" D S(X,1,1)
+ S X=" " D S(X,1,1) S X="# Quit" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAB(X),U,8) S Y=V D S(Y,,X+1)
- S X="% w/ Tobacco Cessation Counseling, Rx for cessation aid or who quit-No Refusals" D S(X,1,1)
+ S X="% Quit" D S(X,1,1)
  F X=1:1:3 S V=$P(BGPDAB(X),U,9) S Y=$$SB($J(V,6,1)) D S(Y,,X+1)
  ;percentage changes
- S X=" " D S(X,1,1) S X="CHANGE FROM BASE YR %" D S(X,1,1)
- S X="# w/ Tobacco Cessation Counseling or Rx for Cessation Aid-No Refusals" D S(X,1,1)
+ S X=" " D S(X,1,1) S X="CHANGE FROM PREV YR %" D S(X,1,1)
+ S X="# w/ Tobacco Cessation Counseling or Rx for Cessation Aid or Quit-No Refusals" D S(X,1,1)
  F X=1:1:3 S N=$P(BGPDAC(X),U,3),O=$P(BGPDAB(X),U,3) S Y=$$SB($J((N-O),6,1)) D S(Y,,X+1)
- S X="# Quit" D S(X,1,1)
+ S X="# w/ Tobacco Cessation Counseling or Rx for Cessation Aid-No Refusals" D S(X,1,1)
  F X=1:1:3 S N=$P(BGPDAC(X),U,5),O=$P(BGPDAB(X),U,5) S Y=$$SB($J((N-O),6,1)) D S(Y,,X+1)
  ;S X="A. # in cessation who quit" D S(X,1,1)
  ;F X=1:1:3 S N=$P(BGPDAC(X),U,7),O=$P(BGPDAB(X),U,7) S Y=$$SB($J((N-O),6,1)) D S(Y,,X+1)
- S X="# w/ Tobacco Cessation Counseling, Rx for cessation aid or who quit-No Refusals" D S(X,1,1)
+ S X="# Quit" D S(X,1,1)
  F X=1:1:3 S N=$P(BGPDAC(X),U,9),O=$P(BGPDAB(X),U,9) S Y=$$SB($J((N-O),6,1)) D S(Y,,X+1)
  Q
 SETN ;set numerator fields

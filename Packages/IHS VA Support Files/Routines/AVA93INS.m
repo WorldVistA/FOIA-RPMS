@@ -1,5 +1,5 @@
 AVA93INS ;IHS//RNB - AVA 93.2 INSTITUTION UPDATE ; 20 JULY 2010 2:45 PM
- ;;93.2;VA SUPPORT FILES;**20**;JULY 20, 2010;Build 8
+ ;;93.2;VA SUPPORT FILES;**20**;JULY 20, 2010;Build 12
  ;
  ; Read through the INSTITUTION table looking to see if the station number
  ; field is valued, if so then report the Institution:

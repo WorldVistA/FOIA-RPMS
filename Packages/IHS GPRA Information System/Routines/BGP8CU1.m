@@ -1,5 +1,5 @@
 BGP8CU1 ; IHS/CMI/LAB - calc CMS measures 26 Sep 2004 11:28 AM 04 May 2010 2:38 PM 30 Oct 2009 11:26 AM ;
- ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
+ ;;18.1;IHS CLINICAL REPORTING;;MAY 25, 2018;Build 66
  ;
 ASAALLEG(P,BDATE,EDATE) ;EP does patient have an aspirin allergy documented on or before EDATE
  NEW BGPG,G,X,N,Z,Y,T,I
@@ -34,7 +34,7 @@ ASAALLEG(P,BDATE,EDATE) ;EP does patient have an aspirin allergy documented on o
  .S I=$P($G(^AUPNPROB(X,0)),U),Y=$P($$ICDDX^BGP8UTL2(I),U,2)
  .S N=$$VAL^XBDIQ1(9000011,X,.05),N=$$UP^XLFSTR(N)
  .Q:$P(^AUPNPROB(X,0),U,8)<BDATE
- .Q:$P(^AUPNPROB(X,0),U,8)>EDATE  ;added after DIS DATE
+ .I $P(^AUPNPROB(X,0),U,13)="" Q:$P(^AUPNPROB(X,0),U,8)>EDATE  ;added after DIS DATE
  .I $P(^AUPNPROB(X,0),U,13)]"",$P(^AUPNPROB(X,0),U,13)>EDATE Q  ;doo
  .Q:$P(^AUPNPROB(X,0),U,12)="D"
  .;Q:$P(^AUPNPROB(X,0),U,12)="I"

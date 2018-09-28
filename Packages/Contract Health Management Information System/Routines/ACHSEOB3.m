@@ -1,5 +1,5 @@
 ACHSEOB3 ; IHS/ITSC/PMF - PROCESS EOBRS (4/6) - UPDATE DOCUMENT(1/2) ;   [ 09/17/2004  11:42 AM ]
- ;;3.1;CONTRACT HEALTH MGMT SYSTEM;**4,11**;JUN 11, 2001;Build 37
+ ;;3.1;CONTRACT HEALTH MGMT SYSTEM;**4,11**;JUN 11, 2001;Build 43
  ;ACHS*3.1*4 if error 32 happens, quit, don't keep going
  ;ACHS*3.1*11 Send vendor warning first 10 only no more suffix warnings
  ;

@@ -1,5 +1,5 @@
 BDPMOD ; IHS/CMI/TMJ - EDIT AN EXISTING DESIGNATED PROVIDER ;
- ;;2.0;IHS PCC SUITE;**10**;MAY 14, 2009;Build 88
+ ;;2.0;IHS PCC SUITE;**10,21**;MAY 14, 2009;Build 34
  ;
  ; Subscripted BDPREC is EXTERNAL form.
  ;   BDPREC("PAT NAME")=patient name
@@ -114,8 +114,8 @@ ADD ; ADD NEW DESIGNATED PROVIDER RECORD
  S BDPQ=1
  S BDPRR=$O(^BDPRECN("AA",BDPDFN,BDPTYPE,"")) ;Check to see if this Patient already has this Type
  I BDPRR'="" S BDPLPROV=$P($G(^BDPRECN(BDPRR,0)),U,3) ;Current Provider
- I BDPRR="" W !!,?10,"This patient does NOT have a Designated Provider Type",!,"for the Category you selected. See the Listing above."
- I BDPRR="" W !!,"-Use the ADD MENU to Add a CURRENT Provider for this Category Type-",!! D PAUSE^BDP Q
+ I BDPRR="" W !!,?10,"This patient does NOT have a Designated Provider",!,"for the Category you selected. See the Listing above."
+ I BDPRR="" W !!,"-Use the ADD menu option to Add a CURRENT Provider for this Category Type-",!! D PAUSE^BDP Q
  ;
  S BDPRIEN=BDPRR ;Assign Record IEN to populate Multiple
  ;
@@ -137,23 +137,28 @@ ASKGO ;Ask to continue
  I Y=0 S BDPQ=1 Q
  W !!,"Okay - I have changed this Patient Record - as follows: ",! D  Q
  .W !!,"DESIGNATED PROVIDER : ",BDPRPRVP,!
- . W "Has been assigned to Patient Name: "_$P($G(^DPT(BDPDFN,0)),U,1) W !
- . W "For Designated Provider Category/Type: "_$P($G(^BDPTCAT(BDPTYPE,0)),U,1) W !!
+ .W "Has been assigned to Patient Name: "_$P($G(^DPT(BDPDFN,0)),U,1) W !
+ .W "For Designated Provider Category/Type: "_$P($G(^BDPTCAT(BDPTYPE,0)),U,1) W !!
  .S BDPLINKI=1
- .S BDPLINKI=1
- .I $D(BDPRIEN) D
- .. Q:'BDPRIEN
- .. S:'$D(^BDPRECN(BDPRIEN,1,0)) $P(^(0),U,2)="90360.11P"
- .. S BDPLIEN=$P($G(^BDPRECN(BDPRIEN,1,0)),U,3) ;Last IEN in Multiple
- .. I BDPLIEN="" S BDPLIEN=0
- .. S BDPLNUM=$P($G(^BDPRECN(BDPRIEN,1,0)),U,4) ;Las Number in Multiple
- .. I BDPLNUM="" S BDPLNUM=0
- .. S BDPLIEN=BDPLIEN+1
- .. S BDPLNUM=BDPLNUM+1
- .. S $P(^BDPRECN(BDPRIEN,1,0),U,3)=BDPLIEN
- .. S $P(^BDPRECN(BDPRIEN,1,0),U,4)=BDPLNUM
- .. S DR=".01///"_"`"_BDPPROV
- .. S DIE="^BDPRECN("_BDPRIEN_",1,",DA(1)=BDPRIEN,DA=BDPLIEN D ^DIE K DIE,DR,DA,DINUM
+ .S:'$D(^BDPRECN(BDPRIEN,1,0)) $P(^(0),U,2)="90360.11P"
+ .S (X,BDPLIEN,BDPLNUM)=0
+ .F  S X=$O(^BDPRECN(BDPRIEN,1,X)) Q:X'=+X  S BDPLIEN=X,BDPLNUM=BDPLNUM+1  ;get last ien in multiple
+ .S BDPNIEN=BDPLIEN+1
+ .S BDPLNUM=BDPLNUM+1
+ .S $P(^BDPRECN(BDPRIEN,1,0),U,3)=BDPNIEN
+ .S $P(^BDPRECN(BDPRIEN,1,0),U,4)=BDPLNUM
+ .;INACTIVE PREVIOUS ONE
+ .I BDPNIEN'=1,$P(^BDPRECN(BDPRIEN,1,BDPLIEN,0),U,5)="" S DIE="^BDPRECN("_BDPRIEN_",1,",DA(1)=BDPRIEN,DA=BDPLIEN,DR=".02////"_DUZ_";.03////"_DT_";.05////"_DT D ^DIE K DIE,DR,DA,DINUM
+ .S BDPLINKI=1  ;tell fileman you are coming from BDP
+ .;S DR=".01///"_"`"_BDPPROV
+ .S ^BDPRECN(BDPRIEN,1,BDPNIEN,0)=BDPPROV_U_DUZ_U_DT_U_DT
+ .;L +^BDPRECN(BDPRIEN):10 I '$T Q "0^UNABLE TO LOCK GLOBAL"
+ .;S DIE="^BDPRECN("_BDPRIEN_",1,",DA(1)=BDPRIEN,DA=BDPLIEN D ^DIE K DIE,DR,DA,DINUM
+ .;L -^BDPRECN(BDPRIEN)
+ .;REINDEX MULTIPLE ENTRY
+ .NEW DIK
+ .S DA(1)=BDPRIEN,DA=BDPNIEN,DIK="^BDPRECN("_BDPRIEN_",1," D IX^DIK K DIC,DA
+ .;I $D(Y) Q "0^ADDING PROVIDER TO LOG FAILED"
  .D PAUSE^BDP
  .S BDPQ=0
  .Q

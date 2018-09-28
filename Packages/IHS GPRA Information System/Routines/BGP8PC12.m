@@ -1,0 +1,282 @@
+BGP8PC12 ; IHS/CMI/LAB - measure I2 ; 02 Feb 2018  11:25 AM
+ ;;18.1;IHS CLINICAL REPORTING;;MAY 25, 2018;Build 66
+ ;
+DFU S (BGPN1,BGPD1)=0
+ S BGPFDV="" K BGPDEPV,BGPV,BGPDOV
+ ;
+ I BGPAGEE<12 S BGPSTOP=1 Q  ;12 or greater during time period
+ ;
+ ;GATHER UP ALL DEP SCRN VISITS
+ NEW X,V,D,Y
+ ;Let's check all Visits, looping through once
+ S G=""  ;return variable
+ K BGPV
+ ;get all visits in date range in BGPV
+ D ALLV^APCLAPIU(DFN,BGPBDATE,BGPEDATE,"BGPV")
+ ;I '$O(BGPV(0)) S BGPSTOP=1 G DFUE   ;NO DEP VISITS
+ ;now loop through and check SNOMED and .17 in visit and check v cpts attached to the visit
+ ;REORDER BY DATE
+ S X=0 F  S X=$O(BGPV(X)) Q:X'=+X  S BGPDOV($P(BGPV(X),U,1),X)=BGPV(X)
+ S D=0 F  S D=$O(BGPDOV(D)) Q:D'=+D  S X=0 F  S X=$O(BGPDOV(D,X)) Q:X'=+X  S V=$P(BGPDOV(D,X),U,5)  D
+ .Q:'$P(^AUPNVSIT(V,0),U,9)  ;no dependent entries
+ .Q:$P(^AUPNVSIT(V,0),U,11)  ;deleted
+ .S Y=$$DEPV(V) I Y]"" S BGPDEPV(9999999-D,X)=""
+ .;is .17 a cpt we want?
+ .S Y=$$VALI^XBDIQ1(9000010,V,.17)
+ .I Y,$$OFFCPT12(Y) S BGPDEPV(9999999-D,X)="" Q
+ .;now check all V CPTs
+ .S Z=0 F  S Z=$O(^AUPNVCPT("AD",V,Z)) Q:Z'=+Z  D
+ ..S Y=$P($G(^AUPNVCPT(Z,0)),U,1)
+ ..I Y,$$OFFCPT12(Y) S BGPDEPV(9999999-D,X)="" Q
+ ;NOW ADD IN ANY VISITS IN BH THAT DID NOT PASS TO PCC AND ARE NOT EHR CREATED
+ S D=0,E=9999999-BGPBDATE,D=9999999-BGPEDATE-1_".99" F  S D=$O(^AMHREC("AE",DFN,D)) Q:D'=+D!($P(D,".")>E)  S V=0 F  S V=$O(^AMHREC("AE",DFN,D,V)) Q:V'=+V  D
+ .Q:$P(^AMHREC(V,0),U,16)  ;ALREADY IN PCC SO WOULD HAVE GOT IT ALREADY
+ .S S=$P($$VALI^XBDIQ1(9002011,V,.01),".")
+ .S Z=0 F  S Z=$O(^AMHRPROC("AD",V,Z)) Q:Z'=+Z  D
+ ..S Y=$P($G(^AMHRPROC(Z,0)),U,1)
+ ..I Y,$$OFFCPT12(Y) S BGPDEPV($P(D,"."),V)="" Q
+ ;
+ I '$D(BGPDEPV) S BGPSTOP=1 G DFUE
+ ;
+ S BGPFDV="",X="" F  S X=$O(BGPDEPV(X)) Q:X'=+X  S BGPFDV=X
+ S D=9999999-BGPFDV
+ ;
+ ;now what about exclusions?
+ I $$HASDX(DFN,$$DOB^AUPNPAT(DFN),$$FMADD^XLFDT(D,-1)) S BGPSTOP=1 G DFUE  ;DX PRIOR TO 1ST DEP VISIT
+ ;
+ ;FIND LAST SCREEN ON A DATE OF A DEPRESSION VISIT
+ S D=0,G="" F  S D=$O(BGPDEPV(D)) Q:D'=+D!(G]"")  D
+ .S G=$$DEPSCR(DFN,(9999999-D),(9999999-D))
+ I G]"" S:G BGPN1=1 G DFU1
+ ;any screening during entire report period?
+ S E=$$DEPSCR(DFN,BGPBDATE,BGPEDATE)
+ I E]"" G DFU1  ;HAS A SCREENING SO CAN'T EXCLUDE
+ ;check refusal, etc
+ S X=$$REFUSAL(DFN,BGPBDATE,BGPEDATE,.BGPDEPV)
+ I X S BGPSTOP=1 G DFUE
+DFU1 ;
+ S BGPD1=1
+ S BGPVALUE=""
+ S BGPVALUE="ENC "_$$DATE^BGP8UTL((9999999-BGPFDV))_"|||"  ;hit denominator
+ I BGPN1 S BGPVALUE=BGPVALUE_"*** "_$$DATE^BGP8UTL($P(G,U,2))_" "_$P(G,U,4)_" "_$P(G,U,6)_" "_$P(G,U,7)
+ I 'BGPN1 S BGPVALUE=BGPVALUE_$$DATE^BGP8UTL($P(G,U,2))_" "_$P(G,U,4)_" "_$P(G,U,6)_" "_$P(G,U,7)
+ ;
+DFUE ;
+ K D,V,X,Y,BGPV,BGPDEPV,BGPFDV,BGPDOV,G
+ Q
+DEPV(V) ;EP
+ NEW A,B,C
+ S A=0,B=""
+ F  S A=$O(^AUPNVSIT(V,28,"B",A)) Q:A=""!(B]"")  D
+ .I $D(^XTMP("BGPSNOMEDSUBSET",$J,"PXRM BGP IPC DEP SCRN ENC",A)) S B=A
+ I B]"" Q B
+ S A=0,B=""
+ F  S A=$O(^AUPNVSIT(V,26,"B",A)) Q:A=""!(B]"")  D
+ .I $D(^XTMP("BGPSNOMEDSUBSET",$J,"PXRM BGP IPC DEP SCRN ENC",A)) S B=A
+ Q B
+OFFCPT12(C) ;EP
+ I $$ICD^ATXAPI(C,$O(^ATXAX("B","BGP IPC DEP SCRN ENC CPTS",0)),1) Q 1
+ Q ""
+LOINC(A,B) ;EP
+ NEW %
+ S %=$P($G(^LAB(95.3,A,9999999)),U,2)
+ I %]"",$D(^ATXAX(B,21,"B",%)) Q 1
+ S %=$P($G(^LAB(95.3,A,0)),U)_"-"_$P($G(^LAB(95.3,A,0)),U,15)
+ I $D(^ATXAX(B,21,"B",%)) Q 1
+ Q ""
+HASDX(P,BDATE,EDATE) ;
+ NEW X,Y,Z
+ I $$PLTAXND^BGP8DU(P,"BGP IPC DEPRESSION DIAG DXS",EDATE,1) Q 1
+ I $$IPLSNOND^BGP8DU(P,"PXRM BGP IPC DEPRESSION DX",EDATE,1) Q 1
+ I $$LASTDX^BGP8UTL1(P,"BGP IPC DEPRESSION DIAG DXS",BDATE,EDATE) Q 1
+ I $$PLTAXND^BGP8DU(P,"BGP IPC BIPOLAR DIAG DXS",EDATE,1) Q 1
+ I $$IPLSNOND^BGP8DU(P,"PXRM BGP IPC BIPOLAR DX",EDATE,1) Q 1
+ I $$LASTDX^BGP8UTL1(P,"BGP IPC BIPOLAR DIAG DXS",BDATE,EDATE) Q 1
+ I $$BHDX(P,BDATE,EDATE) Q 1
+ Q ""
+BHDX(P,BDATE,EDATE) ;has a bh dx in either taxonomy BDATE to EDATE?
+ NEW X,Y,Z,C,I,G
+ S G=""
+ S X=0 F  S X=$O(^AMHRPRO("AC",P,X)) Q:X'=+X!(G)  D
+ .;DATE?
+ .S Y=$$VALI^XBDIQ1(9002011.01,X,.01)
+ .Q:'Y
+ .S Y=$P($P($G(^AMHREC(Y,0)),U,1),".")
+ .Q:'Y
+ .Q:Y<BDATE
+ .Q:Y>EDATE
+ .S C=$P($G(^AMHRPRO(X,0)),U,1)
+ .Q:'C
+ .Q:'$D(^AMHPROB(C,0))
+ .S I=$P(^AMHPROB(C,0),U,5)
+ .I I="" S I=$P(^AMHPROB(C,0),U,17)
+ .I I="" Q
+ .S Z=+$$CODEN^BGP8UTL2(I,80)
+ .I 'Z Q
+ .I $$ICD^BGP8UTL2(Z,$O(^ATXAX("B","BGP IPC BIPOLAR DIAG DXS",0)),9) S G=1 Q
+ .I $$ICD^BGP8UTL2(Z,$O(^ATXAX("B","BGP IPC DEPRESSION DIAG DXS",0)),9) S G=1 Q
+ .Q
+ Q G
+DEPSCR(P,BDATE,EDATE) ;
+ NEW X,Y,Z,BGPV,BGPS,V,D,E,S
+ S BGPS=""
+ D ALLV^APCLAPIU(P,BDATE,EDATE,"BGPV")
+ S X=0 F  S X=$O(BGPV(X)) Q:X'=+X  D
+ .S V=$P(BGPV(X),U,5)
+ .;get depression screenings exam 36
+ .S Y=0 F  S Y=$O(^AUPNVXAM("AD",V,Y)) Q:Y'=+Y  D
+ ..S E=$$VAL^XBDIQ1(9000010.13,Y,.019)
+ ..Q:E'=36
+ ..Q:$P(^AUPNVXAM(Y,0),U,4)=""  ;no result
+ ..S R=$$VALI^XBDIQ1(9000010.13,Y,.04)
+ ..I R'="N",R'="PO",R'="RF" Q  ;these are the positive and negative values
+ ..;S D=$P($G(^AUPNVXAM(Y,12)),U,1)
+ ..S D=$$VDTM^APCLV(V)
+ ..I D=$P(BGPS,U,1),Y>$P(BGPS,U,4) S BGPS=D_U_R_U_"Exam 36"_U_Y_U_$S(R="PO":"POS",R="RF":"POS",1:"NEG") Q
+ ..I D>$P(BGPS,U,1) S BGPS=D_U_$$VAL^XBDIQ1(9000010.13,Y,.04)_U_"Exam 36"_U_Y_U_$S(R="PO":"POS",R="RF":"POS",1:"NEG") Q
+ .;GET PHQ's
+ .S Y=0 F  S Y=$O(^AUPNVMSR("AD",V,Y)) Q:Y'=+Y  D
+ ..Q:$P($G(^AUPNVMSR(Y,2)),U,1)  ;entered in error
+ ..S E=$$VAL^XBDIQ1(9000010.01,Y,.01)
+ ..I E'="PHQ2",E'="PHQ9",E'="PHQT" Q
+ ..Q:$P(^AUPNVMSR(Y,0),U,4)=""  ;no result
+ ..S R=$$VAL^XBDIQ1(9000010.01,Y,.04)
+ ..;S D=$P($G(^AUPNVMSR(Y,12)),U,1)
+ ..S D=$$VDTM^APCLV(V)
+ ..I D=$P(BGPS,U,1),Y>$P(BGPS,U,4) S BGPS=D_U_$$VAL^XBDIQ1(9000010.13,Y,.04)_U_"Meas "_E_U_Y_U_$$RES(E,R) Q
+ ..I D>$P(BGPS,U,1) S BGPS=D_U_$$VAL^XBDIQ1(9000010.13,Y,.04)_U_"Meas "_E_U_Y_U_$$RES(E,R) Q
+ ;ADD IN BH
+ S D=0,E=9999999-BDATE,D=9999999-EDATE-1_".99" F  S D=$O(^AMHREC("AE",P,D)) Q:D'=+D!($P(D,".")>E)  S V=0 F  S V=$O(^AMHREC("AE",P,D,V)) Q:V'=+V  D
+ .S S=$P($$VALI^XBDIQ1(9002011,V,.01),".")
+ .S R=$$VALI^XBDIQ1(9002011,V,1405)
+ .I R="" G BHM
+ .I R]"",R'="P",R'="N",R'="RF" Q
+ .I S>$P(BGPS,U,1) S BGPS=S_U_$$VAL^XBDIQ1(9002011,V,1405)_U_"BH Exam 36"_U_V_U_$S(R="P":"POS",R="RF":"POS",1:"NEG") Q
+BHM .S X=0 F  S X=$O(^AMHRMSR("AD",V,X)) Q:X'=+X  S BGPP=$P($G(^AMHRMSR(X,0)),U) D
+ ..S BGPP=$P($G(^AUTTMSR(BGPP,0)),U)
+ ..S R=$$VAL^XBDIQ1(9002011.12,X,.04)
+ ..I BGPP="PHQ2"!(BGPP="PHQ9")!(BGPP="PHQT") I S>$P(BGPS,U,1) S BGPS=S_U_$$VAL^XBDIQ1(9002011.12,X,.04)_U_"BH Meas "_BGPP_U_X_U_$$RES(BGPP,R) Q
+ I BGPS="" Q ""
+ S R=$P(BGPS,U,5)
+ I R="NEG" Q 1_U_BGPS
+ S Y=$$FUPLAN(P,$P($P(BGPS,U,1),"."),$P($P(BGPS,U,1),"."))
+ I 'Y Q 0_U_BGPS_U_"NO FU PLAN"
+ I Y Q 1_U_BGPS_U_$P(Y,U,2)
+ Q
+FUPLAN(P,BDATE,EDATE) ;
+ ;PROBLEM LIST SNOMED ENTERED ON BDATE
+ NEW X,G,S,BGPG,Y,I,V,W,Z,TAX,BGPMEDS1,TAX1,M,R,B,O
+ S X=0,G="" F  S X=$O(^AUPNPROB("AC",P,X)) Q:X'=+X!(G)  D
+ .Q:'$D(^AUPNPROB(X,0))
+ .Q:$P(^AUPNPROB(X,0),U,12)="D"
+ .Q:$P(^AUPNPROB(X,0),U,8)'=BDATE
+ .S S=$$VAL^XBDIQ1(9000011,X,80001)
+ .Q:S=""
+ .I '$D(^XTMP("BGPSNOMEDSUBSET",$J,"PXRM BGP IPC DEP INTER",S)) Q
+ .S G=1_U_"F/U PL "_S
+ I G Q G
+ ;now vpov using asnc
+ S Y="BGPG("
+ S X=P_"^ALL DX;DURING "_BDATE_"-"_EDATE S E=$$START1^APCLDF(X,Y)
+ S X=0 F  S X=$O(BGPG(X)) Q:X'=+X!(G)  D
+ .S I=+$P(BGPG(X),U,4)
+ .S V=$P(BGPG(X),U,5)
+ .S S=$$VAL^XBDIQ1(9000010.07,I,1101)
+ .I S="" Q
+ .I '$D(^XTMP("BGPSNOMEDSUBSET",$J,"PXRM BGP IPC DEP INTER",S)) Q
+ .S G=1_U_"F/U POV "_S
+ I G Q G
+ ;REFERRALS?  ANY V REFERRAL ON DATE WITH A SNOMED AS .01 FIELD
+ S Z=0 F  S Z=$O(^AUPNVREF("AC",P,Z)) Q:Z'=+Z!(G)  D
+ .S V=$P($G(^AUPNVREF(Z,0)),U,3)
+ .S D=$$VD^APCLV(V)
+ .Q:D<BDATE
+ .Q:D>EDATE
+ .S S=$P($G(^AUPNVREF(Z,0)),U,1) Q:S=""
+ .Q:'$D(^XTMP("BGPSNOMEDSUBSET",$J,"PXRM BGP IPC DEP INTER",S))
+ .S G=1_U_"F/U Referral: "_S Q
+ I G Q G
+ S G=""
+ ;V PATIENT EDUCATION
+ K BGPG
+ S X=P_"^ALL EDUC;DURING "_$$FMTE^XLFDT(BDATE)_"-"_$$FMTE^XLFDT(EDATE) S E=$$START1^APCLDF(X,Y)
+ S X=0 F  S X=$O(BGPG(X)) Q:X'=+X!(G)  D
+ .S I=+$P(BGPG(X),U,4)
+ .S T=$$VALI^XBDIQ1(9000010.16,I,.01)
+ .Q:'T
+ .Q:'$D(^AUTTEDT(T,0))
+ .S T=$P(^AUTTEDT(T,0),U,2)
+ .I $P(T,"-",2)'="FU" Q  ;must be followup
+ .S S=$P(T,"-",1)
+ .S C=$$ICDDX^BGP8UTL2(S)
+ .I $P(C,U,1)'="-1",$$ICD^BGP8UTL2($P(C,U,1),$O(^ATXAX("B","BGP IPC DEPRESSION DIAG DXS",0)),9) S G=1_U_"F/U Pt Ed "_T Q
+ .I $P(C,U,1)'="-1",$$ICD^BGP8UTL2($P(C,U,1),$O(^ATXAX("B","BGP IPC BIPOLAR DISORDER DXS",0)),9) S G=1_U_"F/U Pt Ed "_T Q
+ .;is it a snomed?
+ .I $D(^XTMP("BGPSNOMEDSUBSET",$J,"PXRM BGP IPC DEP INTER",S)) S G=1_U_"F/U Pt Ed "_T Q
+ .I $D(^XTMP("BGPSNOMEDSUBSET",$J,"PXRM BGP IPC DEPRESSION DX",S)) S G=1_U_"F/U Pt Ed "_T Q
+ .I $D(^XTMP("BGPSNOMEDSUBSET",$J,"PXRM BGP IPC BIPOLAR DX",S)) S G=1_U_"F/U Pt Ed "_T Q
+ I G Q G
+ ;v med first
+ D GETMEDS^BGP8UTL2(P,BDATE,EDATE,"BGP IPC DEPRESSION MEDS","",,,.BGPMEDS1,"BGP IPC DEPRESSION RXNORM")
+ S X=0,T=0,W="" F  S X=$O(BGPMEDS1(X)) Q:X'=+X!(G)  D
+ .S Y=$P(BGPMEDS1(X),U,4)  ;vmed ien
+ .Q:'$D(^AUPNVMED(Y,0))
+ .Q:$$UP^XLFSTR($P($G(^AUPNVMED(Y,11)),U))["RETURNED TO STOCK"
+ .S D=$P(^AUPNVMED(Y,0),U,1)  ;drug ien
+ .;DAYS SUPPLY MUST BE >0
+ .S E=$P(^AUPNVMED(Y,0),U,8) ;date discontinued
+ .S S=$P(^AUPNVMED(Y,0),U,7) ;DAYS SUPPLY
+ .Q:'S
+ .I E,E'>$P(BGPMEDS1(X),U,1) Q  ;at least one day
+ .S G=1_U_"F/U Med "_$$VAL^XBDIQ1(9000010.14,Y,.01)
+ I G Q G
+ ;how about orders
+ ;go through all 52 for one ordered on BDATE
+ S TAX=$O(^ATXAX("B","BGP IPC DEPRESSION MEDS",0))
+ S TAX1=$O(^BGPSNOMR("B","BGP IPC DEPRESSION RXNORM",0))
+ S Z=0,G="" F  S Z=$O(^PS(55,P,"P",Z)) Q:Z'=+Z!(G)  D
+ .S R=$P(^PS(55,P,"P",Z,0),U,1)
+ .Q:'$D(^PSRX(R,0))  ;bad xref
+ .S D=$P(^PSRX(R,0),U,6)
+ .Q:'D  ;no drug??
+ .S M=0
+ .I $D(^ATXAX(TAX,21,"B",D)) S M=1
+ .S B=$$VAL^XBDIQ1(9000010.14,R,9999999.27)
+ .I B]"",$D(^BGPSNOMR(TAX1,11,"B",B)) S M=1
+ .Q:'M
+ .;ORDER
+ .S O=$P($G(^PSRX(R,"OR1")),U,2)  ;order number
+ .Q:'O
+ .Q:'$D(^OR(100,O))
+ .S A=0 F  S A=$O(^OR(100,O,8,A)) Q:A'=+A!(G)  D
+ ..S D=$P($G(^OR(100,O,8,A,0)),U,1)
+ ..I $P(D,".")=BDATE S G=1_U_"F/U PSRX Order"
+ I G Q G
+ Q ""
+RES(T,R) ;
+ I T="PHQ2",R<3 Q "NEG"
+ I T="PHQ2" Q "POS"
+ I T="PHQ9",R<10 Q "NEG"
+ I T="PHQ9" Q "POS"
+ I T="PHQT",R<10 Q "NEG"
+ I T="PHQT" Q "POS"
+ Q ""
+REFUSAL(P,BDATE,EDATE,BGPDEPV) ;
+ ;CHECK REFUSAL FILE FIRST FOR FLU CVX OR FLU CPT AND MEDICAL REASON NOT DONE SNOMED OR PATIENT REASON NOT DONE SNOMED OR SYSTEM REASON NOT DONE SNOMED
+ ;ITEM 1-2, 1-3, 1-4
+ NEW F,G,I,C,ID,X
+ S F=0,G="" F F=9999999.07,9999999.15  D
+ .S I="" F  S I=$O(^AUPNPREF("AA",P,F,I)) Q:I=""!(G)  D
+ ..;check all file vs item combos
+ ..I F=9999999.15,$$VAL^XBDIQ1(9999999.15,I,.02)'=36 Q
+ ..I F=9999999.07 S C=$P($G(^AUTTMSR(I,0)),U,1) I C'="PHQ2",C'="PHQ9",C'="PHQT" Q
+ ..S ID=0 F  S ID=$O(^AUPNPREF("AA",P,F,I,ID)) Q:ID=""!(G)  D
+ ...Q:'$D(BGPDEPV(ID))
+ ...S X=0 F  S X=$O(^AUPNPREF("AA",P,F,I,ID,X)) Q:X'=+X!(G)  D
+ ....;get snomed reason not done and it must be in one of the subsets
+ ....S R=$$VALI^XBDIQ1(9000022,X,1.01)  ;SNOMED REASON NOT DONE
+ ....I R]"",$D(^XTMP("BGPSNOMEDSUBSET",$J,"PXRM BGP IPC NOT DONE MED",R)) S G=1 Q
+ ....I R]"",$D(^XTMP("BGPSNOMEDSUBSET",$J,"PXRM BGP IPC NOT DONE PAT",R)) S G=1 Q
+ ....I $$VALI^XBDIQ1(9000022,X,.07)="R" S G=1 Q
+ ....I $$VALI^XBDIQ1(9000022,X,.07)="N" S G=1 Q
+ Q G

@@ -1,5 +1,5 @@
 ABSPOSFC ; IHS/FCS/DRS - Set up ABSP() ;    [ 09/12/2002  10:09 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**3,15,16,40**;JUN 21, 2001;Build 27
+ ;;1.0;PHARMACY POINT OF SALE;**3,15,16,40,50**;JUN 21, 2001;Build 38
  ;----------------------------------------------------------------------
  ;----------------------------------------------------------------------
  Q
@@ -216,12 +216,15 @@ INSWORK ; get worker's comp-related info
  S ABSP("Employer","Phone")=$P(X,U,6)
  Q
 INS3PPH()           Q $P($G(^AUPNPRVT(PINSDA,11,PINSDA1,0)),U,8)
-INSPOL() I PINSTYPE="CAID" Q $P($G(^AUPNMCD(PINSDA,0)),U,3)
+INSPOL() ; /IHS/OIT/RAM ; 15 DEC 17 - IT APPEARS THAT THIS ROUTINE HAS NOT BEEN KEPT UP
+ ; I WONDER IF IT'S EVEN IN USE...
+ I PINSTYPE="CAID" Q $P($G(^AUPNMCD(PINSDA,0)),U,3)
  ;IHS/SD/RLT - 01/24/06 - Patch 15 - begin
  ;I PINSTYPE="CARE" Q $P($G(^AUPNMCR(PINSDA,0)),U,3) ; no suffix?
  I PINSTYPE="CARE" Q $$GETMDPOL
  ;IHS/SD/RLT - 01/24/06 - Patch 15 - end
- I PINSTYPE="RR" Q $P($G(^AUPNRRE(PINSDA,0)),U,4) ; no prefix?
+ ; I PINSTYPE="RR" Q $P($G(^AUPNRRE(PINSDA,0)),U,4) ; no prefix?
+ I PINSTYPE="RR" Q $$GETRRE^AGUTL(PINSDA) ; /IHS/OIT/RAM ; 18 DEC 17 - New method for retrieving the RR Policy Number.
  I PINSTYPE="SELF" Q ""
  I PINSTYPE'="PRVT" D IMPOSS^ABSPOSUE("P","TI","Bad PINSTYPE="_PINSTYPE,,"INSPOL",$T(+0))
  N X S X=$$INS3PPH
@@ -233,7 +236,7 @@ INSMBRNM()  ; Member #
  S ABSPMNUM=""
  S:PINSTYPE="PRVT" ABSPMNUM=$G(^AUPNPRVT(PINSDA,11,PINSDA1,2))
  Q ABSPMNUM
-GETMDPOL()  ;Updated policy number lookup for Medicare D elig.
+OLDGETMDPOL()  ;Updated policy number lookup for Medicare D elig.
  ;IHS/SD/RLT - 01/24/06 - Patch 15 - begin
  N POL,MDPOL
  S POL=$P($G(^AUPNMCR(PINSDA,0)),U,3)         ;original Medicare policy#
@@ -242,6 +245,23 @@ GETMDPOL()  ;Updated policy number lookup for Medicare D elig.
  S:MDPOL'="" POL=MDPOL             ;use Medicare D policy# if elig found
  Q POL
  ;IHS/SD/RLT - 01/24/06 - Patch 15 - end
+GETMDPOL() ;EP  ; /IHS/OIT/RAM ; 15 DEC 2017 ; Total rewrite to account for Medicare Bendficiary Identifier, or MBI.
+ ; /IHS/OIT/RAM ; 21 MAR 18 ; update to # logic - scan for Medicare Part D first, return that from the original area if it exists.
+ ; Does the individual have a new MBI? If so, get it and return.... Do we care? This isn't date specific, so everything is 'Today'... just get the info...
+ N POL,MDPOL S (POL,MDPOL)=""
+ ; MDFLAG has already been called and correct flags set - let's use them to see if it's Medicare Part D & retrieve.
+ S:MDFLG&(MDIEN) MDPOL=$P($G(^AUPNMCR(PINSDA,11,MDIEN,0)),U,6)
+ ; If the retrieve was successful, let's return that policy #.
+ I MDPOL'="" Q MDPOL
+ ; If not, then let's go snag the individual's MBI if it exists...
+ S POL=$$GETMCR^AGUTL(PINSDA)
+ ; if MBI exists, let's default to that & return.
+ I POL'="" Q POL
+ ; OK... the "new way" & Medicare D resulted in nothing. Let's fall back to the original code as a 'Plan B.'
+ S POL=$P($G(^AUPNMCR(PINSDA,0)),U,3)       ;original
+ ;
+ Q POL
+ ;
 CAIDNAME()         Q $P($G(^AUPNMCD(PINSDA,21)),U)
 CARENAME()         ;Q $P($G(^AUPNMCR(PINSDA,21)),U)
  ;IHS/SD/RLT - 01/24/06 - Patch 15 - begin

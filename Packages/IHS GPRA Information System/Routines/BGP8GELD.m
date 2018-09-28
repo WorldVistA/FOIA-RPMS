@@ -1,5 +1,5 @@
 BGP8GELD ; IHS/CMI/LAB - GUI COM REPORT ;
- ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
+ ;;18.1;IHS CLINICAL REPORTING;**1**;MAY 25, 2018;Build 65
  ;
  ;
 TESTELD ;
@@ -144,7 +144,7 @@ BY ;get baseline year
  ;I ^%ZOSF("OS")["PC"!(^%ZOSF("OS")["NT")!($P($G(^AUTTSITE(1,0)),U,21)=2) S BGPUF=$S($P($G(^AUTTSITE(1,1)),U,2)]"":$P(^AUTTSITE(1,1),U,2),1:"C:\EXPORT")
  ;I $P(^AUTTSITE(1,0),U,21)=1 S BGPUF="/usr/spool/uucppublic/"
  S BGPFILEN=""
- I BGPEXPT S BGPFILEN="BG180"_$P(^AUTTLOC(DUZ(2),0),U,10)_".EL"_BGPRPT_" in directory "_BGPUF
+ I BGPEXPT S BGPFILEN="BG"_$$FV^BGP8BAN()_$P(^AUTTLOC(DUZ(2),0),U,10)_".EL"_BGPRPT_" in directory "_BGPUF
  ;create entry in GUI file
  D ^XBFMK
  S X=BGPFILE

@@ -1,5 +1,5 @@
-BGP8CON1 ;IHS/CMI/LAB - measure logic;
- ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
+BGP8CON1 ;IHS/CMI/LAB - measure logic; ; 29 Jan 2018  3:35 PM
+ ;;18.1;IHS CLINICAL REPORTING;;MAY 25, 2018;Build 66
  ;
  ;
 BETA ;EP - BETA BLOCKER CONTRAINDICATION/NMI REFUSAL
@@ -23,7 +23,7 @@ BETA ;EP - BETA BLOCKER CONTRAINDICATION/NMI REFUSAL
  S BGPG=$$LASTDX^BGP8UTL1(P,"BGP SINUS BRADYCARDIA DXS",BDATE,EDATE)
  I $P(BGPG,U)=1 Q 1_U_"sinus bradycardia-Beta Blocker contraindication"
  K BGPG,BGPD
- S X=P_"^ALL DX [BGP COPD DXS BB CONT;DURING "_$$FMTE^XLFDT(BDATE)_"-"_$$FMTE^XLFDT(EDATE) S E=$$START1^APCLDF(X,"BGPG(")
+ S X=P_"^ALL DX [BGP COPD DXS;DURING "_$$FMTE^XLFDT(BDATE)_"-"_$$FMTE^XLFDT(EDATE) S E=$$START1^APCLDF(X,"BGPG(")
  S (X,G)=0 F  S X=$O(BGPG(X)) Q:X'=+X  S BGPD($P(BGPG(X),U))=""
  S (X,G)=0 F  S X=$O(BGPD(X)) Q:X'=+X  S G=G+1
  I G>1 Q 1_U_"COPD dx-Beta Blocker contraindication"
@@ -96,6 +96,7 @@ HEM ;now check for dx 459
  S X=0 F  S X=$O(^AUPNPREF("AA",P,50,X)) Q:X'=+X  D
  .Q:'$D(^ATXAX(T,21,"B",X))  ;not an aspirin
  .S D=0 F  S D=$O(^AUPNPREF("AA",P,50,X,D)) Q:D'=+D  D
+ ..S Y=9999999-D
  ..I Y<NMIB Q  ;before date
  ..I Y>NMIE Q  ;after date
  ..S N=0 F  S N=$O(^AUPNPREF("AA",P,50,X,D,N)) Q:N'=+N  D
@@ -166,7 +167,7 @@ STATIN ;EP does patient have an STATIN Contraidication
  NEW ED,BD,BGPG,BGPC,X,Y,Z,N,E,T,SN,D
  ;
  ;pregnant
- S X=$$PREG^BGP8D7(P,BDATE,EDATE,0,1,,$G(BGPBDATE),$G(BGPEDATE)) I X Q 1_U_"Contra pregnant"  ;V18.0 CMI/LAB ADDED DATES FOR CURRENTLY PREGNANT
+ S X=$$PREG^BGP8D715(P,BDATE,EDATE,0,1,,$G(BGPBDATE),$G(BGPEDATE)) I X Q 1_U_"Contra pregnant"  ;V18.0 CMI/LAB ADDED DATES FOR CURRENTLY PREGNANT
  ;nmi in Refusal file for STATI
  S BGPG=""
  S T=$O(^ATXAX("B","BGP HEDIS STATIN MEDS",0))

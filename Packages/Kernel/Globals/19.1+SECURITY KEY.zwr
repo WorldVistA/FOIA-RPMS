@@ -1,6 +1,6 @@
 OSEHRA ZGO Export: SECURITY KEY
-27-SEP-2018 12:00:55 ZWR
-^DIC(19.1,0)="SECURITY KEY^19.1^1124^919"
+28-SEP-2018 11:41:15 ZWR
+^DIC(19.1,0)="SECURITY KEY^19.1^1125^920"
 ^DIC(19.1,0,"DD")="#"
 ^DIC(19.1,0,"DEL")="#"
 ^DIC(19.1,0,"GL")="^DIC(19.1,"
@@ -3273,6 +3273,7 @@ OSEHRA ZGO Export: SECURITY KEY
 ^DIC(19.1,1123,1,0)="^^1^1^3170605^"
 ^DIC(19.1,1123,1,1,0)="Allow access to split claims option for billing one line item per claim."
 ^DIC(19.1,1124,0)="BYIMZ P8 PREP^P8 PREP"
+^DIC(19.1,1125,0)="AVAZNPI^^^n"
 ^DIC(19.1,"%",0)="^1.005^2^2"
 ^DIC(19.1,"%",1,0)="XU"
 ^DIC(19.1,"%",2,0)="XQ"
@@ -3695,6 +3696,7 @@ OSEHRA ZGO Export: SECURITY KEY
 ^DIC(19.1,"B","AUMZMENU",137)=""
 ^DIC(19.1,"B","AVAZINA",303)=""
 ^DIC(19.1,"B","AVAZMENU",624)=""
+^DIC(19.1,"B","AVAZNPI",1125)=""
 ^DIC(19.1,"B","AVAZPER",301)=""
 ^DIC(19.1,"B","AVAZPRV",302)=""
 ^DIC(19.1,"B","AZAMZMENU",488)=""

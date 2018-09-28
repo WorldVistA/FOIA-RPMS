@@ -1,5 +1,5 @@
 ACHSEOB9; IHS/ITSC/FCJ - PROCESS EOBRS for 3 digit icd code ;   [ 09/17/2004  11:42 AM ]
- ;;3.1;CONTRACT HEALTH MGMT SYSTEM;**22,23**;JUN 11, 2001;Build 37
+ ;;3.1;CONTRACT HEALTH MGMT SYSTEM;**22,23**;JUN 11, 2001;Build 43
  ;ACHS*3.1*22 new routine combined parts of ACHSEOBB, ACHSEOB3 AND ACHSEOB4 FOR
  ;            updating the 3 digit icd9 codes entered in error
  ;

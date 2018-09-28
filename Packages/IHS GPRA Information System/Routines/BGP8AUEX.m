@@ -1,5 +1,5 @@
 BGP8AUEX ;IHS/CMI/LAB - BUILD SITE GPRA FILES, EXPORT TO AREA;
- ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
+ ;;18.1;IHS CLINICAL REPORTING;;MAY 25, 2018;Build 66
  ;
  ;Thanks to Anne Fughat.  The original routines were written by
  ;Anne Fughat, Phoexnix Area Office.  They were copied into the

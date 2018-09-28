@@ -1,5 +1,5 @@
 BGP8ELH ; IHS/CMI/LAB - cover page for ELDER 25 Jun 2010 10:20 AM ;
- ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
+ ;;18.1;IHS CLINICAL REPORTING;**1**;MAY 25, 2018;Build 65
  ;
  ;
  I $G(BGPAREAA) D AREACP Q
@@ -17,7 +17,7 @@ BGP8ELH ; IHS/CMI/LAB - cover page for ELDER 25 Jun 2010 10:20 AM ;
  W !!,"Population: ",$S(BGPBEN=1:"AI/AN Only (Classification 01)",BGPBEN=2:"non AI/AN Only (Classification NOT 01)",BGPBEN=3:"All (Both AI/AN and non AI/AN)",1:"")
  D ENDTIME
  D ELDERHDR
- I $G(BGPEXPT) W !!,"A file will be created called BG180",$P(^AUTTLOC(DUZ(2),0),U,10)_".EL"_BGPRPT,".",!,"It will reside in the public/export directory.",!,"This file should be sent to your Area Office.",!
+ I $G(BGPEXPT) W !!,"A file will be created called BG"_$$FV^BGP8BAN()_$P(^AUTTLOC(DUZ(2),0),U,10)_".EL"_BGPRPT,".",!,"It will reside in the public/export directory.",!,"This file should be sent to your Area Office.",!
  I BGPROT'="P",'$D(BGPGUI) W !!,"A delimited output file called ",BGPDELF,!,"has been placed in the "_$$GETDEDIR^BGP8UTL2()_" directory for your use in Excel or some",!,"other software package.",!,"See your site manager to access this file.",!
  I $G(BGPALLPT) W !!,"All Communities Included.",!
  I '$G(BGPALLPT),'$G(BGPSEAT) W !!?10,"Community Taxonomy Name: ",$P(^ATXAX(BGPTAXI,0),U)

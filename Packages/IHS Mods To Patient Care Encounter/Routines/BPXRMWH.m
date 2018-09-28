@@ -1,8 +1,9 @@
-BPXRMWH ; IHS/CIA/MGH - Women's health reminders. ;13-Jan-2016 09:57;DU
- ;;2.0;CLINICAL REMINDERS;**1001,1006**;Feb 04, 2005;Build 5
+BPXRMWH ; IHS/CIA/MGH - Women's health reminders. ;29-Nov-2017 09:29;DU
+ ;;2.0;CLINICAL REMINDERS;**1001,1006,1009**;Feb 04, 2005;Build 17
  ;===================================================================
  ;This routine will be used as a computed finding for the last pap smear
  ;and the last mammogram
+ ;Patch 1009 fixed infant feeding
  ;=====================================================================
 LASTPAP(DFN,TEST,DATE,VALUE,TEXT) ;EP; -- returns last pap date and result
  NEW N,Y,BW,LINE
@@ -114,13 +115,13 @@ CONCEIVE(DFN,TEST,DATE,VALUE,TEXT) ;EP Returns true if pt has contraceptive meth
  .E  S TEST=0,DATE=DT,VALUE=NAME,TEXT="Able to conceive"
  Q
 FEEDING(DFN,TEST,DATE,VALUE,TEXT) ;Checks infant feeding against input parameter
- N FEED,FIEN,FTIME,FTYP
+ N FEED,FIEN,FTIME,FTYP,VIEN
  S FEED=$G(TEST)
  Q:FEED=""
  S FTIME=""
  S FTIME=$O(^AUPNVIF("AA",DFN,FTIME)) Q:FTIME=""  D
  .S FIEN=""  S FIEN=$O(^AUPNVIF("AA",DFN,FTIME,FIEN),-1) Q:'+FIEN  D
  ..S FTYP=$$GET1^DIQ(9000010.44,FIEN,.01)
- ..I FTYP=FEED S TEST=1,DATE=$$GET1^DIQ(9000010.44,FIEN,.03,"I"),VALUE=FEED,TEXT="Infant Feeding"
+ ..I FTYP=FEED S TEST=1,VIEN=$$GET1^DIQ(9000010.44,FIEN,.03,"I"),DATE=$$GET1^DIQ(9000010,VIEN,.01,"I"),VALUE=FEED,TEXT="Infant Feeding"
  ..E  S TEST=0,DATE=DT,VALUE=FEED,TEXT="Infant Feeding"
  Q

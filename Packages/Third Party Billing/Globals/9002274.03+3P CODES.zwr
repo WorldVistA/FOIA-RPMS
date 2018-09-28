@@ -1,5 +1,5 @@
 OSEHRA ZGO Export: 3P CODES
-27-SEP-2018 11:45:16 ZWR
+28-SEP-2018 11:40:34 ZWR
 ^ABMDCODE="0"
 ^ABMDCODE(0)="3P CODES^9002274.03I^550^547"
 ^ABMDCODE(1,0)="01^O^Accident/Medical Coverage^"
@@ -544,11 +544,11 @@ OSEHRA ZGO Export: 3P CODES
 ^ABMDCODE(543,0)="Y3^V^Part B Coinsurance"
 ^ABMDCODE(544,0)="Y4^V^Conventional Provider Payment Amount for Non-Demonstration Claims"
 ^ABMDCODE(545,0)="08^H^TRIBAL 638 PROVIDER-BASED FACILITY"
-^ABMDCODE(546,0)="50^H^Federally Qualified Health Center"
-^ABMDCODE(547,0)="60^H^Mass Immunization Center"
-^ABMDCODE(548,0)="19^H^Off Campus-Outpatient Hospital"
-^ABMDCODE(549,0)="15^H^Mobile Unit"
-^ABMDCODE(550,0)="02^H^Telemedicine"
+^ABMDCODE(546,0)="50^H^Federally Qualified Health Center^"
+^ABMDCODE(547,0)="60^H^Mass Immunization Center^"
+^ABMDCODE(548,0)="19^H^Off Campus-Outpatient Hospital^"
+^ABMDCODE(549,0)="15^H^Mobile Unit^"
+^ABMDCODE(550,0)="02^H^Telemedicine^"
 ^ABMDCODE("AC","A",1,44)=""
 ^ABMDCODE("AC","A",2,45)=""
 ^ABMDCODE("AC","A",3,46)=""

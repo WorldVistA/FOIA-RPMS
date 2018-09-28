@@ -1,5 +1,5 @@
 OSEHRA ZGO Export: PROVIDER
-27-SEP-2018 12:00:43 ZWR
+28-SEP-2018 11:40:52 ZWR
 ^DIC(6,0)="PROVIDER^6PI^3^2"
 ^DIC(6,0,"DD")="@"
 ^DIC(6,0,"DEL")="@"
@@ -8,7 +8,8 @@ OSEHRA ZGO Export: PROVIDER
 ^DIC(6,0,"WR")="#"
 ^DIC(6,1,0)="1^AA^^1"
 ^DIC(6,1,9999999)="^^^^^^^^00"
-^DIC(6,3,0)="3"
+^DIC(6,3,0)="3^^^12"
+^DIC(6,3,9999999)="1^12^^^^^^^11112"
 ^DIC(6,"%",0)="^1.005^1^1"
 ^DIC(6,"%",1,0)="VA"
 ^DIC(6,"%","B","VA",1)=""
@@ -19,4 +20,6 @@ OSEHRA ZGO Export: PROVIDER
 ^DIC(6,"B",1,1)=""
 ^DIC(6,"B",3,3)=""
 ^DIC(6,"C","AA",1)=""
+^DIC(6,"F",12,3)=""
+^DIC(6,"GIHS",11112,3)=""
 ^DIC(6,"GIHS","00",1)=""

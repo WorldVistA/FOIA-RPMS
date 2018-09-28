@@ -1,7 +1,8 @@
-ABMDREL1 ; IHS/ASDST/DMJ - PRINT MCR,MCD OR PI HOLDERS ; 
- ;;2.6;IHS Third Party Billing;**1**;NOV 12, 2009
+ABMDREL1 ; IHS/SD/SDR - PRINT MCR,MCD OR PI HOLDERS ; 
+ ;;2.6;IHS Third Party Billing;**1,26**;NOV 12, 2009;Build 440
  ;Original;TMD;
- ; IHS/SD/SDR - abm*2.6*1 - HEAT5278 - Fix for policy number not displaying
+ ;IHS/SD/SDR 2.6*1 HEAT5278 - Fix for policy number not displaying
+ ;IHS/SD/SDR 2.6*26 CR9266 Changed to use MBI if available, default to HICN
  ;
 START K ABMD("80D") S $P(ABMD("80D"),"-",80)=""
  S ABMD("ET")=$H
@@ -22,7 +23,16 @@ MCRA ;
  S ABMD("HRN")=$P(^AUPNPAT(ABMD("DFN"),41,ABMD("SU"),0),U,2)
  S ABMD("MN")=$S($D(^AUPNMCR(ABMD("DFN"),21)):$P(^AUPNMCR(ABMD("DFN"),21),U,1),1:"")
  S ABMD("MDOB")=$S($D(^AUPNMCR(ABMD("DFN"),21)):$P(^AUPNMCR(ABMD("DFN"),21),U,2),1:"") I ABMD("MDOB")]"" S Y=ABMD("MDOB") D DD^%DT S ABMD("MDOB")=Y
- S ABMD("MEDN")=$P(^AUPNMCR(ABMD("DFN"),0),U,3)_$P(^(0),U,4)
+ ;S ABMD("MEDN")=$P(^AUPNMCR(ABMD("DFN"),0),U,3)_$P(^(0),U,4)  ;abm*2.6*26 IHS/SD/SDR CR9266
+ ;start new abm*2.6*26 IHS/SD/SDR CR9266
+ K ABMMBI
+ S ABMMBI=""
+ S ABMD("MEDN")=""
+ S ABMMBI=$$HISTMBI^AUPNMBI(ABMD("DFN"),.ABMMBI)
+ S ABMMBI=+$O(ABMMBI(999999999),-1)
+ S:(ABMMBI'=0) ABMD("MEDN")=$P(ABMMBI(ABMMBI),U)
+ I $G(ABMD("MEDN"))="" S ABMD("MEDN")=$P(^AUPNMCR(ABMD("DFN"),0),U,3)_$S(+$P(^(0),U,4)'=0:$P($G(^AUTTMCS($P(^(0),U,4),0)),U),1:"")
+ ;end new abm*2.6*26 IHS/SD/SDR CR9266
  W !,"(REG) ",ABMD("PN"),?36,$J(ABMD("HRN"),6),?49,ABMD("MEDN"),?64,ABMD("OB"),!,"(MCR) ",ABMD("MN"),?64,ABMD("MDOB")
  S ABMD("MDFN")=0 F  S ABMD("MDFN")=$O(^TMP("ABMDBRH",ABMD("$J"),ABMD("PN"),ABMD("DFN"),ABMD("MDFN"))) Q:'ABMD("MDFN")!($D(ABMD("Q")))  I $D(^AUPNMCR(ABMD("DFN"),11,ABMD("MDFN"),0)) S ABMD("R")=^(0) D MCRA2
  W !,ABMD("80D")

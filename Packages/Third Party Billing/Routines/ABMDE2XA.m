@@ -1,24 +1,18 @@
-ABMDE2XA ; IHS/ASDST/DMJ - PAGE 2 - INSURER data chk - cont ;  
- ;;2.6;IHS 3P BILLING SYSTEM;**11,21**;NOV 12, 2009;Build 379
+ABMDE2XA ; IHS/SD/SDR - PAGE 2 - INSURER data chk - cont ;  
+ ;;2.6;IHS 3P BILLING SYSTEM;**11,21,26**;NOV 12, 2009;Build 440
  ;
- ; IHS/SD/SDR - V2.5 P2 - 4/17/02 -  NOIS NEA-0401-180046
- ;     Modified to print coverage type on insurer view option in claim generator
- ; IHS/SD/SDR - v2.5 p3 - 3/4/03 - NDA-0203-180075
- ;     Modified to quit if there are no eligibility dates for RR
- ; IHS/SD/SDR - v2.5 p8 - IM15314/IM15448
- ;    <UNDEF>PRVT+18^ABMDE2XA
- ; IHS/SD/SDR - v2.5 p9 - IM16155
- ;   Patient's ID number instead of policy holder number
- ; IHS/SD/SDR - v2.5 p9 - IM18938
- ;    Added code to get RATE CODE
- ; IHS/SD/SDR - v2.5 p9 - IM19449
- ;    Commented out line to fix policy holder from being date on page 2 of CE
- ; IHS/SD/SDR - v2.5 p10 - IM20165
- ;   Policy number missing on page 2 for PI
+ ;IHS/SD/SDR V2.5 P2 4/17/02 -  NOIS NEA-0401-180046 Modified to print coverage type on insurer view option in claim generator
+ ;IHS/SD/SDR v2.5 p3 3/4/03 - NDA-0203-180075 Modified to quit if there are no eligibility dates for RR
+ ;IHS/SD/SDR v2.5 p8 IM15314/IM15448 <UNDEF>PRVT+18^ABMDE2XA
+ ;IHS/SD/SDR v2.5 p9 IM16155 Patient's ID number instead of policy holder number
+ ;IHS/SD/SDR v2.5 p9 IM18938 Added code to get RATE CODE
+ ;IHS/SD/SDR v2.5 p9 IM19449 Commented out line to fix policy holder from being date on page 2 of CE
+ ;IHS/SD/SDR v2.5 p10 IM20165 Policy number missing on page 2 for PI
  ;
- ;IHS/SD/SDR - 2.6*21 HEAT266450 - Made change to claim editor warning #66.  Now it will also
- ;check the VA Patient file for the gender if the active insurer is Medicare or Medicaid.
- ;IHS/SD/SDR - 2.6*21 - VMBP RQMT_109 - Added code for new VAMB Eligible file
+ ;IHS/SD/SDR 2.6*21 HEAT266450 - Made change to claim editor warning #66.  Now it will also
+ ;   check the VA Patient file for the gender if the active insurer is Medicare or Medicaid.
+ ;IHS/SD/SDR 2.6*21 VMBP RQMT_109 - Added code for new VAMB Eligible file
+ ;IHS/SD/SDR 2.6*26 CR9265 Made changes to ABMV("X1") for Medicare/RR HICN number to use AUPN API to get either the MBI or use old code to get HIC.
  ;
  ; *********************************************************************
  ;
@@ -74,7 +68,15 @@ PRVT ;EP - Entry Point for setting PI Info
  ;
  ; *********************************************************************
 MCR ;EP - Entry Point for setting MCR Info
- S $P(ABMV("X1"),U,4)=$P(ABMX("REC"),U,3)_$S($P(ABMX("REC"),U,4)]"":"-"_$P(^AUTTMCS($P(ABMX("REC"),U,4),0),U),1:"")
+ ;S $P(ABMV("X1"),U,4)=$P(ABMX("REC"),U,3)_$S($P(ABMX("REC"),U,4)]"":"-"_$P(^AUTTMCS($P(ABMX("REC"),U,4),0),U),1:"")  ;abm*2.6*26 IHS/SD/SDR CR9265
+ ;start new abm*2.6*26 IHS/SD/SDR CR9265
+ K ABMMBI
+ S ABMMBI=""
+ S ABMMBI=$$HISTMBI^AUPNMBI(ABMX(2),.ABMMBI)
+ S ABMMBI=+$O(ABMMBI(999999999),-1)
+ S:(ABMMBI'=0) $P(ABMV("X1"),U,4)=$P(ABMMBI(ABMMBI),U)
+ I $P($G(ABMV("X1")),U,4)="" S $P(ABMV("X1"),U,4)=$P(ABMX("REC"),U,3)_$S($P(ABMX("REC"),U,4)]"":"-"_$P(^AUTTMCS($P(ABMX("REC"),U,4),0),U),1:"")
+ ;end new abm*2.6*26 IHS/SD/SDR CR9265
  I '+$O(^AUPNMCR(ABMX(2),11,0)) S ABME(103)=""
  I $D(^AUPNMCR(ABMX(2),21)) D
  .S:$P(^AUPNMCR(ABMX(2),21),U)]"" $P(ABMV("X1"),U,5)=$P(^AUPNMCR(ABMX(2),21),U)
@@ -112,7 +114,15 @@ VAMB ;EP - Entry Point for setting VAMB Info
  ;end new abm*2.6*21 IHS/SD/SDR VMBP RQMT_109
  ; *********************************************************************
 RRE ;EP - Entry Point for setting RR Info
- I $P(ABMX("REC"),U,3)]"" S $P(ABMV("X1"),U,4)=$P(^AUTTRRP($P(ABMX("REC"),U,3),0),U)_$S($P(ABMX("REC"),U,4)]"":"-"_$P(ABMX("REC"),U,4),1:"")
+ ;I $P(ABMX("REC"),U,3)]"" S $P(ABMV("X1"),U,4)=$P(^AUTTRRP($P(ABMX("REC"),U,3),0),U)_$S($P(ABMX("REC"),U,4)]"":"-"_$P(ABMX("REC"),U,4),1:"")  ;abm*2.6*26 IHS/SD/SDR CR9265
+ ;start new abm*2.6*26 IHS/SD/SDR CR9265
+ K ABMMBI
+ S ABMMBI=""
+ S ABMMBI=$$HISTMBI^AUPNMBI(ABMX(2),.ABMMBI)
+ S ABMMBI=+$O(ABMMBI(999999999),-1)
+ S:(ABMMBI'=0) $P(ABMV("X1"),U,4)=$P(ABMMBI(ABMMBI),U)
+ I $P($G(ABMV("X1")),U,4)="" I $P(ABMX("REC"),U,3)]"" S $P(ABMV("X1"),U,4)=$P(^AUTTRRP($P(ABMX("REC"),U,3),0),U)_$S($P(ABMX("REC"),U,4)]"":"-"_$P(ABMX("REC"),U,4),1:"")
+ ;end new abm*2.6*26 IHS/SD/SDR CR9265
  I '+$O(^AUPNRRE(ABMX(2),11,0)) S ABME(103)=""
  I $D(^AUPNRRE(ABMX(2),21)) D
  .S:$P(^AUPNRRE(ABMX(2),21),U)]"" $P(ABMV("X1"),U,5)=$P(^AUPNRRE(ABMX(2),21),U)

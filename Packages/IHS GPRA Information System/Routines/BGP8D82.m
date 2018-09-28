@@ -1,5 +1,5 @@
 BGP8D82 ; IHS/CMI/LAB - measure C 14 Mar 2010 11:49 AM ;
- ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
+ ;;18.1;IHS CLINICAL REPORTING;;MAY 25, 2018;Build 66
  ;
 IRAA ;EP
  S (BGPN1,BGPN2,BGPN3,BGPN4,BGPN5,BGPN6,BGPD1,BGPD2,BGPD3,BGPD4,BGPD5,BGPD6,BGPD7,BGPD8,BGPD9,BGPD10,BGPD11,BGPD12)=0
@@ -44,7 +44,8 @@ OSTEOAR(P,BDATE,EDATE) ;EP
  ;now check for pl entry prior to BDATE
  S T=$O(^ATXAX("B","BGP OSTEOARTHRITIS DXS",0))
  S (X,B)=0 F  S X=$O(^AUPNPROB("AC",P,X)) Q:X'=+X!(H)  D
- .Q:$P(^AUPNPROB(X,0),U,8)>BDATE  ;if added to pl after beginning of time period, no go
+ .I BDATE,$P(^AUPNPROB(X,0),U,13)>BDATE Q
+ .I $P(^AUPNPROB(X,0),U,13)="" Q:$P(^AUPNPROB(X,0),U,8)>BDATE  ;if added to pl after beginning of time period, no go
  .S Y=$P(^AUPNPROB(X,0),U)
  .Q:$P(^AUPNPROB(X,0),U,12)="D"
  .Q:$P(^AUPNPROB(X,0),U,12)="I"

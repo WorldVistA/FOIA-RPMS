@@ -1,5 +1,5 @@
 BDPLDEL ; IHS/CMI/TMJ - LOOP DELETE EXISTING PROVIDER TO NEW PROVIDER ; 
- ;;2.0;IHS PCC SUITE;**10**;MAY 14, 2009;Build 88
+ ;;2.0;IHS PCC SUITE;**10,21**;MAY 14, 2009;Build 34
  ;
  ; Subscripted BDPREC is EXTERNAL form.
  ;   BDPREC("PAT NAME")=patient name
@@ -59,7 +59,7 @@ COUNT ;Count of # Patients for this Old Provider
  ;
 ASK ;Ask to Continue
  S BDPQ=0
- W !! S DIR(0)="Y",DIR("A")="Do you want to continue DELETEING the Designated Provider for each Patient?",DIR("B")="Y" K DA D ^DIR K DIR
+ W !! S DIR(0)="Y",DIR("A")="Do you want to continue DELETING the Designated Provider for each Patient",DIR("B")="Y" K DA D ^DIR K DIR
  I $D(DIRUT) S BDPQ=1 Q
  I 'Y S BDPQ=1 Q
  Q
@@ -97,9 +97,13 @@ UPDATE ;Update Records
  . I BDPTYPE'=BDPTYPEM Q  ;Quit if No Match
  . S BDPPAT=$P($G(^BDPRECN(BDPIEN,0)),U,2) ;Patient
  . Q:BDPPAT=""
+ . S BDPLPROV=$P(^BDPRECN(BDPIEN,0),U,3)  ;PROVIDER
  . ;Q:BDPPROV=""  ;Quit if No New Provider
  . S BDPLINKI=1
- . S DIE="^BDPRECN(",DA=BDPIEN,DR=".03///"_"@" D ^DIE K DIE,DR,DA,DINUM Q
+ . S DIE="^BDPRECN(",DA=BDPIEN,DR=".03///"_"@"_";.04////"_DUZ_";.05////"_DT D ^DIE K DIE,DR,DA,DINUM
+ . ;SET DATE INACTIVE/STOP DATE IN .05 OF MULTIPLE
+ . S X=0 F  S X=$O(^BDPRECN(BDPIEN,1,X)) Q:X'=+X  I $P(^BDPRECN(BDPIEN,1,X,0),U,1)=BDPLPROV S Y=X
+ . I Y,$P(^BDPRECN(BDPIEN,1,Y,0),U,5)="" S DIE="^BDPRECN("_BDPIEN_",1,",DA(1)=BDPIEN,DA=Y,DR=".02////"_DUZ_";.03////"_DT_";.05////"_DT D ^DIE K DIE,DR,DA,DINUM
  . ;I $T(KILL^BDPLINKI)]"" D KILL^BDPLINKI($P($G(^BDPTCAT($P(^BDPRECN(DA,0),U),0)),U,4),$P($G(^BDPTCAT($P(^BDPRECN(DA,0),U),0)),U,5),DA,X,$P(^BDPRECN(DA,0),U,2),$G(BDPLINKI))
  ;
  ;

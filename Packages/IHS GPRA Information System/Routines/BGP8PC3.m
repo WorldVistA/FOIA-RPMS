@@ -1,0 +1,15 @@
+BGP8PC3 ; IHS/CMI/LAB - measure I2 ; 02 Feb 2018  11:25 AM
+ ;;18.1;IHS CLINICAL REPORTING;;MAY 25, 2018;Build 66
+ ;
+ADS ;EP
+ I 'BGPIPCUP S BGPSTOP=1 Q  ;must be ipc up
+ ;did they have a dental exam?
+ S V=$$DENTDEV^BGP8D21(DFN,BGPBDATE,BGPEDATE) I 'V S BGPSTOP=1 Q
+ S BGPVALUE=""
+ S (BGPN1,BGPD1)=0
+ S BGPD1=1  ;had a dental exam
+ S X=$$TC^BGP8D21(DFN,BGPBDATE,BGPEDATE)
+ I X S BGPN1=1
+ S BGPVALUE="IPCUP "_$$DATE^BGP8UTL($P(V,U,2))_" "_$P(V,U,3)_"|||"_$S(BGPN1:"*** TC: "_$$DATE^BGP8UTL($P(X,U,2))_" "_$P(X,U,3),1:"")
+ K X,V
+ Q

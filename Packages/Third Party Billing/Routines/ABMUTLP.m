@@ -1,9 +1,11 @@
 ABMUTLP ; IHS/ASDST/DMJ - PAYER UTILITIES ;      
- ;;2.6;IHS 3P BILLING SYSTEM;**3,6,8,9,10,11,19,21**;NOV 12, 2009;Build 379
+ ;;2.6;IHS 3P BILLING SYSTEM;**3,6,8,9,10,11,19,21,26**;NOV 12, 2009;Build 440
  ;abm*2.6*10 split into ABMUTLP2 due to routine size
  ;IHS/SD/SDR 2.6*19 HEAT136922 -made changes for relationship code for grandchildren, nephew, niece
  ;IHS/SD/SDR 2.6*19 HEAT168248 -Made changes to merge same SARs into one entry, not one for each A/R trans.
  ;IHS/SD/SDR 2.6*21 HEAT107645 - SBR - made change to check if insurer type K should be mcd or prvt and pull appropriate data
+ ;IHS/SD/SDR 2.6*26 CR9265 Added code to call AUPN API to return either MBI or default to old code for HIC
+ ;*********************
 SET(X,ABMDUZ2) ; EP set up standard vars
  ;x=bill ien
  ;abmduz2=duz(2)
@@ -181,10 +183,23 @@ PRVT ;private
  Q
 MCR ;mcr
  I $P(^AUTNINS(+ABMINS,0),U)["RAILROAD" D  Q  ;abm*2.6*3 HEAT12676
- .S ABMPRFX=$P($G(^AUPNRRE(ABMP("PDFN"),0)),U,3),ABMHIC=$P($G(^(0)),U,4)
- .S ABMPRFX=$P($G(^AUTTRRP(+ABMPRFX,0)),U)
- .S ABMP("PNUM",ABMI)=ABMPRFX_ABMHIC
- .K ABMPRFX,ABMHIC
+ .;start old abm*2.6*26 IHS/SD/SDR CR9265
+ .;S ABMPRFX=$P($G(^AUPNRRE(ABMP("PDFN"),0)),U,3),ABMHIC=$P($G(^(0)),U,4)
+ .;S ABMPRFX=$P($G(^AUTTRRP(+ABMPRFX,0)),U)
+ .;S ABMP("PNUM",ABMI)=ABMPRFX_ABMHIC
+ .;K ABMPRFX,ABMHIC
+ .;end old start new abm*2.6*26 IHS/SD/SDR CR9265
+ .K ABMMBI
+ .S ABMMBI=""
+ .S ABMMBI=$$HISTMBI^AUPNMBI(ABMP("PDFN"),.ABMMBI)
+ .S ABMMBI=+$O(ABMMBI(999999999),-1)
+ .S:(ABMMBI'=0) ABMP("PNUM",ABMI)=$P(ABMMBI(ABMMBI),U)
+ .I $G(ABMP("PNUM",ABMI))="" D
+ ..S ABMPRFX=$P($G(^AUPNRRE(ABMP("PDFN"),0)),U,3),ABMHIC=$P($G(^(0)),U,4)
+ ..S ABMPRFX=$P($G(^AUTTRRP(+ABMPRFX,0)),U)
+ ..S ABMP("PNUM",ABMI)=ABMPRFX_ABMHIC
+ ..K ABMPRFX,ABMHIC
+ .;end new abm*2.6*26 IHS/SD/SDR CR9265
  .;start new abm*2.6*3 HEAT12676
  .S ABMP("SNUM",ABMI)=ABMP("PNUM",ABMI)
  .S ABMP("REL",ABMI)=18
@@ -193,10 +208,23 @@ MCR ;mcr
  ;end new HEAT12676
  ;I $P($G(^AUTNINS(+ABMINS,2)),U)="R"!($P(^AUTNINS(+ABMINS,0),U)["MEDICARE") D  Q  ;abm*2.6*3 HEAT12676  ;abm*2.6*10 HEAT73780
  I $$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,+ABMINS,".211","I"),1,"I")="R"!($P(^AUTNINS(+ABMINS,0),U)["MEDICARE") D  Q  ;abm*2.6*3 HEAT12676  ;abm*2.6*10 HEAT73780
- .S ABMHIC=$P($G(^AUPNMCR(ABMP("PDFN"),0)),U,3),ABMSUFX=$P($G(^(0)),U,4)
- .S ABMSUFX=$P($G(^AUTTMCS(+ABMSUFX,0)),U)
- .S ABMP("PNUM",ABMI)=ABMHIC_ABMSUFX
- .K ABMHIC,ABMSUFX
+ .;start old abm*2.6*26 IHS/SD/SDR CR9265
+ .;S ABMHIC=$P($G(^AUPNMCR(ABMP("PDFN"),0)),U,3),ABMSUFX=$P($G(^(0)),U,4)
+ .;S ABMSUFX=$P($G(^AUTTMCS(+ABMSUFX,0)),U)
+ .;S ABMP("PNUM",ABMI)=ABMHIC_ABMSUFX
+ .;K ABMHIC,ABMSUFX
+ .;end old start new abm*2.6*26 IHS/SD/SDR CR9265
+ .K ABMMBI
+ .S ABMMBI=""
+ .S ABMMBI=$$HISTMBI^AUPNMBI(ABMP("PDFN"),.ABMMBI)
+ .S ABMMBI=+$O(ABMMBI(999999999),-1)
+ .S:(ABMMBI'=0) ABMP("PNUM",ABMI)=$P(ABMMBI(ABMMBI),U)
+ .I $G(ABMP("PNUM",ABMI))="" D
+ ..S ABMHIC=$P($G(^AUPNMCR(ABMP("PDFN"),0)),U,3),ABMSUFX=$P($G(^(0)),U,4)
+ ..S ABMSUFX=$P($G(^AUTTMCS(+ABMSUFX,0)),U)
+ ..S ABMP("PNUM",ABMI)=ABMHIC_ABMSUFX
+ ..K ABMHIC,ABMSUFX
+ .;end new abm*2.6*26 IHS/SD/SDR CR9265
  .;start new abm*2.6*3 HEAT12676
  .S ABMP("SNUM",ABMI)=ABMP("PNUM",ABMI)
  .S ABMP("REL",ABMI)=18

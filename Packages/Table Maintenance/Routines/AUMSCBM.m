@@ -1,5 +1,5 @@
 AUMSCBM  ;IHS/OIT/NKD - SCB UPDATE - MAP 12/12/2012 ;
- ;;18.0;TABLE MAINTENANCE;**1**;AUG 14,2017;Build 1
+ ;;18.0;TABLE MAINTENANCE;**3**;AUG 14,2017;Build 1
  ; 03/12/14 - Modified Inactivate processing for Education tables
  ; 05/28/14 - Added Tribe Inactivate and Pre processing
  ; 12/16/14 - Removed old/unused code
@@ -7,6 +7,8 @@ AUMSCBM  ;IHS/OIT/NKD - SCB UPDATE - MAP 12/12/2012 ;
  ; 05/29/15 - Added Clinic Stop Inactivate processing
  ; 12/22/15 - Modified Health Factor New processing
  ; 03/07/16 - Added Service Category table
+ ; 03/15/18 - Added Revenue Codes table
+ ; 05/08/18 - Added Admission Source table
  ;
  Q
  ;
@@ -196,4 +198,21 @@ SC ;; SERVICE CATEGORY FILE
  ;;UPD;;9999999.26^.01|P2;.02|P1^I
  ;;HDR;;AUMT;SERVICE CATEGORY FILE ENTRIES^ABBR|7;NAME|12
  ;;DSP;;AUMM|6;P1|4;P2|30
+ ;;END
+REV ;; REVENUE CODES FILE
+ ;;PRE;;REVPRE^AUMSCBU
+ ;;SEA;;9999999.72^P1|B;P2|C
+ ;;NEW;;REVNEW^AUMSCBU
+ ;;UPD;;9999999.72^.01|P1;1|P2;3|P3;2|AT^I
+ ;;INA;;9999999.72^2|P7^I
+ ;;HDR;;AUMT;REVENUE CODES FILE ENTRIES^CODE|7;DESCRIPTION|12;INA|76
+ ;;DSP;;AUMM|6;P1|4;P2|60;INAD|3|76
+ ;;END
+ASRC ;; ADMISSION SOURCE FILE
+ ;;SEA;;9999999.53^P4|B;P2|B
+ ;;NEW;;9999999.53^.01|P2;.02|P1^I
+ ;;UPD;;9999999.53^.01|P2;.02|P1^I
+ ;;WP;;9999999.53^1|P3
+ ;;HDR;;AUMT;ADMISSION SOURCE FILE ENTRIES^CODE|7;NAME|12
+ ;;DSP;;AUMM|6;P1|4;P2|40
  ;;END

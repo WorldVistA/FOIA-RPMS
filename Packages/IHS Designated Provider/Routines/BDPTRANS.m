@@ -1,5 +1,5 @@
 BDPTRANS ; IHS/CMI/TMJ - TRANSFER FROM A TEMPLATE OF PATIENTS ;
- ;;2.0;IHS PCC SUITE;**10**;MAY 14, 2009;Build 88
+ ;;2.0;IHS PCC SUITE;**10,21**;MAY 14, 2009;Build 34
  ;
  ; Subscripted BDPREC is EXTERNAL form.
  ;   BDPREC("PAT NAME")=patient name
@@ -54,7 +54,7 @@ TLOOK K DIC,DIRUT
  ;
 ASK ;Ask to Continue
  S BDPQ=0
- W !! S DIR(0)="Y",DIR("A")="Do you want to continue changing the Designated Provider for each Patient in this Templates",DIR("B")="Y" K DA D ^DIR K DIR
+ W !! S DIR(0)="Y",DIR("A")="Do you want to continue changing the Designated Provider for each Patient in this Template",DIR("B")="Y" K DA D ^DIR K DIR
  I $D(DIRUT) S BDPQ=1 Q
  I 'Y S BDPQ=1 Q
  Q
@@ -82,6 +82,7 @@ PROV ; GET DESIGNATED PROVIDER
  S DIC("A")="Select New Designated Provider: ",DIC="^VA(200,",DIC(0)="AEMQ" D ^DIC K DIC,DA S:$D(DUOUT) DIRUT=1,BDPQ=1
  Q:$D(DIRUT)
  I +Y<1 S BDPQ=1 Q
+ S X=$$CHKPROV^BDPDPEE(+Y) I X S BDPQ=1 Q
  S BDPPROV=+Y,BDPRPROV=$P(Y,U,2)
  S BDPRPRVP=$P(^VA(200,BDPPROV,0),U,1) ;Provider Print Name
  S BDPQ=0
@@ -108,7 +109,7 @@ ADDTEMP ;Add Patients in Template to File
  . Q:BDPPAT=""
  . Q:BDPTYPE=""
  . Q:BDPPROV=""
- . S X=$$CREATE^BDPPASS(BDPPAT,BDPTYPE,BDPPROV) Q
+ . S X=$$CREATE^BDPAMA(BDPPAT,BDPTYPE,BDPPROV) Q
  . ;
  ;
  ;

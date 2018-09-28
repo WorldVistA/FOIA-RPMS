@@ -1,5 +1,5 @@
 BGP8D731 ; IHS/CMI/LAB - measure AHR.A ;
- ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
+ ;;18.1;IHS CLINICAL REPORTING;;MAY 25, 2018;Build 66
  ;
  ;
 IPAMT ;EP
@@ -140,6 +140,7 @@ HEM ;now check for dx 459
  S X=0 F  S X=$O(^AUPNPREF("AA",P,50,X)) Q:X'=+X  D
  .Q:'$D(^ATXAX(T,21,"B",X))  ;not an aspirin
  .S D=0 F  S D=$O(^AUPNPREF("AA",P,50,X,D)) Q:D'=+D  D
+ ..S Y=9999999-D
  ..I Y>EDATE Q  ;documented EDATE OF REPORT PERIOD
  ..S N=0 F  S N=$O(^AUPNPREF("AA",P,50,X,D,N)) Q:N'=+N  D
  ...Q:$P($G(^AUPNPREF(N,0)),U,7)'="N"

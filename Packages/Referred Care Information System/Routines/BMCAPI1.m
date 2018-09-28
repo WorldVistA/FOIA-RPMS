@@ -1,5 +1,5 @@
 BMCAPI1 ;IHS/OIT/FCJ-API BY REQ FIELDS
- ;;4.0;REFERRED CARE INFO SYSTEM;**4**;JAN 09, 2006;Build 92
+ ;;4.0;REFERRED CARE INFO SYSTEM;**4**;JAN 09, 2006;Build 101
  ;IHS/OIT/FCJ NEW ROUTINE RELEASED W/PATCH 4
  ;
  ;NOTE: Currently not used for multiple or word processing fields

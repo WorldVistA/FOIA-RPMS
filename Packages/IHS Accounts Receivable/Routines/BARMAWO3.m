@@ -1,5 +1,5 @@
 BARMAWO3 ; IHS/SD/LSL - Automatic Write-Off UFMS NON-BEN IN ERROR 2007 - Reversal ;
- ;;1.8;IHS ACCOUNTS RECEIVABLE;**2**;MAY 7,2007
+ ;;1.8;IHS ACCOUNTS RECEIVABLE;**2,28**;OCT 26, 2005;Build 92
  ;
  ; THIS IS TO BE USE ONLY TO REVERSE THE WRITE OFFS ON NON-BEN ACCOUNTS
  ; WHEN PATCH 1 OF THE UFMS WRITE-OFF 2007 WERE MSITAKENLY MADE BECAUSE
@@ -8,9 +8,21 @@ BARMAWO3 ; IHS/SD/LSL - Automatic Write-Off UFMS NON-BEN IN ERROR 2007 - Reversa
  ;
  ; THIS ROUTINE WAS COPIED AND MODIFIED FROM BARMAWO2
  ; *********************************************************************
+ ;STOP!!!  STOP!!!!   STOP!!!!
+ ;IHS/SD/SDR 1.8*28 HEAT293633 - This is an old, outdated routine and shouldn't be used
+ ;  without review and possible changes.  Routine EN^BARMAWO6 should be used instead.  A
+ ;  quit has been added to this routine so it can't be accidentally run.
+ ; *********************************************************************
  Q
  ;
-EN ; EP
+EN ; EP - IHS/DIT/CPC 1.8*28 CR 8349 START
+ W "*********************************************************************",!
+ W "                     STOP!!!  STOP!!!!   STOP!!!!",!
+ W "This is an old, outdated routine and shouldn't be used.  Please ",!
+ W "request assistance from OIT before starting the write-off process.",!
+ W "*********************************************************************",!
+ H 10
+ Q  ;IHS/DIT/CPC 1.8*28 CR 8349 STOP
  D NOTE
  Q:'BARCONT
  D NOW^%DTC

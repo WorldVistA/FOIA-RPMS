@@ -1,5 +1,5 @@
 BGP8ELHH ; IHS/CMI/LAB - cover page for ELDER 25 Jun 2010 10:20 AM ;
- ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
+ ;;18.1;IHS CLINICAL REPORTING;**1**;MAY 25, 2018;Build 65
  ;
  ;
  S X="Cover Page" D S(X,1,1)
@@ -22,7 +22,7 @@ BGP8ELHH ; IHS/CMI/LAB - cover page for ELDER 25 Jun 2010 10:20 AM ;
  D ELDERHDR
  S X=" " D S(X,1,1)
  I $G(BGPEXPT) D
- .S X="A file will be created called BG180"_$P(^AUTTLOC(DUZ(2),0),U,10)_".EL"_BGPRPT_"." D S(X,1,1) S X="It will reside in the public/export directory.  This file should be sent to your Area Office." D S(X,1,1)
+ .S X="A file will be created called BG"_$$FV^BGP8BAN()_$P(^AUTTLOC(DUZ(2),0),U,10)_".EL"_BGPRPT_"." D S(X,1,1) S X="It will reside in the public/export directory.  This file should be sent to your Area Office." D S(X,1,1)
  I BGPROT'="P",'$D(BGPGUI) D
  .S X="A delimited output file called "_BGPDELF D S(X,1,1) S X="has been placed in the "_$$GETDEDIR^BGP8UTL2()_" directory for your use in Excel or some other software package." D
  ..D S(X,1,1) S X="See your site manager to access this file." D S(X,1,1)

@@ -1,5 +1,5 @@
 ABSPOSD2 ; IHS/FCS/DRS - NCPDP DUR overrides ;  [ 09/03/2002  11:10 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**6,48**;JUN 21, 2001;Build 27
+ ;;1.0;PHARMACY POINT OF SALE;**6,48**;JUN 21, 2001;Build 38
  Q
  ; EDIT is called from the menu in ABSPOSO1,
  ;   typically reached from the pharmacy package's call

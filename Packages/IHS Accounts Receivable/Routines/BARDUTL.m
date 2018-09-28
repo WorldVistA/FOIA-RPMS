@@ -1,5 +1,5 @@
 BARDUTL ; IHS/SD/LSL - DATE UTILITIES FOR A/R PACKAGE ;
- ;;1.8;IHS ACCOUNTS RECEIVABLE;**4,6**;OCT 26, 2005
+ ;;1.8;IHS ACCOUNTS RECEIVABLE;**4,6,28**;OCT 26, 2005;Build 92
  ;
  ; IHS/SD/LSL - 02/20/04 - V1.7 Patch 5 - REMARK CODES
  ;      New utility to read in string to local array for printing
@@ -7,6 +7,8 @@ BARDUTL ; IHS/SD/LSL - DATE UTILITIES FOR A/R PACKAGE ;
  ; IHS/SD/LSL - 03/29/04 - V1.8
  ;      Added TRANS utility to find all $$ for specific trans type
  ;      on a bill.
+ ; IHS/DIT/CPC - 20180427 CR9580 - Add Fileman to XML date conversion
+ ; IHS/DIT/CPC - 20180427 CR5994 - Add utility to add wrapping break to a string at specified length.
  ;
  ; ********************************************************************
  ;
@@ -39,6 +41,19 @@ CDT(X) ;EP - Y= date/time ##/##/##@##:## from X (fm date) for display in claim e
  S Y=Y_"@"_$E(BARTIME,1,2)_":"_$E(BARTIME,3,4)
  Q Y
  ; *********************************************************************
+ ;
+ ;Start new code IHS/DIT/CPC BAR*1.8*28 CR8345 HEAT224215
+XDT(X)  ;EP - Y=XML date/time CCYYMMDDTHH:MM:SS.MSS
+ N Y
+ I '+X S Y="" Q Y
+ S Y=($E(X,1,3)+1700)_"-"_$E(X,4,5)_"-"_$E(X,6,7)_"T"
+ I '$P(X,".",2) Q Y_"00:00:00.000"
+ S BARTIME=$P(X,".",2)
+ S BARTIME=BARTIME_"000000"
+ S Y=Y_$E(BARTIME,1,2)_":"_$E(BARTIME,3,4)_":"_$E(BARTIME,5,6)_".000"
+ Q Y
+ ; *********************************************************************
+ ;
  ;start new code IHS/SD/SDR bar*1.8*4 DD item 4.1.5.4
  ;
 TDT(X) ;EP - Y= date/time ##/##/##@##:##:## from X (fm date) for display of formatted trans date
@@ -205,7 +220,7 @@ CARDAYS ; EP
  Q
  ;
  ; ********************************************************************
-WP(BARSTR,BARRAY,BARLNGTH) ; EP
+WP(BARSTR,BARRAY,BARLNGTH) ; EP ; IHS/DIT/CPC - 20180427 CR5994
  ; Used to read string into array where each line is less than
  ; specified length
  Q:'$D(BARSTR)!'$D(BARRAY)!'$D(BARLNGTH)
@@ -215,7 +230,7 @@ WP(BARSTR,BARRAY,BARLNGTH) ; EP
  Q
  ; ********************************************************************
  ;
-READ ;
+READ ; ; IHS/DIT/CPC - 20180427 CR5994
  ; Loop through String
  Q:$L(BARSTR)=0                        ; Nothing left in string
  S BARWORD=0
@@ -224,10 +239,16 @@ READ ;
  Q
  ; ********************************************************************
  ;
-READWORD ;
+READWORD ; ; IHS/DIT/CPC - 20180427 CR5994
  ; Loop each "word" of string
  S BARWORD=BARWORD+1
  S BARTXT=$P(BARSTR," ",1,BARWORD)
+ I $L(BARTXT)>BARLNGTH D
+ .;ADD CODE TO FIND BREAKING CHARACTER IN BARTXT LESS THAN BARLNGTH
+ .;FOR NOW ADD A SPACE AT BARLNGTH-1
+ .;REPEAT BARTXT SET
+ .S BARSTR=$E(BARSTR,1,BARLNGTH-1)_" "_$E(BARSTR,BARLNGTH,)
+ .S BARTXT=$P(BARSTR," ",1,BARWORD)
  I $L(BARSTR)=$L(BARTXT) D LASTLINE Q
  I $L(BARTXT)>BARLNGTH D SETLINE
  Q

@@ -1,5 +1,5 @@
 ACHSTX8 ; IHS/ITSC/PMF - EXPORT DATA (9/9) - EOJ ;JUL 10, 2008
- ;;3.1;CONTRACT HEALTH MGMT SYSTEM;**5,6,11,13,14,19,23,25**;JUN 11,2001;Build 37
+ ;;3.1;CONTRACT HEALTH MGMT SYSTEM;**5,6,11,13,14,19,23,25**;JUN 11,2001;Build 43
  ;IHS/SET/GTH ACHS*3.1*5 12/06/2002 - Capture number of individual records.
  ;IHS/SET/JVK ACHS*3.1*6 4/23/2003 - If site acts as area don't que file
  ;ACHS*3.1*13 6.16.2007 IHS/OIT/FCJ Added new rec type of "U" and trans to Export status file

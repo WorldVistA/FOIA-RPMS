@@ -1,8 +1,9 @@
 BMCRPC3 ;  IHS/CAS/AU - GUI-REFERRED CARE INFO SYSTEM (3/4);     
- ;;4.0;REFERRED CARE INFO SYSTEM;**7,8,12**;JAN 09, 2006;Build 92
+ ;;4.0;REFERRED CARE INFO SYSTEM;**7,8,12,13**;JAN 09, 2006;Build 101
  ;
  ;GDIT/HS/BEE 10/19/17 - p12 CR#8528: Alphabetize the Referral-to-SNOMED terms
  ;GDIT/HS/BEE 10/19/17 - p12 - Address XINDEX/SAC issues
+ ;GDIT/HS/BEE 05/08/2018 - BMC*4.0*13 - Consult review - Time is now passed in and required
  ;
  ; RPC code for RCIS GUI Application
  ; Routines contains code for Fetching Referral Templates
@@ -188,7 +189,9 @@ UPDTSTRF(RSLT,REFIEN,STATUS) ;;Update Status Of Referral against Ref IEN return 
 UPCNRINF(RSLT,REFIEN,CONSULTBY,CONSULTDT,CONSULTSTATUS) ;;Updates new Multiple Consulted By
  ; S REFIEN="113248"
  ; S CONSULTBY="3039"
- ; S CONSULTDT="8/12/2013"
+ ; GDIT/HS/BEE 05/08/2018 - BMC*4.0*13 - Time is passed in and required
+ ; OLD: S CONSULTDT="8/12/2013"
+ ; S CONSULTDT="8/12/2013@10:30"
  ; S CONSULTSTATUS="R"
  ; D UPCNRINF^BMCRPC3(.R,REFIEN,CONSULTBY,CONSULTDT,CONSULTSTATUS) W R
  ; S ^TMP("FAR",12)=$G(REFIEN)_"^"_$G(CONSULTBY)_"^"_$G(CONSULTDT)_"^"_$G(CONSULTSTATUS)
@@ -200,7 +203,9 @@ UPCNRINF(RSLT,REFIEN,CONSULTBY,CONSULTDT,CONSULTSTATUS) ;;Updates new Multiple C
  . . I $$GET1^DIQ(90001,REFIEN_",",1306,"I")=$G(CONSULTSTATUS)  D
  . . . S MSG=$$GET1^DIQ(90001,REFIEN_",",.03,"")_" has already been reviewed by "_$$GET1^DIQ(90001,REFIEN_",",1308,"")_" on "_$$GET1^DIQ(90001,REFIEN_",",1307,"")_"."
  I $G(MSG)'="" S RSLT="~`1^"_$G(MSG) Q RSLT
- D DT^DILF("",CONSULTDT,.CONSULTDT) I CONSULTDT="-1" S RSLT="~`0^Review Date is not in mm/dd/yyyy fromat" Q RSLT
+ ; GDIT/HS/BEE 05/08/2018 - BMC*4.0*13 - Time is passed in and required
+ ;D DT^DILF("",CONSULTDT,.CONSULTDT) I CONSULTDT="-1" S RSLT="~`0^Review Date is not in mm/dd/yyyy fromat" Q RSLT
+ D DT^DILF("RT",CONSULTDT,.CONSULTDT) I CONSULTDT="-1" S RSLT="~`0^Review Date is not in mm/dd/yyyy format" Q RSLT
  S FDA(90001,REFIEN_",",1308)=$G(CONSULTBY)
  S FDA(90001,REFIEN_",",1307)=$G(CONSULTDT)
  S FDA(90001,REFIEN_",",1306)=$G(CONSULTSTATUS)

@@ -1,5 +1,5 @@
 BMCCLO ; IHS/PHXAO/TMJ - CLOSE OUT A REFERRAL ;     [ 09/27/2006  1:32 PM ]
- ;;4.0;REFERRED CARE INFO SYSTEM;**1,2,8,9**;JAN 09, 2006;Build 92
+ ;;4.0;REFERRED CARE INFO SYSTEM;**1,2,8,9**;JAN 09, 2006;Build 101
  ;
  ; This option allows the RCIS manager to select and close out
  ; referrals.

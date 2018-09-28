@@ -1,5 +1,5 @@
 OSEHRA ZGO Export: RCIS OUTPUT FORM DEFINITION
-27-SEP-2018 11:54:58 ZWR
+28-SEP-2018 11:40:49 ZWR
 ^BMCTFORM(0)="RCIS OUTPUT FORM DEFINITION^90001.33^10^10"
 ^BMCTFORM(1,0)="STANDARD IHS REFERRAL LETTER^Referral for Contract Professional Services"
 ^BMCTFORM(1,1,0)="^90001.331^22^22^3140514^^^^"
@@ -270,7 +270,7 @@ OSEHRA ZGO Export: RCIS OUTPUT FORM DEFINITION
 ^BMCTFORM(6,11)=""
 ^BMCTFORM(6,12)="D ^BMCFAHC2"
 ^BMCTFORM(7,0)="SECONDARY PROV AHCCCS REPRINT^Referral for Contract Professional Services"
-^BMCTFORM(7,1,0)="^90001.331^9^9^3050808^^^^"
+^BMCTFORM(7,1,0)="^90001.331^9^9^3180402^^^^"
 ^BMCTFORM(7,1,1,0)="I certify that this referral is being made under the applicable AHCCCS"
 ^BMCTFORM(7,1,2,0)="policies and procedures, and that (check one)"
 ^BMCTFORM(7,1,3,0)=" "
@@ -280,7 +280,7 @@ OSEHRA ZGO Export: RCIS OUTPUT FORM DEFINITION
 ^BMCTFORM(7,1,7,0)="____ I have obtained approval of this referral from the AHCCCS Primary"
 ^BMCTFORM(7,1,8,0)="Care (""Gatekeeper"") physician responsible for this AHCCCS members's health"
 ^BMCTFORM(7,1,9,0)="care, and I have made and will retain a record of this approval."
-^BMCTFORM(7,2,0)="^90001.332^19^19^3050808^^^^"
+^BMCTFORM(7,2,0)="^90001.332^19^19^3180402^^^^"
 ^BMCTFORM(7,2,1,0)="I swear under penalties of law, including perjury, false swearing or"
 ^BMCTFORM(7,2,2,0)="unsworn falsification, that:"
 ^BMCTFORM(7,2,3,0)="    1) The information I have provided on this form is true, accurate, and"

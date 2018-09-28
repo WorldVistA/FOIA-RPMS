@@ -1,5 +1,5 @@
 BDPCHNG ;IHS/CMI/TMJ - CHANGE PROVIDER
- ;;2.0;IHS PCC SUITE;**10**;MAY 14, 2009;Build 88
+ ;;2.0;IHS PCC SUITE;**10,21**;MAY 14, 2009;Build 34
  ;
  ; Subscripted BDPREC is EXTERNAL form.
  ;   BDPREC("PAT NAME")=patient name
@@ -60,7 +60,7 @@ COUNT ;Count of # Patients for this Old Provider
  ;
 ASK ;Ask to Continue
  S BDPQ=0
- W !! S DIR(0)="Y",DIR("A")="Do you want to continue changing the Designated Provider for each Patient?",DIR("B")="Y" K DA D ^DIR K DIR
+ W !! S DIR(0)="Y",DIR("A")="Do you want to continue changing the Designated Provider for each Patient",DIR("B")="Y" K DA D ^DIR K DIR
  I $D(DIRUT) S BDPQ=1 Q
  I 'Y S BDPQ=1 Q
  Q
@@ -78,7 +78,7 @@ TYPE ; GET CATEGORY TYPE FOR DESIGNATED PROVIDER
  .W !,"Menu before they can be assigned as a message agent.",!
  I $P(^BDPTCAT(BDPTYPE,0),U,1)="MESSAGE AGENT",$P($G(^BDPMSGA(BDPPROV,0)),U,3) D  G TYPE
  .W !!,"The provider you selected has been inactivated as a message agent, he/she"
- .W !," must be reactivated using the option on the Manager's Menu before they can "
+ .W !,"must be reactivated using the option on the Manager's Menu before they can "
  .W !,"be assigned as a message agent.",!
  ;
  S BDPQ=0
@@ -88,6 +88,7 @@ PROV ; GET DESIGNATED PROVIDER
  S DIC("A")="Select New Designated Provider: ",DIC="^VA(200,",DIC(0)="AEMQ" D ^DIC K DIC,DA S:$D(DUOUT) DIRUT=1,BDPQ=1
  Q:$D(DIRUT)
  I +Y<1 S BDPQ=1 Q
+ S X=$$CHKPROV^BDPDPEE(+Y) I X S BDPQ=1 Q
  S BDPPROV=+Y,BDPRPROV=$P(Y,U,2)
  S BDPRPRVP=$P(^VA(200,BDPPROV,0),U,1) ;Provider Print Name
  S BDPQ=0
@@ -138,11 +139,9 @@ EOJ ; END OF JOB
  ;
 INFORM ;Data Entry Explanation
  ;
- W !,?3,"This option is used to assign a Message Agent to any patient who"
- W !,"has a particular provider assigned to them.  For example, if you want"
- W !,"to assign message agent Mary Smith, RN to all of Dr. Miller's patients"
- W !,"you can do so with this option."
- W !!!,"PLEASE NOTE:  If the patient already has a message agent assigned"
- W !,"this option will replace that message agent with the new one you are"
- W !,"assigning.",!
+ W !,?3,"This Option allows the automatic changing of all Records......",!,?10,"from the existing CURRENT Designated Provider -",!,?10,"to a NEW assigned Designated Provider.",!!
+ W ?3,"The User is prompted for the OLD Provider and the NEW Provider Name.",!
+ W ?3,"Once the desired Provider Category Type is selected by the User,",!
+ W ?3,"the Program will automatically LOOP through all Records and",!,?3,"change to the NEW Provider for this Category Type.",!!
+ W ?3,"If the patient's existing Provider/Category Type are the same,",!,?3,"no update will occur.",!
  Q

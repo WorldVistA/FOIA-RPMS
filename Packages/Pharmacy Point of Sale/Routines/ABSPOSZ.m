@@ -1,5 +1,5 @@
 ABSPOSZ ; IHS/FCS/DRS - Upgrades ;       
- ;;1.0;PHARMACY POINT OF SALE;**48**;JUN 21, 2001;Build 27
+ ;;1.0;PHARMACY POINT OF SALE;**48**;JUN 21, 2001;Build 38
  Q
  ; Upgrades for files are in ABSPOSZA.  Only needed at a couple of
  ; places, so run them manually, separately.

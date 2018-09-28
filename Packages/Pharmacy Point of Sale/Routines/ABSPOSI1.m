@@ -1,5 +1,5 @@
 ABSPOSI1 ; IHS/FCS/DRS - support for the prescrip. field on the form ;    [ 09/12/2002  10:10 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**3,10,44**;JUN 21, 2001;Build 27
+ ;;1.0;PHARMACY POINT OF SALE;**3,10,44**;JUN 21, 2001;Build 38
  ;----------------------------------------------------------------------
  ;IHS/SD/lwj 03/10/04 patch 10
  ; Routine adjusted to call ABSPFUNC to retrieve

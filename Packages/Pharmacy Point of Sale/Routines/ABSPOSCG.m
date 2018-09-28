@@ -1,5 +1,5 @@
 ABSPOSCG ; IHS/SD/RLT - Set up ABSP() - CONT;      [ 05/22/2006  9:00 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**17,20,21,22,42**;MAY 22, 2006;Build 27
+ ;;1.0;PHARMACY POINT OF SALE;**17,20,21,22,42,50**;MAY 22, 2006;Build 38
  ;---
  ;IHS/SD/RLT - 05/22/06 - Patch 17
  ;    Created new routine ABSPOSCC getting too large.
@@ -21,11 +21,20 @@ ABSPOSCG ; IHS/SD/RLT - Set up ABSP() - CONT;      [ 05/22/2006  9:00 AM ]
  Q
  ;
 GETRRDPL() ;EP    ^ABSPOSCC
- N POL,RRDPOL
- S POL=$P($G(^AUPNRRE(PINSDA,0)),U,4)      ;orig
- S RRDPOL=""
+ N POL,RRDPOL S (POL,RRDPOL)=""
+ ; /IHS/OIT/RAM ; 15 DEC 2017 ; Total rewrite to account for Medicare Bendficiary Identifier, or MBI.
+ ; Does the individual have a new MBI? If so, get it and return.... Do we care? This isn't date specific, so everything is 'Today'...
+ ; RRDFLAG has already been called and correct flags set - 
  S:RRDFLG&(RRDIEN) RRDPOL=$P($G(^AUPNRRE(PINSDA,11,RRDIEN,0)),U,6)
- S:RRDPOL'="" POL=RRDPOL
+ ; If the retrieve was successful, let's return that policy #.
+ I RRDPOL'="" Q RRDPOL
+ ; If not, let's see if Patient Reg has an updated 'old style' Railroad Elig. number
+ S POL=$$GETRRE^AGUTL(PINSDA)
+ ; if so, let's default to that & return.
+ I POL'="" Q POL
+ ; OK... the "new way" resulted in nothing. Let's fall back to the original code as a 'Plan B.'
+ S POL=$P($G(^AUPNRRE(PINSDA,0)),U,4)      ;orig
+ ;
  Q POL
  ;
 RRNAME() ;EP    ^ABSPOSCC
@@ -69,7 +78,7 @@ GETRRD() ;EP    ^ABSPOSCC
  ;Q RRDIEN
  Q ""
  ;
-GETMDPOL() ;EP    ^ABSPOSCC
+OLDGETMDPOL() ;EP    ^ABSPOSCC
  ;Updated policy number lookup for Medicare D elig.
  N POL,MDPOL
  S POL=$P($G(^AUPNMCR(PINSDA,0)),U,3)       ;original
@@ -77,6 +86,24 @@ GETMDPOL() ;EP    ^ABSPOSCC
  ;S:MDIEN'="" MDPOL=$P($G(^AUPNMCR(PINSDA,11,MDIEN,0)),U,6)
  S:MDFLG&(MDIEN) MDPOL=$P($G(^AUPNMCR(PINSDA,11,MDIEN,0)),U,6)
  S:MDPOL'="" POL=MDPOL                      ;MPD
+ Q POL
+ ;
+GETMDPOL() ;EP  Called from ^ABSPOSCC
+ ; /IHS/OIT/RAM ; 15 DEC 2017 ; Total rewrite to account for Medicare Bendficiary Identifier, or MBI.
+ ; /IHS/OIT/RAM ; 21 MAR 18 ; update to # logic - scan for Medicare Part D first, return that from the original area if it exists.
+ ; Does the individual have a new MBI? If so, get it and return.... Do we care? This isn't date specific, so everything is 'Today'... just get the info...
+ N POL,MDPOL S (POL,MDPOL)=""
+ ; MDFLAG has already been called and correct flags set - let's use them to see if it's Medicare Part D & retrieve.
+ S:MDFLG&(MDIEN) MDPOL=$P($G(^AUPNMCR(PINSDA,11,MDIEN,0)),U,6)
+ ; If the retrieve was successful, let's return that policy #.
+ I MDPOL'="" Q MDPOL
+ ; If not, then let's go snag the individual's MBI if it exists...
+ S POL=$$GETMCR^AGUTL(PINSDA)
+ ; if MBI exists, let's default to that & return.
+ I POL'="" Q POL
+ ; OK... the "new way" & Medicare D resulted in nothing. Let's fall back to the original code as a 'Plan B.'
+ S POL=$P($G(^AUPNMCR(PINSDA,0)),U,3)       ;original
+ ;
  Q POL
  ;
 MDFLG() ;EP     ^ABSPOSCC
@@ -116,3 +143,4 @@ PHARNPI(X,Y) ;EP
  Q:INST="" ""
  S NPI=$P($$NPI^XUSNPI("Organization_ID",INST),U)
  Q NPI
+ ;

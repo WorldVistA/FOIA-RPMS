@@ -1,5 +1,5 @@
 BMCCHS ; IHS/OIT/FCJ - CHS INTERFACE RTN 1 OF 2 ;         [ 09/22/2006  10:03 AM ]
- ;;4.0;REFERRED CARE INFO SYSTEM;**2,8**;JAN 09, 2006;Build 92
+ ;;4.0;REFERRED CARE INFO SYSTEM;**2,8**;JAN 09, 2006;Build 101
  ;
  ;IHS/ITSC/FCJ Added entries for link to CHS denial documents,
  ;    also added other entries for CHS PO entry

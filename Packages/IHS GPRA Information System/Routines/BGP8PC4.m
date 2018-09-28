@@ -1,0 +1,311 @@
+BGP8PC4 ; IHS/CMI/LAB - measure I2 ; 02 Feb 2018  11:25 AM
+ ;;18.1;IHS CLINICAL REPORTING;;MAY 25, 2018;Build 66
+ ;
+FLU ;EP
+ S (BGPN1,BGPD1)=0
+ S BGPDV="",BGPDV1=""
+ ;GET THE PATIENT'S 6 MONTH BIRTHDAY
+ S A=$$M6BD(DFN)
+ I A>BGPEDATE S BGPSTOP=1 Q  ;turned 6 months after end date of report period
+ ;
+ S BGPDV=$$ENC4(DFN,BGPBDATE,BGPEDATE) I BGPDV="" S BGPSTOP=1 Q  ;no visit
+ ;did they have item #2 92 days prior to bdate through 89 days after bdate
+ S BGPDV1=$$ENC42(DFN,$$FMADD^XLFDT(BGPBDATE,-92),$$FMADD^XLFDT(BGPBDATE,89)) I BGPDV1="" S BGPSTOP=1 Q
+ ;
+ ;now what about exclusions?
+ I $$FLUREF(DFN,$$FMADD^XLFDT(BGPBDATE,-153),$$FMADD^XLFDT(BGPBDATE,89)) S BGPSTOP=1 Q  ;refused
+ I $$FLUALG(DFN,$$DOB^AUPNPAT(DFN),$$FMADD^XLFDT(BGPBDATE,89),BGPEDATE) S BGPSTOP=1 Q  ;ALLERGY
+ ;
+ S BGPD1=1
+ S X=$$FLUVAC(DFN,$$FMADD^XLFDT(BGPBDATE,-153),$$FMADD^XLFDT(BGPBDATE,89))
+ I $E(X)=1 S BGPN1=1
+ S BGPVALUE=""
+ S BGPVALUE="ENC "_$P(BGPDV,U,2)_"|||"  ;hit denominator
+ I BGPN1 S BGPVALUE=BGPVALUE_"*** "_$P(X,U,2)_" "_$P(X,U,3)
+ K V,BGPDV
+ Q
+FLUALG(P,BDATE,BDATE89,EDATE) ;
+ NEW X,Y,Z,A,B,BGPT,BGPZ,TCVX,TCPT,T,I,D,S,G,ID,F
+ ;P is dfn
+ ;a is taxonomy name
+ I $G(P)="" Q ""
+ NEW T
+ S T=$O(^ATXAX("B","BGP IPC EGG ALLERGY DXS",0))
+ I 'T Q ""  ;bad taxonomy??
+ NEW X,Y,I,D
+ S (X,Y,I)=0
+ F  S X=$O(^AUPNPROB("AC",P,X)) Q:X'=+X!(I)  D
+ .Q:'$D(^AUPNPROB(X,0))
+ .I $P(^AUPNPROB(X,0),U,12)="D" Q   ;S D=$P($$VALI^XBDIQ1(9000011,X,2.02),".") I D'>BDATE89 
+ .Q:$P(^AUPNPROB(X,0),U,12)="I"
+ .S Y=$P(^AUPNPROB(X,0),U)
+ .I $P(^AUPNPROB(X,0),U,13),$P(^AUPNPROB(X,0),U,13)>BDATE89 Q  ;if there is a doo and it is after report period skip
+ .I $P(^AUPNPROB(X,0),U,13)="",$P(^AUPNPROB(X,0),U,8)>BDATE89 Q  ;entered after report period, skip
+ .I $$ICD^BGP8UTL2(Y,T,9) S I=1 Q
+ .S S=$$VAL^XBDIQ1(9000011,X,80001)
+ .I S]"",$D(^XTMP("BGPSNOMEDSUBSET",$J,"PXRM BGP IPC EGG ALLERGY",S)) S I=1 Q
+ .I S=294647003 S I=1 Q
+ .I S=294648008 S I=1 Q
+ .I S=294649000 S I=1 Q
+ .I S=293112000 S I=1 Q
+ .I S=293113005 S I=1 Q
+ .I S=390796006 S I=1 Q
+ .I S=420113004 S I=1 Q
+ .Q
+ I I Q 1
+ S BGPT=$O(^ATXAX("B","BGP FLU IZ CVX CODES",0))
+ S BGPZ=0,X="" F  S BGPZ=$O(^ATXAX(BGPT,21,"B",BGPZ)) Q:BGPZ=""!(X]"")  S X=$$FLUIPCON(P,BGPZ,$$DOB^AUPNPAT(P),BDATE89)
+ I X]"" Q 1
+ ;NMI REFUSALS
+ S TCVX=$O(^ATXAX("B","BGP IPC INFLUENZA CVX CODES",0))
+ S TCPT=$O(^ATXAX("B","BGP IPC INFLUENZA CPT CODES",0))
+ S F=0,G="" F  S F=$O(^AUPNPREF("AA",P,F)) Q:F'=+F!(G)  D
+ .S I="" F  S I=$O(^AUPNPREF("AA",P,F,I)) Q:I=""!(G)  D
+ ..;check all file vs item combos
+ ..I F=9002318.4,I'=315640000 Q   ;IF IT'S SNOMED, MUST BE THAT ONE
+ ..I F=9999999.14 S C=$P($G(^AUTTIMM(I,0)),U,3) Q:'$D(^ATXAX(TCVX,21,"B",C))  ;immunization but not a flu one
+ ..I F=81 I '$$ICD^BGP8UTL2(I,TCPT,1) Q  ;cpt but not a flu cpt
+ ..S ID=0 F  S ID=$O(^AUPNPREF("AA",P,F,I,ID)) Q:ID=""!(G)  D
+ ...S D=9999999-ID
+ ...Q:D<BDATE
+ ...Q:D>BDATE89
+ ...S X=0 F  S X=$O(^AUPNPREF("AA",P,F,I,ID,X)) Q:X'=+X!(G)  D
+ ....;get REASON AND IT MUST BE NMI
+ ....S R=$$VALI^XBDIQ1(9000022,X,.07)  ; REASON NOT DONE
+ ....I R="N" S G=1 Q
+ I G Q G
+ ;NOW VPOV FOR ALLERY TO EGGS DX OR SNOMED
+ K BGPT
+ S Y="BGPT("
+ S X=P_"^FIRST DX [BGP IPC EGG ALLERGY;DURING "_$$DOB^AUPNPAT(P)_"-"_BDATE89 S E=$$START1^APCLDF(X,Y)
+ I $D(BGPT(1)) Q 1
+ ;NOW SNOMED USING ASNC
+ S T="PXRM BGP IPC EGG ALLERGY"
+ S G=""
+ S S=0 F  S S=$O(^XTMP("BGPSNOMEDSUBSET",$J,T,S)) Q:S=""!(G)  D
+ .Q:'$D(^AUPNVPOV("ASNC",P,S))
+ .S D=0 F  S D=$O(^AUPNVPOV("ASNC",P,S,D)) Q:D=""!(G)  D
+ ..S Y=9999999-D
+ ..Q:Y<BDATE
+ ..Q:Y>BDATE89
+ ..S G=1
+ I G Q 1
+ Q ""
+ ;
+FLUREF(P,BDATE,EDATE) ;
+ NEW A,B,C,X,Y,Z,F,D,I,ID,G,C,TCVX,TCPT,R,BGPT,BGPZ
+ S BGPT=$O(^ATXAX("B","BGP IPC INFLUENZA CVX CODES",0))
+ S BGPZ=0,X="" F  S BGPZ=$O(^ATXAX(BGPT,21,"B",BGPZ)) Q:BGPZ=""!(X]"")  S X=$$FLUPREF(P,BGPZ,BDATE,EDATE)
+ I X]"" Q 1
+ ;CHECK REFUSAL FILE FIRST FOR FLU CVX OR FLU CPT AND MEDICAL REASON NOT DONE SNOMED OR PATIENT REASON NOT DONE SNOMED OR SYSTEM REASON NOT DONE SNOMED
+ ;ITEM 1-2, 1-3, 1-4
+ S TCVX=$O(^ATXAX("B","BGP IPC INFLUENZA CVX CODES",0))
+ S TCPT=$O(^ATXAX("B","BGP IPC INFLUENZA CPT CODES",0))
+ S F=0,G="" F  S F=$O(^AUPNPREF("AA",P,F)) Q:F'=+F!(G)  D
+ .S I="" F  S I=$O(^AUPNPREF("AA",P,F,I)) Q:I=""!(G)  D
+ ..;check all file vs item combos
+ ..I F=9002318.4,I'=315640000 Q   ;IF IT'S SNOMED, MUST BE THAT ONE
+ ..I F=9999999.14 S C=$P($G(^AUTTIMM(I,0)),U,3) Q:'$D(^ATXAX(TCVX,21,"B",C))  ;immunization but not a flu one
+ ..I F=81 I '$$ICD^BGP8UTL2(I,TCPT,1) Q  ;cpt but not a flu cpt
+ ..S ID=0 F  S ID=$O(^AUPNPREF("AA",P,F,I,ID)) Q:ID=""!(G)  D
+ ...S D=9999999-ID
+ ...Q:D<BDATE
+ ...Q:D>EDATE
+ ...S X=0 F  S X=$O(^AUPNPREF("AA",P,F,I,ID,X)) Q:X'=+X!(G)  D
+ ....;get snomed reason not done and it must be in one of the subsets
+ ....S R=$$VALI^XBDIQ1(9000022,X,1.01)  ;SNOMED REASON NOT DONE
+ ....I R]"",R="443390004" S G=1 Q
+ ....I R]"",$D(^XTMP("BGPSNOMEDSUBSET",$J,"PXRM BGP IPC NO IZ MED",R)) S G=1 Q
+ ....I R]"",$D(^XTMP("BGPSNOMEDSUBSET",$J,"PXRM BGP IPC NO IZ PAT",R)) S G=1 Q
+ ....I R]"",$D(^XTMP("BGPSNOMEDSUBSET",$J,"PXRM BGP IPC NO IZ SYS",R)) S G=1 Q
+ I G Q G
+ ;IS 315640000 ON THE PROBLEM LIST WITH DOO AND/OR DATE ADDED FROM BDATE TO EDATE
+ S X=0,G=0 F  S X=$O(^AUPNPROB("AC",P,X)) Q:X'=+X!(G=1)  D
+ .Q:'$D(^AUPNPROB(X,0))
+ .I $P(^AUPNPROB(X,0),U,12)="D" Q
+ .S S=$$VAL^XBDIQ1(9000011,X,80001)
+ .Q:S'=315640000
+ .S D=$P(^AUPNPROB(X,0),U,13)
+ .I 'D S D=$P(^AUPNPROB(X,0),U,8)
+ .Q:D<BDATE
+ .Q:D>EDATE
+ .S G=1
+ .Q
+ I G Q G
+ ;what about V POVs
+ S S=315640000
+ S D=0 F  S D=$O(^AUPNVPOV("ASNC",P,S,D)) Q:D=""!(G)  D
+ .S Y=9999999-D
+ .Q:Y<BDATE
+ .Q:Y>EDATE
+ .S G=1
+ I G Q G
+ Q ""
+M6BD(P) ;
+ NEW B,M,D,Y
+ S B=$$DOB^AUPNPAT(P)  ;DOB
+ S M=+$E(B,4,5)
+ S D=$E(B,6,7)
+ S Y=$E(B,1,3)
+ S M=$S(M<7:M+6,1:M-6) S:$L(M)=1 M="0"_M
+ S Y=$S(M<7:Y+1,1:Y)
+ Q Y_M_D
+ENC4(P,BDATE,EDATE) ;EP  - have encounter per CMS122v6
+ NEW X,Y,Z,G,BGPV,D,A,B
+ ;Let's check all Visits, looping through once
+ S G=""  ;return variable
+ ;get all visits in date range in BGPV
+ D ALLV^APCLAPIU(P,BDATE,EDATE,"BGPV")
+ ;now loop through and check Face to Face and .17 in visit and check v cpts attached to the visit
+ S X=0 F  S X=$O(BGPV(X)) Q:X'=+X!(G)  S V=$P(BGPV(X),U,5)  D
+ .Q:'$P(^AUPNVSIT(V,0),U,9)  ;no dependent entries
+ .Q:$P(^AUPNVSIT(V,0),U,11)  ;deleted
+ .S D=$$VD^APCLV(V)
+ .S Y=$$FTOF^BGP8PC2(V) I Y]"" S G=1_U_$$DATE^BGP8UTL(D)_" FTOF: "_Y Q   ;ITEM 18
+ .S Y=$$PROVINT(V) I Y]"" S G=1_U_$$DATE^BGP8UTL(D)_" PAT/PROV INT: "_Y Q      ;ITEM 5
+ .;is .17 a cpt we want?
+ .S Y=$$VALI^XBDIQ1(9000010,V,.17)
+ .I Y,$$OFFCPT4(Y) S G=1_U_$$DATE^BGP8UTL(D)_" CPT: "_$P($$CPT^ICPTCOD(Y),U,2) Q
+ .;now check all V CPTs
+ .S Z=0 F  S Z=$O(^AUPNVCPT("AD",V,Z)) Q:Z'=+Z!(G)  D
+ ..S Y=$P($G(^AUPNVCPT(Z,0)),U,1)
+ ..I Y,$$OFFCPT4(Y) S G=1_U_$$DATE^BGP8UTL(D)_" CPT: "_$P($$CPT^ICPTCOD(Y),U,2) Q
+ Q G
+ENC42(P,BDATE,EDATE) ;EP  - have encounter per CMS147
+ NEW X,Y,Z,G,BGPV,D,A,B
+ ;Let's check all Visits, looping through once
+ S G=""  ;return variable
+ ;get all visits in date range in BGPV
+ D ALLV^APCLAPIU(P,BDATE,EDATE,"BGPV")
+ ;now loop through and check Face to Face and .17 in visit and check v cpts attached to the visit
+ S X=0 F  S X=$O(BGPV(X)) Q:X'=+X!(G)  S V=$P(BGPV(X),U,5)  D
+ .Q:'$P(^AUPNVSIT(V,0),U,9)  ;no dependent entries
+ .Q:$P(^AUPNVSIT(V,0),U,11)  ;deleted
+ .S D=$$VD^APCLV(V)
+ .S Y=$$VALI^XBDIQ1(9000010,V,.17)
+ .I Y,$$FLUCPT(Y) S G=1_U_$$DATE^BGP8UTL(D)_" CPT: "_$P($$CPT^ICPTCOD(Y),U,2) Q
+ .;now check all V CPTs
+ .S Z=0 F  S Z=$O(^AUPNVCPT("AD",V,Z)) Q:Z'=+Z!(G)  D
+ ..S Y=$P($G(^AUPNVCPT(Z,0)),U,1)
+ ..I Y,$$FLUCPT(Y) S G=1_U_$$DATE^BGP8UTL(D)_" CPT: "_$P($$CPT^ICPTCOD(Y),U,2) Q
+ ..;CHECK VISIT 26 NODE FOR SNOMED
+ .S A=0 F  S A=$O(^AUPNVSIT(V,26,"B",A)) Q:A=""!(G]"")  D
+ ..I $D(^XTMP("BGPSNOMEDSUBSET",$J,"PXRM BGP IPC FLU ENCOUNTER",A)) S G=1_U_$$DATE^BGP8UTL(D)_" SNOMED: "_A Q
+ .;CHECK VISIT 28 NODE FOR SNOMED
+ .S A=0 F  S A=$O(^AUPNVSIT(V,28,"B",A)) Q:A=""!(G]"")  D
+ ..I $D(^XTMP("BGPSNOMEDSUBSET",$J,"PXRM BGP IPC FLU ENCOUNTER",A)) S G=1_U_$$DATE^BGP8UTL(D)_" SNOMED: "_A Q
+ .;CHECK POV'S FOR SNOMED
+ .S Z=0 F  S Z=$O(^AUPNVPOV("AD",V,Z)) Q:Z'=+Z!(G]"")  D
+ ..S A=$P($G(^AUPNVPOV(Z,11)),U,1)
+ ..I A]"",$D(^XTMP("BGPSNOMEDSUBSET",$J,"PXRM BGP IPC FLU ENCOUNTER",A)) S G=1_U_$$DATE^BGP8UTL(D)_" SNOMED: "_A
+ Q G
+PROVINT(V) ;EP
+ NEW A,B,C
+ S A=0,B=""
+ F  S A=$O(^AUPNVSIT(V,28,"B",A)) Q:A=""!(B]"")  D
+ .I $D(^XTMP("BGPSNOMEDSUBSET",$J,"PXRM BGP IPC PAT PROV INT",A)) S B=A
+ Q B
+OFFCPT4(C) ;EP
+ I $$ICD^ATXAPI(C,$O(^ATXAX("B","BGP IPC OFFICE VISIT CPTS",0)),1) Q 1       ;ITEM 1
+ I $$ICD^ATXAPI(C,$O(^ATXAX("B","BGP IPC OUTPT CONSULT CPTS",0)),1) Q 1      ;ITEM 2
+ I $$ICD^ATXAPI(C,$O(^ATXAX("B","BGP IPC LT RES FACILITY CPTS",0)),1) Q 1    ;ITEM 3
+ I $$ICD^ATXAPI(C,$O(^ATXAX("B","BGP IPC HOMEHEALTH VISIT CPTS",0)),1) Q 1   ;ITEM 4
+ I $$ICD^ATXAPI(C,$O(^ATXAX("B","BGP IPC PREVCARE IOV 0-17 CPTS",0)),1) Q 1  ;ITEM 6
+ I $$ICD^ATXAPI(C,$O(^ATXAX("B","BGP IPC PREVCARE IOV >=18 CPTS",0)),1) Q 1  ;ITEM 7
+ I $$ICD^ATXAPI(C,$O(^ATXAX("B","BGP IPC PREVCARE IND COUN CPTS",0)),1) Q 1  ;ITEM 8
+ I $$ICD^ATXAPI(C,$O(^ATXAX("B","BGP IPC PREVCARE GRP COUN CPTS",0)),1) Q 1  ;ITEM 9
+ I $$ICD^ATXAPI(C,$O(^ATXAX("B","BGP IPC PREVCARE OTHER CPTS",0)),1) Q 1     ;ITEM 10
+ I $$ICD^ATXAPI(C,$O(^ATXAX("B","BGP IPC DSCH SRV NURS FAC CPTS",0)),1) Q 1  ;ITEM 11
+ I $$ICD^ATXAPI(C,$O(^ATXAX("B","BGP IPC NURS FAC VISIT CPTS",0)),1) Q 1     ;ITEM 12
+ I $$ICD^ATXAPI(C,$O(^ATXAX("B","BGP IPC ANNUAL WELLNESS CPTS",0)),1) Q 1    ;ITEM 13
+ I $$ICD^ATXAPI(C,$O(^ATXAX("B","BGP IPC PERI DIALYSIS CPTS",0)),1) Q 1      ;ITEM 14
+ I $$ICD^ATXAPI(C,$O(^ATXAX("B","BGP IPC HEMO DIALYSIS CPTS",0)),1) Q 1      ;ITEM 15
+ I $$ICD^ATXAPI(C,$O(^ATXAX("B","BGP IPC PREVCARE EOV 0-17 CPTS",0)),1) Q 1  ;ITEM 16
+ I $$ICD^ATXAPI(C,$O(^ATXAX("B","BGP IPC PREVCARE EOV >=18 CPTS",0)),1) Q 1  ;ITEM 17
+ Q ""
+FLUCPT(C) ;EP
+ I $$ICD^ATXAPI(C,$O(^ATXAX("B","BGP IPC FLU ENCOUNTER CPTS",0)),1) Q 1
+ I $$ICD^ATXAPI(C,$O(^ATXAX("B","BGP IPC PERI DIALYSIS CPTS",0)),1) Q 1
+ I $$ICD^ATXAPI(C,$O(^ATXAX("B","BGP IPC HEMO DIALYSIS CPTS",0)),1) Q 1
+ Q ""
+FLUIPCON(P,C,BD,ED) ;EP
+ NEW X,G,Y,R,D
+ S X=0,G="",Y=$O(^AUTTIMM("C",C,0)) I Y F  S X=$O(^BIPC("AC",P,Y,X)) Q:X'=+X!(G)  D
+ .S R=$P(^BIPC(X,0),U,3)
+ .Q:R=""
+ .Q:'$D(^BICONT(R,0))
+ .S D=$P(^BIPC(X,0),U,4)
+ .Q:D=""
+ .Q:$P(^BIPC(X,0),U,4)<BD
+ .Q:$P(^BIPC(X,0),U,4)>ED
+ .I $P(^BICONT(R,0),U,1)="Egg Allergy" S G=D_U_"Contra: Egg Allergy"
+ .I $P(^BICONT(R,0),U,1)="Anaphylaxis" S G=D_U_"Contra Anaphylaxis"
+ Q G
+FLUPREF(P,C,BD,ED) ;EP
+ NEW X,G,Y,R,D,A
+ S X=0,G="",Y=$O(^AUTTIMM("C",C,0)) I Y F  S X=$O(^BIPC("AC",P,Y,X)) Q:X'=+X!(G)  D
+ .S R=$P(^BIPC(X,0),U,3)
+ .Q:R=""
+ .Q:'$D(^BICONT(R,0))
+ .S D=$P(^BIPC(X,0),U,4)
+ .Q:D=""
+ .Q:$P(^BIPC(X,0),U,4)<BD
+ .Q:$P(^BIPC(X,0),U,4)>ED
+ .I $P(^BICONT(R,0),U,1)="Patient Refusal" S G=D_U_"Patient Refusal 315640000" Q
+ .I $P(^BICONT(R,0),U,1)="Parent Refusal" S G=D_U_"Parent Refusal 315640000" Q
+ .S A="" F  S A=$O(^BIPC(X,1,"B",A)) Q:A=""!(G)  D
+ ..I A=315640000 S G=D_U_"Imm Pkg Refusal 315640000" Q
+ ..I A]"",$D(^XTMP("BGPSNOMEDSUBSET",$J,"PXRM BGP IPC NO IZ MED",A)) S G=D_U_"Imm Pkg SNOMED "_A Q
+ ..I A]"",$D(^XTMP("BGPSNOMEDSUBSET",$J,"PXRM BGP IPC NO IZ PAT",A)) S G=D_U_"Imm Pkg SNOMED "_A Q
+ ..I A]"",$D(^XTMP("BGPSNOMEDSUBSET",$J,"PXRM BGP IPC NO IZ SYS",A)) S G=D_U_"Imm Pkg SNOMED "_A Q
+ Q G
+FLUVAC(P,BDATE,EDATE) ;
+ NEW BGPG,BGPLFLU,X,E,%,I,T,J,V,G,D,R,CVX,BGPT,TCVX,TCPT
+ S TCVX=$O(^ATXAX("B","BGP IPC INFLUENZA CVX CODES",0))
+ S TCPT=$O(^ATXAX("B","BGP IPC INFLUENZA CPT CODES",0))
+ K BGPG
+ S BGPLFLU=""
+ S X=0 F  S X=$O(^AUPNVIMM("AC",P,X)) Q:X'=+X  D
+ .S I=$P($G(^AUPNVIMM(X,0)),U,1)
+ .I 'I Q
+ .S CVX=$P($G(^AUTTIMM(I,0)),U,3)
+ .Q:CVX=""
+ .I '$D(^ATXAX(TCVX,21,"B",CVX)) Q  ;NOT IN TAXONOMY
+ .S D=$$VD^APCLV($P(^AUPNVIMM(X,0),U,3))
+ .Q:D<BDATE
+ .Q:D>EDATE
+ .S BGPLFLU=1_U_$$DATE^BGP8UTL(D)_U_"Imm "_CVX
+ I BGPLFLU Q BGPLFLU
+ ;CPT
+ I TCPT D
+ .S X=$$CPT^BGP8DU(P,BDATE,EDATE,TCPT,5) I X]"" Q
+ .S X=$$TRAN^BGP8DU(P,BDATE,EDATE,TCPT,5)
+ I X]"" Q 1_U_$$DATE^BGP8UTL($P(X,U,1))_U_"CPT: "_$P(X,U,2)
+ ;NOW CHECK PROBLEM LIST AND V POV FOR DURING BDATE AND EDATE
+ S X=0,G=0,I="" F  S X=$O(^AUPNPROB("AC",P,X)) Q:X'=+X!(G=1)  D
+ .S I=""
+ .Q:'$D(^AUPNPROB(X,0))
+ .I $P(^AUPNPROB(X,0),U,12)="D" Q
+ .S S=$$VAL^XBDIQ1(9000011,X,80001)
+ .I S=185900003 S I=1
+ .I S=185901004 S I=1
+ .I S=185902006 S I=1
+ .I S=416928007 S I=1
+ .Q:'I
+ .S D=$P(^AUPNPROB(X,0),U,13)
+ .I 'D S D=$P(^AUPNPROB(X,0),U,8)
+ .Q:D<BDATE
+ .Q:D>EDATE
+ .S G=1_U_$$DATE^BGP8UTL(D)_U_"PL: "_S
+ .Q
+ I G Q G
+ ;what about V POVs
+ S G=""
+ F S=185900003,185901004,185902006,416928007 D  Q:G
+ .S D=0 F  S D=$O(^AUPNVPOV("ASNC",P,S,D)) Q:D=""!(G)  D
+ ..S Y=9999999-D
+ ..Q:Y<BDATE
+ ..Q:Y>EDATE
+ ..S G=1_U_$$DATE^BGP8UTL(Y)_U_"POV: "_S
+ I G Q G
+ Q ""

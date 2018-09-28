@@ -1,5 +1,5 @@
 BGP8DP1N ; IHS/CMI/LAB - print ind 1 12 Nov 2010 7:38 AM ;
- ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
+ ;;18.1;IHS CLINICAL REPORTING;;MAY 25, 2018;Build 66
  ;
  ;mta age dist x 2
 I1AGE ;EP  special age tallies

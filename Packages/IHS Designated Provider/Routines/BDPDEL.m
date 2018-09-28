@@ -1,5 +1,5 @@
 BDPDEL ; IHS/CMI/TMJ - DELETE AN EXISTING DESIGNATED PROVIDER ;
- ;;2.0;IHS PCC SUITE;;MAY 14, 2009
+ ;;2.0;IHS PCC SUITE;**21**;MAY 14, 2009;Build 34
  ;
  ; Subscripted BDPREC is EXTERNAL form.
  ;   BDPREC("PAT NAME")=patient name
@@ -125,10 +125,13 @@ ASKGO ;Ask to continue
  .W !!,"Old DESIGNATED PROVIDER : ",BDPLPRVT,!
  . W "Has been deleted from Patient Name: "_$P($G(^DPT(BDPDFN,0)),U,1) W !
  . W "For Designated Provider Category/Type: "_$P($G(^BDPTCAT(BDPTYPE,0)),U,1) W !!
+ . S BDPLINKI=1  ;tell xrefs we are in BDP
+ . I $D(BDPRIEN) D
+ .. S DIE="^BDPRECN(",DA=BDPRIEN,DR=".03///@;.04////"_DUZ_";.05////"_DT D ^DIE K DIE,DR,DA,DINUM
+ .. ;NOW FIND LAST MULTIPLE AND SET STOP DATE
+ .. S X=0 F  S X=$O(^BDPRECN(BDPRIEN,1,X)) Q:X'=+X  I $P(^BDPRECN(BDPRIEN,1,X,0),U,1)=BDPLPROV S Y=X
+ .. I Y,$P(^BDPRECN(BDPRIEN,1,Y,0),U,5)="" S DIE="^BDPRECN("_BDPRIEN_",1,",DA(1)=BDPRIEN,DA=Y,DR=".02////"_DUZ_";.03////"_DT_";.05////"_DT D ^DIE K DIE,DR,DA,DINUM
  .D PAUSE^BDP
- .S BDPLINKI=1  ;tell xrefs we are in BDP
- .I $D(BDPRIEN) D
- . S DIE="^BDPRECN(",DA=BDPRIEN,DR=".03///"_"@" D ^DIE K DIE,DR,DA,DINUM Q
  .Q
 EOJ ; END OF JOB
  D ^BDPKILL

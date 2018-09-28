@@ -1,5 +1,5 @@
 BGP8DNG ;IHS/CMI/LAB - NATL COM EXPORT;
- ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
+ ;;18.1;IHS CLINICAL REPORTING;**1**;MAY 25, 2018;Build 65
  ;
  ;
  W:$D(IOF) @IOF
@@ -109,7 +109,7 @@ ZIS ;call to XBDBQUE
  I $G(BGPQUIT) D XIT Q
  I BGPRPT="" D XIT Q
  I BGPEXPT D
- .W !!,"A file will be created called BG180",$P(^AUTTLOC(DUZ(2),0),U,10)_"."_BGPRPT," and will reside",!,"in the ",BGPUF," directory.",!
+ .W !!,"A file will be created called BG"_$$FV^BGP8BAN()_$P(^AUTTLOC(DUZ(2),0),U,10)_"."_BGPRPT," and will reside",!,"in the ",BGPUF," directory.",!
  .W !,"Depending on your site configuration, this file may need to be manually",!,"sent to your Area Office.",!
  K IOP,%ZIS I BGPROT="D",BGPDELT="F" D NODEV,XIT Q
  K IOP,%ZIS W !! S %ZIS=$S(BGPDELT'="S":"PQM",1:"PM") D ^%ZIS

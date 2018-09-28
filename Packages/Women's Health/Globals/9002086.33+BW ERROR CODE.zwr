@@ -1,5 +1,5 @@
 OSEHRA ZGO Export: BW ERROR CODE
-27-SEP-2018 11:57:46 ZWR
+28-SEP-2018 11:40:50 ZWR
 ^BWERR(0)="BW ERROR CODE^9002086.33^20^20"
 ^BWERR(1,0)="1^Either the Procedure Type, the Site, or the V file# was not provided."
 ^BWERR(2,0)="2^The Result/Diagnosis of the Procedure is ""ERROR/DISREGARD""."

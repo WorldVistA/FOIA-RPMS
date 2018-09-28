@@ -1,5 +1,5 @@
 ABSPOSQA ; IHS/FCS/DRS - POS background, Part 1 ;   
- ;;1.0;PHARMACY POINT OF SALE;**10,42,43,46,47,48,49**;JUN 21, 2001;Build 27
+ ;;1.0;PHARMACY POINT OF SALE;**10,42,43,46,47,48,49**;JUN 21, 2001;Build 38
  ;------------------------------------------------
  ;IHS/SD/lwj 03/10/04 patch 10
  ; Routine adjusted to call ABSPFUNC to retrieve

@@ -1,5 +1,5 @@
 BGP8GTA ; IHS/CMI/LAB - BGPG Gui CRS Tables 2/2/2005 10:24:22 AM ;
- ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
+ ;;18.1;IHS CLINICAL REPORTING;;MAY 25, 2018;Build 66
  ;
  ;
  ;
@@ -133,5 +133,40 @@ HI ;-- get all mu hospital indicators
  Q
  ;
 AUTOA ;--get the auto area parameters
+ Q
+ ;
+IPCALL(RETVAL) ;-- get all IPC measures
+ S X="MERR^BGP8GU",@^%ZOSF("TRAP") ; m error trap
+ N BGPI,X,Y,Z
+ K ^BGPTMP($J)
+ S RETVAL="^BGPTMP("_$J_")"
+ S BGPI=0
+ S ^BGPTMP($J,BGPI)="T00007BMXIEN^T00050Measure"_$C(30)
+ S X=0 F  S X=$O(^BGPINDR("AIPC",X)) Q:X'=+X  D
+ . S Y=0 F  S Y=$O(^BGPINDR("AIPC",X,Y)) Q:Y'=+Y  D
+ .. ;Q:$P(^BGPINDR(Y,0),U,7)'=1
+ .. S BGPI=BGPI+1
+ .. S ^BGPTMP($J,BGPI)=Y_U_$P($G(^BGPINDR(Y,0)),U,3)_$C(30)
+ S ^BGPTMP($J,BGPI+1)=$C(31)_$G(BGPERR)
+ Q
+ ;
+IPATLST(RETVAL,BGPSTR) ;-- get all ipc pat lists
+ S X="MERR^BGP8GU",@^%ZOSF("TRAP") ; m error trap
+ N BGPI,X,Y,Z,P,BGPIND
+ S P="|"
+ K ^BGPTMP($J)
+ S RETVAL="^BGPTMP("_$J_")"
+ S BGPI=0
+ S ^BGPTMP($J,BGPI)="T00007BMXIEN^T00050Measure"_$C(30)
+ N I
+ F I=2:1 D  Q:$P(BGPSTR,P,I)=""
+ . Q:$P(BGPSTR,P,I)=""
+ . S BGPINDI=$P(BGPSTR,P,I)
+ . S BGPIND(BGPINDI)=""
+ S X=0 F  S X=$O(BGPIND(X)) Q:X'=+X  D
+ . Q:$P($G(^BGPINDR(X,0)),U,5)=""
+ . S BGPI=BGPI+1
+ . S ^BGPTMP($J,BGPI)=X_U_$P($G(^BGPINDR(X,0)),U,5)_$C(30)
+ S ^BGPTMP($J,BGPI+1)=$C(31)_$G(BGPERR)
  Q
  ;

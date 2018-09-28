@@ -1,5 +1,5 @@
-PXRMSTAT ; SLC/PKR - Routines for dealing with status. ;11-Jun-2015 11:13;du
- ;;2.0;CLINICAL REMINDERS;**4,1005**;Feb 04, 2005;Build 23
+PXRMSTAT ; SLC/PKR - Routines for dealing with status. ;29-Nov-2017 09:31;DU
+ ;;2.0;CLINICAL REMINDERS;**4,1005,1009**;Feb 04, 2005;Build 17
  ;IHS/MSC/MGH Add IHS problem statuses
  ;===============================================
 DEFAULT(FILENUM,STATUSA) ;Given the file number return the default
@@ -30,14 +30,15 @@ DEFAULT(FILENUM,STATUSA) ;Given the file number return the default
  ;Problem List
  I FILENUM=9000011 D  Q
  . S STATUSA(0)=4,STATUSA(1)="A"
- . ;IHS/MSC/MGH Add IHS statuses
- . S STATUSA(2)="S",STATUSA(3)="E",STATUSA(4)="O"
+ . ;IHS/MSC/MGH Add IHS statuses - Patch 1009 added status R
+ . S STATUSA(2)="S",STATUSA(3)="E",STATUSA(4)="O",STATUSA(5)="R"
  Q
  ;
  ;===============================================
-GETSTATI(FILENUM,FINDPA,STATUSA) ;Return the list of statuses to search
+GETSTATI(FILENUM,FINDPA,STATUSA,TAXIEN) ;Return the list of statuses to search
  ;for in the array STATUSA. STATUSA(0) will contain the number found.
  N IND,NUM
+ S TAXIEN=$G(TAXIEN)
  K STATUSA
  S (IND,NUM)=0
  ;Do Problem List first because it is a special case.
@@ -68,4 +69,8 @@ ADDSTAT ;Add active statuses
  S NUM=NUM+1,STATUSA(NUM)="E"
  S NUM=NUM+1,STATUSA(NUM)="S"
  S NUM=NUM+1,STATUSA(NUM)="O"
+ S NUM=NUM+1,STATUSA(NUM)="R"
+ ;IHS/MSC/MGH added for inactive problems
+ I +TAXIEN D
+ .I $P($G(^PXD(811.2,TAXIEN,0)),U,9)=1 S NUM=NUM+1,STATUSA(NUM)="I"
  Q

@@ -1,5 +1,5 @@
 ABSPOSK1 ; IHS/FCS/DRS - winnow POS data ;      [ 04/03/2002  10:05 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**1,48,49**;JUN 21, 2001;Build 27
+ ;;1.0;PHARMACY POINT OF SALE;**1,48,49**;JUN 21, 2001;Build 38
  Q
  ;
  ; IHS/SD/lwj 04/03/02  as per David's fix at ANMC - changed

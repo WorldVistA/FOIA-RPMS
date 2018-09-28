@@ -1,5 +1,5 @@
 ABSPOSJ2 ;IHS/OIT/SCR - pre and post init for V1.0 patch 28 [ 10/31/2002  10:58 AM ]
- ;;1.0;Pharmacy Point of Sale;**29,39,43,44,45,46,47,48**;Jun 21,2001;Build 27
+ ;;1.0;Pharmacy Point of Sale;**29,39,43,44,45,46,47,48**;Jun 21,2001;Build 38
  ;
  ; Pre and Post init routine use in absp0100.29k
  ;------------------------------------------------------------------

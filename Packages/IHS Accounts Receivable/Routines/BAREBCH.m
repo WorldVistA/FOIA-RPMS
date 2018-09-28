@@ -1,7 +1,11 @@
 BAREBCH ; IHS/SD/SDR - EDIT COLLECTION BATCH/ITEMS JAN 15,1997 ; 11/21/2008
- ;;1.8;IHS ACCOUNTS RECEIVABLE;**4,10,20**;OCT 26, 2005
+ ;;1.8;IHS ACCOUNTS RECEIVABLE;**4,10,20,28**;OCT 26, 2005;Build 92
  ; New routine in bar*1.8*4 for DD item 4.1.5.2
  ;
+ ;BAR*1.8*28 IHS/DIT/CPC - Added Edit Check Number CR5994
+ ;BAR*1.8*28 IHS/DIT/CPC - Added Edit A/R Account CR5994
+ ;BAR*1.8*28 IHS/DIT/CPC - Added Item Change Audit CR5994
+ ; 
 EN ;EP;
  K BARSTAR,BAREQUAL,BARDASH
  K BARCBIEN,BARTRIEN,BARPFLG,BARVALUE
@@ -13,7 +17,7 @@ EN ;EP;
  S $P(BARDASH,"-",79)="-"
  ;
  W !!,$$EN^BARVDF("RVN"),"Note: ",$$EN^BARVDF("RVF")
- W "Collection Batch and Item's that have not been posted may be modified."
+ W "Collection Batch and Items that have not been posted may be modified."  ;IHS/DIT/CPC -20180425 Remove apostrophe BAR*1.8*28
  W !?6,"If you entered a TDN/IPAC in error and the batch has been posted, you"
  W !?6,"may not edit the TDN/IPAC and must notify your Finance Office to make"
  W !?6,"adjustments in the financial system.",!!
@@ -37,8 +41,19 @@ SELECT ;
  .I $P($G(^BARTR(DUZ(2),BARTRIEN,1)),U)=40 S BARPFLG=1
  ;
  I BARPFLG=1 W !!,"ITEMS WITHIN THIS COLLECTION BATCH ALREADY HAVE PAYMENTS POSTED AND IS THEREFORE UNEDITABLE",!! H 2 K BARVALUE G SELECT
- ;
  ;no payments posted so display batch/item info and confirm entry
+ S BARCNT=0,BAREND=0,BARITEM=0  ;;IHS/DIT/CPC - 20180418 V1.8 P28 CHECK FOR NO ITEMS IN BATCH
+ F  S BARITEM=$O(^BARCOL(DUZ(2),BARCBIEN,1,+BARITEM)) Q:+BARITEM=0  D
+ .S BARCNT=+$G(BARCNT)+1
+ I BARCNT=0 D
+ .S BAREND=1
+ .W !!,"There are no items associated with this batch.",!!
+ .W "Please use the Collections Entry option to add the",!
+ .W "missing batch item(s) before proceeding.",!!!
+ .S DIR(0)="E",DIR("A")="Enter RETURN to Continue"
+ .D ^DIR
+ .Q
+ I $G(BAREND) D CLEANUP Q  ;IHS/DIT/CPC - 20180418 V1.8 P28 END NO ITEM CHECK
  W !!!!
  W BARSTAR
  W !?2,"Collection Batch: ",$P($G(^BARCOL(DUZ(2),BARCBIEN,0)),U),!
@@ -68,7 +83,7 @@ SELECT ;
  I Y<1 G SELECT
  ;
  ;edit the batch TDN and amount
- ;it will prompt for information and display for user to confirm before filling new
+ ;it will prompt and display for user to confirm before filling new
  ;data on the collection batch
 EDITBCH ;
  W !,"Now Editing COLLECTION BATCH HEADER data:",!!
@@ -87,7 +102,7 @@ EDITBCH ;
  D ^DIR K DIR
  I $D(DTOUT)!$D(DUOUT)!$D(DIRUT)!$D(DIROUT) W !!,"NOTHING CHANGED",!! H 2 G SELECT
  S BARNAMT=Y
- ;IHS/SD/AML 5/3/2011 - Begin new code, Added ability to edit Deposit Date bar*1.8*20
+ ;IHS/SD/AML 5/3/2011 - Added ability to edit Deposit Date bar*1.8*20
  K DIR,DIE,DIC,D,Y,DA
  S DIR(0)="DO"
  S DIR("A")="TDN/IPAC Deposit Date: "
@@ -95,9 +110,9 @@ EDITBCH ;
  D ^DIR K DIR
  I $D(DTOUT)!$D(DUOUT)!$D(DIRUT)!$D(DIROUT) W !!,"NOTHING CHANGED",!! H 2 G SELECT
  S BARNDDT=Y
- ;IHS/SD/AML 5/3/2011 - End new code, Added ability to edit Deposit Date
+ ;IHS/SD/AML 5/3/2011 - End ability to edit Deposit Date
  ;
- ;display header with new info and verify
+ ;display header 
  W !!,"You have edited the COLLECTION BATCH HEADER data to reflect:",!!
  W BARSTAR
  W !?2,"Collection Batch: ",$P($G(^BARCOL(DUZ(2),BARCBIEN,0)),U),!
@@ -126,10 +141,11 @@ EDITBCH ;
  .D NOW^%DTC
  .S X=%
  .S DIC("DR")=".02////28;.03////"_BAROBCH_";.04////"_BARNBCH_";.05////"_DUZ
- .S DLAYGO=90050
+ .S DLAYGO=90050  ;Why not 90051.01? IHS/DIT/CPC - 20180309
  .S DIC("P")=$P(^DD(90051.01,1101,0),U,2)
  .D ^DIC
  .K DIC,DIE,DR,DA,X,Y
+ .S DIE("NO^")="OUTOK"
  .S DIE="^BARCOL(DUZ(2),"
  .S DA=BARCBIEN
  .S DR="28////"_BARNBCH
@@ -150,6 +166,7 @@ EDITBCH ;
  .S DIC("P")=$P(^DD(90051.01,1101,0),U,2)
  .D ^DIC
  .K DIC,DIE,DR,DA,X,Y
+ .S DIE("NO^")="OUTOK"
  .S DIE="^BARCOL(DUZ(2),"
  .S DA=BARCBIEN
  .S DR="29////"_BARNAMT
@@ -171,6 +188,7 @@ EDITBCH ;
  .S DIC("P")=$P(^DD(90051.01,1101,0),U,2)
  .D ^DIC
  .K DIC,DIE,DR,DA,D,X,Y
+ .S DIE("NO^")="OUTOK"
  .S DIE="^BARCOL(DUZ(2),"
  .S DA=BARCBIEN
  .S DR="30////"_BARNDDT
@@ -181,9 +199,11 @@ EDITBCH ;
  S BARITEM=0
  F  S BARITEM=$O(^BARCOL(DUZ(2),BARCBIEN,1,BARITEM)) Q:+BARITEM=0  D
  .I $P($G(^BARCOL(DUZ(2),BARCBIEN,1,BARITEM,0)),U,20)=BAROBCH D
- ..K DIC,DIE,DR,DA,X,Y
+ ..K DIC,DIE,DR,DA,X,Y,D1
+ ..S D0=BARCBIEN,D1=BARITEM  ;;PARAMS FOR COLL BATCH ITEMS FIELD 20 OUTPUT TRANSFORM - IHS/DIT/CPC - BAR*1.8*28 CR5994
  ..S DA(1)=BARCBIEN
  ..S DA=BARITEM
+ ..S DIE("NO^")="OUTOK"
  ..S DIE="^BARCOL(DUZ(2),"_DA(1)_",1,"
  ..S DR="20////"_BARNBCH
  ..D ^DIE
@@ -192,18 +212,23 @@ EDITBCH ;
 EDITITEM ;
  W !!,"Now editing Collection Batch Items....",!
  W BARDASH,!
- W "Item",?9,"Check#",?27,"A/R ACCOUNT",?46,"TDN/IPAC",?69,"Amount"
+ ;W "Item",?9,"Check#",?27,"A/R ACCOUNT",?46,"TDN/IPAC",?69,"Amount"  ;bar*1.8*28 IHS/SD/AML HEAT305486 CR5994
+ I $P($G(^BARCOL(DUZ(2),BARCBIEN,1,+BARITEM,0)),U,2)=51 W "Item",?9,"Check#",?27,"A/R ACCOUNT",?46,"TDN/IPAC",?69,"Amount"  ;bar*1.8*28 IHS/SD/AML HEAT305486 CR5994 IHS/DIT/CPC 20180418
+ I $P($G(^BARCOL(DUZ(2),BARCBIEN,1,+BARITEM,0)),U,2)'=51 W "Item",?9,"Check#",?27,"A/R ACCOUNT",?46,"TDN/IPAC",?58,"TYPE",?69,"Amount"  ;bar*1.8*28 IHS/SD/AML HEAT305486 CR5994 IHS/DIT/CPC 20180418
  W !
  W BARDASH
  S BARITEM=0,BARCNT=0
  F  S BARITEM=$O(^BARCOL(DUZ(2),BARCBIEN,1,BARITEM)) Q:+BARITEM=0  D
  .S BARCNT=+$G(BARCNT)+1
+ .S BARPMTYP=$P($G(^BARCOL(DUZ(2),BARCBIEN,1,BARITEM,0)),U,2)  ;bar*1.8*27 IHS/SD/AML HEAT305486 CR5994
  .I $P($G(^BARCOL(DUZ(2),BARCBIEN,1,BARITEM,0)),U,17)'="",($P($G(^BARCOL(DUZ(2),BARCBIEN,1,BARITEM,0)),U,17)'="E") Q
  .W !,$J(BARITEM,3)  ;item number
  .W ?5,$E($P($G(^BARCOL(DUZ(2),BARCBIEN,1,BARITEM,0)),U,11),1,20)  ;item check#
  .W ?27,$E($$GET1^DIQ(90051.1101,BARITEM_","_BARCBIEN_",",7,"E"),1,17)    ;item A/R Acct
  .W ?46,$P($G(^BARCOL(DUZ(2),BARCBIEN,1,BARITEM,0)),U,20)  ;item TDN
- .W ?68,$J($FN($P($G(^BARCOL(DUZ(2),BARCBIEN,1,BARITEM,1)),U),",",2),12)  ;item amt
+ .I BARPMTYP'=51 W ?58,$P(^BARTBL(BARPMTYP,0),U,6)  ;bar*1.8*27 IHS/SD/AML HEAT305486 CR5994
+ .;W ?68,$J($FN($P($G(^BARCOL(DUZ(2),BARCBIEN,1,BARITEM,1)),U),",",2),12)  ;item amt  ;bar*1.8*27 IHS/SD/AML HEAT305486 CR5994
+ .W ?68,$J($FN($P($G(^BARCOL(DUZ(2),BARCBIEN,1,BARITEM,1)),U),",",2),12)  ;item amt  ;bar*1.8*27 IHS/SD/AML HEAT305486 CR5994
  W !,BARDASH
  K DIR,DIE,DIC,X,Y,DA
  ;S DIR(0)="NO^1:"_BARCNT
@@ -216,20 +241,60 @@ EDITITEM ;
  ;display selection
  I +Y'=0 D
  .S BARITEM=Y
+ .S BARPMTYP=$P($G(^BARCOL(DUZ(2),BARCBIEN,1,BARITEM,0)),U,2)  ;bar*1.8*28 IHS/SD/AML HEAT305486 CR 5994
  .W !!,$J(BARITEM,3)  ;item number
+ .I '$G(^BARCOL(DUZ(2),BARCBIEN,1,BARITEM,0)) D  ;IHS/DIT/CPC - 20180418 V1.8 P28
+ ..S BAREND=1
+ ..W !!,"There are no items associated with this batch.",!
+ ..W "Please use the Collections Entry option to add the ",!
+ ..W "missing batch item(s) before proceeding.",!!
+ ..S DIR(0)="E",DIR("A")="Enter RETURN to Continue"
+ ..D ^DIR
+ ..Q  ;IHS/DIT/CPC - 20180418 V1.8 P28
+ .Q:$G(BAREND)
  .W ?5,$E($P($G(^BARCOL(DUZ(2),BARCBIEN,1,BARITEM,0)),U,11),1,20)  ;item check#
  .W ?27,$E($$GET1^DIQ(90051.1101,BARITEM_","_BARCBIEN_",",7,"E"),1,17)    ;item A/R Acct
  .W ?46,$P($G(^BARCOL(DUZ(2),BARCBIEN,1,BARITEM,0)),U,20)  ;item TDN
+ .I BARPMTYP'=51 W ?58,$P(^BARTBL(BARPMTYP,0),U,6)  ;bar*1.8*27 IHS/SD/AML HEAT305486 CR 5994
  .W ?68,$J($FN($P($G(^BARCOL(DUZ(2),BARCBIEN,1,BARITEM,1)),U),",",2),12)  ;item amt
- .;
  .W !
+ .;bar*1.8*28 IHS/DIT/CPC HEAT 305486 CR 5994 SET UP ITEM AUDIT TEST VALUES
+ .S BARITMCK=$P($G(^BARCOL(DUZ(2),BARCBIEN,1,BARITEM,0)),U,11)  ;item check#
+ .S BARITMACCT=$E($$GET1^DIQ(90051.1101,BARITEM_","_BARCBIEN_",",7,"I"),1,20)    ;item A/R Acct
+ .S BARITMTDN=$P($G(^BARCOL(DUZ(2),BARCBIEN,1,BARITEM,0)),U,20)  ;item TDN
+ .S BARITMAMT=$P($G(^BARCOL(DUZ(2),BARCBIEN,1,BARITEM,1)),U)  ;item amt
+ .;
+ .;IHS/SD/AML 10/24/2013 - Edit Check Number - IHS/DIT/CPC - 20180309 Start New Code BAR*1.8*28 CR5994
  .K DIC,DIE,X,Y,DA,DR
  .S DA(1)=BARCBIEN
  .S DA=BARITEM
+ .S DIE("NO^")="OUTOK"
+ .S DIE="^BARCOL(DUZ(2),"_DA(1)_",1,"
+ .S DR="11Check Number"
+ .D ^DIE
+ .I $D(Y) K DIC,DIE,X,Y,DA,DR Q
+ .D ITMAUDIT(BARCBIEN,BARITEM,"11",BARITMCK,$P($G(^BARCOL(DUZ(2),BARCBIEN,1,BARITEM,0)),U,11),DUZ)
+ .;Edit A/R Account
+ .K DIC,DIE,X,Y,DA,DR
+ .S DA(1)=BARCBIEN
+ .S DA=BARITEM
+ .S DIE("NO^")="OUTOK"
+ .S DIE="^BARCOL(DUZ(2),"_DA(1)_",1,"
+ .S DR="7A/R Account"
+ .D ^DIE
+ .I $D(Y) K DIC,DIE,X,Y,DA,DR Q
+ .D ITMAUDIT(BARCBIEN,BARITEM,"7",BARITMACCT,$E($$GET1^DIQ(90051.1101,BARITEM_","_BARCBIEN_",",7,"I"),1,20),DUZ)
+ .K DIC,DIE,X,Y,DA,DR
+ .S DA(1)=BARCBIEN
+ .S DA=BARITEM
+ .S DIE("NO^")="OUTOK"
  .S DIE="^BARCOL(DUZ(2),"_DA(1)_",1,"
  .S DR="101Item Amount"
  .I $P($G(^BARCOL(DUZ(2),BARCBIEN,0)),U,28)="" S DR="20Item TDN;"_DR
  .D ^DIE
+ .I $D(Y) K DIC,DIE,X,Y,DA,DR Q
+ .D ITMAUDIT(BARCBIEN,BARITEM,"101",BARITMAMT,$P($G(^BARCOL(DUZ(2),BARCBIEN,1,BARITEM,1)),U),DUZ)
+ .;end new bar*1.8*28 IHS/SD/AML HEAT305486 CR5994
 EDITEOB .;
  .I $P($G(^BARCOL(DUZ(2),BARCBIEN,1,BARITEM,6,0)),U,4)>1 D  ;more than one EOB
  ..;list EOBs
@@ -251,6 +316,7 @@ EDITEOB .;
  ..K DIC,DIE,DA,X,Y,DR
  ..S DA(2)=BARCBIEN
  ..S DA(1)=BARITEM
+ ..S DIE("NO^")="OUTOK"
  ..S DIE="^BARCOL(DUZ(2),"_DA(2)_",1,"_DA(1)_",6,"
  ..S DA=$G(BARLIST(BARSEL))
  ..S DR="2//"
@@ -261,6 +327,7 @@ EDITEOB .;
  ..K DIC,DIE,DA,X,Y,DR
  ..S DA(2)=BARCBIEN
  ..S DA(1)=BARITEM
+ ..S DIE("NO^")="OUTOK"
  ..S DIE="^BARCOL(DUZ(2),"_DA(2)_",1,"_DA(1)_",6,"
  ..S DA=$O(^BARCOL(DUZ(2),BARCBIEN,1,BARITEM,6,0))
  ..S DR="2////"_$P($G(^BARCOL(DUZ(2),BARCBIEN,1,BARITEM,1)),U)
@@ -272,7 +339,9 @@ EDITEOB .;
  .I BAREOBT'=+$P($G(^BARCOL(DUZ(2),BARCBIEN,1,BARITEM,1)),U) W !!,"Total of EOBs don't match item amount." G EDITEOB
  ;
  S BARITTOT=$$ITEMTOT^BARCLU(BARCBIEN)
+ ;
 PICKEDIT ;
+ I $G(BAREND) D CLEANUP Q
  I BARITTOT'=$P($G(^BARCOL(DUZ(2),BARCBIEN,0)),U,29) D
  .W !!,"Batched amount of $",$FN(BARITTOT,",",2)," does not match TDN/IPAC amount of $",$FN($P($G(^BARCOL(DUZ(2),BARCBIEN,0)),U,29),",",2)
  .K DIR,DIE,DIC,X,Y,DA
@@ -288,5 +357,27 @@ PICKEDIT ;
  ;if it gets here the batch and items balance and they haven't selected an item to edit
  ;I $D(DTOUT)!$D(DUOUT)!$D(DIRUT)!$D(DIROUT) W !!,"NOTHING CHANGED",!!
  ;
- S DIR(0)="E",DIR("A")="Enter RETURN to Continue" D ^DIR K DIR
+ S DIR(0)="E",DIR("A")="Enter RETURN to Continue"  D EN
+ D ^DIR K DIR
+ D CLEANUP
  Q
+ITMAUDIT(BATCHIEN,ITEMIEN,FIELD,OLD,NEW,USER) ;BAR*1.8*28 ITEM AUDIT - IHS/DIT/CPC CR 5994
+ I OLD'=NEW  D
+ .K DIC,DIE,DR,DA,D,X,Y
+ .S DA(1)=ITEMIEN
+ .S DA(2)=BATCHIEN
+ .S DIC="^BARCOL(DUZ(2),"_DA(2)_",1,"_DA(1)_",1101,"
+ .S DIC(0)="LMQ"
+ .H 1
+ .D NOW^%DTC
+ .S X=%
+ .S DIC("DR")=".02////"_FIELD_";.03////"_OLD_";.04////"_NEW_";.05////"_DUZ
+ .S DLAYGO=90051.1101
+ .D ^DIC
+ Q
+CLEANUP ;BAR*1.8*28 - IHS/DIT/CPC CR 5994
+ K BARCNT,BARDASH,BAREND,BAREOB,BAREOBT,BAREQUAL,BARITDA,BARITEM,BARITMACCT,BARITMAMT
+ K BARITMCK,BARITMTDN,BARITTOT,BAROBCH,BARPMTYP,BARSTAR,BARVDDF
+ K C,D,D0,D1,DI,DIC,DR,X,Y
+ Q
+ ;EOR - IHS/DIT/CPC 1.8*28

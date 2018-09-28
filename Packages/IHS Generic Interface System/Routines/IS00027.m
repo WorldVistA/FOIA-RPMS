@@ -1,4 +1,4 @@
-IS00027(UIF,INOA,INODA) ;Compiled from script 'Generated: HL IHS IZV04 V03VXR IN-I' on FEB 22, 2018
+IS00027(UIF,INOA,INODA) ;Compiled from script 'Generated: HL IHS IZV04 V03VXR IN-I' on AUG 15, 2018
  ;Part 1
  ;Copyright 2018 SAIC
 EN S X="ERROR^IS00027",@^%ZOSF("TRAP")
@@ -27,7 +27,6 @@ START ;Initialize variables
  S INDEFSEG("NK1",1)=1
  S INDEFSEG("PV1",0)=0
  S INDEFSEG("IN1",1)=1
- S INDEFSEG("IN2",1)=0
  S INDEFSEG("ORC",1)=1
  S INDEFSEG("RXA",1)=0
  ;Start of GROUP
@@ -153,13 +152,6 @@ START ;Initialize variables
  .S:DO @("@INV@(""IN143"",INI(1))")=$$PIECE^INHU(.LINE,DELIM,44)
  .S:DO @("@INV@(""IN147"",INI(1))")=$$PIECE^INHU(.LINE,DELIM,48)
  .S:DO @("@INV@(""IN149"",INI(1))")=$$PIECE^INHU(.LINE,DELIM,50)
- .D:'INVS MC^INHS
- .D GET^INHOU(UIF,0) S LINE=$G(LINE),DO=1
- .I LINE?1"I"1"N"1"2".ANPC S DO=1
- .E  S LCT=LCT-CNT,DO=0
- .S:DO @("@INV@(""IN23"",INI(1))")=$$PIECE^INHU(.LINE,DELIM,4)
- .S:DO @("@INV@(""IN26"",INI(1))")=$$PIECE^INHU(.LINE,DELIM,7)
- .S:DO @("@INV@(""IN28"",INI(1))")=$$PIECE^INHU(.LINE,DELIM,9)
  .Q
  ;WHILE $P(DATA,DELIM)="ORC"
  S INI(1)=1 F  S DATA=$$GL^INHOU(UIF,LCT) Q:'$$CHECKSEG^INHOU("ORC",0,1)  D  S INI(1)=INI(1)+1
@@ -308,5 +300,11 @@ START ;Initialize variables
  .S (INX,X)=$G(@INV@("PID11"))
  .I $L(X) S:$P(X,INSUBDEL,4)="" $P(X,INSUBDEL,4)=INSUBDEL
  .S @INV@("PID11")=$G(X)
+ .I '$D(X) D ERROR^INHS("Variable 'PID11' failed input transform. Processing continues.",0),ERROR^INHS("  Value = '"_INX_"'",0)
+ .K DXS
+ .S (INX,X)=$G(@INV@("PID13"))
+ .I $P($G(INTHL7F2),U,4) S X=$$SUBESC^INHUT7(X,INDELIMS,"I")
+ .S @INV@("PID13")=$G(X)
+ .I '$D(X) D ERROR^INHS("Variable 'PID13' failed input transform. Processing continues.",0),ERROR^INHS("  Value = '"_INX_"'",0)
 9 .D EN^IS00027A
  G I1^IS00027A

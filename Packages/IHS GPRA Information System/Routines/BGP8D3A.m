@@ -1,5 +1,5 @@
 BGP8D3A ;IHS/CMI/LAB - MEASURE LOGIC;
- ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
+ ;;18.1;IHS CLINICAL REPORTING;;MAY 25, 2018;Build 66
  ;
  ;
 SEALDEV(P,BDATE,EDATE) ;EP
@@ -123,7 +123,8 @@ HRPL ;
  S G=""
  S T=$O(^ATXAX("B","BGP HIGH RISK FLU DXS",0))
  S (X,G)=0 F  S X=$O(^AUPNPROB("AC",P,X)) Q:X'=+X!(G)  D
- .Q:$P(^AUPNPROB(X,0),U,8)>EDATE  ;if added to pl after beginning of time period, no go
+ .I EDATE,$P(^AUPNPROB(X,0),U,13)>EDATE Q
+ .I $P(^AUPNPROB(X,0),U,13)="" Q:$P(^AUPNPROB(X,0),U,8)>EDATE  ;if added to pl after beginning of time period, no go
  .S Y=$P(^AUPNPROB(X,0),U)
  .Q:$P(^AUPNPROB(X,0),U,12)="D"
  .Q:$P(^AUPNPROB(X,0),U,12)="I"
@@ -229,7 +230,8 @@ HRPLP ;
  S G=""
  S T=$O(^ATXAX("B","BGP HIGH RISK PNEUMO DXS",0))
  S (X,G)=0 F  S X=$O(^AUPNPROB("AC",P,X)) Q:X'=+X!(G)  D
- .Q:$P(^AUPNPROB(X,0),U,8)>EDATE  ;if added to pl after beginning of time period, no go
+ .I EDATE,$P(^AUPNPROB(X,0),U,13)>EDATE Q
+ .I $P(^AUPNPROB(X,0),U,13)="" Q:$P(^AUPNPROB(X,0),U,8)>EDATE  ;if added to pl after beginning of time period, no go
  .S Y=$P(^AUPNPROB(X,0),U)
  .Q:$P(^AUPNPROB(X,0),U,12)="D"
  .Q:$P(^AUPNPROB(X,0),U,12)="I"

@@ -1,5 +1,5 @@
 BIPOST ;IHS/CMI/MWR - POST-INIT ROUTINE; OCT 15, 2010
- ;;8.5;IMMUNIZATION;**15**;SEP 30,2017
+ ;;8.5;IMMUNIZATION;**16**;MAR 01,2018
  ;;* MICHAEL REMILLARD, DDS * CIMARRON MEDICAL INFORMATICS, FOR IHS *
  ;;  PATCH 3: Set MenCY-Hib (148) and Flu-nasal4 (149) and all Skin Tests
  ;;           in the Vaccine Table to Inactive.   START+30
@@ -22,6 +22,7 @@ BIPOST ;IHS/CMI/MWR - POST-INIT ROUTINE; OCT 15, 2010
  ;;  PATCH 14: Make old Rabies CVX 18 inactive.
  ;;            Set High Risk parameter selection = zero/none.
  ;;  PATCH 15: Restandardize Vaccine Table, make CVX 186 Active.  START+54
+ ;;  PATCH 16: Add new vaccines & manufacturers, restandardize Vaccine Table, START
  ;
  ;
  ;----------
@@ -85,7 +86,7 @@ START ;EP
  ;
  ;---> Make these CVX's ACTIVE:
  ;N BICVX F BICVX=150,158,168,185 D
- N BICVX F BICVX=186 D
+ ;N BICVX F BICVX=186 D
  .N N S N=$$HL7TX^BIUTL2(BICVX)
  .;---> Quit if CVX is Unknown.
  .Q:(N=137)
@@ -221,7 +222,7 @@ TEXT1 ;EP
  ;;
  ;;                       * CONGRATULATIONS! *
  ;;
- ;;          You have successfully installed Immunization v8.5 p15.
+ ;;          You have successfully installed Immunization v8.5 p16.
  ;;
  ;;
  ;;

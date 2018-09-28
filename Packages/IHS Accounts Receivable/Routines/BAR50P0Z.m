@@ -1,5 +1,5 @@
 BAR50P0Z ; IHS/SD/LSL - MATCH REASONS AND CLAIMS ; 01/30/2009
- ;;1.8;IHS ACCOUNTS RECEIVABLE;**10,20,21,23,24,26**;OCT 26, 2005;Build 17
+ ;;1.8;IHS ACCOUNTS RECEIVABLE;**10,20,21,23,24,26,28**;OCT 26, 2005;Build 92
  ; NEW ROUTINE TO LOCKOUT REVERSALS AND PLB SEGMENTS; MRS:BAR*1.8*10 D159
  ; MODIFIED TO LIMIT LOCK OUT TO INDIVIDUAL CHECKS
  ; HEAT148388 P.OTT 1/10/2014 ACCEPT REVERSALS FOR TYPE= 1 IF NEG PAYMENT FIX: 1/27/2014
@@ -7,9 +7,7 @@ BAR50P0Z ; IHS/SD/LSL - MATCH REASONS AND CLAIMS ; 01/30/2009
  ;IHS/SD/SDR - 1.8*26 Including routine in build but no changes were made.  It looks like changes may have been made at sites
  ;  so sending out routine to get everyone on the same page, right or wrong.  What I saw at one site was EN+3 being commented out
  ;  which causes payment reversal message to display no matter how the A/R parameter for allow neg bal is answered.
- ;IHS/SD/SDR - 1.8*26 - HEAT263595 - Made changes if PLB segment is present in file.  It wasn't finding the '1' code for pymt,
- ;  it wasn't sorting amounts correctly if it had already been formatted with '.00' on the end, and it was allowing REV, PLB, and NEGP
- ;  reason on the same bill.
+ ;IHS/SD/SDR 1.8*28 - CR8346 HEAT275351 - Made fix for check on reason NTP present.
  Q
 EN(IMPDA) ; EP ; Scan SEGMENTS for PLB, REVERSALS AND NEGATIVE AMOUNTS
  N BARFLG
@@ -183,7 +181,8 @@ REVFIND ;EP
  F  S EDA=$O(^XTMP("BAR-REV",$J,DUZ(2),EDA)) Q:'EDA  D
  .S EBILL=$G(^XTMP("BAR-REV",$J,DUZ(2),EDA))
  .S EAMT=$P($G(^BAREDI("I",DUZ(2),IMPDA,30,EDA,0)),U,4)
- .I $D(^BAREDI("I",DUZ(2),IMPDA,30,EDA,4)) Q  ;bar*1.8*26 IHS/SD/SDR HEAT263595
+ .;I $D(^BAREDI("I",DUZ(2),IMPDA,30,EDA,4)) Q  ;bar*1.8*26 IHS/SD/SDR HEAT263595  ;bar*1.8*28 IHS/SD/SDR CR8346 HEAT275351
+ .I $D(^BAREDI("I",DUZ(2),IMPDA,30,EDA,4))>10 Q  ;bar*1.8*26 IHS/SD/SDR HEAT263595  ;bar*1.8*28 IHS/SD/SDR CR8346 HEAT275351
  .S EAMT=EAMT*-1
  .I $D(^XTMP("BAR-BILLS",$J,DUZ(2),EBILL)) D
  ..S MDA=0
@@ -200,7 +199,8 @@ REVFIND ;EP
  .F  S MAMT=$O(^XTMP("BAR-MBAMT",$J,DUZ(2),MAMT)) Q:'MAMT  D
  ..S MDA=0
  ..F  S MDA=$O(^XTMP("BAR-MBAMT",$J,DUZ(2),MAMT,MDA)) Q:'MDA  D
- ...I $D(^BAREDI("I",DUZ(2),IMPDA,30,MDA,4)) Q  ;bar*1.8*26 IHS/SD/SDR HEAT263595
+ ...;I $D(^BAREDI("I",DUZ(2),IMPDA,30,MDA,4)) Q  ;bar*1.8*26 IHS/SD/SDR HEAT263595
+ ...I $D(^BAREDI("I",DUZ(2),IMPDA,30,MDA,4))>10 Q  ;bar*1.8*28 IHS/DIT/CPC CR9572
  ...Q:MTCHAMT'=MAMT
  ...;S RCLMDA=$O(^XTMP("BAR-MBAMT",$J,DUZ(2),EBILL,MDA,0))
  ...D UP(IMPDA,MDA,$S(BAR="REV":"REV",1:"NEGP"))
@@ -211,7 +211,8 @@ REVFIND ;EP
  .F  S MAMT=$O(^XTMP("BAR-MBAMT",$J,DUZ(2),MAMT),-1) Q:'MAMT  D  Q:((MTCHAMT=0)!(MTCHAMT<0))
  ..S MDA=0
  ..F  S MDA=$O(^XTMP("BAR-MBAMT",$J,DUZ(2),MAMT,MDA)) Q:'MDA  D  Q:((MTCHAMT=0)!(MTCHAMT<0))
- ...I $D(^BAREDI("I",DUZ(2),IMPDA,30,MDA,4)) Q  ;bar*1.8*26 IHS/SD/SDR HEAT263595
+ ...;I $D(^BAREDI("I",DUZ(2),IMPDA,30,MDA,4)) Q  ;bar*1.8*26 IHS/SD/SDR HEAT263595
+ ...I $D(^BAREDI("I",DUZ(2),IMPDA,30,MDA,4))>10 Q  ;bar*1.8*28 IHS/DIT/CPC CR9572
  ...D UP(IMPDA,MDA,$S(BAR="REV":"REV",1:"NEGP"))
  ...S MTCHAMT=MTCHAMT-MAMT
  ...W !?6,$P($G(^BAREDI("I",DUZ(2),IMPDA,30,MDA,0)),U),?27,$J(MAMT,",",2),?39,$P($G(^BAREDI("I",DUZ(2),IMPDA,30,MDA,0)),U,11)
@@ -232,7 +233,7 @@ BUILDLST ;EP
  ..W !?6,$P($G(^BAREDI("I",DUZ(2),IMPDA,30,CLMDA,0)),U),?27,$J($P($G(^BAREDI("I",DUZ(2),IMPDA,30,CLMDA,0)),U,4),",",2),?39,$P($G(^BAREDI("I",DUZ(2),IMPDA,30,CLMDA,0)),U,11)
  .;S ^XTMP("BAR-MBAMT",$J,DUZ(2),$P($G(^BAREDI("I",DUZ(2),IMPDA,30,CLMDA,0)),U,4),CLMDA)=""  ;E-payment  ;bar*1.8*26 IHS/SD/SDR HEAT263595
  .S ^XTMP("BAR-MBAMT",$J,DUZ(2),+$P($G(^BAREDI("I",DUZ(2),IMPDA,30,CLMDA,0)),U,4),CLMDA)=""  ;E-payment  ;bar*1.8*26 IHS/SD/SDR HEAT263595
- .S ^XTMP("BAR-BILLS",$J,DUZ(2),$P($G(^BAREDI("I",DUZ(2),IMPDA,30,CLMDA,0)),U),$P($G(^BAREDI("I",DUZ(2),IMPDA,30,CLMDA,0)),U,4),CLMDA)=""  ;bills
+ .S ^XTMP("BAR-BILLS",$J,DUZ(2),$P($G(^BAREDI("I",DUZ(2),IMPDA,30,CLMDA,0)),U),+$P($G(^BAREDI("I",DUZ(2),IMPDA,30,CLMDA,0)),U,4),CLMDA)=""  ;bills
  Q
 RCHK(CHKREASN) ;
  S BARRCHK=0,CHKREASN=""

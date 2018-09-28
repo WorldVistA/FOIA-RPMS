@@ -1,5 +1,5 @@
 BGP8DPA ;IHS/CMI/LAB - FORECAST;
- ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
+ ;;18.1;IHS CLINICAL REPORTING;;MAY 25, 2018;Build 66
  ;
 EP ;EP - called from option interactive
  D EOJ

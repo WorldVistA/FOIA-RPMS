@@ -1,5 +1,5 @@
 BMCMODS ;IHS/ITSC/FCJ - EDIT SECONDARY REFERRAL ;   
- ;;4.0;REFERRED CARE INFO SYSTEM;**3,6,8,9**;JAN 09, 2006;Build 92
+ ;;4.0;REFERRED CARE INFO SYSTEM;**3,6,8,9**;JAN 09, 2006;Build 101
  ;
  ; This option allows the user to EDIT Secondary Referrals
  ;   BMCRIEN=Primary referral

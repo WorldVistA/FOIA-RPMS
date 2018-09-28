@@ -1,11 +1,11 @@
 BQIULPT ;VNGT/HS/ALA-Patient Data Utilities ; 17 Oct 2005  3:17 PM
- ;;2.5;ICARE MANAGEMENT SYSTEM;**1**;May 24, 2016;Build 17
+ ;;2.7;ICARE MANAGEMENT SYSTEM;**1**;Dec 19, 2017;Build 12
  ;
  ; This is a utility program containing special function calls
  ; needed for patient demographic data.
  Q
  ;
-HRN(DFN) ;EP -- Patient Health Record Number
+HRN(DFN) ;EP -- Current Location Patient Health Record Number
  ;
  ;Description
  ;  Returns the patient's health record number
@@ -60,19 +60,21 @@ DPCP(DFN) ;EP -- Get patient's designated primary care provider
  ;    DPCPN  - Primary Care Provider internal entry number
  ;    DPCPNM - Primary Care Provider Name
  ;
- NEW DPCAT,DPIEN,DPCPN,DPCPNM
- S DPCPN=""
+ NEW DPCAT,DPIEN,DPCPN,DPCPNM,TRM
+ S DPCPN="",TRM=0
  S DPCAT=$O(^BDPTCAT("B","DESIGNATED PRIMARY PROVIDER",""))
  I DPCAT'="" D
  . S DPIEN=$O(^BDPRECN("AA",DFN,DPCAT,""))
  . I DPIEN="" Q
- . S DPCPN=$$GET1^DIQ(90360.1,DPIEN_",",.03,"I")
+ . S DPCPN=$$GET1^DIQ(90360.1,DPIEN_",",.03,"I") I DPCPN="" Q
+ . I $P($G(^VA(200,DPCPN,0)),"^",13)'="" S TRM=1
  . S DPCPNM=$$GET1^DIQ(90360.1,DPIEN_",",.03,"E")
- I DPCPN'="" Q DPCPN_"^"_DPCPNM
+ I DPCPN'="" Q DPCPN_"^"_$S(TRM:"*",1:"")_DPCPNM
  ;
  S DPCPN=$$GET1^DIQ(9000001,DFN_",",.14,"I")
+ I DPCPN'="",$P($G(^VA(200,DPCPN,0)),"^",13)'="" S TRM=1
  S DPCPNM=$$GET1^DIQ(9000001,DFN_",",.14,"E")
- Q DPCPN_"^"_DPCPNM
+ Q DPCPN_"^"_$S(TRM:"*",1:"")_DPCPNM
  ;
 CM(DFN) ;EP -- Get patient's case manager
  ;

@@ -1,13 +1,7 @@
-IS00027A ;Compiled from script 'Generated: HL IHS IZV04 V03VXR IN-I' on FEB 22, 2018
+IS00027A ;Compiled from script 'Generated: HL IHS IZV04 V03VXR IN-I' on AUG 15, 2018
  ;Part 2
  ;Copyright 2018 SAIC
-EN I '$D(X) D ERROR^INHS("Variable 'PID11' failed input transform. Processing continues.",0),ERROR^INHS("  Value = '"_INX_"'",0)
- K DXS
- S (INX,X)=$G(@INV@("PID13"))
- I $P($G(INTHL7F2),U,4) S X=$$SUBESC^INHUT7(X,INDELIMS,"I")
- S @INV@("PID13")=$G(X)
- I '$D(X) D ERROR^INHS("Variable 'PID13' failed input transform. Processing continues.",0),ERROR^INHS("  Value = '"_INX_"'",0)
- K DXS
+EN K DXS
  S (INX,X)=$G(@INV@("PID14"))
  I $P($G(INTHL7F2),U,4) S X=$$SUBESC^INHUT7(X,INDELIMS,"I")
  S @INV@("PID14")=$G(X)
@@ -137,28 +131,6 @@ I1 ;IF $D(@INV@("PD11"))
  ..S @INV@("IN117",INI(1))=$G(X) I '$D(X) D ERROR^INHS("Variable 'IN117' failed input transform in iteration #"_INI(1)_". Processing continues.",0),ERROR^INHS("  Value = '"_INX_"'",0)
  ..Q
  .K DXS
- .;IF $D(@INV@("IN21"))
- .I $D(@INV@("IN21"))
- .D:$T
- ..S INI(1)=0 F  S INI(1)=$O(@INV@("IN23",INI(1))) Q:'INI(1)  S INI=INI(1) D
- ...S (INX,X)=@INV@("IN23",INI(1))
- ...I $P($G(INTHL7F2),U,4) S X=$$SUBESC^INHUT7(X,INDELIMS,"I")
- ...S @INV@("IN23",INI(1))=$G(X) I '$D(X) D ERROR^INHS("Variable 'IN23' failed input transform in iteration #"_INI(1)_". Processing continues.",0),ERROR^INHS("  Value = '"_INX_"'",0)
- ...Q
- ..K DXS
- ..S INI(1)=0 F  S INI(1)=$O(@INV@("IN26",INI(1))) Q:'INI(1)  S INI=INI(1) D
- ...S (INX,X)=@INV@("IN26",INI(1))
- ...I $P($G(INTHL7F2),U,4) S X=$$SUBESC^INHUT7(X,INDELIMS,"I")
- ...S @INV@("IN26",INI(1))=$G(X) I '$D(X) D ERROR^INHS("Variable 'IN26' failed input transform in iteration #"_INI(1)_". Processing continues.",0),ERROR^INHS("  Value = '"_INX_"'",0)
- ...Q
- ..K DXS
- ..S INI(1)=0 F  S INI(1)=$O(@INV@("IN28",INI(1))) Q:'INI(1)  S INI=INI(1) D
- ...S (INX,X)=@INV@("IN28",INI(1))
- ...I $P($G(INTHL7F2),U,4) S X=$$SUBESC^INHUT7(X,INDELIMS,"I")
- ...S @INV@("IN28",INI(1))=$G(X) I '$D(X) D ERROR^INHS("Variable 'IN28' failed input transform in iteration #"_INI(1)_". Processing continues.",0),ERROR^INHS("  Value = '"_INX_"'",0)
- ...Q
- ..K DXS
- ..Q
  .Q
  ;IF $D(@INV@("ORC1"))
  I $D(@INV@("ORC1"))

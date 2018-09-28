@@ -1,5 +1,5 @@
 BGP8ASL1 ;IHS/CMI/LAB - DISPLAY IND LISTS;
- ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
+ ;;18.1;IHS CLINICAL REPORTING;**1**;MAY 25, 2018;Build 65
  ;; ;
 NGR ;EP
  K BGPTIND S BGPHIGH=""
@@ -9,7 +9,7 @@ NGR ;EP
  .Q:$P(V,U)'=BGPBD
  .Q:$P(V,U,2)'=BGPED
  .Q:$P(V,U,7)'=BGPPER
- .Q:$P(V,U,21)'="18"
+ .Q:$P(V,U,21)'=$$VER^BGP8BAN()
  .I $G(BGPYGPU),$P(V,U,12)'=9 Q
  .I '$G(BGPYGPU),$P(V,U,12)'=1 Q
  .Q:$P(V,U,20)  ;DPRV
@@ -41,7 +41,7 @@ ONM ;EP
  .Q:$P(V,U)'=BGPBD
  .Q:$P(V,U,2)'=BGPED
  .Q:$P(V,U,7)'=BGPPER
- .Q:$P(V,U,21)'="18"
+ .Q:$P(V,U,21)'=$$VER^BGP8BAN()
  .Q:$P(V,U,5)'=BGPBBD
  .Q:$P(V,U,6)'=BGPBED
  .Q:$P(V,U,14)'=BGPBEN

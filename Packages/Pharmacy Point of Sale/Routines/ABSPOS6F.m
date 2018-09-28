@@ -1,5 +1,5 @@
 ABSPOS6F ; IHS/FCS/DRS - debugging for ABSPOS ;  [ 09/12/2002  10:04 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**3**;JUN 21, 2001;Build 27
+ ;;1.0;PHARMACY POINT OF SALE;**3**;JUN 21, 2001;Build 38
  Q
  ; Problem:  errors occurring in ABSPOS, but NEW commands
  ; and use of temp storage indexed by $J mean there's no wreckage

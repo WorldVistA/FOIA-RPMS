@@ -1,5 +1,5 @@
 BGP8DEMO ; IHS/CMI/LAB - demo patient search template ;
- ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
+ ;;18.1;IHS CLINICAL REPORTING;;MAY 25, 2018;Build 66
  ;
  ;
  ;

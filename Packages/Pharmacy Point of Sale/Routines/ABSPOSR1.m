@@ -1,5 +1,5 @@
 ABSPOSR1 ; IHS/FCS/DRS - silent claim submitter ;   
- ;;1.0;PHARMACY POINT OF SALE;**48**;JUN 21, 2001;Build 27
+ ;;1.0;PHARMACY POINT OF SALE;**48**;JUN 21, 2001;Build 38
  ; This routine monitors ^PSRX indexes.  As it detects 
  ; the release of prescriptions and sometimes cancellations, too,
  ; it silently submits claims and sometimes reversals, too.

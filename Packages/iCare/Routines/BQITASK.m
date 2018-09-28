@@ -1,5 +1,5 @@
 BQITASK ;PRXM/HC/ALA-Scheduled Task Program ; 20 Dec 2006  4:56 PM
- ;;2.6;ICARE MANAGEMENT SYSTEM;**1**;Jul 07, 2017;Build 2
+ ;;2.7;ICARE MANAGEMENT SYSTEM;**1**;Dec 19, 2017;Build 12
  Q
  ;
 EN ;EP - Entry point
@@ -147,6 +147,7 @@ GPR ;EP - Entry point to get GPRA values for all users
  ;
  ; Define the time frame for the patient
  S BGPBD=$$DATE^BQIUL1("T-12M"),BGPED=DT
+ ;S BGPBD=3160731,BGPED=3170731
  S BGPBBD="300"_$E(BGPBD,4,7),BGPBED="300"_$E(BGPED,4,7)
  S BGPPBD=$$DATE^BQIUL1("T-24M"),BGPPED=$$DATE^BQIUL1("T-12M")
  S BGPPER=$E($$DT^XLFDT(),1,3)_"0000"
@@ -158,8 +159,8 @@ GPR ;EP - Entry point to get GPRA values for all users
  ;
  ; Setup taxonomies
  I VER>14.1 D
- . I $T(UNFOLDTX^BGP6UTL2)="" Q
- . D UNFOLDTX^BGP6UTL2
+ . I $T(UNFOLDTX^BGP8UTL2)="" Q
+ . D UNFOLDTX^BGP8UTL2
  ;
  ;  For every patient in the database, call the GPRA API
  S BQIDFN=0

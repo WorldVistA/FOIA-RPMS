@@ -1,5 +1,5 @@
 ABSPOSS1 ; IHS/FCS/DRS - report what's in POS tables ;  
- ;;1.0;PHARMACY POINT OF SALE;;JUN 21, 2001;Build 27
+ ;;1.0;PHARMACY POINT OF SALE;;JUN 21, 2001;Build 38
  ;
  ; Enter at top - option ABSP SETUP DETAIL
  ;

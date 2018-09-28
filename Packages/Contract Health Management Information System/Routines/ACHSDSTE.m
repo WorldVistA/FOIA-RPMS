@@ -1,5 +1,5 @@
 ACHSDSTE ; IHS/OIT/FCJ - DOCUMENT STATUS REPORT FOR EOBR DATA ;   [ 01/16/2003  8:54 AM ]
- ;;3.1;CONTRACT HEALTH MGMT SYSTEM;**26**;JUN 11, 2001;Build 37
+ ;;3.1;CONTRACT HEALTH MGMT SYSTEM;**26**;JUN 11, 2001;Build 43
  ;ACHS*3.1*26 NEW ROUTINE
  ;Modified routine to just print documents that have had payments
  ;between a specific data range.  This report if for aiding in service

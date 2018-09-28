@@ -1,10 +1,11 @@
 BDPLINKO ; IHS/CMI/TMJ - LINK ROUTINE ON PARM PASS TO THE DESG PROV PKG ;
- ;;2.0;IHS PCC SUITE;;MAY 14, 2009
+ ;;2.0;IHS PCC SUITE;**21**;MAY 14, 2009;Build 34
  ;
  ;
  ;
 START ;Get Record Information
-UPDATE(BDPFILE,BDPFIELD,BDPDA,BDPPROV,BDPPAT,BDPLINKI) ;PEP - published entry point
+UPDATE(BDPFILE,BDPFIELD,BDPDA,BDPPROV,BDPPAT) ;PEP - published entry point
+ ;THIS NEEDS UPDATED FOR PATCH 21
  ;this entry point is called from xrefs on various
  ;files/fields to update the current designated
  ;provider package
@@ -33,14 +34,13 @@ UPDATE1 ;
  ;then just update the .03 field, otherwise populate the multiple
  S BDPLAST=""
  S X=0 F  S X=$O(^BDPRECN(BDPRIEN,1,X)) Q:X'=+X  S BDPLAST=$P($G(^BDPRECN(BDPRIEN,1,X,0)),U)
- I 'BDPLAST D ADDM Q  ;there are no entries in the multiple so go add one
- I BDPLAST'=BDPPROV D ADDM ;the last one doesn't match this new one so go add to multiple
+ D ADDM ;the last one doesn't match this new one so go add to multiple
  ;just update .03 since last entry in mulitple is this provider
  D ^XBFMK S DIE="^BDPRECN(",DA=BDPRIEN,DR=".03///`"_BDPPROV_";.04////"_DUZ_";.05////"_DT D ^DIE,^XBFMK
  Q
 ADDM ;
  ;add to multiple of BDPRIEN using FILE^DICN
- S X="`"_BDPPROV,DIC="^BDPRECN("_BDPRIEN_",1,",DA(1)=BDPRIEN,DIC(0)="L",DIC("P")=$P(^DD(90360.1,.06,0),U,2) D ^DIC K DIC,DA,DR,Y,X,DIADD,DLAYGO
+ S DIADD=1,X="`"_BDPPROV,DIC="^BDPRECN("_BDPRIEN_",1,",DA(1)=BDPRIEN,DIC(0)="L",DIC("P")=$P(^DD(90360.1,.06,0),U,2),DIC("DR")=".04////"_DT D ^DIC K DIC,DA,DR,Y,X,DIADD,DLAYGO
  Q
 ADD ;
  D ^XBFMK K DIADD,DLAYGO
@@ -50,7 +50,7 @@ ADD ;
  S BDPRIEN=+Y
  D ^XBFMK K DIADD,DLAYGO
  Q
-KILL(BDPFILE,BDPFIELD,BDPDA,BDPPROV,BDPPAT,BDPLINKI) ;PEP - called from kill side of xrefs
+KILL(BDPFILE,BDPFIELD,BDPDA,BDPPROV,BDPPAT) ;PEP - called from kill side of xrefs
  I $G(BDPLINKI) Q  ;don't process if bdp
  I $G(BDPFILE)="" Q
  I $G(BDPFIELD)="" Q
@@ -65,6 +65,9 @@ KILL1 ;EP - CALLED FROM XBNEW
  S BDPRIEN=$O(^BDPRECN("AA",BDPPAT,BDPTYIEN,0))
  Q:BDPRIEN=""  ;NO entry of this type for this patient
  ;now delete last current provider field
- S DIE="^BDPRECN(",DA=BDPRIEN,DR=".03///@" D ^DIE
+ S DIE="^BDPRECN(",DA=BDPRIEN,DR=".03///@;.04////"_DUZ_";.05////"_DT D ^DIE
+ D ^XBFMK
+ S X=0 F  S X=$O(^BDPRECN(BDPRIEN,1,X)) Q:X'=+X  S Y=X
+ I Y,$P(^BDPRECN(BDPRIEN,1,Y,0),U,5)="" S DIE="^BDPRECN("_BDPRIEN_",1,",DA(1)=BDPRIEN,DA=Y,DR=".02////"_DUZ_";.03////"_DT_";.05////"_DT D ^DIE K DIE,DR,DA,DINUM
  D ^XBFMK
  Q

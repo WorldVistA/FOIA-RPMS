@@ -1,5 +1,6 @@
 AGED61 ; IHS/ASDS/EFG - EDIT - PAGE 6 (2 OF 2) (RR) ;  
- ;;7.1;PATIENT REGISTRATION;**1,2**;JAN 31, 2007
+ ;;7.1;PATIENT REGISTRATION;**1,2,13**;AUG 25, 2005;Build 1
+ ;IHS/OIT/NKD AG*7.1*13 MBI IMPLEMENTATION
  ;
  D @($P("E1,E2,E3,E4,E5,E6,E7,E8,E9,E10,E11,E12,",",",AG("SEL"))) Q
 E1 ;
@@ -45,17 +46,19 @@ E4 ;EP
  . D ^DIE
  D UPDATE
  Q
-E5 S DIE="^AUPNRRE("
- S DR=".03;.04"
- S DA=DFN
- W !,"The NUMBER will be prompted for immediately after the PREFIX",!
- D ^DIE
- I $P($G(^AUPNRRE(DFN,0)),U,3)="" D
- . S DA=DFN
- . S DR=".01///@"
- . S DIE="^AUPNRRE("
- . D ^DIE
- . W !!,"Railroad coverage is deleted." H 3
+E5 ;
+ D EDITRRE^AGUTL(DFN)  ;IHS/OIT/NKD AG*7.1*13
+ ;S DIE="^AUPNRRE("
+ ;S DR=".03;.04"
+ ;S DA=DFN
+ ;W !,"The NUMBER will be prompted for immediately after the PREFIX",!
+ ;D ^DIE
+ ;I $P($G(^AUPNRRE(DFN,0)),U,3)="" D
+ ;. S DA=DFN
+ ;. S DR=".01///@"
+ ;. S DIE="^AUPNRRE("
+ ;. D ^DIE
+ ;. W !!,"Railroad coverage is deleted." H 3
  D UPDATE
  Q
 E6 S DIE="^AUPNRRE("

@@ -1,5 +1,5 @@
 AVAP3 ;IHS/ORDC/LJF - MOVE LICENSURE BACK TO FILE 6 [ 10/27/93  9:47 AM ]
- ;;93.2;VA SUPPORT FILES**3**;Jul 17, 1992;;Build 8
+ ;;93.2;VA SUPPORT FILES**3**;Jul 17, 1992;;Build 12
  ;
  Q  ;no direct entry to rtn
  ;

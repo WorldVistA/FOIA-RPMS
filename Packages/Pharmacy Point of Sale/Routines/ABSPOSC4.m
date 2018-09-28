@@ -1,5 +1,5 @@
 ABSPOSC4 ; IHS/FCS/DRS - installation testing ;    
- ;;1.0;PHARMACY POINT OF SALE;**48**;JUN 21, 2001;Build 27
+ ;;1.0;PHARMACY POINT OF SALE;**48**;JUN 21, 2001;Build 38
  Q
  ; Send the NEBRASKA MEDICAID test claim
  ; Special naming assumptions:

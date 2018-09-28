@@ -1,5 +1,5 @@
 ABSPOSBW ; IHS/FCS/DRS - Billing - FSI/ILC A/R v1,2;       
- ;;1.0;PHARMACY POINT OF SALE;**48**;JUN 21, 2001;Build 27
+ ;;1.0;PHARMACY POINT OF SALE;**48**;JUN 21, 2001;Build 38
  Q
  ; Billing interface for FSI/ILC Accounts Receivable,
  ; Versions 1 and 2

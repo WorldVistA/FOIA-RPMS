@@ -1,5 +1,5 @@
 BDPCHNGD ; IHS/CMI/TMJ - CHANGE NON-EXISTING PROVIDER TO NEW PROVIDER ;
- ;;2.0;IHS PCC SUITE;**10**;MAY 14, 2009;Build 88
+ ;;2.0;IHS PCC SUITE;**10,21**;MAY 14, 2009;Build 34
  ;
  ; Subscripted BDPREC is EXTERNAL form.
  ;   BDPREC("PAT NAME")=patient name
@@ -68,6 +68,7 @@ PROV ; GET DESIGNATED PROVIDER
  S DIC("A")="Select New Designated Provider: ",DIC="^VA(200,",DIC(0)="AEMQ" D ^DIC K DIC,DA S:$D(DUOUT) DIRUT=1,BDPQ=1
  Q:$D(DIRUT)
  I +Y<1 S BDPQ=1 Q
+ S X=$$CHKPROV^BDPDPEE(+Y) I X S BDPQ=1 Q
  S BDPPROV=+Y,BDPRPROV=$P(Y,U,2)
  S BDPRPRVP=$P(^VA(200,BDPPROV,0),U,1) ;Provider Print Name
  S BDPQ=0
@@ -100,9 +101,9 @@ UPDATE ;Update Records
  . S BDPOPROV=$P($G(^BDPRECN(BDPIEN,0)),U,3) ;Existing Provider
  . Q:BDPOPROV'=""  ;Quit if they already have a Provider
  . ;Otherwise go on and populate these non-existing Current Providers
- .;with the new one the User Selected
+ . ;with the new one the User Selected
  . Q:BDPPROV=""  ;Quit if No New Provider
- . S X=$$CREATE^BDPPASS(BDPPAT,BDPTYPE,BDPPROV) Q
+ . S X=$$CREATE^BDPAMA(BDPPAT,BDPTYPE,BDPPROV) Q
  ;
  ;
 MSGEND ;End of Add Message
@@ -122,8 +123,8 @@ EOJ ; END OF JOB
  ;
 INFORM ;Data Entry Explanation
  ;
- W !,?3,"This Option allows the automatic changing of all Records......",!,?10,"from the existing CURRENT Designated Provider -",!,?10,"to a NEW assigned Designated Provider.",!!
- W ?3,"The User is prompted for the OLD Provider and the NEW Provider Name.",!
+ W !,?3,"This Option allows the automatic changing Existing Records......",!,?10,"from an Unassigned (blank) CURRENT Designated Provider -",!,?10,"to a NEW assigned Designated Provider.",!!
+ W ?3,"The User is prompted for the NEW Provider Name.",!
  W ?3,"Once the desired Provider Category Type is selected by the User,",!
  W ?3,"the Program will automatically LOOP through all Records and",!,?3,"change to the NEW Provider for this Category Type.",!!
  W ?3,"If the patient's existing Provider/Category Type are the same,",!,?3,"no update will occur.",!

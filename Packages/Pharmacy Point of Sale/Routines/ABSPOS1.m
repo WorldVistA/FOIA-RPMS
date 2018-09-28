@@ -1,5 +1,5 @@
 ABSPOS1 ; IHS/UNK/UNK ; less commonly called subroutines [ 10/13/2000  9:06 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**49**;JUN 21, 2001;Build 27
+ ;;1.0;PHARMACY POINT OF SALE;**49**;JUN 21, 2001;Build 38
  Q
 PRINTALL ; print all patients' results  ABSB POS RXE P1 PRINT ALL
  N IO I '$$DEVICE G PRINT99

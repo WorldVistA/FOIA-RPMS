@@ -1,5 +1,5 @@
-BDPAMA ;IHS/CMI/LAB - ASSIGN MESSAGE AGENT
- ;;2.0;IHS PCC SUITE;**10**;MAY 14, 2009;Build 88
+BDPAMA ;IHS/CMI/LAB - ASSIGN MESSAGE AGENT ; 05 Jun 2018  11:09 AM
+ ;;2.0;IHS PCC SUITE;**10,21**;MAY 14, 2009;Build 34
  ;
  ; Subscripted BDPREC is EXTERNAL form.
  ;   BDPREC("PAT NAME")=patient name
@@ -47,10 +47,10 @@ OLDPROV ; GET OLD EXISTING PROVIDER
  Q
  ;
 COUNT ;Count of # Patients for this Old Provider
- S BDPI="",BDPQ=0
- F BDPYI=1:1 S BDPI=$O(^BDPRECN("AC",BDPOPROV,BDPI)) Q:BDPI=""
- W !!?10,"There are ",BDPYI-1," patients currently assigned to this Provider."
- I BDPYI=1 S BDPQ=1 ;More than one patient exists for Provider
+ S BDPI="",BDPQ=0,BDPYI=0
+ F  S BDPI=$O(^BDPRECN("AC",BDPOPROV,BDPI)) Q:BDPI=""  S BDPYI=BDPYI+1
+ W !!?10,"There are ",BDPYI," patients currently assigned to this Provider."
+ I BDPYI=0 S BDPQ=1 ;More than one patient exists for Provider
  K BDPI,BDPYI
  W !
  W !
@@ -117,8 +117,52 @@ UPDATE ;Update Records
  . S BDPPAT=$P($G(^BDPRECN(BDPIEN,0)),U,2) ;Patient
  . Q:BDPPAT=""
  . Q:BDPPROV=""  ;Quit if No New Provider
- . S X=$$CREATE^BDPPASS(BDPPAT,BDPTYPE,BDPPROV) Q
+ . S X=$$CREATE(BDPPAT,BDPTYPE,BDPPROV) Q
  ;
+ Q
+ ;
+CREATE(BDPDFN,BDPTYPE,BDPRPRVP) ;EP - Entry Point to Create
+ ;
+ N BDPRR,BDPLINKI,BDPLPROV,BDPRIEN,BDPLINKI
+ ;
+ S BDPQ=1
+ S BDPLINKI=1  ;tell xrefs we are in bdp
+ S BDPRPROV=$P($G(^VA(200,BDPRPRVP,0)),U) ;Provider Text Name
+ S BDPRR=$O(^BDPRECN("AA",BDPDFN,BDPTYPE,""))  ;Check to see if this Patient already has Type
+ I BDPRR="" D ADDNEW Q BDPQ  ;NONE OF THIS TYPE
+ S BDPLPROV=$P($G(^BDPRECN(BDPRR,0)),U,3) ;Current Provider
+ Q:BDPLPROV=BDPRPRVP 0  ;Quit if Same Provider Selected as Current
+ S BDPRIEN=BDPRR D MOD Q 0
+ Q 0
+ ;
+ADDNEW ;Add a new Record
+ K DIC S DIC="^BDPRECN(",DIC(0)="L",DLAYGO=90360.1,DIC("DR")=".02////"_BDPDFN,X=BDPTYPE
+ D FILE^BDPFMC
+ K DIC,DLAYGO,DIADD
+ I Y<0 W !,"Error creating DESIGNATED PROVIDER.",!,"Notify programmer.",! D EOP^BDP Q
+ ;
+ S BDPRIEN=+Y
+ ;S X="`"_BDPRPRVP,DIC="^BDPRECN("_BDPRIEN_",1,",DA(1)=BDPRIEN,DIC(0)="L",DIC("P")=$P(^DD(90360.1,.06,0),U,2) D ^DIC K DIC,DA,DR,Y,X,DIADD,DLAYGO D ^XBFMK
+ S X="`"_BDPRPRVP,DIC="^BDPRECN("_BDPRIEN_",1,",DA(1)=BDPRIEN,DIC(0)="L",DIC("P")=$P(^DD(90360.1,.06,0),U,2),DIC("DR")=".04////"_DT D ^DIC K DIC,DA,DR,Y,X,DIADD,DLAYGO D ^XBFMK  ;IHS/CMI/LAB - PATCH 21 ADDED SETTING OF .04 EFFECTIVE DATE
+ S BDPQ=0
+ K BDPLINKI
+ Q
+ ;
+MOD ;Modify an Existing Provider Type for this Patient
+ S BDPLINKI=1
+ ;S X="`"_BDPRPRVP,DIC="^BDPRECN("_BDPRIEN_",1,",DA(1)=BDPRIEN,DIC(0)="L",DIC("P")=$P(^DD(90360.1,.06,0),U,2) D ^DIC K DIC,DA,DR,Y,X,DIADD,DLAYGO D ^XBFMK
+ ;FIND THE LAST MULTIPLE AND SET .05 EQUAL TO DT, .02 AND .03
+ S Z=0,X=0 F  S X=$O(^BDPRECN(BDPRIEN,1,X)) Q:X'=+X  S Z=X
+ I Z,$P(^BDPRECN(BDPRIEN,1,Z,0),U,5)="" S DIE="^BDPRECN("_BDPRIEN_",1,",DA(1)=BDPRIEN,DA=Z,DR=".02////"_DUZ_";.03////"_DT_";.05////"_DT D ^DIE K DIE,DR,DA,DINUM,X,Y,Z
+ ;now add new one
+ S DIADD=1,X="`"_BDPRPRVP,DIC="^BDPRECN("_BDPRIEN_",1,",DA(1)=BDPRIEN,DIC(0)="L",DIC("P")=$P(^DD(90360.1,.06,0),U,2),DIC("DR")=".04////"_DT D ^DIC K DIC,DIADD,DR
+ I Y=-1 S BDPQ=0 Q
+ K DIC,DA,DR,Y,X,DIADD,DLAYGO D ^XBFMK   ;IHS/CIM/LAB - ADDED SETTING OF .04 EFFECTIVE DATE PATCH 21
+ ;
+ S DIE="^BDPRECN(",DA=BDPRIEN,DR=".03///`"_BDPRPRVP_";.04////"_DUZ_";.05////"_DT D ^DIE,^XBFMK
+ S BDPQ=0
+ K BDPLINKI
+ Q
  ;
 MSGEND ;End of Add Message
  W !!!!,"Okay - I have changed all Patient Records - as follows: ",! D  Q

@@ -1,5 +1,5 @@
 BGP8DAR ;IHS/CMI/LAB - GPRA AREA REPORT;
- ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
+ ;;18.1;IHS CLINICAL REPORTING;;MAY 25, 2018;Build 66
  ;
  ;
  W:$D(IOF) @IOF
@@ -91,18 +91,18 @@ EISSEX ;
  .S BGPFDEV3="CRSGPRADEVNT3"_$P(^AUTTLOC(DUZ(2),0),U,10)_2018063000000000_$$D^BGP8UTL(BGPNOW)_"_"_$$LZERO^BGP8UTL(BGPC,6)_".TXT"
  .S BGPFDEV4="CRSGPRADEVNT4"_$P(^AUTTLOC(DUZ(2),0),U,10)_2018063000000000_$$D^BGP8UTL(BGPNOW)_"_"_$$LZERO^BGP8UTL(BGPC,6)_".TXT"
  .S BGPFGNT3="CRSGPRANT3"_$P(^AUTTLOC(DUZ(2),0),U,10)_2018063000000000_$$D^BGP8UTL(BGPNOW)_"_"_$$LZERO^BGP8UTL(BGPC,6)_".TXT"
- .S BGPFGNT4="CRSGPRANT4"_$P(^AUTTLOC(DUZ(2),0),U,10)_2018063000000000_$$D^BGP8UTL(BGPNOW)_"_"_$$LZERO^BGP8UTL(BGPC,6)_".TXT"
- .S BGPFGNT5="CRSGPRANT5"_$P(^AUTTLOC(DUZ(2),0),U,10)_2018063000000000_$$D^BGP8UTL(BGPNOW)_"_"_$$LZERO^BGP8UTL(BGPC,6)_".TXT"
- .S BGPFGNT6="CRSGPRANT6"_$P(^AUTTLOC(DUZ(2),0),U,10)_2018063000000000_$$D^BGP8UTL(BGPNOW)_"_"_$$LZERO^BGP8UTL(BGPC,6)_".TXT"
+ .;S BGPFGNT4="CRSGPRANT4"_$P(^AUTTLOC(DUZ(2),0),U,10)_2018063000000000_$$D^BGP8UTL(BGPNOW)_"_"_$$LZERO^BGP8UTL(BGPC,6)_".TXT"
+ .;S BGPFGNT5="CRSGPRANT5"_$P(^AUTTLOC(DUZ(2),0),U,10)_2018063000000000_$$D^BGP8UTL(BGPNOW)_"_"_$$LZERO^BGP8UTL(BGPC,6)_".TXT"
+ .;S BGPFGNT6="CRSGPRANT6"_$P(^AUTTLOC(DUZ(2),0),U,10)_2018063000000000_$$D^BGP8UTL(BGPNOW)_"_"_$$LZERO^BGP8UTL(BGPC,6)_".TXT"
  .Q
  S BGPASUF=$P(^AUTTLOC(DUZ(2),0),U,10)
  I BGPEXCEL D
  .W !!,"A file will be created called ",BGPFGNT1,!,"and will reside in the ",BGPUF," directory. This file can be used in Excel.",!
  .W !!,"A file will be created called ",BGPFGNT2,!,"and will reside in the ",BGPUF," directory. This file can be used in Excel.",!
  .W !!,"A file will be created called ",BGPFGNT3,!,"and will reside in the ",BGPUF," directory. This file can be used in Excel.",!
- .W !!,"A file will be created called ",BGPFGNT4,!,"and will reside in the ",BGPUF," directory. This file can be used in Excel.",!
- .W !!,"A file will be created called ",BGPFGNT5,!,"and will reside in the ",BGPUF," directory. This file can be used in Excel.",!
- .W !!,"A file will be created called ",BGPFGNT6,!,"and will reside in the ",BGPUF," directory. This file can be used in Excel.",!
+ .;W !!,"A file will be created called ",BGPFGNT4,!,"and will reside in the ",BGPUF," directory. This file can be used in Excel.",!
+ .;W !!,"A file will be created called ",BGPFGNT5,!,"and will reside in the ",BGPUF," directory. This file can be used in Excel.",!
+ .;W !!,"A file will be created called ",BGPFGNT6,!,"and will reside in the ",BGPUF," directory. This file can be used in Excel.",!
  .W !!,"A file will be created called ",BGPFDEV1,!,"and will reside in the ",BGPUF," directory. This file can be used in Excel.",!
  .W !!,"A file will be created called ",BGPFDEV2,!,"and will reside in the ",BGPUF," directory. This file can be used in Excel.",!
  .W !!,"A file will be created called ",BGPFDEV3,!,"and will reside in the ",BGPUF," directory. This file can be used in Excel.",!

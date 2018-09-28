@@ -1,5 +1,5 @@
 BARMAWO2 ; IHS/SD/LSL - Automatic Write-Off 2000 - Reversal ;
- ;;1.8;IHS ACCOUNTS RECEIVABLE;;OCT 26, 2005
+ ;;1.8;IHS ACCOUNTS RECEIVABLE;**28**;OCT 26, 2005;Build 92
  ;
  ; IHS/ASDS/LSL - 09/07/01 - Routine created
  ;     Reverse all transactions of transaction type 43 (Adjustment)
@@ -7,9 +7,21 @@ BARMAWO2 ; IHS/SD/LSL - Automatic Write-Off 2000 - Reversal ;
  ;     with Adjustment type 501 (Auto Write-off 2000)
  ;
  ; *********************************************************************
+ ;STOP!!!  STOP!!!!   STOP!!!!
+ ;IHS/SD/SDR 1.8*28 HEAT293633 - This is an old, outdated routine and shouldn't be used
+ ;  without review and possible changes.  Routine EN^BARMAWO6 should be used instead.  A
+ ;  quit has been added to this routine so it can't be accidentally run.
+ ; *********************************************************************
  Q
  ;
-EN ; EP
+EN ; EP - IHS/DIT/CPC 1.8*28 CR 8349 START
+ W "*********************************************************************",!
+ W "                     STOP!!!  STOP!!!!   STOP!!!!",!
+ W "This is an old, outdated routine and shouldn't be used.  Please ",!
+ W "request assistance from OIT before starting the write-off process.",!
+ W "*********************************************************************",!
+ H 10
+ Q  ;IHS/DIT/CPC 1.8*28 CR 8349 STOP
  D NOTE
  Q:'BARCONT
  D NOW^%DTC

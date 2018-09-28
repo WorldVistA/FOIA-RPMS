@@ -1,5 +1,5 @@
 ABSPOS29 ; IHS/FCS/DRS - BUILD COMBINED INSURANCE ;  [ 09/12/2002  10:04 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**3,14,15,16,17,21,22,37,44,46,49**;JUN 21, 2001;Build 27
+ ;;1.0;PHARMACY POINT OF SALE;**3,14,15,16,17,21,22,37,44,46,49,50**;JUN 21, 2001;Build 38
  ; 
  ; Copied from VTLCOMB on 08/18/2000
  ; Removed $ZT="DX^KCRZT"
@@ -137,18 +137,21 @@ MEDICAID ;
  Q
  ;
 MEDICARE ;
+ N MBIARRAY,STATUS
  S FILE=$O(^DIC("B","MEDICARE ELIGIBLE",0))
  S CAREDFN=$O(^AUPNMCR("B",PATDFN,0))
  Q:'CAREDFN
  ;S NUMBER=NUMBER+1             ;RLT 21
  S REC=^AUPNMCR(CAREDFN,0)
+ S STATUS=$$HISTMBI^AUPNMBI(PATDFN,.MBIARRAY) ; /IHS/OIT/RAM ; 15 DEC 17 ; GET THE STATUS OF ALL MBI INFO.
  S D1=0
  F  S D1=$O(^AUPNMCR(CAREDFN,11,D1)) Q:'D1  D
  . S REC11=$G(^AUPNMCR(CAREDFN,11,D1,0))
  . S COVTYP=$P(REC11,U,3)
  . Q:COVTYP="A"
  . S INSDFN=$P(REC,U,2)
- . S POLNUM=$P(REC,U,3)
+ . S POLNUM=$$GETMCR^AGUTL(CAREDFN) ; /IHS/OIT/RAM ; 18 DEC 17 ; New method for retrieving Policy Number...
+ . I POLNUM="" S POLNUM=$P(REC,U,3) ; /IHS/OIT/RAM ; 18 DEC 17 ; Old method for retrieving Policy Number...; only if new didn't work.
  . S SUFFIX=$P(REC,U,4)
  . S POLNAM=""
  . S POLREL=$O(^AUTTRLSH("B","SELF",0))
@@ -159,7 +162,8 @@ MEDICARE ;
  . I COVTYP="D"  D
  .. S INSDFN=$P(REC11,U,4)
  .. S CARENAM=$P(REC11,U,5)
- .. S POLNUM=$P(REC11,U,6)
+ .. S POLNUM=$$GETMCR^AGUTL(CAREDFN) ; /IHS/OIT/RAM ; 18 DEC 17 ; New method for retrieving Policy Number...
+ .. I POLNUM="" S POLNUM=$P(REC11,U,6) ; /IHS/OIT/RAM ; 18 DEC 17 ; Old method for retrieving Policy Number...; only if new didn't work.
  . Q:INSDFN=""                  ;RLT 21 incomplete record
  . S NUMBER=NUMBER+1            ;RLT 21
  . ;S ARRAY(NUMBER)=INSDFN_U_"CARE"_U_CARENAM_U_POLNUM_U_BEGDAT_U_ENDDAT_U_POLIEN_U_FILE_U_CAREDFN_U_U_POLREL
@@ -167,6 +171,8 @@ MEDICARE ;
  Q
  ;---
 RAILROAD ;RLT - 04/25/06 - Patch 17
+ ; /IHS/OIT/RAM ; THE POLNUM RETRIEVAL SEGMENTS OF THIS ROUTINE AREN'T RIGHT - SHOULD LOOK FOR PIECE #4, NOT 3... IS THIS EVEN USED?
+ ; RAILROAD ALSO USES A PREFIX, NOT A SUFFIX - THE 'SUFFIX' FIELD IS A DATE FIELD!
  S FILE=$O(^DIC("B","RAILROAD ELIGIBLE",0))
  S RRDFN=$O(^AUPNRRE("B",PATDFN,0))
  Q:'RRDFN
@@ -178,7 +184,8 @@ RAILROAD ;RLT - 04/25/06 - Patch 17
  . S COVTYP=$P(REC11,U,3)
  . Q:COVTYP="A"
  . S INSDFN=$P(REC,U,2)
- . S POLNUM=$P(REC,U,3)
+ . S POLNUM=$$GETRRE^AGUTL(RRDFN) ; /IHS/OIT/RAM ; 18 DEC 17 ; New method for retrieving Policy Number...
+ . I POLNUM="" S POLNUM=$P(REC,U,3) ; /IHS/OIT/RAM ; 18 DEC 17 ; Old method for retrieving Policy Number...; only if new didn't work.
  . S SUFFIX=$P(REC,U,4)
  . S POLNAM=""
  . S POLREL=$O(^AUTTRLSH("B","SELF",0))
@@ -189,7 +196,8 @@ RAILROAD ;RLT - 04/25/06 - Patch 17
  . I COVTYP="D"  D
  .. S INSDFN=$P(REC11,U,4)
  .. S RRNAM=$P(REC11,U,5)
- .. S POLNUM=$P(REC11,U,6)
+ .. S POLNUM=$$GETRRE^AGUTL(RRDFN) ; /IHS/OIT/RAM ; 18 DEC 17 ; New method for retrieving Policy Number...
+ .. I POLNUM="" S POLNUM=$P(REC11,U,6) ; /IHS/OIT/RAM ; 18 DEC 17 ; Old method for retrieving Policy Number...; only if new didn't work.
  . Q:INSDFN=""                  ;RLT 21 incomplete record
  . S NUMBER=NUMBER+1            ;RLT 21
  . ;S ARRAY(NUMBER)=INSDFN_U_"RR"_U_RRNAM_U_POLNUM_U_BEGDAT_U_ENDDAT_U_POLIEN_U_FILE_U_RRDFN_U_U_POLREL

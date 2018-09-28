@@ -1,9 +1,13 @@
 BARPST7 ; IHS/SD/LSL - UNALLOCATED POSTING ;
- ;;1.8;IHS ACCOUNTS RECEIVABLE;**3,21**;OCT 26, 2005
+ ;;1.8;IHS ACCOUNTS RECEIVABLE;**3,21,27**;OCT 26, 2005;Build 12
+ ;vc; Version BARPST7.INT/BAR.1  Date 29-Aug-17  By User  Location BAR$M
+ ;vc; Component name INT.BARPST7  Routine name: BARPST7
  ;
  ; IHS/SD/LSL - 11/27/02 - V1.7 - QAA-1200-130051
  ;      Modified to not update other files if couldn't create a
  ;      transaction.
+ ; IHS/DIT/CPC New Medicare Card Initiative HEAT348817 11/3/2017 - BAR*1.8*27
+ ; 		Visit location not updating if Mult 3P EOB parameter set
  ;
  ; ********************************************************************
  ;
@@ -132,6 +136,7 @@ PX ;
  S DR=DR_";105////^S X=""O"""
  S DR=DR_";104////^S X=1"
  S DR=DR_";10////^S X=$$VALI^XBDIQ1(200,DUZ,29)"
+ S:$D(BAREOB) DR=DR_";11////^S X=BAREOB"  ; HEAT348817 - IHS/SD/CPC - 20170829
  S DIDEL=90050
  D ^DIE
  K DIDEL

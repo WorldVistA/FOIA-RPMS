@@ -1,5 +1,5 @@
 ABSPOSBM ; IHS/FCS/DRS - POS billing, part 3 ;      
- ;;1.0;PHARMACY POINT OF SALE;**48**;JUN 21, 2001;Build 27
+ ;;1.0;PHARMACY POINT OF SALE;**48**;JUN 21, 2001;Build 38
  ; *****
  ; *****  Interface to ABSB, the ILC A/R package
  ; *****  This code is reached _ONLY_ by sites using ILC A/R,

@@ -1,5 +1,5 @@
 BGP8DARO ; IHS/CMI/LAB - ihs area GPRA 02 Sep 2004 1:11 PM 01 Jul 2010 11:43 AM ;
- ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
+ ;;18.1;IHS CLINICAL REPORTING;**1**;MAY 25, 2018;Build 65
  ;
  ;
  W:$D(IOF) @IOF
@@ -10,8 +10,8 @@ CHOICE ;
  W !!!,"Please select the type of report would you like to run:"
  W !!?8,"H  Hard-coded Report:  Report with all parameters set to the"
  W !?11,"same as the National GPRA Report (report period of "
- W !?11,"July 1, 2017 - June 30, 2018, baseline period of July 1, 2009"
- W !?11,"- June 30, 2010, and AI/AN patients only)"
+ W !?11,"October 1, 2017 - September 30, 2018, baseline period of "
+ W !?11,"October 1, 2009 - September 30, 2010, and AI/AN patients only)"
  W !!?8,"U  User-defined Report:  You select the report and baseline"
  W !?11,"periods and beneficiary population"
  W !
@@ -134,7 +134,7 @@ EISSEX ;
  .S BGPFONN1="CRSONMNT1"_$P(^AUTTLOC(DUZ(2),0),U,10)_2018063000000000_$$D^BGP8UTL(BGPNOW)_"_"_$$LZERO^BGP8UTL(BGPC,6)_".TXT"
  .S BGPFONN2="CRSONMNT2"_$P(^AUTTLOC(DUZ(2),0),U,10)_2018063000000000_$$D^BGP8UTL(BGPNOW)_"_"_$$LZERO^BGP8UTL(BGPC,6)_".TXT"
  .S BGPFONN3="CRSONMNT3"_$P(^AUTTLOC(DUZ(2),0),U,10)_2018063000000000_$$D^BGP8UTL(BGPNOW)_"_"_$$LZERO^BGP8UTL(BGPC,6)_".TXT"
- .;S BGPFONN4="CRSONMNT4"_$P(^AUTTLOC(DUZ(2),0),U,10)_2018063000000000_$$D^BGP8UTL(BGPNOW)_"_"_$$LZERO^BGP8UTL(BGPC,6)_".TXT"
+ .S BGPFONN4="CRSONMNT4"_$P(^AUTTLOC(DUZ(2),0),U,10)_2018063000000000_$$D^BGP8UTL(BGPNOW)_"_"_$$LZERO^BGP8UTL(BGPC,6)_".TXT"
  .;S BGPFONN5="CRSONMNT5"_$P(^AUTTLOC(DUZ(2),0),U,10)_2018063000000000_$$D^BGP8UTL(BGPNOW)_"_"_$$LZERO^BGP8UTL(BGPC,6)_".TXT"
  .Q
  S BGPASUF=$P(^AUTTLOC(DUZ(2),0),U,10)
@@ -142,7 +142,7 @@ EISSEX ;
  .W !!,"A file will be created called ",BGPFONN1,!,"and will reside in the ",BGPUF," directory. This file can be used in Excel.",!
  .W !!,"A file will be created called ",BGPFONN2,!,"and will reside in the ",BGPUF," directory. This file can be used in Excel.",!
  .W !!,"A file will be created called ",BGPFONN3,!,"and will reside in the ",BGPUF," directory.  This file can be used in Excel.",!
- .;W !!,"A file will be created called ",BGPFONN4,!,"and will reside in the ",BGPUF," directory. This file can be used in Excel.",!
+ .W !!,"A file will be created called ",BGPFONN4,!,"and will reside in the ",BGPUF," directory. This file can be used in Excel.",!
  .;W !!,"A file will be created called ",BGPFONN5,!,"and will reside in the ",BGPUF," directory.  This file can be used in Excel.",!
  S BGPASUF=$P(^AUTTLOC(DUZ(2),0),U,10)
  D ^XBFMK

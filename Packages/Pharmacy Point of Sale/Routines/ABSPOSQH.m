@@ -1,5 +1,5 @@
 ABSPOSQH ; IHS/FCS/DRS - JWS 10:46 AM 7 Jan 1997 ;
- ;;1.0;PHARMACY POINT OF SALE;**48**;JUN 21, 2001;Build 27
+ ;;1.0;PHARMACY POINT OF SALE;**48**;JUN 21, 2001;Build 38
  ;prepare claims for transmission (eg assemble into ASCII record format)
  ; Called from ABSPOSQG, usually from ABSPOSQ2
  ; Also used by certification, called from ABSPOSC2

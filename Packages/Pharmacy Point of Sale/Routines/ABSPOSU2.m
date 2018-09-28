@@ -1,5 +1,5 @@
 ABSPOSU2 ; IHS/FCS/DRS - copied for POS ;  [ 09/12/2002  10:19 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**3**;JUN 21, 2001;Build 27
+ ;;1.0;PHARMACY POINT OF SALE;**3**;JUN 21, 2001;Build 38
  ;----------------------------------------------------------------------
  ;----------------------------------------------------------------------
  ;Standard FREETEXT and Numeric Functions

@@ -1,5 +1,5 @@
-BPXRMPCC ; IHS/MSC/MGH - Computed Findings for PCC reminders. ;23-Apr-2014 08:39;du
- ;;2.0;CLINICAL REMINDERS;**1001,1002,1003**;Feb 04, 2005;Build 21
+BPXRMPCC ; IHS/MSC/MGH - Computed Findings for PCC reminders. ;16-Feb-2018 16:02;DU
+ ;;2.0;CLINICAL REMINDERS;**1001,1002,1003,1009**;Feb 04, 2005;Build 17
  ;=================================================================
  ;This routine is designed to use the standard PCC logic for reminders to
  ;evaluate if items are met or not met. Using the standard PCC calls ensures

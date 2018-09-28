@@ -1,5 +1,5 @@
 BGP8DCL ; IHS/CMI/LAB - national patient list 20 Dec 2004 9:24 AM ;
- ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
+ ;;18.1;IHS CLINICAL REPORTING;;MAY 25, 2018;Build 66
  ;
  ;
  ;

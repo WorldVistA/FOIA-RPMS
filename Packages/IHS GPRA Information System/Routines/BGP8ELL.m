@@ -1,5 +1,5 @@
 BGP8ELL ; IHS/CMI/LAB - IHS gpra print 01 Jul 2010 7:56 PM ;
- ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
+ ;;18.1;IHS CLINICAL REPORTING;;MAY 25, 2018;Build 66
  ;
  ;
 DEL ;
@@ -83,7 +83,7 @@ CALC .;
  Q
 HEADER ;EP
  S Y=$P(^VA(200,DUZ,0),U,2),$E(Y,35)=$$FMTE^XLFDT(DT) D S(Y,1,1)
- I BGPRTYPE=3 S Y="*** IHS 2018 ELDER CARE Clinical Performance Report***" D S(Y,1,1)
+ I BGPRTYPE=5 S Y="*** IHS 2018 ELDER CARE Clinical Performance Report***" D S(Y,1,1)
  I $G(BGPAREAA) S Y="AREA AGGREGATE" D S(Y,1,1)
  S X="Date Report Run: "_$$FMTE^XLFDT(DT) D S(X,1,1)
  I '$G(BGPAREAA) S Y=$P(^DIC(4,DUZ(2),0),U) D S(Y,1,1)

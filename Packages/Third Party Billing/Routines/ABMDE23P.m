@@ -1,5 +1,6 @@
-ABMDE23P ; IHS/ASDST/DMJ - PAGE 2 - 3RD PARTY SOURCES ; 
- ;;2.6;IHS 3P BILLING SYSTEM;;NOV 12, 2009
+ABMDE23P ; IHS/SD/SDR - PAGE 2 - 3RD PARTY SOURCES ; 
+ ;;2.6;IHS 3P BILLING SYSTEM;**26**;NOV 12, 2009;Build 440
+ ;IHS/SD/SDR 2.6*26 CR9265 Changed to use AUPN API to get the MBI or use old code to get HIC
  ;
  ; *********************************************************************
  ;
@@ -37,7 +38,15 @@ PRVT ;
  ;
  ; *********************************************************************
 MCR ;
- S $P(ABMV("X1"),U,4)=$P(ABMX("REC"),U,3)_"-"_$P(^AUTTMCS($P(ABMX("REC"),U,4),0),U)
+ ;S $P(ABMV("X1"),U,4)=$P(ABMX("REC"),U,3)_"-"_$P(^AUTTMCS($P(ABMX("REC"),U,4),0),U)  ;abm*2.6*26 IHS/SD/SDR CR9265
+ ;start new abm*2.6*26 IHS/SD/SDR CR9265
+ K ABMMBI
+ S ABMMBI=""
+ S ABMMBI=$$HISTMBI^AUPNMBI(ABMX(2),.ABMMBI)
+ S ABMMBI=+$O(ABMMBI(999999999),-1)
+ S:(ABMMBI'=0) $P(ABMV("X1"),U,4)=$P(ABMMBI(ABMMBI),U)
+ I $P($G(ABMV("X1")),U,4)="" S $P(ABMV("X1"),U,4)=$P(ABMX("REC"),U,3)_"-"_$P(^AUTTMCS($P(ABMX("REC"),U,4),0),U)
+ ;end new abm*2.6*26 IHS/SD/SDR CR9265
  I $D(^AUPNMCR(ABMX(2),21)) D
  .S:$P(^AUPNMCR(ABMX(2),21),U)]"" $P(ABMV("X1"),U,5)=$P(^AUPNMCR(ABMX(2),21),U)
  .S:$P(^AUPNMCR(ABMX(2),21),U,2)]"" $P(ABMV("X1"),U,6)=$P(^AUPNMCR(ABMX(2),21),U,2)
@@ -46,7 +55,15 @@ MCR ;
  ;
  ; *********************************************************************
 RRE ;
- S $P(ABMV("X1"),U,4)=$P(^AUTTRRP($P(ABMX("REC"),U,3),0),U)_"-"_$P(ABMX("REC"),U,4)
+ ;S $P(ABMV("X1"),U,4)=$P(^AUTTRRP($P(ABMX("REC"),U,3),0),U)_"-"_$P(ABMX("REC"),U,4)  ;abm*2.6*26 IHS/SD/SDR HCR9265
+ ;start new abm*2.6*26 IHS/SD/SDR CR9265
+ K ABMMBI
+ S ABMMBI=""
+ S ABMMBI=$$HISTMBI^AUPNMBI(ABMX(2),.ABMMBI)
+ S ABMMBI=+$O(ABMMBI(999999999),-1)
+ S:(ABMMBI'=0) $P(ABMV("X1"),U,4)=$P(ABMMBI(ABMMBI),U)
+ I $P($G(ABMV("X1")),U,4)="" S $P(ABMV("X1"),U,4)=$P(^AUTTRRP($P(ABMX("REC"),U,3),0),U)_"-"_$P(ABMX("REC"),U,4)
+ ;end new abm*2.6*26 IHS/SD/SDR CR9265
  I $D(^AUPNRRE(ABMX(2),21)) D
  .S:$P(^AUPNRRE(ABMX(2),21),U)]"" $P(ABMV("X1"),U,5)=$P(^AUPNRRE(ABMX(2),21),U)
  .S:$P(^AUPNRRE(ABMX(2),21),U,2)]"" $P(ABMV("X1"),U,6)=$P(^AUPNRRE(ABMX(2),21),U,2)

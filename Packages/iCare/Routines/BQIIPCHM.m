@@ -1,14 +1,14 @@
 BQIIPCHM ;GDIT/HCSD/ALA-IPC Medical Home ; 12 Jul 2017  11:17 AM
- ;;2.7;ICARE MANAGEMENT SYSTEM;;Dec 19, 2017;Build 23
+ ;;2.7;ICARE MANAGEMENT SYSTEM;**1**;Dec 19, 2017;Build 12
  ;;
  ;
 EN ; Set medical home up
  I $G(^BQI(90508,1,"GPRA"))'=2018 Q
  NEW TEXT,BQIUPD,ERROR,BI,BJ,HELP,IEN,X
  NEW BI,BJ,BK,BN,BQIUPD,ERROR,IEN,ND,NDATA,TEXT,VAL
- S ^BQI(90508,1,22,3,0)="IPCMH",^BQI(90508,1,22,"B","IPCMH",3)=""
+ S ^BQI(90508,1,22,4,0)="IPCMH",^BQI(90508,1,22,"B","IPCMH",4)=""
  S ^BQI(90508,1,22,0)="^90508.022^3^3"
- S ^BQI(90508,1,22,3,1,0)="^90508.221I^13^13"
+ S ^BQI(90508,1,22,4,1,0)="^^90508.221I^25^20"
  ;
  F BI=1:1 S TEXT=$T(ARR+BI) Q:TEXT=" Q"  D
  . S TEXT=$P(TEXT,";;",2) I TEXT="" Q
@@ -22,12 +22,12 @@ EN ; Set medical home up
  ;
  ;Check bundles
  F BI=1:1 S TEXT=$T(BUN+BI) Q:TEXT=" Q"  D
- . K ^BQI(90508,1,22,3,1,BI,2)
+ . K ^BQI(90508,1,22,4,1,BI,2)
  . S TEXT=$P(TEXT,";;",2) I TEXT="" Q
  . F BJ=1:1:$L(TEXT,"~") D
  .. S NDATA=$P(TEXT,"~",BJ) I NDATA="" Q
- .. S ^BQI(90508,1,22,3,1,BI,2,BJ,0)=NDATA
- . S ^BQI(90508,1,22,3,1,BI,2,0)="^90508.2212^"_BJ_"^"_BJ
+ .. S ^BQI(90508,1,22,4,1,BI,2,BJ,0)=NDATA
+ . S ^BQI(90508,1,22,4,1,BI,2,0)="^90508.2212^"_BJ_"^"_BJ
  ;
  ; Check that measure is marked for IPC
  F BI=1:1 S TEXT=$T(MEAS+BI) Q:TEXT=" Q"  D
@@ -39,9 +39,9 @@ EN ; Set medical home up
  .. S NCODE="2018_"_IEN
  . I $P($G(^BGPINDRC(IEN,17)),"^",7)'=1 S $P(^BGPINDRC(IEN,17),"^",7)=1
  . I $G(NCODE)'="" D
- .. S NN=$O(^BQI(90508,1,22,3,1,"B",CODE,"")) I NN="" Q
- .. S ^BQI(90508,1,22,3,1,"B",NCODE,NN)="" K ^BQI(90508,1,22,3,1,"B",CODE)
- .. S $P(^BQI(90508,1,22,3,1,NN,0),"^",1)=NCODE
+ .. S NN=$O(^BQI(90508,1,22,4,1,"B",CODE,"")) I NN="" Q
+ .. S ^BQI(90508,1,22,4,1,"B",NCODE,NN)="" K ^BQI(90508,1,22,4,1,"B",CODE)
+ .. S $P(^BQI(90508,1,22,4,1,NN,0),"^",1)=NCODE
  ;
  NEW DIK,DA
  S DIK="^BQI(90508,",DA=1
@@ -54,75 +54,69 @@ UPD ; Update values
  . S NDATA=$P(TEXT,"~",BJ)
  . S ND=$P(NDATA,"|",1),VAL=$P(NDATA,"|",2)
  . I VAL="" Q
- . S ^BQI(90508,1,22,3,1,BI,ND)=VAL
+ . S ^BQI(90508,1,22,4,1,BI,ND)=VAL
  ;
  S TEXT=$T(TIP+BI) D
  . S TEXT=$P(TEXT,";;",2) I TEXT="" Q
  . F BJ=1:1:$L(TEXT,"~") D
  .. S NDATA=$P(TEXT,"~",BJ) I NDATA="" Q
- .. S ^BQI(90508,1,22,3,1,BI,3,BJ,0)=NDATA
- . S ^BQI(90508,1,22,3,1,BI,3,0)="^90508.2213^"_BJ_"^"_BJ
+ .. S ^BQI(90508,1,22,4,1,BI,3,BJ,0)=NDATA
+ . S ^BQI(90508,1,22,4,1,BI,3,0)="^90508.2213^"_BJ_"^"_BJ
  ;
  Q
  ;
 MEAS ;
- ;;2018_3255|026.U.1
- ;;2018_2023|027.B.19
- ;;2018_2584|028.A.23
- ;;2018_2857|025.S.1
- ;;2018_60|DM.1.1
- ;;2018_84|002.B.8
- ;;2018_2648|MHBP.A.1
- ;;2018_2558|MTA.B.1
- ;;2018_2559|MTA.B.2
- ;;2018_2159|CHS.F.1
- ;;2018_2673|WCC.A.3
- ;;2018_2674|WCC.A.4
- ;;2018_2872|B.M.1
- ;;2018_209|008.A.1
- ;;2018_2731|007.D.2
- ;;2018_3196|A.O.1
- ;;2018_489|A.C.3
+ ;;2018_3404|IPC.DMC.1
+ ;;2018_3405|IPC.DMG.1
+ ;;2018_3406|IPC.ADS.1
+ ;;2018_3407|IPC.FLU.1
+ ;;2018_3408|IPC.AIZ.1
+ ;;2018_3409|IPC.CIZ.1
+ ;;2018_3410|IPC.ADZ.1
+ ;;2018_3411|IPC.ADZ.2
+ ;;2018_3412|IPC.ADZ.3
+ ;;2018_3413|IPC.CCS.1
+ ;;2018_3414|IPC.BCS.1
+ ;;2018_3415|IPC.CRC.1
+ ;;2018_3416|IPC.DEP.1
+ ;;2018_3417|IPC.DFU.1
+ ;;2018_3418|IPC.DRM.1
+ ;;2018_3419|IPC.BMI.1
+ ;;2018_3420|IPC.WAC.1
+ ;;2018_3421|IPC.WAC.2
+ ;;2018_3422|IPC.WAC.3
+ ;;2018_3423|IPC.CBP.1
+ ;;2018_3424|IPC.MTA.1
  Q
  ;
 ARR ;  Measure definition
- ;;0|IPC_CCPR^R^23^Continuity of Care Primary Provider^^20^^^^^^^A~1|D EN^BQIIPCCP($G(BQDATE),$G(BQFROM),$G(BQTHRU))
- ;;0|IPC_PEMP^R^23^% of Pts Empanelled to a Primary Care Provider^^19^^^^^^^A~1|D EN^BQIIPEMP($G(BQDATE),$G(BQFROM),$G(BQTHRU))
- ;;0|2018_3255^G^19^Adult Composite Immunization^^3~1|
- ;;0|2018_2023^G^19^Childhood Immunization Status^^1~1|
- ;;0|2018_2584^G^19^Adolescents Immunization Status^^2~1|
- ;;0|IPC_FLU^R^19^Influenza Immunization Status^B^4~1|D EN^BQIIPBNL(CRN,MSN,$G(BQDATE),CODE,$G(BQFROM),$G(BQTHRU))
- ;;0|2018_60^G^20^Diabetes Comprehensive Care^^5~1|
- ;;0|2018_84^G^20^A1C Control > 9^^6~1|
- ;;0|2018_2648^G^20^BP Control^^7~1|
- ;;0|IPC_ASTH^R^20^Asthma Control - Pharmacologic Therapy for Persistent Asthma^B^8~1|D EN^BQIIPBNL(CRN,MSN,$G(BQDATE),CODE,$G(BQFROM),$G(BQTHRU))
- ;;0|2018_2159^G^20^Body Mass Index (BMI) Screening^^9~1|
- ;;0|IPC_WGTA^R^20^Weight Assessment/Counseling Children/Adolescents^B^10~1|D EN^BQIIPBNL(CRN,MSN,$G(BQDATE),CODE,$G(BQFROM),$G(BQTHRU))
- ;;0|2018_2872^G^21^Colorectal Cancer Screening^^12~1|
- ;;0|2018_209^G^21^Breast Cancer Screening^^13~1|
- ;;0|2018_2731^G^21^Cervical Cancer Screening^^14~1|
- ;;0|IPC_DEP^R^22^Screening for Clinical Depression^B^16~1|D EN^BQIIPBNL(CRN,MSN,$G(BQDATE),CODE,$G(BQFROM),$G(BQTHRU))
- ;;0|IPC_CCTM^R^23^Continuity of care to a Designated Care Team^^21^^^^^^^A^T~1|D EN^BQIIPCCT($G(BQDATE),$G(BQFROM),$G(BQTHRU))
+ ;;0|IPC_CCPR^R^23^Continuity of Care Primary Provider^^23^^^^^^^A~1|D EN^BQIIPCCP($G(BQDATE),$G(BQFROM),$G(BQTHRU))
+ ;;0|IPC_PEMP^R^23^% of Pts Empaneled to a Primary Care Provider^^22^^^^^^^A~1|D EN^BQIIPEMP($G(BQDATE),$G(BQFROM),$G(BQTHRU))
+ ;;0|2018_3408^G^19^Adult Immunization Status^^5~1|
+ ;;0|2018_3409^G^19^Childhood Immunization Status^^1~1|
+ ;;0|2018_3410^G^19^Adolescents IZ: Meningococcal^^2~1|
+ ;;0|2018_3407^G^19^Influenza Immunization Status^^6~1|
+ ;;0|2018_3404^G^20^Diabetes Comprehensive Care^^7~1|
+ ;;0|2018_3405^G^20^Diabetes: Glycemic Control^^8~1|
+ ;;0|2018_3423^G^20^Controlling High Blood Pressure^^9~1|
+ ;;0|2018_3424^G^20^Medication Therapy for Persons with Asthma^^10~1|
+ ;;0|2018_3419^G^20^Body Mass Index (BMI) Screening/Followup^^11~1|
+ ;;0|2018_3415^G^21^Colorectal Cancer Screening^^16~1|
+ ;;0|2018_3414^G^21^Breast Cancer Screening^^17~1|
+ ;;0|2018_3413^G^21^Cervical Cancer Screening^^18~1|
+ ;;0|2018_3416^G^22^Depression Screening^^19~1|
+ ;;0|IPC_CCTM^R^23^Continuity of care to a Designated Care Team^^24^^^^^^^A^T~1|D EN^BQIIPCCT($G(BQDATE),$G(BQFROM),$G(BQTHRU))
+ ;;0|2018_3406^G^20^Dental Treatment^^15^^^^^~1|
+ ;;0|2018_3420^G^20^Weight Assess/Counseling - BMI^^12^^^^^~1|
+ ;;0|2018_3421^G^20^Weight Assess/Counseling - Nutrition^^13^^^^^~1|
+ ;;0|2018_3422^G^20^Weight Assess/Counseling - Physical Activity^^14^^^^^~1|
+ ;;0|2018_3411^G^19^Adolescents IZ: Tdap/TD^^3~1|
+ ;;0|2018_3412^G^19^Adolescents IZ: Td/Tdap & Meningococcal^^4~1|
+ ;;0|2018_3417^G^22^Depression Screening with Followup^^20~1|
+ ;;0|2018_3418^G^22^Depression Remission (12 months)^^21~1|
  Q
  ;
 BUN ; Bundles
- ;;
- ;;
- ;;
- ;;
- ;;
- ;;2018_2404~2018_2857~
- ;;
- ;;
- ;;
- ;;2018_2558~2018_2559~
- ;;
- ;;2018_2673~2018_2674~
- ;;
- ;;
- ;;
- ;;2018_3196~2018_489~
- ;;
  Q
  ;
 TIP ;  Tooltips
@@ -141,6 +135,13 @@ TIP ;  Tooltips
  ;;
  ;;
  ;;
- ;;
  ;;% of visits among patients empaneled to a Designated Primary Care ~Provider (DPCP) seen by a member of the care team but not the patient's ~DPCP.~
+ ;;
+ ;;
+ ;;
+ ;;
+ ;;
+ ;;
+ ;;
+ ;;
  Q

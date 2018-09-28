@@ -1,5 +1,5 @@
 AVA200 ; IHS/OIT/FBD - ADD/ EDIT PERSONS TO VA(200 ;30-Sep-2010 17:29;fbd
- ;;93.2;VA SUPPORT FILES;**1,4,7,8,13,19,21**;SEP 30, 2010;Build 8
+ ;;93.2;VA SUPPORT FILES;**1,4,7,8,13,19,21**;SEP 30, 2010;Build 12
  ;PATCH #8 -- Added Service/Section field to Add New Person-IHS/ADC/CRG
  ;PATCH #19 Added Trigger to fire Protocol to generate MFN-M02 Hl7 message IHS/OIT/FJE
  ;PATCH #21 Added Fax, Email Addr, SPI field edits to Add Provider - IHS/OIT/FBD

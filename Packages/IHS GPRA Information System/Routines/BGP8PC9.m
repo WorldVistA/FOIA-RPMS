@@ -1,0 +1,199 @@
+BGP8PC9 ; IHS/CMI/LAB - measure I2 ; 02 Feb 2018  11:25 AM
+ ;;18.1;IHS CLINICAL REPORTING;;MAY 25, 2018;Build 66
+ ;
+BCS ;EP
+ S (BGPN1,BGPD1)=0
+ S BGPDV=""
+ I $P(^DPT(DFN,0),U,2)'="F" S BGPSTOP=1 Q  ;female only
+ I BGPAGEE<51 S BGPSTOP=1 Q  ;18 or greater during time period
+ I BGPAGEB>73 S BGPSTOP=1 Q  ;74 or less during time period
+ ;
+ S BGPDV=$$ENC9(DFN,BGPBDATE,BGPEDATE) I BGPDV="" S BGPSTOP=1 Q  ;no office visit
+ ;
+ ;now what about exclusions?
+ I $$HOSPIND^BGP8PC2(DFN,BGPBDATE,BGPEDATE) S BGPSTOP=1 Q  ;no hospice pts
+ ;Hysterectomy?
+ I $$MAS(DFN,BGPEDATE) S BGPSTOP=1 Q
+ ;
+ S BGPD1=1
+ ;
+ S BGPVAL=""
+ S X=$$MAM(DFN,$$FMADD^XLFDT(BGPEDATE,-824),BGPEDATE)  ;PAP IN 3 YRS?
+ I $E(X)=1 S BGPN1=1,BGPVAL=X
+ S BGPVALUE=""
+ S BGPVALUE="ENC "_$P(BGPDV,U,2)_"|||"  ;hit denominator
+ I BGPN1 S BGPVALUE=BGPVALUE_"*** "_$$DATE^BGP8UTL($P(X,U,2))_" "_$P(X,U,3)
+ K V,BGPDV,BGPVAL
+ Q
+ENC9(P,BDATE,EDATE) ;EP  - have encounter per CMS122v6
+ ;HAS one of the following
+ ;1.  cpt in BGP IPC OFFICE VISIT CPTS
+ ;2.  snomed in PXRM BGP IPC FACE2FACE
+ ;3.  CPT in BGP IPC PREVCARE EOV >=18 CPTS
+ ;4.  CPT in BGP IPC PREVCARE IOV >=18 CPTS
+ ;5.  CPT in BGP IPC HOMEHEALTH VISIT CPTS
+ NEW X,Y,Z,G,BGPV,D
+ ;Let's check all Visits, looping through once
+ S G=""  ;return variable
+ ;get all visits in date range in BGPV
+ D ALLV^APCLAPIU(P,BDATE,EDATE,"BGPV")
+ ;now loop through and check Face to Face and .17 in visit and check v cpts attached to the visit
+ S X=0 F  S X=$O(BGPV(X)) Q:X'=+X!(G)  S V=$P(BGPV(X),U,5)  D
+ .Q:'$P(^AUPNVSIT(V,0),U,9)  ;no dependent entries
+ .Q:$P(^AUPNVSIT(V,0),U,11)  ;deleted
+ .S D=$$VD^APCLV(V)
+ .S Y=$$FTOF^BGP8PC2(V) I Y]"" S G=1_U_$$DATE^BGP8UTL(D)_" FTOF: "_Y Q
+ .;is .17 a cpt we want?
+ .S Y=$$VALI^XBDIQ1(9000010,V,.17)
+ .I Y,$$OFFCPT9(Y) S G=1_U_$$DATE^BGP8UTL(D)_" CPT: "_$P($$CPT^ICPTCOD(Y),U,2) Q
+ .;now check all V CPTs
+ .S Z=0 F  S Z=$O(^AUPNVCPT("AD",V,Z)) Q:Z'=+Z!(G)  D
+ ..S Y=$P($G(^AUPNVCPT(Z,0)),U,1)
+ ..I Y,$$OFFCPT9(Y) S G=1_U_$$DATE^BGP8UTL(D)_" CPT: "_$P($$CPT^ICPTCOD(Y),U,2) Q
+ Q G
+OFFCPT9(C) ;EP
+ I $$ICD^ATXAPI(C,$O(^ATXAX("B","BGP IPC OFFICE VISIT CPTS",0)),1) Q 1
+ I $$ICD^ATXAPI(C,$O(^ATXAX("B","BGP IPC PREVCARE EOV >=18 CPTS",0)),1) Q 1
+ I $$ICD^ATXAPI(C,$O(^ATXAX("B","BGP IPC PREVCARE IOV >=18 CPTS",0)),1) Q 1
+ I $$ICD^ATXAPI(C,$O(^ATXAX("B","BGP IPC HOMEHEALTH VISIT CPTS",0)),1) Q 1
+ I $$ICD^ATXAPI(C,$O(^ATXAX("B","BGP IPC ANNUAL WELLNESS CPTS",0)),1) Q 1
+ Q ""
+LOINC(A,B) ;EP
+ NEW %
+ S %=$P($G(^LAB(95.3,A,9999999)),U,2)
+ I %]"",$D(^ATXAX(B,21,"B",%)) Q 1
+ S %=$P($G(^LAB(95.3,A,0)),U)_"-"_$P($G(^LAB(95.3,A,0)),U,15)
+ I $D(^ATXAX(B,21,"B",%)) Q 1
+ Q ""
+MAS(P,EDATE) ;EP mastectomy before end of time frame
+ NEW BGP,X,Y,Z,G,T,%,D,M,BGPX,E,BGPRL,T1,I,BGPC,BGPG,S
+ K BGP
+ ;V POV
+ S BGP(1)=$$LASTDX^BGP8UTL1(P,"BGP IPC BILAT MASTECTOMY DXS",$$DOB^AUPNPAT(P),EDATE)
+ I $P(BGP(1),U,1) Q 1
+ ;problem list
+ S T=$O(^ATXAX("B","BGP IPC BILAT MASTECTOMY DXS",0))
+ S (X,Y,I)=0
+ F  S X=$O(^AUPNPROB("AC",P,X)) Q:X'=+X!(I)  D
+ .Q:'$D(^AUPNPROB(X,0))
+ .I $P(^AUPNPROB(X,0),U,12)="D" Q
+ .S Y=$P(^AUPNPROB(X,0),U)
+ .I $P(^AUPNPROB(X,0),U,13),$P(^AUPNPROB(X,0),U,13)>EDATE Q  ;if there is a doo and it is after report period skip
+ .I $P(^AUPNPROB(X,0),U,13)="",$P(^AUPNPROB(X,0),U,8)>EDATE Q  ;entered after report period, skip
+ .I $$ICD^BGP8UTL2(Y,T,9) S I=1 Q
+ .S S=$$VAL^XBDIQ1(9000011,X,80001)
+ .I S=428529004 S I=1 Q
+ .Q
+ I I Q 1
+ ;NOW V POV FOR SNOMED CODE
+ ;NOW SNOMED USING ASNC
+ S G="",I=""
+ S S="" F  S S=$O(^AUPNVPOV("ASNC",P,S)) Q:S=""!(G)  D
+ .S I=0
+ .I S=428529004 S I=1 Q
+ .Q:'I
+ .S D=0 F  S D=$O(^AUPNVPOV("ASNC",P,S,D)) Q:D=""!(G)  D
+ ..S Y=9999999-D
+ ..Q:Y>EDATE
+ ..S G=1
+ I G Q 1
+ ;check cpt codes for 2 unilateral
+ ;loop through all cpt codes up to Edate and count them
+ S (X,Y,Z,G)=0
+ S BGPC=0
+ S T=$O(^ATXAX("B","BGP IPC UNILAT MASTECTOMY CPTS",0))
+ I T D  I BGPC>1 Q 1
+ .S Y=0 F  S Y=$O(^AUPNVCPT("AC",P,Y)) Q:Y'=+Y!(BGPC>1)  D
+ ..S D=$P($G(^AUPNVCPT(Y,0)),U,3)
+ ..Q:D=""
+ ..S D=$P($P($G(^AUPNVSIT(D,0)),U),".") ;date done
+ ..Q:D=""
+ ..I D>EDATE Q
+ ..S X=$P(^AUPNVCPT(Y,0),U)
+ ..Q:'$$ICD^BGP8UTL2(X,T,1)
+ ..S BGPC=BGPC+1
+ .Q
+ ;NOW CHECK PROBLEM LIST AND V POV FOR A RIGHT AND AN LEFT
+ K BGPRL
+ S T=$O(^ATXAX("B","BGP IPC RT MASTECTOMY DXS",0))
+ S T1=$O(^ATXAX("B","BGP IPC LT MASTECTOMY DXS",0))
+ S (X,Y,I)=0
+ F  S X=$O(^AUPNPROB("AC",P,X)) Q:X'=+X  D
+ .Q:'$D(^AUPNPROB(X,0))
+ .I $P(^AUPNPROB(X,0),U,12)="D" Q
+ .S Y=$P(^AUPNPROB(X,0),U)
+ .I $P(^AUPNPROB(X,0),U,13),$P(^AUPNPROB(X,0),U,13)>EDATE Q  ;if there is a doo and it is after report period skip
+ .I $P(^AUPNPROB(X,0),U,13)="",$P(^AUPNPROB(X,0),U,8)>EDATE Q  ;entered after report period, skip
+ .I $$ICD^BGP8UTL2(Y,T,9) S BGPRL("RT")=1 Q
+ .I $$ICD^BGP8UTL2(Y,T1,9) S BGPRL("LT")=1 Q
+ .S S=$$VAL^XBDIQ1(9000011,X,80001)
+ .I S=429242008 S BGPRL("RT")=1 Q
+ .I S=429009003 S BGPRL("LT")=1 Q
+ .S C=$$VAL^XBDIQ1(9000011,X,.22)
+ .Q:C=""
+ .I S]"",$D(^XTMP("BGPSNOMEDSUBSET",$J,"PXRM BGP IPC UNI MAST DX",S)),$$UP^XLFSTR(C)["LEFT" S BGPRL("LT")=1 Q
+ .I S]"",$D(^XTMP("BGPSNOMEDSUBSET",$J,"PXRM BGP IPC UNI MAST DX",S)),$$UP^XLFSTR(C)["RIGHT" S BGPRL("RT")=1 Q
+ .I $$ICD^BGP8UTL2(Y,$O(^ATXAX("B","BGP IPC UNILAT MASTECTOMY DXS",0)),9),$$UP^XLFSTR(C)["LEFT" S BGPRL("LT")=1 Q
+ .I $$ICD^BGP8UTL2(Y,$O(^ATXAX("B","BGP IPC UNILAT MASTECTOMY DXS",0)),9),$$UP^XLFSTR(C)["RIGHT" S BGPRL("RT")=1 Q
+ .Q
+ I $D(BGPRL("RT")),$D(BGPRL("LT")) Q 1
+ ;NOW V POV
+ S X=$$LASTDX^BGP8UTL1(P,"BGP IPC RT MASTECTOMY DXS",$$DOB^AUPNPAT(P),EDATE) I X S BGPRL("RT")=1
+ S X=$$LASTDX^BGP8UTL1(P,"BGP IPC LT MASTECTOMY DXS",$$DOB^AUPNPAT(P),EDATE) I X S BGPRL("LT")=1
+ I $D(BGPRL("RT")),$D(BGPRL("LT")) Q 1
+ S S=429242008
+ S D=0 F  S D=$O(^AUPNVPOV("ASNC",P,S,D)) Q:D=""!(G)  D
+ .S Y=9999999-D
+ .Q:Y>EDATE
+ .S BGPRL("RT")=1
+ S S=429009003
+ S D=0 F  S D=$O(^AUPNVPOV("ASNC",P,S,D)) Q:D=""!(G)  D
+ .S Y=9999999-D
+ .Q:Y>EDATE
+ .S BGPRL("LT")=1
+ I $D(BGPRL("RT")),$D(BGPRL("LT")) Q 1
+ ;NOW V POV FOR UNILATERAL WITH LATERALITY LEFT OR RIGHT
+ S Y="BGPG("
+ S X=P_"^ALL DX [BGP IPC UNILAT MASTECTOMY DXS;DURING "_$$DOB^AUPNPAT(P)_"-"_EDATE S E=$$START1^APCLDF(X,Y)
+ S X=0 F  S X=$O(BGPG(X)) Q:X'=+X  D
+ .S C=$$VAL^XBDIQ1(9000010.07,+$P(BGPG(X),U,4),1104)
+ .I $$UP^XLFSTR(C)["LEFT" S BGPRL("LT")=1 Q
+ .I $$UP^XLFSTR(C)["RIGHT" S BGPRL("RT")=1 Q
+ I $D(BGPRL("RT")),$D(BGPRL("LT")) Q 1
+ ;NOW SNOMED USING ASNC
+ S G=0
+ S T="PXRM BGP IPC UNI MAST DX"
+ S S=0 F  S S=$O(^XTMP("BGPSNOMEDSUBSET",$J,T,S)) Q:S=""  D
+ .Q:'$D(^AUPNVPOV("ASNC",P,S))
+ .S D=0 F  S D=$O(^AUPNVPOV("ASNC",P,S,D)) Q:D=""  D
+ ..S Y=9999999-D
+ ..Q:Y>EDATE
+ ..S I=0 F  S I=$O(^AUPNVPOV("ASNC",P,S,D,I)) Q:I=""  D
+ ...S C=$$VAL^XBDIQ1(9000010.07,I,1104)
+ ...Q:C=""
+ ...I $$UP^XLFSTR(C)["LEFT" S BGPRL("LT")=1 Q
+ ...I $$UP^XLFSTR(C)["RIGHT" S BGPRL("RT")=1 Q
+ I $D(BGPRL("RT")),$D(BGPRL("LT")) Q 1
+ Q ""
+MAM(P,BDATE,EDATE) ;
+ NEW BGPLMAM,X,Y,V,G
+ S BGPLMAM=""
+ S (X,Y,V)=0,G="" F  S X=$O(^AUPNVRAD("AC",P,X)) Q:X'=+X  D
+ .Q:'$D(^AUPNVRAD(X,0))
+ .S V=$P(^AUPNVRAD(X,0),U,3)
+ .Q:V=""
+ .S V=$P($P($G(^AUPNVSIT(V,0)),U),".")
+ .Q:V>EDATE
+ .Q:V<BDATE
+ .S Y=$P(^AUPNVRAD(X,0),U),Y=$P($G(^RAMIS(71,Y,0)),U,9)
+ .I Y,$$ICD^BGP8UTL2(Y,$O(^ATXAX("B","BGP IPC MAMMOGRAM CPTS",0)),1) D  Q
+ ..S Y=$P($$CPT^ICPTCOD(Y),U,2)
+ ..I $P(BGPLMAM,U,2)<V S BGPLMAM="1^"_V_U_"RAD "_Y Q
+ .S Z="" F  S Z=$O(^AUPNVRAD(X,27,"B",Z)) Q:Z=""  D
+ ..I $D(^ATXAX($O(^ATXAX("B","BGP IPC MAMMOGRAM LOINC CODES",0)),21,"B",Z)) I $P(BGPLMAM,U,2)<V S BGPLMAM="1^"_V_U_"RAD "_Y Q
+ .Q
+ S T=$O(^ATXAX("B","BGP IPC MAMMOGRAM CPTS",0))
+ I T D  I X]"",$P(BGPLMAM,U,2)<$P(X,U,1) S BGPLMAM="1^"_$P(X,U,1)_"^"_"CPT "_$P(X,U,2)
+ .S X=$$CPT^BGP8DU(P,BDATE,EDATE,T,5) I X]"" Q
+ .S X=$$TRAN^BGP8DU(P,BDATE,EDATE,T,5)
+ Q BGPLMAM

@@ -1,5 +1,5 @@
 BGP8DAP ;IHS/CMI/LAB - GPRA AREA DRIVER;
- ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
+ ;;18.1;IHS CLINICAL REPORTING;;MAY 25, 2018;Build 66
  ;
  ;
  W:$D(IOF) @IOF
@@ -17,7 +17,7 @@ SETIND ;
  S BGPINDG=""
  S BGPRTYPE=4,BGPYRPTH="A"
  S DIR(0)="S^DM:Diabetes-Related Measures;CVD:Cardiovascular Disease Prevention for At-Risk Patients;WH:Women's Health-Related Measures"
- S DIR(0)=DIR(0)_";IPC:Improving Patient Care Measures;PQA:Pharmacy Quality Alliance Measures;AST:Asthma-Related Measures;SEL:Selected Performance Measures (User Defined)"
+ S DIR(0)=DIR(0)_";PQA:Pharmacy Quality Alliance Measures;AST:Asthma-Related Measures;SEL:Selected Performance Measures (User Defined)"
  S DIR("A")="Which set of Measures should be included in this report" KILL DA D ^DIR KILL DIR
  I $D(DIRUT) D XIT Q
  S BGPINDG=$E(Y)

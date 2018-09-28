@@ -1,5 +1,5 @@
 BITN3 ;IHS/CMI/MWR - BUILD ^BITN GLOBAL THIRD PART.
- ;;8.5;IMMUNIZATION;**15**;SEP 30,2017
+ ;;8.5;IMMUNIZATION;**16**;MAR 01,2018
  ;;* MICHAEL REMILLARD, DDS * CIMARRON MEDICAL INFORMATICS, FOR IHS *
  ;;  UTILITY: BUILD STANDARD ^BITN GLOBAL.
  ;
@@ -68,3 +68,9 @@ TABLE ; EP
  ;;289a;;^^^^^^^^^^^^^influenza, recombinant, quadrivalent,injectable, preservative free
  ;;290;;Influenza, injectable, MDCK, quadrivalent^FLU-ccI4^186^^^^0^0^10^^^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185,186^3150807^^^0^1^.5
  ;;290a;;^^^^^^^^^^^^^Influenza, injectable, Madin Darby Canine Kidney, quadrivalent
+ ;;291;;ZOSTER RECOMBINANT^ZOS-Shgrx^187^^^^0^0^7^^^21,94,117,121,187,188^3091006^^^0^1^.5
+ ;;291a;;Shingrix^^^^^^^^^^^^^zoster vaccine recombinant
+ ;;292;;ZOSTER,NOS^ZOS,NOS^188^^^^0^0^7^^^21,94,117,121,187,188^^^^0^1
+ ;;292a;;^^^^^^^^^^^^^zoster vaccine, unspecified formulation
+ ;;293;;Hep B, adjuvanted^HEP B ADJV^189^^^^0^0^4^^^8,42,43,44,45,51,104,110,189^3160720^^^0^1^.5
+ ;;293a;;Heplisav-B^^^^^^^^^^^^^Hepatitis B vaccine (recombinant), adjuvanted

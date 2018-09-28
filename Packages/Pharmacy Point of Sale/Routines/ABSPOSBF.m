@@ -1,5 +1,5 @@
 ABSPOSBF ; IHS/FCS/DRS - ILC/AR comments in 9002302 ; 
- ;;1.0;PHARMACY POINT OF SALE;**48**;JUN 21, 2001;Build 27
+ ;;1.0;PHARMACY POINT OF SALE;**48**;JUN 21, 2001;Build 38
  Q
 COMMENT(PCNDFN,COMMENT,DATE) ;EP - add a brief comment
  ; If you call it with $$, it returns pointer to the comment

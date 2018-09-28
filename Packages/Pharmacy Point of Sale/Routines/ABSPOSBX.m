@@ -1,5 +1,5 @@
 ABSPOSBX ; IHS/FCS/DRS - Billing - FSI/ILC A/R v1,2;      
- ;;1.0;PHARMACY POINT OF SALE;**48**;JUN 21, 2001;Build 27
+ ;;1.0;PHARMACY POINT OF SALE;**48**;JUN 21, 2001;Build 38
  Q
 ENABLED() Q 1
 EN ; Taskman routine begins here

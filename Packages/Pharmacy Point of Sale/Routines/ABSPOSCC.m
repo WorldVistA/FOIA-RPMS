@@ -1,5 +1,5 @@
 ABSPOSCC ; IHS/FCS/DRS - Set up ABSP() ;      [ 05/09/2003  9:37 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**1,4,6,9,11,15,16,17,19,20,21,29,37,40,42,46,47**;JUN 01, 2001;Build 27
+ ;;1.0;PHARMACY POINT OF SALE;**1,4,6,9,11,15,16,17,19,20,21,29,37,40,42,46,47**;JUN 01, 2001;Build 38
  ;---
  ; IHS/SD/lwj 03/12/02  some insurers are requiring the entire
  ; untranslated value as the cardholder id - new array budget

@@ -1,5 +1,5 @@
 BARMAWO1 ; IHS/SD/LSL - Automatic Write-off (con't) ;
- ;;1.8;IHS ACCOUNTS RECEIVABLE;**1,2**;MAR 27,2007
+ ;;1.8;IHS ACCOUNTS RECEIVABLE;**1,2,28**;OCT 26, 2005;Build 92
  ;
  ; IHS/ASDS/LSL - 06/15/2001 - V1.5 Patch 1 - NOIS HQW-0601-100051
  ;     Modifying BARMAWO to extend the expiration date resulted in 
@@ -17,8 +17,14 @@ BARMAWO1 ; IHS/SD/LSL - Automatic Write-off (con't) ;
  ;
  ; IHS/SD/LSL - 12/06/02 - V1.7 - NOIS NHA-0601-180049
  ;      Find 3P bill correctly.
- ;
- Q
+ ;IHS/DIT/CPC 1.8*28 CR 8349 START
+ W "*********************************************************************",!
+ W "                     STOP!!!  STOP!!!!   STOP!!!!",!
+ W "This is an old, outdated routine and shouldn't be used.  Please ",!
+ W "request assistance from OIT before starting the write-off process.",!
+ W "*********************************************************************",!
+ H 10
+ Q  ;IHS/DIT/CPC 1.8*28 CR 8349 STOP
  ; *********************************************************************
 LOOPDUZ ; EP
  ; Loop A/R Bill File by DUZ(2)

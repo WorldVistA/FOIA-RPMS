@@ -1,7 +1,7 @@
-BPXRMAL1 ;IHS/MSC/MGH - Handle Allergy findings for drugs ;18-Apr-2014 15:23;DU
- ;;2.0;CLINICAL REMINDERS;**1001,1002**;Feb 04, 2005;Build 15
+BPXRMAL1 ;IHS/MSC/MGH - Handle Allergy findings for drugs ;30-Mar-2018 14:29;DU
+ ;;2.0;CLINICAL REMINDERS;**1001,1002,1009**;Feb 04, 2005;Build 17
  ;--------------------------------------------------------------
- ;1008 Removed check for non-verified allergies
+ ;Patch 1009 added Statin drugs
  ;ROUTINE TO TEST ALLERGY STATUS
  ;ENTRY POINT REM JUST NEEDS THE PSODFN.NOT NECESSARILY THE TERM WILL FIND ALL
  ;TERMS THAT HAVE DRUGS IN THEM EITHER DRUG OR VA GENERIC
@@ -9,6 +9,11 @@ BPXRMAL1 ;IHS/MSC/MGH - Handle Allergy findings for drugs ;18-Apr-2014 15:23;DU
  ;
 ASAREM(PSODFN,TEST,DATE,VALUE,TEXT) ; EP ASPIRIN COMPUTED ALLERGY CHECK RETURN TEST=1 IF ALLERGY
  S TERM="IHS-ASPIRIN"
+ D REM(PSODFN,.TEST,.DATE,.VALUE,.TEXT)
+ Q
+ ;
+STATREM(PSODFN,TEST,DATE,VALUE,TEXT) ;EP Statin computed allergy check added patch 1009
+ S TERM="IHS-STATIN DRUGS"
  D REM(PSODFN,.TEST,.DATE,.VALUE,.TEXT)
  Q
  ;

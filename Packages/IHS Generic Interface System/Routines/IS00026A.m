@@ -1,4 +1,4 @@
-IS00026A ;Compiled from script 'Generated: HL IHS IZV04 V02VXX IN-I' on FEB 22, 2018
+IS00026A ;Compiled from script 'Generated: HL IHS IZV04 V02VXX IN-I' on AUG 15, 2018
  ;Part 2
  ;Copyright 2018 SAIC
 EN I $D(@INV@("QRD1"))#2,$G(@INV@("QRD7"))="" S INREQERR=2 D KILL^INHVA1("QRD","HL IHS QRD IN QTY (QRD-7)")

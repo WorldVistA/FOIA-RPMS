@@ -1,5 +1,5 @@
 ABSPOS6J ; IHS/FCS/DRS - user screen subrous ; 
- ;;1.0;PHARMACY POINT OF SALE;**49**;JUN 21, 2001;Build 27
+ ;;1.0;PHARMACY POINT OF SALE;**49**;JUN 21, 2001;Build 38
  Q
 HEADER ; protocol ABSP P1 HEADER ; edit header  (EV  "Edit view screen")
  ; first, ask "All users or just one user or one patient?"

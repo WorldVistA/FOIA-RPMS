@@ -1,5 +1,5 @@
 ABSPP49 ; /IHS/OIT/RAM ; 13 OCT 2017 ; PRE & POST INSTALL ROUTINES FOR ABSP PATCH 49
- ;;1.0;PHARMACY POINT OF SALE;**49**;13 OCT 2017;Build 27
+ ;;1.0;PHARMACY POINT OF SALE;**49**;13 OCT 2017;Build 38
  ; =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  ; /IHS/OIT/RAM ; Entire routine
  ; Preinstall and Postinstall routines for ABSP Patch 49.
@@ -53,12 +53,15 @@ ENV ; /IHS/OIT/RAM ; 13 OCT 2017 ; ENVIRONMENT CHECK ROUTINE FOR ABSP PATCH 49
  }
  I PLOP G ENVABORT
  E  D MES^XPDUTL("AG 7.2 patch level correct!")
- 
+ ;
  S LASTPATCH=$$LAST^XPDUTL("AG",7.1)
- I +LASTPATCH'>11 {
-   D MES^XPDUTL("Current patch revision of AG 7.1 package: "_+LASTPATCH_" -- requires P12 or newer.")
+ I +LASTPATCH'>12 {
+   D MES^XPDUTL("Current patch revision of AG 7.1 package: "_+LASTPATCH_" -- requires P13 or newer.")
    S PLOP=1
  }
+ I PLOP G ENVABORT
+ E  D MES^XPDUTL("AG 7.1 patch level correct!")
+ ;
  /*
  S LASTPATCH=$$LAST^XPDUTL("AG",7.1)
  I +LASTPATCH'>10 {
@@ -66,8 +69,26 @@ ENV ; /IHS/OIT/RAM ; 13 OCT 2017 ; ENVIRONMENT CHECK ROUTINE FOR ABSP PATCH 49
   S PLOP=1
  }
  */
+ ;
+ ; Let's check AUPN next. It's needed for the new MBI patch as well.
+ ;
+ D BMES^XPDUTL("Checking Patch Prerequisites.... AUPN package.")
+ S CURVER=$$VERSION^XPDUTL("AUPN")
+ I CURVER'=99.1 {
+  D MES^XPDUTL("Current version of the AG package: "_CURVER_" isn't the expected 99.1.")
+  D MES^XPDUTL("Aborting Install.")
+  S PLOP=1
+ }
  I PLOP G ENVABORT
- E  D MES^XPDUTL("AG 7.1 patch level correct!")
+ E  D MES^XPDUTL("AUPN version ("_CURVER_") level correct!")
+ ;
+ S LASTPATCH=$$LAST^XPDUTL("AUPN",99.1)
+ I +LASTPATCH'>25 {
+   D MES^XPDUTL("Current patch revision of AUPN 99.1 package: "_+LASTPATCH_" -- requires P26 or newer.")
+   S PLOP=1
+ }
+ I PLOP G ENVABORT
+ E  D MES^XPDUTL("AUPN 99.1 patch level correct!")
  ;
  D BMES^XPDUTL("Checking Patch Prerequisites.... ABSP package.")
  ;
@@ -85,8 +106,8 @@ ENV ; /IHS/OIT/RAM ; 13 OCT 2017 ; ENVIRONMENT CHECK ROUTINE FOR ABSP PATCH 49
   D MES^XPDUTL("Current patch revision of ABSP 1.0 package: "_+LASTPATCH_" -- requires P47 or newer.")
   S PLOP=1
  }
- I +LASTPATCH>49 {
-  D MES^XPDUTL("Current patch revision of ABSP 1.0 package: "_+LASTPATCH_" -- is newer than P49.")
+ I +LASTPATCH>50 {
+  D MES^XPDUTL("Current patch revision of ABSP 1.0 package: "_+LASTPATCH_" -- is newer than Patch 50.")
   D MES^XPDUTL("Are you sure that you wish to install this package? ")
   R INPUT#1:120 S INPUT=$$SUP(INPUT)
      I "N"=INPUT S PLOP=1
@@ -113,7 +134,7 @@ ENVABORT ; "SOMETHING BROKE. ABORT INSTALL AND UNLOAD DISTRIBUTION."
  ; K DIR S DIR(0)="FA^0:0" D ^DIR
  R PLOP#1:120
  S XPDABORT=1,XPDQUIT=1,XPDQUIT("ABSP*1.0*49")=1
- Q
+ ;;1.0;PHARMACY POINT OF SALE;**49**;13 OCT 2017
  ;
 PRE ; /IHS/OIT/RAM ; 13 OCT 2017 ; PRE-INSTALL ROUTINE FOR ABSP PATCH 49
  ;;1.0;PHARMACY POINT OF SALE;**49**;13 OCT 2017
@@ -122,7 +143,7 @@ PRE ; /IHS/OIT/RAM ; 13 OCT 2017 ; PRE-INSTALL ROUTINE FOR ABSP PATCH 49
  N STATTEXT,ZMONTH D INIT
  ;
 PREBYE ;
- Q
+ ;;1.0;PHARMACY POINT OF SALE;**49**;13 OCT 2017
  ;
 POST ; /IHS/OIT/RAM ; 13 OCT 2017 ; POST-INSTALL ROUTINE FOR ABSP PATCH 49
  ;;1.0;PHARMACY POINT OF SALE;**49**;13 OCT 2017
@@ -203,7 +224,7 @@ PREREQ(PKG,VER,PAT) ;
  I J2<PAT Q 3_U_J2 ; LAST PATCH INSTALLED IS 2+ PATCHES OLDER THAN THIS PATCH. EXIT GRUMPILY; WARN USER TO INSTALL PREVIOUS PATCHES.
  ;
  ; THEN... VERIFY PREREQUISITE EVEN INSTALLED.
- ;
+NOTOUCHIE ;; LEFTOVER CODE I COULDN'T BRING MYSELF TO DELETE... MIGHT STILL NEED THE LOGIC SOMEDAY. 
  Q 5 ; SHOULD NEVER GET HERE... THIS IS THE "IMPOSSIBLE" RETURN CODE.
  ;
 NOTOUCHIE ;; LEFTOVER CODE I COULDN'T BRING MYSELF TO DELETE... MIGHT STILL NEED THE LOGIC SOMEDAY. 
@@ -287,6 +308,3 @@ INIT ;
  Q
  ;
 SUP(YUP) ; UTILITY TO GRAB JUST THE FIRST CHARACTER AND UPPERCASE IT.
- ;
- Q $TR($E(YUP,1),"abcdefghijklmnopqrstuvwxyz","ABCDEFGHIJKLMNOPQRSTUVWXYZ")
- ;

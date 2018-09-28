@@ -1,5 +1,5 @@
 BITN2 ;IHS/CMI/MWR - BUILD ^BITN GLOBAL SECOND PART.
- ;;8.5;IMMUNIZATION;**15**;SEP 30,2017
+ ;;8.5;IMMUNIZATION;**16**;MAR 01,2018
  ;;* MICHAEL REMILLARD, DDS * CIMARRON MEDICAL INFORMATICS, FOR IHS *
  ;;  UTILITY: BUILD STANDARD ^BITN GLOBAL.
  ;
@@ -28,7 +28,7 @@ TABLE ; EP
  ;;199a;;Gammar-P IV^21^Venoglobulin-S^19^^^^^^^^^^Immune globulin, intravenous
  ;;200;;VEE, NOS^VEE,NOS^92^^^^1^^^^^^^^^0^0^.5
  ;;200a;;^^^^^^^^^^^^^Venezuelan equine enchapahlitis vaccine, NOS
- ;;201;;MMRV^MMRV^94^^^^0^^14^^90710^3,4,5,6,7,21,38,121^3100521^^^0^1^.5^^^117^132
+ ;;201;;MMRV^MMRV^94^^^^0^^14^^90710^3,4,5,6,7,21,38,94,117,121,187,188^3100521^^^0^1^.5^^^117^132
  ;;201a;;Pro-Quad^^^^^^^^^^^^^Measles, Mumps, Rubella, and Varicella virus vaccine
  ;;202;;TST-OT TINE TEST^TST-OT TIN^95^^^^1^1^13^^^^^^^0^0^.5
  ;;202a;;^^^^^^^^^^^^^Tuberculin skin test; old tuberculin, multipuncture device
@@ -44,7 +44,7 @@ TABLE ; EP
  ;;207a;;^^^^^^^^^^^^^Typhoid Vi capsular polysaccharide vaccine
  ;;208;;DTP-HIB-HEP B^DTP-HIB-HE^102^^^^1^^14^^^^^^^0^0^.5^^^103^136^138
  ;;208a;;^^^^^^^^^^^^^DTP-Haemophilus influenzae type b conjugate and hepatitis b vaccine
- ;;209;;HEP A-HEP B^TWINRIX^104^^^^0^^14^^90636^52,83,84,31,85,8,42,43,44,45,51,110,169^3160720^^^0^1^1^^^144^196
+ ;;209;;HEP A-HEP B^TWINRIX^104^^^^0^^14^^90636^52,83,84,31,85,8,42,43,44,45,51,110,169,189^3160720^^^0^1^1^^^144^196
  ;;209a;;Twinrix^59^^^^^^^^^^^^Hepatitis A and hepatitis B vaccine
  ;;210;;SMALLPOX, DILUTED^SMALLPOX,D^105^^^^1^^^^^^^^^0^1^.5
  ;;210a;;^^^^^^^^^^^^^Smallpox vaccine, diluted
@@ -58,7 +58,7 @@ TABLE ; EP
  ;;214a;;^^^^^^^^^^^^^Pneumococcal vaccine, NOS
  ;;215;;NO VACCINE ADMINISTERED^NO VACCINE^998^^^^1^^^^^^^^^0^0^.5
  ;;215a;;^^^^^^^^^^^^^No vaccine administered
- ;;216;;DTaP-Hep B-IPV^PEDIARIX^110^^^^0^^14^^90723^1,22,28,102,43,44,45,10,106,107,50,8,42,20,170^3151105^^^0^1^.5^^^138^107^133
+ ;;216;;DTaP-Hep B-IPV^PEDIARIX^110^^^^0^^14^^90723^1,22,28,102,43,44,45,10,106,107,50,8,42,20,170,189^3151105^^^0^1^.5^^^138^107^133
  ;;216a;;Pediarix^59^^^^^^^^^^^^DTap- hepatitis B and poliovirus vaccine
  ;;217;;INFLUENZA, Intranasal, Trivalent^FLU-LAIV3^111^^^^1^0^10^Flu-LAIV3^90660^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185,186^3150807^^^0^1^.2
  ;;217a;;FluMist^42^^^^^^^^^^^^Influenza virus vaccine, live, attenuated, for intranasal use
@@ -80,7 +80,7 @@ TABLE ; EP
  ;;225a;;Rotarix^^^^^^^^^^^^^rotavirus, live, monovalent vaccine
  ;;226;;DTaP-Hib-IPV^PENTACEL^120^^^^1^0^14^^90698^01,10,17,20,22,46,47,48,49,50,51,102,106,107,110,120^3151105^^^^1^.5^^^133^136^107
  ;;226a;;^^^^^^^^^^^^^DTaP-Hib-IPV
- ;;227;;ZOSTER^ZOSTER^121^^^^0^0^7^^90736^21,94,117^3091006^^^^^.65
+ ;;227;;ZOSTER LIVE^ZOS-Live^121^^^^0^0^7^^90736^21,94,117,121,187,188^3091006^^^^^.65
  ;;227a;;Zostavax^^^^^^^^^^^^^zoster vaccine, live
  ;;228;;ROTAVIRUS, NOS^ROTA,NOS^122^^^^1^0^15^^^74,116,119^^^^^1
  ;;228a;;^^^^^^^^^^^^^rotavirus vaccine, NOS

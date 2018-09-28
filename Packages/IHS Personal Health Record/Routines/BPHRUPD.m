@@ -1,5 +1,5 @@
 BPHRUPD ;GDIT/HS/ALA-Update parameters ; 05 Aug 2013  1:57 PM
- ;;2.1;IHS PERSONAL HEALTH RECORD;**1**;Apr 01, 2014;Build 23
+ ;;2.1;IHS PERSONAL HEALTH RECORD;**1,2**;Apr 01, 2014;Build 4
  Q
  ;
 WEB ;EP - Update Web Services
@@ -13,6 +13,11 @@ WEB ;EP - Update Web Services
  S DIC="^BPHR(90670.2,",DIC(0)="AELMNZ",DIE=DIC,DR="[BPHR ADD/EDIT WEB SERVICE]"
  ;S DLAYGO=90670.2 D ^DIC S DA=+Y
  D ^DIE
+ Q
+ ;
+ITR ;EP - Input Transform
+ I $L(X)>40!($L(X)<1) K X Q
+ I $E(X,1,8)'="https://" K X Q
  Q
  ;
 PROV(PROV) ;EP = Provider DIRECT address
@@ -40,7 +45,7 @@ PROV(PROV) ;EP = Provider DIRECT address
  Q ADDR
  ;
 AGNT(DFN) ;EP = Messaging Agent for Patient
- NEW BDPCAT,BDPIEN,MSA,BPA,AGN,ADR,BPDATA
+ NEW BDPCAT,BDPIEN,MSA,BPA,AGN,ADR,BPDATA,NBP,OK
  S ADDR=""
  S BDPCAT=$$FIND1^DIC(90360.3,,"X","MESSAGE AGENT")
  I BDPCAT="" Q ADDR
@@ -49,17 +54,33 @@ AGNT(DFN) ;EP = Messaging Agent for Patient
  S BPA=0
  F  S BPA=$O(^BDPRECN(BDPIEN,1,BPA)) Q:'BPA  D
  . S BPDATA=^BDPRECN(BDPIEN,1,BPA,0)
- . I $P(BPDATA,"^",3)<BDT Q
- . I $P(BPDATA,"^",3)>EDT Q
  . S MSA=$P(^BDPRECN(BDPIEN,1,BPA,0),"^",1)
- . S AGN(MSA)=""
- S MSA=$P(^BDPRECN(BDPIEN,0),"^",3)
- I MSA="",'$D(AGN) Q ADDR
- I MSA'="" S AGN(MSA)=""
- S MSA="" F  S MSA=$O(AGN(MSA)) Q:MSA=""  D
- . S ADR=$$LOW^XLFSTR($P($G(^BDPMSGA(MSA,0)),"^",2))
- . I ADR'["direct" Q
- . S ADDR=ADDR_ADR_","
+ . S AGN(BPA)=MSA_"^"_$P(BPDATA,"^",3)
+ . S AGN(BPA)=MSA_"^"_$P(BPDATA,"^",3),LBP=BPA
+ . ; Check the next agent in the history
+ . S NBP=$O(^BDPRECN(BDPIEN,1,BPA)) I 'NBP D  Q
+ .. S QL=0 D CMA^BPHRCHK
+ .. I 'QL S $P(AGN(BPA),"^",3)=DT Q
+ .. I QL S $P(AGN(BPA),"^",3)=CDT
+ . S $P(AGN(BPA),"^",3)=$P(^BDPRECN(BDPIEN,1,NBP,0),"^",3)
+ ;
+ I CURR'="",$P(^BDPRECN(BDPIEN,1,LBP,0),"^",1)'=CURR D
+ . S AGN(LBP+1)=CURR_"^"_CDT_"^"_DT
+ ;
+ S MS="" F  S MS=$O(AGN(MS)) Q:MS=""  D
+ . S OK=0
+ . I EDT<$P(AGN(MS),"^",2)!(BDT>$P(AGN(MS),"^",3)) Q
+ . I BDT'<$P(AGN(MS),"^",2),BDT'>$P(AGN(MS),"^",3) S OK=1
+ . I EDT'<$P(AGN(MS),"^",2),EDT'>$P(AGN(MS),"^",3) S OK=1
+ . ;
+ . I BDT'>$P(AGN(MS),"^",2),EDT'<$P(AGN(MS),"^",2) S OK=1
+ . I BDT'>$P(AGN(MS),"^",3),EDT'<$P(AGN(MS),"^",3) S OK=1
+ . ;
+ . I OK D
+ .. S MSA=$P(AGN(MS),"^",1)
+ .. S ADR=$$LOW^XLFSTR($P($G(^BDPMSGA(MSA,0)),"^",2))
+ .. I ADR'["direct" Q
+ .. S ADDR=ADDR_ADR_","
  Q ADDR
  ;
 PUNC(X) ;EP

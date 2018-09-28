@@ -1,5 +1,6 @@
 AGED41 ; IHS/ASDS/EFG - EDIT - PAGE 4 (2 OF 2) (MEDICARE) ;  
- ;;7.1;PATIENT REGISTRATION;**1,2**;JAN 31, 2007
+ ;;7.1;PATIENT REGISTRATION;**1,2,13**;AUG 25, 2005;Build 1
+ ;IHS/OIT/NKD AG*7.1*13 MBI IMPLEMENTATION
  ;
  D @($P("E1,E2,E3,E4,E5,E6,E7,E8,E9,E10,E11,E12,",",",AG("SEL"))) Q
 E1 ;EP - MCR REL DATE
@@ -43,17 +44,18 @@ E5 ;EP - MEDICARE NAME
  D UPDATE
  Q
 E6 ;MCR NUMBER AND SUFFIX
- S DIE="^AUPNMCR("
- S DR=".03R;.04R"
- S DA=DFN
- W !,"The SUFFIX will be prompted for immediately after the number!",!
- D ^DIE
- I $P($G(^AUPNMCR(DFN,0)),U,3)="" D
- . S DA=DFN
- . S DR=".01///@"
- . S DIE="^AUPNMCR("
- . D ^DIE
- . W !!,"Medicare coverage is deleted." H 3
+ D EDITMCR^AGUTL(DFN)  ;IHS/OIT/NKD AG*7.1*13
+ ;S DIE="^AUPNMCR("
+ ;S DR=".03R;.04R"
+ ;S DA=DFN
+ ;W !,"The SUFFIX will be prompted for immediately after the number!",!
+ ;D ^DIE
+ ;I $P($G(^AUPNMCR(DFN,0)),U,3)="" D
+ ;. S DA=DFN
+ ;. S DR=".01///@"
+ ;. S DIE="^AUPNMCR("
+ ;. D ^DIE
+ ;. W !!,"Medicare coverage is deleted." H 3
  D UPDATE
  Q
 E7 ;PRIMARY CARE PROVIDER

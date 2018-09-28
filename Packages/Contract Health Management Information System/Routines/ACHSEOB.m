@@ -1,5 +1,5 @@
 ACHSEOB ;IHS/ITSC/PMF - PROCESS EOBRS (1/6) - READ IN, PROCESS ; 22 Feb 2016  11:50 AM
- ;;3.1;CONTRACT HEALTH MGMT SYSTEM;**5,6,21,22,23**;JUNE 11, 2001;Build 37
+ ;;3.1;CONTRACT HEALTH MGMT SYSTEM;**5,6,21,22,23**;JUNE 11, 2001;Build 43
  ;IHS/SET/GTH ACHS*3.1*5 12/06/2002 - Remove $ETRAP; direct ref to ^%ZIS(1.
  ;IHS/SET/JVK ACHS*3.1*6 4/9/2003 - CHECK FOR ACTIVE CHS JOBS
  ;Why do some of our errors record and others do not?  The
@@ -97,7 +97,7 @@ SUF ;
  ;W !!,"Last sequence number found in CHS FACILITY file is ",ACHSEOSQ
  W !!,"Last sequence number processed in CHS FACILITY file is ",ACHSEOSQ
  ;W !,"If you wish to re-process this global"
- ;W !,"call the Help desk at 505-248-4371"
+ ;W !,"call the Help desk at 999-999-9999"
  W !!
  I +$P(ACHSUFLS(ACHSK(Y))," ",3)<(ACHSEOSQ+1) D  G:+ACHSREP>0 CONT
  .W !,"This file has already been processed."

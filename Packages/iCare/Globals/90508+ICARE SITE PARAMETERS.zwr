@@ -1,5 +1,5 @@
 OSEHRA ZGO Export: ICARE SITE PARAMETERS
-27-SEP-2018 11:54:59 ZWR
+28-SEP-2018 11:40:50 ZWR
 ^BQI(90508,-1,20,0)="^90508.01"
 ^BQI(90508,0)="ICARE SITE PARAMETERS^90508P^1^1"
 ^BQI(90508,1,0)="7819^H^^^^1^^2.7.0.5^2.7.0.5^1037^3641664^^^^^^^^3^^60^5^60^36M^1"
@@ -616,7 +616,7 @@ OSEHRA ZGO Export: ICARE SITE PARAMETERS
 ^BQI(90508,1,10,"B","DM AUDIT STATIN DRUGS",21)=""
 ^BQI(90508,1,10,"B","DM AUDIT TRIGLYCERIDE TAX",37)=""
 ^BQI(90508,1,10,"B","SURVEILLANCE DIABETES",7)=""
-^BQI(90508,1,11)="IPC4/IPC5^1^^1002^^13"
+^BQI(90508,1,11)="IPCMH^1^^1002^^13"
 ^BQI(90508,1,12)="^^0^0^1033^^1^3120401^3120430"
 ^BQI(90508,1,13,0)="^90508.013P^3^3"
 ^BQI(90508,1,13,1,0)="334"
@@ -2548,8 +2548,10 @@ OSEHRA ZGO Export: ICARE SITE PARAMETERS
 ^BQI(90508,1,22,2,4)="http://icare.spreadinnovation.com/FilesDownload.aspx^http://icare.spreadinnovation.com/FilesUpload.aspx"
 ^BQI(90508,1,22,2,5)="http://ipcreporting.improvingindianhealth.org/FilesDownload.aspx^http://ipcreporting.improvingindianhealth.org/FilesUpload.aspx"
 ^BQI(90508,1,22,2,"B","IPC4",1)=""
+^BQI(90508,1,22,3,0)="ZIPCMH"
 ^BQI(90508,1,22,"B","IPC3",1)=""
 ^BQI(90508,1,22,"B","IPC4/IPC5",2)=""
+^BQI(90508,1,22,"B","ZIPCMH",3)=""
 ^BQI(90508,1,23,0)="^90508.023P^4^4"
 ^BQI(90508,1,23,1,0)="1"
 ^BQI(90508,1,23,2,0)="13"

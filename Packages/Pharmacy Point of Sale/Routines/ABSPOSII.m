@@ -1,5 +1,5 @@
 ABSPOSII ; IHS/SD/RLT - DIAGNOSIS CODES form ;   [ 06/21/2007  9:30 AM ]
- ;;1.0;PHARMACY POINT OF SALE;**23,45,48**;JUN 21, 2007;Build 27
+ ;;1.0;PHARMACY POINT OF SALE;**23,45,48**;JUN 21, 2007;Build 38
  ;
  Q
 PREINIT ;EP - check for existing record

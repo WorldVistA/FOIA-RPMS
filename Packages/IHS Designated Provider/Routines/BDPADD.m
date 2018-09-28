@@ -1,5 +1,5 @@
 BDPADD ; IHS/CMI/TMJ - ADD A NEW DESIGNATED PROVIDER ;
- ;;2.0;IHS PCC SUITE;**10**;MAY 14, 2009;Build 88
+ ;;2.0;IHS PCC SUITE;**10,21**;MAY 14, 2009;Build 34
  ;
  ; Subscripted BDPREC is EXTERNAL form.
  ;   BDPREC("PAT NAME")=patient name
@@ -101,6 +101,7 @@ PROV ; GET DESIGNATED PROVIDER
  S BDPPROV="",BDPQ=1
  S DIC("A")="Select New Designated Provider: ",DIC="^VA(200,",DIC(0)="AEMQ"
  I $$GET1^DIQ(90360.3,BDPTYPE,.01)="MESSAGE AGENT" S DIC("S")="I $D(^BDPMSGA(+Y,0)),'$P(^BDPMSGA(+Y,0),U,3)" K DIC("B")
+ I $$GET1^DIQ(90360.3,BDPTYPE,.01)'="MESSAGE AGENT" S DIC("S")="I $D(^VA(200,""AK.PROVIDER"",$P($G(^VA(200,+Y,0)),U),+Y)),$P($G(^VA(200,+Y,""PS"")),U,4)="""""
  D ^DIC K DIC,DA S:$D(DUOUT) DIRUT=1
  Q:$D(DIRUT)
  I +Y<1 S BDPQ=1 Q
@@ -114,7 +115,7 @@ ADD ; ADD NEW DESIGNATED PROVIDER RECORD
  S BDPRR=$O(^BDPRECN("AA",BDPDFN,BDPTYPE,"")) ;Check to see if this Patient already has Type
  I BDPRR'="" S BDPLPROV=$P($G(^BDPRECN(BDPRR,0)),U,3) ;Current Provider
  I BDPRR>0 W !!,?10,"This patient already has a Designated Provider Type",!,"   the Category you selected. See the Designated Provider Listing above."
- I BDPRR>0 W !!,"-Use the Edit Menu to change to a new CURRENT Provider for this Category Type-",!! D PAUSE^BDP Q
+ I BDPRR>0 W !!,"-Use the MOD menu item to change to a new CURRENT Provider for this Category Type-",!! D PAUSE^BDP Q
  ;
  D PROV
  Q:BDPQ
@@ -136,6 +137,7 @@ ASKGO ;Ask to continue
  . W "Has been assigned to Patient Name: "_$P($G(^DPT(BDPDFN,0)),U,1) W !
  . W "For Designated Provider Category/Type: "_$P($G(^BDPTCAT(BDPTYPE,0)),U,1) W !!
  .S BDPRIEN=+Y
+ .;SEEMS TO ME THE MULTIPLE IEN WILL ALWAYS BE 1 SO NO NEED TO GET THE LAST AND INACTIVATE IT OR PUT IN A STOP DATE
  .I $D(BDPRIEN) D
  .. Q:'BDPRIEN
  .. S:'$D(^BDPRECN(BDPRIEN,1,0)) $P(^(0),U,2)="90360.11P"
@@ -148,7 +150,7 @@ ASKGO ;Ask to continue
  .. S $P(^BDPRECN(BDPRIEN,1,0),U,3)=BDPLIEN
  .. S $P(^BDPRECN(BDPRIEN,1,0),U,4)=BDPLNUM
  .. S BDPLINKI=1  ;tell fileman you are coming from bdp
- .. S DR=".01///"_"`"_BDPPROV
+ .. S DR=".01///"_"`"_BDPPROV_";.04////"_DT  ;ihs/cmi/lab - added effective date
  .. S DIE="^BDPRECN("_BDPRIEN_",1,",DA(1)=BDPRIEN,DA=BDPLIEN D ^DIE K DIE,DR,DA,DINUM
  . D PAUSE^BDP
  .S BDPQ=0

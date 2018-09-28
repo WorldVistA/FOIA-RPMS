@@ -1,5 +1,5 @@
 BGP8D83 ; IHS/CMI/LAB - measure C 07 Jan 2018 11:45 AM ;
- ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
+ ;;18.1;IHS CLINICAL REPORTING;;MAY 25, 2018;Build 66
  ;
 IHEDCWP ;EP
  S (BGPN1,BGPN2,BGPN3,BGPN4,BGPN5,BGPN6,BGPD1,BGPD2,BGPD3,BGPD4,BGPD5,BGPD6,BGPD7,BGPD8,BGPD9,BGPD10,BGPD11,BGPD12)=0
@@ -27,8 +27,8 @@ PHAR(P,BDATE,EDATE) ;
  .S V=$P(BGPG(X),U,5)
  .Q:'$D(^AUPNVSIT(V,0))
  .I "ASO"'[$P(^AUPNVSIT(V,0),U,7) Q  ;not outpatient
- .S (C,E)=0 F  S E=$O(^AUPNVPOV("AD",V,E)) Q:E'=+E  S C=C+1
- .Q:C>1  ;can't have any other diagnoses
+ .S (C,E)=0 F  S E=$O(^AUPNVPOV("AD",V,E)) Q:E'=+E  S Y=$P($G(^AUPNVPOV(E,0)),U) I Y,'$$ICD^BGP8UTL2(Y,$O(^ATXAX("B","BGP PHARYNGITIS DXS",9))) S C=C+1
+ .Q:C  ;HAS ANOTHER DX OTHER THAN A URI DX ;can't have any other diagnoses
  .I $$CLINIC^APCLV(V,"C")=30 D  Q:H  ;if H is 1 then there was a hosp stay so don't use this visit
  ..S H=0
  ..S E=$O(^AUPNVER("AD",V,0)) I E,"ATLM"[$P($G(^AUPNVER(E,0)),U,11) S H=1 Q  ;er visit with admission

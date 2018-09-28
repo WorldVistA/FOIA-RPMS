@@ -1,5 +1,5 @@
 BSTSLKP ;GDIT/HS/BEE-Standard Terminology Lookups ; 15 Nov 2012  4:26 PM
- ;;2.0;IHS STANDARD TERMINOLOGY;;Dec 01, 2016;Build 62
+ ;;2.0;IHS STANDARD TERMINOLOGY;**2**;Dec 01, 2016;Build 1
  Q
  ;
 DSC(OUT,BSTSWS) ;EP - Perform Lookup on Description Id
@@ -139,7 +139,7 @@ CIEN(CONC,NMID) ;EP - Return the CIEN for the concept
  S TRNCONC=$E(CONC,1,30)
  ;
  S FOUND=""
- S CIEN="" F  S CIEN=$O(^BSTS(9002318.4,"C",NMID,TRNCONC,CIEN)) Q:CIEN=""  D  I FOUND]"" Q
+ S CIEN="" F  S CIEN=$O(^BSTS(9002318.4,"C",NMID,TRNCONC,CIEN),-1) Q:CIEN=""  D  I FOUND]"" Q
  . NEW CONCID
  . S CONCID=$$GET1^DIQ(9002318.4,CIEN_",",".02","I") Q:CONCID=""
  . I CONC'=CONCID Q

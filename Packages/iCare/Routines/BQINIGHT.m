@@ -1,5 +1,5 @@
 BQINIGHT ;PRXM/HC/ALA-Nightly Background Job ; 05 Jan 2006  1:31 PM
- ;;2.7;ICARE MANAGEMENT SYSTEM;;Dec 19, 2017;Build 23
+ ;;2.7;ICARE MANAGEMENT SYSTEM;**1**;Dec 19, 2017;Build 12
  ;
  ;
 EN ;EP - Entry point
@@ -184,8 +184,8 @@ CRS ;EP - Find all GPRA indicators
  ;
  ; Setup taxonomies
  I VER>14.1 D
- . I $T(UNFOLDTX^BGP6UTL2)="" Q
- . D UNFOLDTX^BGP6UTL2
+ . I $T(UNFOLDTX^BGP8UTL2)="" Q
+ . D UNFOLDTX^BGP8UTL2
  ;
  S DFN=0
  F  S DFN=$O(^XTMP("BQINIGHT",DFN)) Q:'DFN  D

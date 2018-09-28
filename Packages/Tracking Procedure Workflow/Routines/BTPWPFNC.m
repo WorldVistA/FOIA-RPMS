@@ -1,5 +1,5 @@
 BTPWPFNC ;VNGT/HS/ALA-Correct deleted/merged visits ; 11 Oct 2010  9:45 AM
- ;;1.0;CARE MANAGEMENT EVENT TRACKING;**1,2**;Feb 07, 2011;Build 52
+ ;;1.2;CARE MANAGEMENT EVENT TRACKING;**1**;JUL 07,2017;Build 5
  ;
  ;
 EN ; Entry point
@@ -32,5 +32,20 @@ EN ; Entry point
  ... I TRIEN'="" S BTPWUPD(90620,TRIEN_",",.04)=NVIS I $G(VDATE)'="" S BTPWUPD(90620,TRIEN_",",.03)=VDATE
  ... I WHIEN'="",$P($G(^BWPCD(WHIEN,"PCC")),U,2)=RIEN S BTPWUPD(9002086.1,WHIEN_",",5.01)=NVIS
  .. I $P(^BTPWQ(QIEN,0),U,2)=$P($G(@GLOB@(RIEN,0)),U,2),TRIEN="" S BTPWUPD(90629,QIEN_",",.01)="@"
+ .. ; No merged visit found so visit is deleted
+ .. I NVIS="" D
+ ... ; If status is pending, delete
+ ... S STAT=$P(DATA,U,8) I STAT="P" D  Q
+ .... NEW DIK,DA
+ .... S DIK="^BTPWQ(",DA=QIEN D ^DIK
+ ... ; If status is tracked and tracked event is open, close it, if closed, add comment
+ ... I STAT="T" D
+ .... I $P($G(^BTPWP(TRIEN,1)),U,1)="O" D
+ ..... D CLOSE^BTPWPEVO(.DATA,TRIEN,4,"Associated PCC visit was deleted.")
+ .... I $P($G(^BTPWP(TRIEN,1)),U,1)="C" D
+ ..... NEW COM
+ ..... S COM(1)="Associated PCC visit was deleted."
+ ..... D WLOG^BTPWHIST(.COM,"90620:3",TRIEN_",",$G(DUZ),$G(DTTM),"Add Comment")
+ ... S BTPWUPD(90629,QIEN_",",.01)="@"
  . I $D(BTPWUPD) D FILE^DIE("","BTPWUPD","ERROR")
  Q

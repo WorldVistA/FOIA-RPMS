@@ -1,5 +1,5 @@
 BMCRR4 ; IHS/PHXAO/TMJ - list patients for which medical and/or cost data has not been received ; 
- ;;4.0;REFERRED CARE INFO SYSTEM;**4**;JAN 09, 2006;Build 92
+ ;;4.0;REFERRED CARE INFO SYSTEM;**4**;JAN 09, 2006;Build 101
  ;BMC*4.0*4 IHS/OIT/FCJ TYPEO
  ;
 START ;

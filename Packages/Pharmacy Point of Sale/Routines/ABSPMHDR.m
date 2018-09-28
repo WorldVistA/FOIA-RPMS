@@ -1,5 +1,5 @@
 ABSPMHDR ; IHS/FCS/DRS - MENUS HEADERS ; 
- ;;1.0;PHARMACY POINT OF SALE;**18,22,23**;JUN 21, 2001;Build 27
+ ;;1.0;PHARMACY POINT OF SALE;**18,22,23**;JUN 21, 2001;Build 38
  ;
  ;****** Send this routine with each new patch with **n** in piece
  ;****** 3 so the patch level can be displayed as part of the

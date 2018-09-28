@@ -1,5 +1,5 @@
 ABSPECFM ; IHS/FCS/DRS - JWS 04:09 PM 28 May 1996 ;   [ 09/04/2002  1:55 PM ]
- ;;1.0;PHARMACY POINT OF SALE;**3,9,47**;JUN 21, 2001;Build 27
+ ;;1.0;PHARMACY POINT OF SALE;**3,9,47**;JUN 21, 2001;Build 38
  ;----------------------------------------------------------------------
  ;----------------------------------------------------------------------
  ;NCPDP Field Format Functions

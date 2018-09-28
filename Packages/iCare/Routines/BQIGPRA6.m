@@ -1,5 +1,5 @@
 BQIGPRA6 ;GDIT/HS/ALA-Update all patients for selected measures ; 26 Sep 2012  9:59 AM
- ;;2.5;ICARE MANAGEMENT SYSTEM;**2**;May 24, 2016;Build 14
+ ;;2.7;ICARE MANAGEMENT SYSTEM;**1**;Dec 19, 2017;Build 12
  ;
  Q
  ;
@@ -19,9 +19,45 @@ EN ;EP
  S BQIGREF=$NA(^TMP("BQIGPRA",UID))
  S BQIDATA=$NA(^BQIPAT)
  K @BQIGREF
+ ; Set the DATE/TIME GPRA STARTED field
+ NEW DA
+ S DA=$O(^BQI(90508,0)) I 'DA Q
+ S BQIUPD(90508,DA_",",4.04)=$$NOW^XLFDT()
+ S BQIUPD(90508,DA_",",4.06)=1
+ S BQIUPD(90508,DA_",",24.05)=$G(ZTSK)
+ D FILE^DIE("","BQIUPD")
+ K BQIUPD
+ ;
+ ;  Initialize data
+ D INP^BQINIGHT
+ ;  If the routine is not defined, quit
+ I $G(BQIROU)="" Q
+ ;
+ ;  If the tag is not defined, quit
+ I $T(@("BQI^"_BQIROU))="" Q
+ ;
+ ;  Initialize GPRA variables
+ NEW VER,BQX,XN
+ S VER=$$VERSION^XPDUTL("BGP")
+ ;
+ I VER>7.0 D
+ . S BQX=""
+ . F  S BQX=$O(^BQI(90506.1,"AC","G",BQX)) Q:BQX=""  D
+ .. I $P(^BQI(90506.1,BQX,0),U,10)=1 Q
+ .. S X=$P(^BQI(90506.1,BQX,0),U,1),XN=$P(X,"_",2)
+ .. S X=$P($G(@BQIMEASG@(XN,0)),U,1) I X'="" S BGPIND(X)=""
  ;
  S DFN=0
  F  S DFN=$O(^BQIPAT(DFN)) Q:'DFN  D FND
+ ;
+ ; Set the DATE/TIME GPRA STOPPED
+ NEW DA
+ S DA=$O(^BQI(90508,0)) I 'DA Q
+ S BQIUPD(90508,DA_",",4.05)=$$NOW^XLFDT()
+ S BQIUPD(90508,DA_",",4.06)="@"
+ S BQIUPD(90508,DA_",",24.05)="@"
+ D FILE^DIE("","BQIUPD","ERROR")
+ K BQIUPD
  Q
  ;
 FND ;EP
@@ -41,14 +77,11 @@ FND ;EP
  S VER=$$VERSION^XPDUTL("BGP")
  ;
  I VER>7.0 D
- . S BQX=""
- . F BI=1:1:$L(MLIST,$C(29)) S BQX=$P(MLIST,$C(29),BI) Q:BQX=""  D
- .. S XN=$P(BQX,"_",2)
- .. S X=$P(@BQIMEASG@(XN,0),U,1),BGPIND(X)=""
- .. S MCT=$O(^BQIPAT(DFN,30,"B",BQX,"")) I MCT'="" Q
- .. S CT=""
- .. S CT=$O(@BQIDATA@(DFN,30,"A"),-1)
- .. S CT=CT+1
+ . ;  initialize the summary indicators for the patient
+ . S CT=0,SIND=""
+ . F  S SIND=$O(^BQI(90506.1,"AC","G",SIND)) Q:SIND=""  D
+ .. I $P(^BQI(90506.1,SIND,0),U,10)=1 Q
+ .. S CT=CT+1,BQX=$P(^BQI(90506.1,SIND,0),U,1)
  .. S @BQIDATA@(DFN,30,CT,0)=BQX
  .. S @BQIDATA@(DFN,30,"B",BQX,CT)=""
  .. S ^BQIPAT("AC",BQX,DFN,CT)=""
@@ -72,8 +105,8 @@ FND ;EP
  K BQIPUP
  ; Setup taxonomies
  I VER>14.1 D
- . I $T(UNFOLDTX^BGP5UTL2)="" Q
- . D UNFOLDTX^BGP5UTL2
+ . I $T(UNFOLDTX^BGP8UTL2)="" Q
+ . D UNFOLDTX^BGP8UTL2
  ;
  D @("BQI^"_BQIROU_"(DFN,.BQIGREF)")
  ;

@@ -1,5 +1,5 @@
 BITN ;IHS/CMI/MWR - BUILD ^BITN GLOBAL.
- ;;8.5;IMMUNIZATION;**15**;SEP 30,2017
+ ;;8.5;IMMUNIZATION;**16**;MAR 01,2018
  ;;* MICHAEL REMILLARD, DDS * CIMARRON MEDICAL INFORMATICS, FOR IHS *
  ;;  UTILITY: BUILD STANDARD ^BITN GLOBAL.
  ;
@@ -46,7 +46,7 @@ TABLE ; EP
  ;;107a;;IPOL^54^^^^^^^^^^^^Poliovirus vaccine, inactivated
  ;;108;;INFLUENZA, NOS^FLU,NOS^88^^^^1^^10^Flu,NOS^90724^15,16,88,111,123,125,126,127,128,135,140,141,144,149,150,151,153,155,158,161,166,168,171,185,186^^V04.8^99.52^0^1^.5^^^^
  ;;108a;;^^^^^^^^^^^^^Influenza virus vaccine, NOS
- ;;110;;HEP B, NOS^HEP B,NOS^45^^6^^1^^4^RECOMBIVAX^90731^8,43,44,51,110,104^^V05.3^99.59^0^1^.5^^^^
+ ;;110;;HEP B, NOS^HEP B,NOS^45^^6^^1^^4^RECOMBIVAX^90731^8,42,43,44,45,51,104,110,189^^V05.3^99.59^0^1^.5^^^^
  ;;110a;;Hepagene^56^^^^^^^^^^^^Hepatitis B vaccine, NOS
  ;;111;;MEASLES^MEASLES^5^^3^^1^^6^^90705^3,4,94^^V04.2^99.45^0^1^.5^^^^
  ;;111a;;ATTENUVAX^45^^^^^^^^^^^^Measles virus vaccine
@@ -84,7 +84,7 @@ TABLE ; EP
  ;;130a;;^^^^^^^^^^^^^Immune globulin, NOS
  ;;131;;HEP A, NOS^HEP A,NOS^85^^3^^1^^9^^90730^31,83,84,85,52,104,169^^V05.3^99.59^0^1^.5^^^^^
  ;;131a;;^^^^^^^^^^^^^Hepatitis A vaccine, NOS
- ;;132;;VARICELLA^VARICELLA^21^^3^^0^^7^^90716^94,121^3080313^V05.4^99.59^0^1^.5^^^
+ ;;132;;VARICELLA^VARICELLA^21^^3^^0^^7^^90716^21,94,117,121,187,188^3080313^V05.4^99.59^0^1^.5^^^
  ;;132a;;VARIVAX^45^^^^^^^^^^^^Varicella virus vaccine
  ;;133;;DTAP^DTaP^20^^6^^0^^1^DTAP^90700^20,50,106,107,110,170^3070517^V06.1^99.39^0^1^.5^^^^
  ;;133a;;Tripedia^54^Infanrix^59^Acel-Imune^63^Certiva^24^^^^^^Diphtheria, tetanus toxoids and acellular pertussis vaccine
@@ -96,7 +96,7 @@ TABLE ; EP
  ;;136a;;ActHIB^54^OmniHIB^59^Hiberix^^^^^^^^^Haemophilus influenza type b vaccine, PRP-T conjugate
  ;;137;;UNKNOWN^OTHER^999^^^^1^^12^TEST^90749^^^^99.59^0^0^.5^^^
  ;;137a;;^^^^^^^^^^^^^Unknown vaccine or immune globulin
- ;;138;;HEP B, ADOLESCENT OR PEDIATRIC^HEP B PED^8^^6^^0^^4^^90744^43,44,45,51,110,42,104^3160720^V05.3^99.59^0^1^.5^^^
+ ;;138;;HEP B, ADOLESCENT OR PEDIATRIC^HEP B PED^8^^6^^0^^4^^90744^8,42,43,44,45,51,104,110,189^3160720^V05.3^99.59^0^1^.5^^^
  ;;138a;;Recombivax HB pediatric formul^45^Engerix-B pediatric/adolescent^59^^^^^^^^^^Hepatitis B vaccine, pediatric or pediatric/adolescent dosage
  ;;139;;POLIO, NOS^POLIO,NOS^89^^^^1^^2^^^^^V04.0^99.41^0^1^.5^^^
  ;;139a;;^^^^^^^^^^^^^Polio, NOS
@@ -108,7 +108,7 @@ TABLE ; EP
  ;;142a;;Prevnar 7^63^PREVNAR 7^^^^^^^^^^^pneumococcal conjugate vaccine, 7 valent
  ;;143;;MENINGOCOCCAL C CONJUGATE^MEN-C CONJ^103^^^^1^^16^^^32,103,108,114,136,147,148,162,163,164,167^^V03.89^99.59^0^1^.5^^^
  ;;143a;;MENING^^^^^^^^^^^^^Meningococcal C conjugate vaccine
- ;;144;;HEP B,ADULT^HEP B ADLT^43^^6^^0^^4^^90746^8,42,44,45,104^3160720^V05.3^99.59^0^1^1^^^
+ ;;144;;HEP B,ADULT^HEP B ADLT^43^^6^^0^^4^^90746^8,42,43,44,45,51,104,110,189^3160720^V05.3^99.59^0^1^1^^^
  ;;144a;;Recombivax HB adult formulatio^45^Heptavax-B^45^Engerix-B adult dose^59^^^^^^^^Hepatitis B vaccine, adult dosage^90743
  ;;145;;PERTUSSIS^PERTUSSIS^11^^^^1^^^^^^^^^0^0^.5
  ;;145a;;^^^^^^^^^^^^^Pertussis
@@ -148,13 +148,13 @@ TABLE ; EP
  ;;162a;;Imovax Rabies I.D.^54^^^^^^^^^^^^Rabies vaccine, for intradermal injection
  ;;163;;TYPHOID, PARENTERAL^TYPHOID,PA^41^^^^1^^^^90692^^3120529^^^0^1^.5
  ;;163a;;Typhim Vi^54^^^^^^^^^^^^Typhoid vaccine, Parenteral; other than acetone killed, dried
- ;;164;;HEP B, ADOLESCENT/HIGH RISK INFA^HEP B ADOL^42^^^^1^^4^^90745^43,44,45,8,104^3160720^^^0^1^.5
+ ;;164;;HEP B, ADOLESCENT/HIGH RISK INFA^HEP B ADOL^42^^^^1^^4^^90745^8,42,43,44,45,51,104,110,189^3160720^^^0^1^.5
  ;;164a;;Recombivax HB adolescent/high-^45^^^^^^^^^^^^Hepatitis B vaccine, adolescent/high risk infant dosage
- ;;165;;HEP B, DIALYSIS^HEP B DIAL^44^^^^1^^4^^90740^8,43,45,42,104^3160720^^^0^1^1
+ ;;165;;HEP B, DIALYSIS^HEP B DIAL^44^^^^1^^4^^90740^8,42,43,44,45,51,104,110,189^3160720^^^0^1^1
  ;;165a;;^^^^^^^^^^^^^Hepatitis B vaccine, dialysis patient dosage^90747
  ;;166;;DTAP-HIB^DTAP-HIB^50^^^^1^^14^^90721^20,106,107,110,46,47,48,49,17,51,120,170^3151105^^^0^1^.5^^^133^136
  ;;166a;;TriHIBit^54^^^^^^^^^^^^DTaP-Haemophilus influenza type b conjugate vaccine
- ;;167;;HIB-HEP B^COMVAX^51^^^^0^^14^^90748^46,47,48,8,42,43,44,45,49,17,170^3160720^^^0^1^.5^^^138^127
+ ;;167;;HIB-HEP B^COMVAX^51^^^^0^^14^^90748^46,47,48,8,42,43,44,45,49,17,110,170,189^3160720^^^0^1^.5^^^138^127
  ;;167a;;Comvax^45^^^^^^^^^^^^Haemophilus influenza type b vaccine conjugate and Hepatitis B vaccine
  ;;168;;HEP A, ADULT^HEP A ADLT^52^^^^0^^9^^90632^31,83,84,85,52,104,169^3160720^^^0^1^1
  ;;168a;;VAQTA adult formulation^45^Havrix 1440 ELU/1 mL^59^^^^^^^^^^Hepatitis A vaccine, adult dosage

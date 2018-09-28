@@ -1,5 +1,5 @@
 BDPDPEE ; IHS/CMI/TMJ - UPDATE USING LISTMAN ; 
- ;;2.0;IHS PCC SUITE;**2,10,20**;MAY 14, 2009;Build 25
+ ;;2.0;IHS PCC SUITE;**2,10,20,21**;MAY 14, 2009;Build 34
  ;
  ;
 START ;
@@ -14,12 +14,28 @@ PROV ;
  W !! S DIC("A")="Enter Designated Provider Name: ",DIC="^VA(200,",DIC(0)="AEMQ" D ^DIC K DIC,DA,DR,DLAYGO,DIADD
  I Y<0 W !,"No Provider Selected." Q
  S BDPPIEN=+Y
+ S X=$$CHKPROV(BDPPIEN) I X Q
  D EN
 END ;
  D EOJ
  K BDPP,BDPQUIT,BDPW
  Q
  ;
+CHKPROV(PROV) ;
+ NEW X,Y,BDPQ,BDPG
+ S BDPQ=0,BDPG=0
+ S X=$$VAL^XBDIQ1(200,PROV,53.4) I X]"" D
+ .W !!,"Please Note:  This provider was inactivated on ",X,!
+ .S BDPG=1
+ I '$D(^VA(200,"AK.PROVIDER",$P($G(^VA(200,PROV,0)),U),PROV)) D
+ .W !!,"Please Note:  This person does not have the PROVIDER key and therefore",!,"should not be used as the designated primary care provider.",!
+ .S BDPG=1
+ I 'BDPG Q 0
+ NEW DIR
+ S DIR(0)="Y",DIR("A")="Do you wish to continue with the update",DIR("B")="Y" KILL DA D ^DIR KILL DIR
+ W !
+ I 'Y Q 1
+ Q 0
 PPEP(BDPPIEN) ;PEP - entry point to view/update one provider's panel
  I '$G(BDPPIEN) Q
  D EN
@@ -34,7 +50,7 @@ HDR ; -- header code
  S VALMHDR(2)="Patients with Designated Provider: "_$P(^VA(200,BDPPIEN,0),U)
  S VALMHDR(3)="*I or *D denotes patient is Inactive or Deceased"
  S VALMHDR(4)=$TR($J(" ",80)," ","-")
- S VALMHDR(5)="#      HRN    PATIENT NAME            DOB          SEX LAST VISIT    PROV TYPE"
+ S VALMHDR(5)="#      HRN    PATIENT NAME            DOB      SEX LAST VISIT   PROV TYPE"
  Q
  ;
 CTR(X,Y) ;EP - Center X in a field Y wide.
@@ -56,8 +72,8 @@ GATHER ;
  ..S BDPD=$P(^BDPRECN(BDPX,0),U,2)
  ..I $$DOD^AUPNPAT(BDPD)]"" S Y=Y_" *D"
  ..E  I $P($G(^AUPNPAT(BDPD,41,DUZ(2),0)),U,3)]"" S Y=Y_" *I"
- ..S $E(Y,8)=$$HRN^AUPNPAT(BDPD,DUZ(2)),$E(Y,15)=$E($P(^DPT(BDPD,0),U),1,20),$E(Y,39)=$$DOB^AUPNPAT(BDPD,"E"),$E(Y,52)=$P(^DPT(BDPD,0),U,2),$E(Y,56)=$$FMTE^XLFDT($$LASTVD^APCLV1(BDPD))
- ..S $E(Y,69)=$E($$VAL^XBDIQ1(90360.1,BDPX,.01),1,11)
+ ..S $E(Y,8)=$$HRN^AUPNPAT(BDPD,DUZ(2)),$E(Y,15)=$E($P(^DPT(BDPD,0),U),1,20),$E(Y,39)=$$DATE^BDPLMDSP($$DOB^AUPNPAT(BDPD)),$E(Y,48)=$P(^DPT(BDPD,0),U,2),$E(Y,52)=$$DATE^BDPLMDSP($$LASTVD^APCLV1(BDPD))
+ ..S $E(Y,62)=$$VAL^XBDIQ1(90360.1,BDPX,.01)
  ..S ^TMP("BDPDPEE",$J,BDPLINE,0)=Y,^TMP("BDPDPEE",$J,"IDX",BDPLINE,BDPRCNT)=BDPX
  Q  ;new 
  ;
@@ -72,24 +88,15 @@ CHG ;EP - Called from Protocol to change from One Provider to Another
  D ^DIC K DIC,DA,DR,DLAYGO,DIADD
  I Y<0 W !,"No Provider Selected." D PAUSE G EXIT
  S BDPPROV=+Y
+ S X=$$CHKPROV(BDPPROV) I X G EXIT
  S BDPC="" F BDPI=1:1 S BDPC=$P(BDPANS,",",BDPI) Q:BDPC=""  S BDPR=^TMP("BDPDPEE",$J,"IDX",BDPC,BDPC) D
  . I '$D(^BDPRECN(BDPR,0)) Q
  . S BDPPAT=$P(^BDPRECN(BDPR,0),U,2)
  . S BDPTYPE=$P(^BDPRECN(BDPR,0),U) ; TYPE
- . I $$GET1^DIQ(90360.3,BDPTYPE,.01)="MESSAGE AGENT",'$D(^BDPMSGA("B",BDPPROV)) W !!,"Cannot assign as Message Agent-RECORD ",BDPC D PAUSE^BDP Q
- . S X=$$CREATE^BDPPASS(BDPPAT,BDPTYPE,BDPPROV)
+ . I $$GET1^DIQ(90360.3,BDPTYPE,.01)="MESSAGE AGENT",'$D(^BDPMSGA("B",BDPPROV)) W !!,"Cannot assign as Message Agent (not in message agent file)-RECORD ",BDPC D PAUSE^BDP Q
+ . I $$GET1^DIQ(90360.3,BDPTYPE,.01)="MESSAGE AGENT",$P($G(^BDPMSGA(BDPPROV,0)),U,3) W !!,"Cannot assign as Message Agent (inactive message agent)-RECORD ",BDPC D PAUSE^BDP Q
+ . S X=$$CREATE^BDPAMA(BDPPAT,BDPTYPE,BDPPROV)
  W !,"Changed the selected Providers",!
- D EXIT
- Q
-EDDP ;EP - called from protocol
- D EN^VALM2(XQORNOD(0),"OS")
- I '$D(VALMY) W !,"No records selected." G EXIT
- S BDPR=$O(VALMY(0)) I 'BDPR K BDPR,VALMY,XQORNOD W !,"No record selected." G EXIT
- S BDPR=^TMP("BDPDPEE",$J,"IDX",BDPR,BDPR) I 'BDPR K BDPRDEL,BDPR D PAUSE^BDP D EXIT Q
- I '$D(^BDPPATR(BDPR,0)) W !,"Not a valid PATIENT RECORD." K BDPRDEL,BDPR D PAUSE^BDP D EXIT Q
- D FULL^VALM1
- W !,"Editing Designated Provider....."
- S DA=BDPR,DIE="^BDPPATR(",DR=".02;.03;.04;.12;.13" D ^DIE
  D EXIT
  Q
 RMDP ;EP - called from protocol to remove multiple DP entries
@@ -138,15 +145,21 @@ ADDDP1 S BDPTYPE=""
  K DIR S DIR(0)="90360.1,.01",DIR("A")="Enter the Type of Designated Provider" KILL DA D ^DIR KILL DIR
  I $D(DIRUT) W !!,"TYPE not entered." D PAUSE,EXIT Q
  S BDPTYPE=+Y
+ I $D(^BDPRECN("AA",BDPPAT,BDPTYPE)) S X=$O(^BDPRECN("AA",BDPPAT,BDPTYPE,0)) I $P($G(^BDPRECN(X,0)),U,3)'="" D  I BDPQ D PAUSE,EXIT Q
+ .W !!,"This patient already has provider ",$P(^VA(200,$P($G(^BDPRECN(X,0)),U,3),0),U)," assigned for category ",!?5,$P(^BDPTCAT(BDPTYPE,0),U)
+ .K DIR
+ .S BDPQ=""
+ .S DIR(0)="Y",DIR("A")="Do you want to change the provider to "_$P(^VA(200,BDPPIEN,0),U,1),DIR("B")="Y" KILL DA D ^DIR KILL DIR
+ .I 'Y S BDPQ=1 Q
  I $P(^BDPTCAT(BDPTYPE,0),U,1)="MESSAGE AGENT",'$D(^BDPMSGA("B",BDPPIEN)) D  G ADDDP1
- .W !!,"You are not listed as a Message Agent, you must be added to the Message"
- .W !,"Agent List using the option on the Manager's Menu before you can be "
+ .W !!,"This person is not listed as a Message Agent, they must be added to the Message"
+ .W !,"Agent List using the option on the Manager's Menu before they can be "
  .W !,"assigned as a message agent.",!
- I $P($G(^BDPMSGA(BDPPIEN,0)),U,3) D  G ADDDP1
- .W !!,"You have been inactivated as a message agent, you must be reactivated"
- .W !,"using the option on the Manager's Menu before you can be assigned"
+ I $P(^BDPTCAT(BDPTYPE,0),U,1)="MESSAGE AGENT",$P($G(^BDPMSGA(BDPPIEN,0)),U,3) D  G ADDDP1
+ .W !!,"This person been inactivated as a message agent, they must be reactivated"
+ .W !,"using the option on the Manager's Menu before they can be assigned"
  .W !,"as a message agent.",!
- S X=$$CREATE^BDPPASS(BDPPAT,BDPTYPE,BDPPIEN)
+ S X=$$CREATE^BDPAMA(BDPPAT,BDPTYPE,BDPPIEN)
  D EXIT
  Q
  ;
@@ -156,7 +169,7 @@ GATHER1 ;EP Called from Protocol to Resort List Display
  ;
 BDPASK ;Ask User Type of Sort
  ;
- S DIR(0)="S^1:PATIENT;2:CATEGORY",DIR("A")="Enter Tyupe of Lister Display Sort: ",DIR("B")="PATIENT",DIR("?")="You must select a Sort Type from the List" KILL DA D ^DIR KILL DIR
+ S DIR(0)="S^1:PATIENT;2:CATEGORY",DIR("A")="Enter Type of Lister Display Sort: ",DIR("B")="PATIENT",DIR("?")="You must select a Sort Type from the List" KILL DA D ^DIR KILL DIR
  I Y<0 W !,"NO SORT SELECTED.",!! Q
  S BDPSANS=Y
  D EXIT
@@ -171,8 +184,8 @@ GATHER2 ;Resort by Provider
  .S BDPX=0 F  S BDPX=$O(^TMP($J,"BDPDPEE",BDPNAME,BDPX)) Q:BDPX'=+BDPX  D
  ..S BDPRCNT=BDPRCNT+1,BDPLINE=BDPLINE+1,Y=BDPRCNT
  ..S BDPD=$P(^BDPRECN(BDPX,0),U,2)
- ..S $E(Y,6)=$$HRN^AUPNPAT(BDPD,DUZ(2)),$E(Y,13)=$E($P(^DPT(BDPD,0),U),1,25),$E(Y,39)=$$DOB^AUPNPAT(BDPD,"E"),$E(Y,52)=$P(^DPT(BDPD,0),U,2),$E(Y,56)=$$FMTE^XLFDT($$LASTVD^APCLV1(BDPD))
- ..S $E(Y,69)=$E($$VAL^XBDIQ1(90360.1,BDPX,.01),1,11)
+ ..S $E(Y,8)=$$HRN^AUPNPAT(BDPD,DUZ(2)),$E(Y,15)=$E($P(^DPT(BDPD,0),U),1,20),$E(Y,39)=$$DATE^BDPLMDSP($$DOB^AUPNPAT(BDPD)),$E(Y,48)=$P(^DPT(BDPD,0),U,2),$E(Y,52)=$$DATE^BDPLMDSP($$LASTVD^APCLV1(BDPD))
+ ..S $E(Y,62)=$$VAL^XBDIQ1(90360.1,BDPX,.01)
  ..S ^TMP("BDPDPEE",$J,BDPLINE,0)=Y,^TMP("BDPDPEE",$J,"IDX",BDPLINE,BDPRCNT)=BDPX
  Q  ;new 
 HELP ;EP -- help code
@@ -197,7 +210,7 @@ EOJ ;
  K X,Y,%,DR,DDS,DA,DIC
  K BDPCASE,BDPX,BDPD,BDPRCNT,BDPLINE,BDPCDATE
  D:$D(VALMWD) CLEAR^VALM1
- K VALM,VALMHDR,VALMKEY,VALMMENU,VALMSGR,VALMUP,VALMWD,VALMLST,VALMVAR,VALMLFT,VALMBCK,VALMCC,VALMAR,VALMBG,VALMCAP,VALMCOFF,VALMCNT,VALMCON,BALMON,VALMEVL,VALMIOXY
+ K VALM,VALMHDR,VALMKEY,VALMMENU,VALMSGR,VALMUP,VALMWD,VALMLST,VALMVAR,VALMLFT,VALMBCK,VALMCC,VALMAR,VALMBG,VALMCAP,VALMCOFF,VALMCNT,VALMCON,VALMON,VALMEVL,VALMIOXY
  D KILL^AUPNPAT
  Q
  ;

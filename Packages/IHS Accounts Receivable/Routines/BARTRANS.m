@@ -1,7 +1,9 @@
 BARTRANS ; IHS/SD/SDR - Transaction Summary/Detail Report ; 03/10/2009
- ;;1.8;IHS ACCOUNTS RECEIVABLE;**10,19,20,23**;OCT 26, 2005
+ ;;1.8;IHS ACCOUNTS RECEIVABLE;**10,19,20,23,28**;OCT 26, 2005;Build 92
  ;NEW ROUTINE BAR*1.8*10 H2470
- ;01-OCT-2012 HEAT # 86006 P.OTT FIXING RTYP answered wrong
+ ;IHS/SD/POT 1.8*23 01-OCT-2012 HEAT # 86006 P.OTT FIXING RTYP answered wrong
+ ;IHS/SD/SDR - 1.8*28 - Updated p23 documentation
+ ;IHS/SD/SDR,POT - 1.8*28 - CR8397 HEAT155084 - Made changes to do report by 3p approval date, not transaction date
  Q
  ; *********************************************************************
  ;
@@ -19,7 +21,7 @@ EN ; EP
  I +BARSTART<1 D XIT Q               ; Dates answered wrong
  ; Ask rpt type (only if sort by allow cat/bill ent-return BARY("RTYP")
  D RTYP                             ; Ask report type
- I Y<1 D XIT Q                      ; Rtyp answered wrong or ^  P.OTT
+ I Y<1 D XIT Q  ;Rtyp answered wrong or ^  ;bar*1.8*23 IHS/SD/POT HEAT86006
  ; IHS/SD/PKD 1/25/11 1.8*20 Allow detail lines to all display $$
  I BARY("RTYP")=2 D
  . W !!,"Note: Some bills may contain more than one adjustment transaction on the report."
@@ -96,7 +98,8 @@ RTYP ;
  ;
 DATES ;
  ; Ask beginning and ending Transaction Dates.
- W !!," ============ Entry of TRANSACTION DATE Range =============",!
+ ;W !!," ============ Entry of TRANSACTION DATE Range =============",!  ;bar*1.8*28 IHS/SD/POT CR8397 HEAT155084
+ W !!," ============ Entry of 3P APPROVAL DATE Range =============",!  ;bar*1.8*28 IHS/SD/POT CR8397 HEAT155084
  K %DT  ;bar*1.8*20
  S BARSTART=$$DATE^BARDUTL(1)
  K %DT  ;bar*1.8*20
@@ -115,7 +118,8 @@ DATES ;
 SETHDR ;
  ; Build header array
  S BAR("OPT")="GAO"
- S BARY("DT")="T"
+ ;S BARY("DT")="T"  ;bar*1.8*28 IHS/SD/POT CR8397 HEAT155084
+ S BARY("DT")="A"  ;bar*1.8*28 IHS/SD/POT CR8397 HEAT155084
  S BAR("LVL")=0
  S BAR("HD",0)="GAO Transaction Report"
  I ",1,2,3,"[(","_BARY("STCR")_",") S BAR("HD",0)=BAR("HD",0)_" by "_BARY("STCR","NM")
@@ -149,3 +153,4 @@ SETHDR ;
 XIT ;
  D ^BARVKL0
  Q
+ ;EOR - IHS/DIT/CPC 1.8*28

@@ -1,5 +1,5 @@
-BGP8ULF ; IHS/CMI/LAB - UPLOAD AREA FILES ;
- ;;18.0;IHS CLINICAL REPORTING;;NOV 21, 2017;Build 51
+BGP8ULF ; IHS/CMI/LAB - UPLOAD AREA FILES ; 27 Jul 2018  11:10 AM
+ ;;18.1;IHS CLINICAL REPORTING;**1**;MAY 25, 2018;Build 65
  ;
  ;
  W:$D(IOF) @IOF
@@ -16,10 +16,11 @@ DIR ;
 FILENAME ;
  W !!
  S BGPFILE=""
- S DIR(0)="FO^2:30",DIR("A")="Enter filename w /ext (i.e. BG180101201.5)" K DA D ^DIR K DIR
+ S DIR(0)="FO^2:30",DIR("A")="Enter filename w /ext (i.e. BG"_$$FV^BGP8BAN()_"101201.5)" K DA D ^DIR K DIR
  G:$D(DIRUT) DIR
  I Y="" G DIR
- I $E($$UP^XLFSTR(Y),1,5)'="BG180" W !!,"Filename must begin with BG180" G FILENAME
+ S BGPJFN="BG"_$$FV^BGP8BAN()
+ I $E($$UP^XLFSTR(Y),1,5)'=BGPJFN W !!,"Filename must begin with BG"_$$FV^BGP8BAN() G FILENAME
  S BGPFILE=Y
  W !,"Directory=",BGPDIR,"  ","File=",BGPFILE
  D READF
@@ -43,7 +44,7 @@ PROC ;
  I Q W !!,"File is corrupt, the site will need to re-run the report." K ^TMP("BGPUPL",$J) G EOJ
  S BGPG=$P($G(^TMP("BGPUPL",$J,1,0)),"|")
  F X=1:1:14,21,22 S Y="BGP"_X,@Y=$P(BGP0,U,X)
- I BGP21="" S BGP21="18.0"
+ I BGP21="" S BGP21=$$VER^BGP8BAN()
  ;find existing entry and if exists, delete it
  S (X,BGPOIEN)=0 F  S X=$O(^BGPGPDCR(X)) Q:X'=+X  D
  .I '$D(^BGPGPDCR(X,0)) K ^BGPGPDCR(X) Q

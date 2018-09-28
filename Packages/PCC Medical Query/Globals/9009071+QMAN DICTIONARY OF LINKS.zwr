@@ -1,5 +1,5 @@
 OSEHRA ZGO Export: QMAN DICTIONARY OF LINKS
-27-SEP-2018 11:46:45 ZWR
+28-SEP-2018 11:40:36 ZWR
 ^AMQQ(1,0)="QMAN DICTIONARY OF LINKS^9009071^1002.0001^820"
 ^AMQQ(1,1,0)="PATIENT;DOB^2^2^.03^7^^0^1"
 ^AMQQ(1,1,1)="F AMQP(|6|)=|10|:0 S AMQP(10)=$O(^DPT(""ADOB"",AMQP(10))) Q:'AMQP(10)  Q:(AMQP(10)'<|11|)  S AMQT(|20|)=1 |30|"
@@ -722,15 +722,15 @@ OSEHRA ZGO Export: QMAN DICTIONARY OF LINKS
 ^AMQQ(1,69,5)="S AMQT(|20|)=0,%=$O(^AUPNMCR(""B"",AMQP(0),"""")) S:% %=$P(^AUPNMCR(%,0),U,2) S:'% AMQT(|20|)=1,AMQP(|6|)="""" |30|"
 ^AMQQ(1,69,7)="S AMQP(|6|)="""",AMQT(|20|)=1 S %=$O(^AUPNMCR(""B"",AMQP(0),"""")) S:% %=$P(^AUPNMCR(%,0),U,2) S:% AMQP(|5|)=% |30|"
 ^AMQQ(1,70,0)="PATIENT;MEDICARE NUMBER^2^9000003^.03^2^^0"
-^AMQQ(1,70,1)="S AMQP(0)="""" F  Q:$G(AMQP(0))=99999999999  S AMQP(0)=$O(^AUPNMCR(""B"",AMQP(0))) Q:'AMQP(0)  S AMQT(|20|)=0,%=$O(^(AMQP(0),"""")),AMQP(4.03)=$P(^AUPNMCR(%,0),U,3) S:AMQP(4.03)]"""" AMQT(|20|)=1 |30|"
+^AMQQ(1,70,1)="S AMQP(0)="""" F  Q:$G(AMQP(0))=99999999999  S AMQP(0)=$O(^AUPNMCR(""B"",AMQP(0))) Q:'AMQP(0)  S AMQT(|20|)=0,%=$O(^(AMQP(0),"""")),AMQP(4.03)=$$GETMCR^AGUTL(%) S:AMQP(4.03)]"""" AMQT(|20|)=1 |30|"
 ^AMQQ(1,70,1.1)="S (AMQQVALU,AMQP(|6|))=AMQP(4.03),AMQQX=""|10|;|11|"" X ""I 0"" D ^AMQQFAN S AMQT(|20|)=$T |30|"
-^AMQQ(1,70,2)="X ""I 0"" S %=$O(^AUPNMCR(""B"",AMQP(0),"""")) Q:'%  S %=$P($G(^AUPNMCR(%,0)),U,3) S:%'="""" (AMQQVALU,AMQP(|6|))=%,AMQQX=""|10|;|11|"" D:%'="""" ^AMQQFAN S AMQT(|20|)=$T |30|"
-^AMQQ(1,70,3)="I $D(^DPT(%,0)) S AMQQEVAL=$O(^AUPNMCR(""B"",%,"""")) S:AMQQEVAL'="""" AMQQEVAL=$P($G(^AUPNMCR(AMQQEVAL,0)),U,3) D:AMQQEVAL'="""" SER^AMQQFAN"
+^AMQQ(1,70,2)="X ""I 0"" S %=$O(^AUPNMCR(""B"",AMQP(0),"""")) Q:'%  S %=$$GETMCR^AGUTL(%) S:%'="""" (AMQQVALU,AMQP(|6|))=%,AMQQX=""|10|;|11|"" D:%'="""" ^AMQQFAN S AMQT(|20|)=$T |30|"
+^AMQQ(1,70,3)="I $D(^DPT(%,0)) S AMQQEVAL=$O(^AUPNMCR(""B"",%,"""")) S:AMQQEVAL'="""" AMQQEVAL=$$GETMCR^AGUTL(AMQQEVAL) D:AMQQEVAL'="""" SER^AMQQFAN"
 ^AMQQ(1,70,4,0)="^9009071.01^1^1"
-^AMQQ(1,70,4,1,0)="MEDICARE NUMBER^9000003^.03^ NUMBER^9^9^NUMBER"
+^AMQQ(1,70,4,1,0)="MEDICARE NUMBER^9000003^.03^ NUMBER^11^11^NUMBER"
 ^AMQQ(1,70,4,"B","MEDICARE NUMBER",1)=""
-^AMQQ(1,70,5)="S AMQT(|20|)=0,%='$D(^AUPNMCR(""B"",AMQP(0))) S:'% %=$O(^(AMQP(0),"""")),%=($P(^AUPNMCR(%,0),U,3)="""") I % S AMQP(|6|)="""",AMQT(|20|)=1 |30|"
-^AMQQ(1,70,7)="S %=$O(^AUPNMCR(""B"",AMQP(0),"""")) S:% %=$P(^AUPNMCR(%,0),U,3) S AMQP(|6|)=%,AMQT(|20|)=1 |30|"
+^AMQQ(1,70,5)="S AMQT(|20|)=0,%='$D(^AUPNMCR(""B"",AMQP(0))) S:'% %=$O(^(AMQP(0),"""")),%=($$GETMCR^AGUTL(%)="""") I % S AMQP(|6|)="""",AMQT(|20|)=1 |30|"
+^AMQQ(1,70,7)="S %=$O(^AUPNMCR(""B"",AMQP(0),"""")) S:% %=$$GETMCR^AGUTL(%) S AMQP(|6|)=%,AMQT(|20|)=1 |30|"
 ^AMQQ(1,71,0)="PATIENT;MEDICARE;SUFFIX^2^9000003^.04^10^^0"
 ^AMQQ(1,71,1)="F AMQP(0)=0:0 S AMQP(0)=$O(^AUPNMCR(""B"",AMQP(0))) Q:'AMQP(0)  S %=$O(^(AMQP(0),"""")),%=$P(^AUPNMCR(%,0),U,4),AMQT(|20|)=0  S:%'="""" AMQT(|20|)=$D(^UTILITY(""AMQQ TAX"",$J,|11|,%))+$D(^(""*""))='$D(^(""--"")),AMQP(|6|)=% |30|"
 ^AMQQ(1,71,2)="S AMQT(|20|)=0,%=$O(^AUPNMCR(""B"",AMQP(0),"""")) S:% %=$P(^AUPNMCR(%,0),U,4) S:%'="""" AMQT(|20|)=$D(^UTILITY(""AMQQ TAX"",$J,|11|,%))+$D(^(""*""))='$D(^(""--"")),AMQP(|6|)=% |30|"

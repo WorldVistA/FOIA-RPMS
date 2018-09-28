@@ -1,8 +1,11 @@
 BARENVCK ;IHS/SD/POT - ENVIRONMENT CHECKER ;   
- ;;1.8;IHS ACCOUNTS RECEIVABLE;**8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26**;OCT 26,2005;Build 17
+ ;;1.8;IHS ACCOUNTS RECEIVABLE;**8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28**;OCT 26,2005;Build 92
+ ;vc; Version BARENVCK.INT/BAR.1  Date 25-Oct-17  By User  Location BAR$M
+ ;vc; Component name INT.BARENVCK  Routine name: BARENVCK
  ;IHS/SD/POT - BAR*1.8*25 - checker to look for latest patches
  ;IHS/SD/SDR - 1.8*26 - Updated for patch 26; changed all namespacing of variable from ABM to BAR
- ;
+ ;IHS/DIT/CPC - BAR*1.8*27 - Updated for patch 27;
+ ;IHS/DIT/CPC - BAR*1.8*28 - Updated for patch 28;
  ;
  I '$G(DUZ) W !,"DUZ UNDEFINED OR 0." D SORRY(2) Q
  ;
@@ -24,7 +27,7 @@ BARENVCK ;IHS/SD/POT - ENVIRONMENT CHECKER ;
  I '$$VCHK("ABM","2.6",2) S XPDQUIT=2
  N X,BAR,I
  S BAR=1
- F I=1:1:13 D
+ F I=1:1:22 D
  .S X=$$PATCH^XPDUTL("ABM*2.6*"_I)
  .I X'=1 S BAR=0 W !,$$CJ^XLFSTR("Need Third Party Billing v2.6 Patch "_I_"..... "_$S(BAR=0:"NOT ",1:"")_"Present",IOM)
  I BAR=0 S XPDQUIT=2
@@ -33,7 +36,7 @@ BARENVCK ;IHS/SD/POT - ENVIRONMENT CHECKER ;
  I '$$VCHK("BAR","1.8",2) S XPDQUIT=2
  S BAR=1
  ;F I=9:1:24 D  ;bar*1.8*26 IHS/SD/SDR
- F I=6:1:7,9,10,12,13,14,15,16,17,18,19,20,21,22,23,24,25 D  ;bar*1.8*26 IHS/SD/SDR
+ F I=6:1:7,9,10,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27 D  ;bar*1.8*28 IHS/DIT/CPC
  .S X=$$PATCH^XPDUTL("BAR*1.8*"_I)
  .I X'=1 S BAR=0 W !,$$CJ^XLFSTR("Need A/R v1.8 Patch "_I_"..... "_$S(BAR=0:"NOT ",1:"")_"Present",IOM)
  I BAR=0 S XPDQUIT=2
@@ -54,6 +57,12 @@ BARENVCK ;IHS/SD/POT - ENVIRONMENT CHECKER ;
  K X
  ;end NEW CODE- BAR*1.8*25 ;IHS/SD/POT
  ;
+ ;NEW CODE - BAR*1.8*27 ;IHS/DIT/CPC
+ S X=$$PATCH^XPDUTL("AUPN*99.1*26") ; NOT TESTABLE AT CREATION 
+ I X'=1 W !,$$CJ^XLFSTR("IHS DICTIONARIES V99.1 PAT 26 NOT INSTALLED",IOM) S XPDQUIT=2
+ I X=1 W !,$$CJ^XLFSTR("IHS DICTIONARIES V99.1 PAT 26 INSTALLED",IOM)
+ K X
+ ;end NEW CODE - BAR*1.8*27 ;IHS/DIT/CPC
  ;
  N DA,DIC
  S X="BAR",DIC="^DIC(9.4,",DIC(0)="",D="C"
@@ -94,13 +103,13 @@ VCHK(BARPRE,BARVER,BARQUIT) ; Check versions needed.
  ;
 OPTSAV(BARM) ;
  D BMES^XPDUTL("Saving the configuration of option '"_BARM_"'...")
- I $D(^XTMP("BARENVCK",7.2,"OPTSAV",BARM)) D BMES^XPDUTL("NOT SAVED.  Option '"_BARM_"' has previously been saved.") Q
+ I $D(^XTMP("BARENVCK",7.2,"OPTSAV",DT,BARM)) D BMES^XPDUTL("NOT SAVED.  Option '"_BARM_"' has previously been saved.") Q
  I '$D(^XTMP("BARENVCK")) S ^XTMP("BARENVCK",0)=$$FMADD^XLFDT(DT,30)_U_DT_U_"BARENVCK - SAVE OPTION CONFIGURATIONS."
  N I,A
  S I=$O(^DIC(19,"B",BARM,0))
  I 'I D BMES^XPDUTL("NOT SAVED.  Option '"_BARM_"' not found in OPTION file.") Q
  S A=0
- F  S A=$O(^DIC(19,I,10,A)) Q:'A  S ^XTMP("BARENVCK",7.2,"OPTSAV",BARM,A)=$P(^DIC(19,+^DIC(19,I,10,A,0),0),U,1)_U_$P(^DIC(19,I,10,A,0),U,2,3)
+ F  S A=$O(^DIC(19,I,10,A)) Q:'A  S ^XTMP("BARENVCK",7.2,"OPTSAV",DT,BARM,A)=$P(^DIC(19,+^DIC(19,I,10,A,0),0),U,1)_U_$P(^DIC(19,I,10,A,0),U,2,3)
  Q
  ;
 INSTALLD(BARINSTL) ;EP - Determine if patch ABMINSTL was installed, where ABMINSTL is

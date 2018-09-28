@@ -1,6 +1,6 @@
 OSEHRA ZGO Export: BGP 18 ICARE GROUPS
-27-SEP-2018 11:54:38 ZWR
-^BGPICAGR(0)="BGP 18 ICARE GROUPS^90560.17^10^10"
+28-SEP-2018 11:40:42 ZWR
+^BGPICAGR(0)="BGP 18 ICARE GROUPS^90560.17^11^11"
 ^BGPICAGR(1,0)="Diabetes"
 ^BGPICAGR(2,0)="Elder"
 ^BGPICAGR(3,0)="Dental"
@@ -11,6 +11,8 @@ OSEHRA ZGO Export: BGP 18 ICARE GROUPS
 ^BGPICAGR(8,0)="STI-Related"
 ^BGPICAGR(9,0)="Other Clinical"
 ^BGPICAGR(10,0)="Comprehensive Health Screening"
+^BGPICAGR(11,0)="Asthma"
+^BGPICAGR("B","Asthma",11)=""
 ^BGPICAGR("B","Behavioral Health",6)=""
 ^BGPICAGR("B","CVD-Related",7)=""
 ^BGPICAGR("B","Cancer-Related",5)=""
