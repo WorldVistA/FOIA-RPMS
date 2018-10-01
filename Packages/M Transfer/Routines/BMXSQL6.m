@@ -343,4 +343,3 @@ LAST(VAR) ; Get last entry in an array //SMH new code
   N SUB3 S SUB3=$O(@VAR@(SUB1,SUB2,""),-1)
   I SUB3="" Q $NA(@VAR@(SUB1,SUB2))
   E  Q $NA(@VAR@(SUB1,SUB2,SUB3))
-
