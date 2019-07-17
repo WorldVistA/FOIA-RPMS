@@ -1,5 +1,5 @@
 AMER2A ; IHS/ANMC/GIS -ISC - OVERFLOW FROM AMER2 ;  
- ;;3.0;ER VISIT SYSTEM;**6**;MAR 03, 2009;Build 30
+ ;;3.0;ER VISIT SYSTEM;**6,10**;MAR 03, 2009;Build 23
  ;
 QD20 ; CLINIC TYPE
  N AMERLINE,%
@@ -10,32 +10,45 @@ QD20 ; CLINIC TYPE
  .W !,AMERLINE,!
  .Q
 QD20A ;
- N AMERPCC,X,AMERLOC,AMERCLN,AMERTYP
+ N AMERPCC,AMERLOC,AMERCLN,AMERTYP,ERR
  S X=""
- S DIC("A")="*Clinic type (EMERGENCY or URGENT): " K DIC("B")
+ ;GDIT/HS/BEE 05/10/2018;CR#10213 - AMER*3.0*10 - Pull default clinic and use
+ ;S DIC("A")="*Clinic type (EMERGENCY or URGENT): " K DIC("B")
+ S DIC("A")="*Clinic type: " K DIC("B")
  ;S DIC("B")="EMERGENCY MEDICINE"
  ;IHS/OIT/SCR 2/20/09 - DEFAULT TO WALK IN CLINIC THAT IS IDENTIFIED IN ERS SITE PREFERENCES FILE
- S AMERLOC=0,AMERLOC=$O(^AMER(2.5,AMERLOC))
- I AMERLOC="" D
+ ;S AMERLOC=0,AMERLOC=$O(^AMER(2.5,AMERLOC))
+ S AMERLOC=$G(DUZ(2))
+ I '$D(^AMER(2.5,AMERLOC,0)) D
  .W !,"SITE PARAMETERS have not been set up in the ERS PARAMETER option"
  .W !,"Please contact your ERS Supervisors to complete this option before using the EMERGENCY ROOM system"
  .S X="^^"
  .Q
  I AMERLOC'="" D
- .S AMERCLN=$G(^AMER(2.5,AMERLOC,"SD"))
- .I AMERCLN="" D
- ..W !,"WALK IN CLINC has not been set up in the ERS PARAMETER option"
- ..W !,"Please contact your ERS Supervisors to identify a CLINIC before using the EMERGENCY ROOM system"
- ..S X="^^"
- ..Q
- .I AMERCLN'="" D
- ..S AMERTYP=$P(^SC(AMERCLN,0),"^",7)  ;THIS STOP CODE NUMBER - POINTER TO STOP CODE FILE (30 OR 60)
- ..S DIC("B")=AMERTYP
- ..S AMERPCC=$$EXISTING^AMERPCC(AMERDFN)
- ..S:AMERPCC>0 DIC("B")=$$GET1^DIQ(9000010,AMERPCC,.08)
+ .;
+ .;GDIT/HS/BEE 05/10/2018;CR#10213 - AMER*3.0*10 - Pull default clinic and use
+ .S DIC("B")=""
+ .S AMERCLN=$$GET1^DIQ(9009082.5,AMERLOC_",",.06,"I") I AMERCLN]"" D
+ ..S DIC("B")=$$GET1^DIQ(9009083,AMERCLN,.01,"E")
+ .;If not defined use first one with 30
+ .I DIC("B")="" D
+ ..S AMERCLN=$O(^AMER(3,"B",30,""))
+ ..I AMERCLN]"" S DIC("B")=$$GET1^DIQ(9009083,AMERCLN,.01,"E")
+ .;
+ .;I AMERCLN'="" D
+ .;.S AMERTYP=$P(^SC(AMERCLN,0),"^",7)  ;THIS STOP CODE NUMBER - POINTER TO STOP CODE FILE (30 OR 60)
+ .;.S DIC("B")=AMERTYP
+ .;.S AMERPCC=$$EXISTING^AMERPCC(AMERDFN)
+ .;.S:AMERPCC>0 DIC("B")=$$GET1^DIQ(9000010,AMERPCC,.08)
+ .S AMERPCC=$$EXISTING^AMERPCC(AMERDFN)
+ .I AMERPCC>0 D
+ ..S AMERCLN=$$GETCLN(AMERPCC) ;Pull Hospital Location
+ ..I AMERCLN]"" S DIC("B")=$$GET1^DIQ(9009083,AMERCLN,.01,"E")  ;Get AMER clinic text
  ..I $D(^TMP("AMER",$J,2,20)) S %=+^(20),DIC("B")=$P(^AMER(3,%,0),U)  ;clinic code
  ..S DIC="^AMER(3,"
- ..S DIC("S")="I $P(^(0),U,2)="_$$CAT^AMER0("CLINIC TYPE")
+ ..;GDIT/HS/BEE 05/10/2018;CR#10213 - AMER*3.0*10 - Filter out inactive
+ ..;S DIC("S")="I $P(^(0),U,2)="_$$CAT^AMER0("CLINIC TYPE")
+ ..S DIC("S")="I '$P(^(0),U,5),$P(^(0),U,2)="_$$CAT^AMER0("CLINIC TYPE")
  ..S DIC(0)="AEQ"
  ..D ^DIC K DIC
  ..I X=U,'$D(AMERBCH),'$D(AMEREFLG) S X="^^"
@@ -43,6 +56,11 @@ QD20A ;
  ..I X=U Q
  ..Q
  .Q
+ ;
+ ;GDIT/HS/BEE 05/10/2018;CR#10213/10423 - AMER*3.0*10 - Save updated clinic and hospital location
+ ;Need to update clinic and hospital location if overrides on file and possibly create new appt
+ I +Y,AMERPCC>0 S ERR=$$CKHLOC^AMERBSD(AMERPCC,+Y)
+ ;
  D OUT^AMER I $D(AMERQUIT) Q
  Q
  ;
@@ -174,3 +192,89 @@ TVAL(Z,T,H) ; ENTRY POINT FROM AMER2 and multiple editing routines
  S %=2 W !!,*7,"This means a really long delay since the time of admission: ",Y,!,"Are you sure" D YN^DICN W !
  I %=1 Q 0
  Q 1
+ ;
+ ;GDIT/HS/BEE 05/10/2018;CR#10213 - AMER*3.0*10 - Save updated clinic and hospital location
+SYNCCL(AMERDA,AMERPCC) ;Sync the ER VISIT clinic with the PCC clinic
+ ;
+ ;Original code from SYNCHPCC^AMERPCC - Copied here to address routine size issue
+ ; GET THE EXTERNAL VALUE FOR "CLINIC TYPE" IN VISIT FILE AND SET IT TO EMERGENCY IF IT ISN'T ALREADY URGENT CARE
+ ;S AMERCLN=$P($G(^AMERVSIT(AMERDA,0)),U,4)  ; AMERCLN IS A POINTER TO ER OPTIONS FILE 
+ ;I AMERCLN'="" D
+ ;.S AMERCLN=$P($G(^AMER(3,AMERCLN,0)),U,1)  ; AMERCLN IS A WORD - 30: EMERGENCY MEDICINE "80: URGENT CARE"
+ ;.S AMERVVAL=$$CLINIC^APCLV(AMERPCC,"E")
+ ;.I (AMERVVAL'=AMERCLN) D
+ ;..S AMERPNTR=$O(^DIC(40.7,"B",AMERCLN,0))
+ ;..S:AMERPNTR'="" AMERVDR=$S(AMERVDR'="":AMERVDR_";",1:""),AMERVDR=AMERVDR_".08////"_AMERPNTR
+ ;..Q
+ ;
+ I +$G(AMERDA)=0 Q
+ I +$G(AMERPCC)=0 Q
+ ;
+ NEW ECEIEN,ECPIEN,EHPIEN,PCIEN,PHIEN
+ ;
+ ;Get ERS clinic pointer to ER OPTIONS
+ S ECEIEN=$$GET1^DIQ(9009080,AMERDA_",",.04,"I")
+ ;
+ ;Get ERS clinic pointer associated IEN for PCC and associated hospital location IEN
+ S (ECPIEN,EHPIEN)="" I +ECEIEN D
+ . NEW CLN,HLI
+ . ;
+ . ;Clinic
+ . S CLN=$$GET1^DIQ(9009083,+ECEIEN_",",5,"I")  ;Get clinic code
+ . I CLN]"" S ECPIEN=$O(^DIC(40.7,"C",CLN,""))
+ . ;
+ . ;Hospital Location
+ . S HLI=$O(^AMER(2.5,DUZ(2),8,"B",+ECEIEN,"")) I HLI D
+ .. S EHPIEN=$P($G(^AMER(2.5,DUZ(2),8,HLI,0)),U,2)
+ . S:EHPIEN="" EHPIEN=$G(^AMER(2.5,DUZ(2),"SD"))  ;If blank, pull original value
+ ;
+ ;Get PCC Clinic and Hospital Location
+ S PCIEN=$$GET1^DIQ(9000010,AMERPCC_",",.08,"I")
+ S PHIEN=$$GET1^DIQ(9000010,AMERPCC_",",.22,"I")
+ ;
+ ;If ER VISIT is blank or not equal to PCC copy from PCC
+ I PCIEN,(('ECEIEN)!(ECPIEN'=PCIEN)) D  Q
+ . NEW AMERUPD,ERROR,ENCPIEN,CODE
+ . S CODE=$$GET1^DIQ(40.7,PCIEN_",",1,"I") Q:'CODE
+ . S ENCPIEN=$O(^AMER(3,"B",CODE,"")) Q:'ENCPIEN
+ . S AMERUPD(9009080,AMERDA_",",.04)=ENCPIEN
+ . D FILE^DIE("","AMERUPD","ERROR")
+ ;
+ ;If PCC is blank copy from ER VISIT
+ I 'PCIEN,ECPIEN D
+ . NEW AMERUPD,ERROR
+ . S AMERUPD(9000010,AMERPCC_",",.08)=ECPIEN
+ . S AMERUPD(9000010,AMERPCC_",",.22)=EHPIEN
+ . D FILE^DIE("","AMERUPD","ERROR")
+ ;
+ Q
+ ;
+ ;GDIT/HS/BEE 07/12/2018;CR#10423 - AMER*3.0*10
+GETCLN(AUPNVSIT) ;Return the ER Clinic for the PCC hospital location
+ ;
+ I $G(AUPNVSIT)="" Q ""
+ ;
+ NEW HLOC,CLN,DIV
+ ;
+ S DIV=$$GET1^DIQ(9000010,AUPNVSIT_",",".06","I") S:DIV="" DIV=$G(DUZ(2)) I DIV="" Q ""
+ ;
+ S CLN=""
+ S HLOC=$$GET1^DIQ(9000010,AUPNVSIT_",",.22,"I") I HLOC]"" D
+ . NEW CIEN
+ . S CIEN=0 F  S CIEN=$O(^AMER(2.5,DIV,8,CIEN)) Q:'CIEN  D  Q:CLN
+ .. NEW ECLN,EHLOC,DA,IENS
+ .. S DA(1)=DIV,DA=CIEN,IENS=$$IENS^DILF(.DA)
+ .. S EHLOC=$$GET1^DIQ(9009082.58,IENS_",",".02","I")
+ .. I HLOC'=EHLOC Q
+ .. S ECLN=$$GET1^DIQ(9009082.58,IENS_",",".01","I") Q:ECLN=""
+ .. S CLN=ECLN
+ ;
+ ;If no clinic resort to pre-patch 10 logic
+ I CLN="" D
+ . NEW CLINIC
+ . ;
+ . S CLINIC=$$GET1^DIQ(9000010,AUPNVSIT_",",.08,"I")
+ . I CLINIC]"" S CLINIC=$$GET1^DIQ(40.7,CLINIC_",",1,"I")
+ . I CLINIC]"" S CLN=$O(^AMER(3,"B",CLINIC,""))
+ ;
+ Q CLN

@@ -1,5 +1,5 @@
 ABMERINS ; IHS/ASDST/DMJ - UB92 EMC Set up Insurer Information ;   
- ;;2.6;IHS Third Party Billing System;**3,10,26**;NOV 12, 2009;Build 440
+ ;;2.6;IHS Third Party Billing System;**3,10,26,27**;NOV 12, 2009;Build 486
  ;Original;DMJ;06/25/96 12:43 PM
  ;IHS/SD/SDR V2.5 P3 1/24/03 - NEA-0301-180044 Modified to display patient info when workers comp
  ;IHS/SD/SDR v2.5 p8 IM14799 Modified BCBS line tag to kill possible pre-existing calue of ABME("LOC")
@@ -9,9 +9,10 @@ ABMERINS ; IHS/ASDST/DMJ - UB92 EMC Set up Insurer Information ;
  ;IHS/SD/SDR v2.5 p10 IM21619 Made change to print worker's comp claim number
  ;IHS/SD/SDR v2.5 p11 IM24315 Added check for new parameter for UB Relationship code
  ;
- ;IHS/SD/SDR - abm*2.6*3 - HEAT8996 - get group name/# for Medicaid
+ ;IHS/SD/SDR 2.6*3 HEAT8996 - get group name/# for Medicaid
  ;IHS/SD/SDR 2.6*26 CR9265 and CR9863 Changed to use AUPN API for MBI or default to HIC number
- ;
+ ;IHS/SD/SDR 2.6*27 CR10170 Check if there's a replacement insurer; use that insurer type to drive what linetag it goes to;
+ ;   policy# wasn't printing because it was in wrong linetag for elig entry (like replacement PI when elig is in MCD file).
  ; *********************************************************************
  ;
 START ;START HERE
@@ -24,7 +25,20 @@ ISET ;SET UP DEPENDING ON INSURER
  S ABME("INM")=$P(^AUTNINS(ABME("INS"),0),U)  ; Ins name
  K ABME("PH"),ABME("PHNM"),ABME("PPP")
  S:'$G(ABME("INSIEN")) ABME("INSIEN")=$O(^ABMDBILL(DUZ(2),ABMP("BDFN"),13,"B",ABME("INS"),0))
+ ;start new abm*2.6*27 IHS/SD/SDR CR10170
+ I '$G(ABME("INSIEN")) D
+ .S ABME("INSIEN")=0
+ .S ABMIF=0
+ .F  S ABME("INSIEN")=$O(^ABMDBILL(DUZ(2),ABMP("BDFN"),13,ABME("INSIEN"))) Q:'ABME("INSIEN")  D  Q:ABMIF
+ ..I $P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),13,ABME("INSIEN"),0)),U)=ABME("INS") S ABMIF=1 Q
+ ..I $P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),13,ABME("INSIEN"),0)),U,11)=ABME("INS") S ABMIF=1 Q
+ I '$G(ABME("INSIEN")) S ABME("INSIEN")=ABME("INS")
+ ;type of insurer
+ I $P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),13,ABME("INSIEN"),0)),U)'=ABME("INS") S ABME("ITYPE")=$$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),13,ABME("INSIEN"),0)),U),".211","I"),1,"I")
+ E  S ABME("ITYPE")=$$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,ABME("INS"),".211","I"),1,"I")
+ ;end new abm*2.6*27 IHS/SD/SDR CR10170
  D @$S(ABME("INS")=1:"RR",ABME("ITYPE")="R":"MCR",ABME("ITYPE")="D"!(ABME("ITYPE")="K"):"MCD",ABME("ITYPE")="N":"NON",1:"PRVT")
+ S ABME("ITYPE")=$$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,ABME("INS"),".211","I"),1,"I")  ;type of insurer - reset to active insurer, just in case  ;abm*2.6*27 IHS/SD/SDR CR10170
  S ABME("ID#")=$G(ABMR(30,70))
  Q
  ;

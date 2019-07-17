@@ -1,5 +1,5 @@
 AMHGESIG ; IHS/CMI/MAW - AMHG GUI ESig Utilities 6/22/2009 11:14:59 AM ;
- ;;4.0;IHS BEHAVIORAL HEALTH;**1**;JUN 18, 2010;Build 8
+ ;;4.0;IHS BEHAVIORAL HEALTH;**1,10**;JUN 02, 2010;Build 15
  ;
  ;
  ;
@@ -120,6 +120,8 @@ ISIGN(RETVAL,AMHSTR) ;-- sign the record if valid, if not return invalid
  Q
  ;
 UPDREC(REC,DZ) ;EP -- update the record with the date and user
+ ;cmi/maw v4.0p10 also do we need to check for groups only?
+ I $$GET1^DIQ(9002011,REC,1112)]"",$$GET1^DIQ(9002011,REC,1113)]"" Q  ;cmi/maw v4.0p10 dont update if an edit and signed
  N AMHFDA,AMHIENS,AMHERRR,AMHNOW
  S AMHIENS=REC_","
  S AMHNOW=$$NOW^XLFDT()

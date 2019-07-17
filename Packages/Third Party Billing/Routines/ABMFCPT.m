@@ -1,26 +1,18 @@
 ABMFCPT ; IHS/ASDST/DMJ - FILE CPT CODE ;   
- ;;2.6;IHS Third Party Billing System;**2,11**;NOV 12, 2009;Build 133
+ ;;2.6;IHS Third Party Billing System;**2,11,27**;NOV 12, 2009;Build 486
  ;
- ; IHS/ASDS/JLG - 01/23/01 - V2.4 Patch 3 - NOIS NEA-0600-18022
- ;    Modified routine to fix problem with provider narrative not 
- ;    showing up.
- ; IHS/ASDS/SDH - 04/26/01 - V2.4 Patch 9 - NOIS DXX-0400-140004
- ;     Allow quantity to pass from PCC to 3PB when the CPT 
- ;     mnuemonic is used.
- ; IHS/ASDS/LSL - 07/03/01 - V2.4 Patch 9 - NOIS NEA-0600-180021
- ;     Modified to allow Pathology, Cytology, and Blood Bank CPT's
- ;     entered through CPT mnuemonic in PCC to pass to 3PB. Thanks
- ;     to Jim Gray for the code.
+ ;IHS/ASDS/JLG 01/23/01 2.4*3 NOIS NEA-0600-18022 Modified routine to fix problem with provider narrative not showing up.
+ ;IHS/ASDS/SDH 04/26/01 2.4*9 NOIS DXX-0400-140004 Allow quantity to pass from PCC to 3PB when the CPT mnuemonic is used.
+ ;IHS/ASDS/LSL 07/03/01 2.4*9 NOIS NEA-0600-180021 Modified to allow Pathology, Cytology, and Blood Bank CPT's
+ ;     entered through CPT mnuemonic in PCC to pass to 3PB. Thanks to Jim Gray for the code.
  ;
- ; IHS/SD/SDR - 11/4/02 - V2.5 P2 - ZZZ-0301-210046
- ;     Modified to capture modifiers from PCC
- ; IHS/SD/SDR - v2.5 p8
- ;    Added code so A0000-A0999 would go to page 8K if ambulance
- ; IHS/SD/SDR - v2.5 p10 - IM21095
- ;   Removed VRAD check for unit; it should always be 1
+ ;IHS/SD/SDR 11/4/02 2.5*2 ZZZ-0301-210046 Modified to capture modifiers from PCC
+ ;IHS/SD/SDR 2.5*8 Added code so A0000-A0999 would go to page 8K if ambulance
+ ;IHS/SD/SDR 2.5*10 IM21095 Removed VRAD check for unit; it should always be 1
  ;
- ; IHS/SD/SDR - v2.6 CSV
- ; IHS/SD/SDR - abm*2.6*2 - 3PMS10003A - modified to call ABMFEAPI
+ ;IHS/SD/SDR v2.6 CSV
+ ;IHS/SD/SDR 2.6*2 3PMS10003A modified to call ABMFEAPI
+ ;IHS/SD/SDR 2.8*27 CR8894 Made correction to ABMFEAPI call to use CPT (not IEN); API does cross reference look up on CPT code
  ; *********************************************************************
  ;
 START ;FILE ONE CPT CODE
@@ -38,7 +30,7 @@ START ;FILE ONE CPT CODE
  .I +ABMCPT<10000 D ANES Q
  .I +ABMCPT<70000 D SURG Q
  .I +ABMCPT<80000 D RAD Q
- . I +ABMCPT<90000 D LAB Q
+ .I +ABMCPT<90000 D LAB Q
  .D MED
  K ABMCPT,ABMSRC,ABMRVN,DIC,DIE,DR,X,Y,ABMUNIT
  Q
@@ -56,7 +48,8 @@ ANES ;ANESTHESIA CODE
  S:'ABMRVN ABMRVN=370
  S DR=DR_";.02////"_ABMRVN
  ;S DR=DR_";.04////"_$P($G(^ABMDFEE(ABMP("FEE"),23,+ABMCPT,0)),"^",2)  ;abm*2.6*2 3PMS10003A
- S DR=DR_";.04////"_$P($$ONE^ABMFEAPI(ABMP("FEE"),23,+ABMCPT,ABMP("VDT")),U)  ;abm*2.6*2 3PMS10003A
+ ;S DR=DR_";.04////"_$P($$ONE^ABMFEAPI(ABMP("FEE"),23,+ABMCPT,ABMP("VDT")),U)  ;abm*2.6*2 3PMS10003A  ;abm*2.6*27 IHS/SD/SDR CR8894
+ S DR=DR_";.04////"_$P($$ONE^ABMFEAPI(ABMP("FEE"),23,ABMCPT,ABMP("VDT")),U)  ;abm*2.6*2 3PMS10003A  ;abm*2.6*27 IHS/SD/SDR CR8894
  S DR=DR_";.05////"_ABMSDT
  S DR=DR_";.06////"_ABMMOD1
  S DR=DR_";.07////"_ABMAST  ;Anes. start dt/tm abm*2.6*11 HEAT83923
@@ -149,7 +142,8 @@ HCPCS ;HCPCS CODE
  I +ABMUNIT=0 S ABMUNIT=1
  S DR=DR_";.03////"_ABMUNIT
  ;S DR=DR_";.04////"_$P($G(^ABMDFEE(ABMP("FEE"),13,ABMCPTIE,0)),"^",2)  ;abm*2.6*2 3PMS10003A
- S DR=DR_";.04////"_$P($$ONE^ABMFEAPI(ABMP("FEE"),13,ABMCPTIE,ABMP("VDT")),U)  ;abm*2.6*2 3PMS10003A
+ ;S DR=DR_";.04////"_$P($$ONE^ABMFEAPI(ABMP("FEE"),13,ABMCPTIE,ABMP("VDT")),U)  ;abm*2.6*2 3PMS10003A  ;abm*2.6*27 IHS/SD/SDR CR8894
+ S DR=DR_";.04////"_$P($$ONE^ABMFEAPI(ABMP("FEE"),13,ABMCPT,ABMP("VDT")),U)  ;abm*2.6*2 3PMS10003A  ;abm*2.6*27 IHS/SD/SDR CR8894
  S DR=DR_";.05////"_ABMMOD1
  ;Next line set correspond diagnosis if only 1 POV
  I $D(ABMP("CORRSDIAG")) S DR=DR_";.06////1"

@@ -1,5 +1,5 @@
 AUMSCBU  ;IHS/OIT/NKD - SCB UPDATE - UTILITY 12/07/2012 ;
- ;;18.0;TABLE MAINTENANCE;**2**;AUG 14,2017;Build 1
+ ;;19.0;TABLE MAINTENANCE;**1**;SEP 04,2018;Build 1
  ; 03/12/14 - Modified Inactivate processing for Education tables
  ; 05/28/14 - Added Tribe pre-routine for Inactivate processing
  ;          - Corrected condition to trigger Patient Current Community change

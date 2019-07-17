@@ -1,22 +1,24 @@
 ABMDE2X ; IHS/ASDST/DMJ - PAGE 2 - INSURER data chk ;  
- ;;2.6;IHS 3P BILLING SYSTEM;**3,6,8,9,10,11,21**;NOV 12, 2009;Build 379
+ ;;2.6;IHS 3P BILLING SYSTEM;**3,6,8,9,10,11,21,27**;NOV 12, 2009;Build 486
  ;
  ; IHS/SD/SDR - V2.5 P3 - 1/24/03 - NOIS NEA-0301-180044
  ;     Modified routine to display patient info when workers comp
  ;
- ;IHS/SD/SDR - v2.5 p8 - IM15307/IM14092 - Modified to check for new MSP errors 194-197
- ;IHS/SD/SDR - v2.5 p8 - IM15111 - Check format of Medicare name
- ;IHS/SD/SDR - v2.5 p10 - IM20000 - Added code to use CARD NAME for Policy Holder
- ;IHS/SD/SDR - v2.5 p10 - IM20593 - Added new warning for NO MSP FOR MEDICARE PATIENT
- ;IHS/SD/SDR - v2.5 p10 - IM20311 - Added new error for missing DOB when Medicare active (219)
- ;IHS/SD/SDR - v2.5 p12 - UFMS - Added new warning/errors 225 and 226 for pseudo/missing TIN
- ;IHS/SD/SDR - v2.5 p13 - NO IM
+ ;IHS/SD/SDR 2.5 p8 IM15307/IM14092 - Modified to check for new MSP errors 194-197
+ ;IHS/SD/SDR 2.5 p8 IM15111 - Check format of Medicare name
+ ;IHS/SD/SDR 2.5 p10 IM20000 - Added code to use CARD NAME for Policy Holder
+ ;IHS/SD/SDR 2.5 p10 IM20593 - Added new warning for NO MSP FOR MEDICARE PATIENT
+ ;IHS/SD/SDR 2.5 p10 IM20311 - Added new error for missing DOB when Medicare active (219)
+ ;IHS/SD/SDR 2.5 p12 UFMS - Added new warning/errors 225 and 226 for pseudo/missing TIN
+ ;IHS/SD/SDR v2.5 p13 NO IM
  ;
- ;IHS/SD/SDR - 2.6*3 - HEAT7574 - added tribal self-insured warning
- ;IHS/SD/SDR - 2.6*6 - 5010 - added error 236
- ;IHS/SD/SDR - 2.6*21 - HEAT145126 - Made correction to error 218 so it would display correctly.
- ;IHS/SD/SDR - 2.6*21 - VMBP RQMT_91 - Added error 253 if Mcr/Mcd and V insurer type exists on claim also
- ;IHS/SD/SDR - 2.6*21 - VMBP RQMT_109 - Added code to get data from the VAMB Eligible file
+ ;IHS/SD/SDR 2.6*3 HEAT7574 - added tribal self-insured warning
+ ;IHS/SD/SDR 2.6*6 5010 - added error 236
+ ;IHS/SD/SDR 2.6*21 HEAT145126 - Made correction to error 218 so it would display correctly.
+ ;IHS/SD/SDR 2.6*21 VMBP RQMT_91 - Added error 253 if Mcr/Mcd and V insurer type exists on claim also
+ ;IHS/SD/SDR 2.6*21 VMBP RQMT_109 - Added code to get data from the VAMB Eligible file
+ ;IHS/SD/SDR 2.6*27 CR10170 When replacement insurer is Medicaid it tries to do the NAME check but fails and drops error 203; fixed to use
+ ;  the original insurer type for check.
  ;
  ; *********************************************************************
 ERR ;
@@ -187,6 +189,7 @@ SEL ;EP - Entry Point for Checking Select Insurer for Errors
  D ^ABMDE2X3
  S:$G(ABMP("INS"))="" ABMP("INS")=$P($G(ABMV("X1")),";")
  ;I $P($G(^AUTNINS(ABMP("INS"),2)),U)="R"!($P($G(^AUTNINS(ABMP("INS"),2)),U)="D") D  ;abm*2.6*10 HEAT73780
+ I ABMP("INS")'=$P($G(ABMV("X1")),";") S ABMISV=ABMP("INS"),ABMP("INS")=$P($G(ABMV("X1")),";")  ;abm*2.6*27 IHS/SD/SDR CR10170
  S ABMITYP=$$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,ABMP("INS"),".211","I"),1,"I")  ;abm*2.6*10 HEAT73780
  I ABMITYP="R"!(ABMITYP="D") D  ;abm*2.6*10 HEAT73780
  .S ABMCK=$P(ABMV("X1"),U,5)
@@ -194,6 +197,7 @@ SEL ;EP - Entry Point for Checking Select Insurer for Errors
  .I $G(ABMCK)="" S ABME(203)=""
  ;I $P($G(^AUTNINS(ABMP("INS"),2)),U)="R",($P($G(ABMV("X1")),U,6)="") S ABME(219)=""  ;abm*2.6*10 HEAT73780
  I ABMITYP="R",($P($G(ABMV("X1")),U,6)="") S ABME(219)=""  ;abm*2.6*10 HEAT73780
+ S:(+$G(ABMISV)'=0) ABMP("INS")=ABMISV,ABMITYP=$$GET1^DIQ(9999999.181,$$GET1^DIQ(9999999.18,ABMP("INS"),".211","I"),1,"I")  ;abm*2.6*27 IHS/SD/SDR CR10170
  I $P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),0)),U,11)="Y" S ABME(234)=""  ;abm*2.6*3 HEAT7574
  I $P(ABMV("X1"),U,4)="" S ABME(236)=""  ;abm*2.6*6 5010
  ;start new abm*2.6*21 IHS/SD/SDR VMBP RQMT_91

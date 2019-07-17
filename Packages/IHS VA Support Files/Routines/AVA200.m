@@ -1,8 +1,9 @@
 AVA200 ; IHS/OIT/FBD - ADD/ EDIT PERSONS TO VA(200 ;30-Sep-2010 17:29;fbd
- ;;93.2;VA SUPPORT FILES;**1,4,7,8,13,19,21**;SEP 30, 2010;Build 12
+ ;;93.2;VA SUPPORT FILES;**1,4,7,8,13,19,21,22,24**;SEP 30, 2010;Build 6
  ;PATCH #8 -- Added Service/Section field to Add New Person-IHS/ADC/CRG
  ;PATCH #19 Added Trigger to fire Protocol to generate MFN-M02 Hl7 message IHS/OIT/FJE
  ;PATCH #21 Added Fax, Email Addr, SPI field edits to Add Provider - IHS/OIT/FBD
+ ;PATCH #24 Conditionalized DEA#, DEA Expiration Date field edits in Add Provider - IHS/OIT/FBD
  ;
  Q
 PERADD ;EP; ENTRY POINT to add or edit persons in ^va(200
@@ -67,9 +68,9 @@ PERSON(AVADR,AVADR1) ;PEP;EXTR FUNC called to perform add or edit on one person
 EXIT1 Q AVADA
  ;
  ;
-PROVIDER(AVADR,AVADR1) ;PEP;EXTR FUNC called to add or edit one provider
- ;AVADR can be set to fields to add as identifiers
- ;AVADR1 can be set to additional fields for DR for ^DIE call
+PROVIDER(AVADR,AVADR1) ;PEP;EXTR FUNC add/edit one provider
+ ;AVADR (opt) = fields to add as identifiers
+ ;AVADR1(opt) = additional fields for DR for ^DIE call
  ;to call, set variable to $$PROVIDER(with optional parameters)
  ;Identifiers already included:  by VA: Initials, SSN, Sex
  ;  By variable X set below: Affiliation, Provider Class, Code
@@ -82,9 +83,11 @@ PROVIDER(AVADR,AVADR1) ;PEP;EXTR FUNC called to add or edit one provider
  N Y,X
  S X="53.5R;9999999.01;9999999.02" S:$D(AVADR) X=X_";"_AVADR ;IHS/ORDC/LJF 12/3/93 PATCH #4
  ;S Y=X_";9999999.05:9999999.08;53.1;53.2;53.6:53.9" ;PATCH #7  ;IHS/OIT/FBD - 9/30/2010 - COMMENTED OUT - SUPERCEDED BY AVA*93.2*21
- S Y=".136;.151;"_X_";9999999.05:9999999.08;53.1;53.2;747.44;43.99;53.6:53.9" ;IHS/OIT/FBD - 9/30/2010 - AVA*93.2*21 - AVA*93.2*22 ADDED DEA EXPIRATION DATE
+ ;S Y=".136;.151;"_X_";9999999.05:9999999.08;53.1;53.2;747.44;43.99;53.6:53.9" ;IHS/OIT/FBD - 9/30/2010 - AVA*93.2*21 - AVA*93.2*22 ADDED DEA EXPIRATION DATE - 5/16/2018 - SUPERCEDED BY AVA*93.2*24
+ S Y=".136;.151;"_X_";9999999.05:9999999.08;53.1;43.99;53.6:53.9" ;IHS/OIT/FBD - 8/1/2018 - AVA*93.2*24
  S:$D(AVADR1) Y=Y_";"_AVADR1
  S AVADA=$$PERSON(X,Y)
+ D EPCSEDIT^AVA200E(AVADA)  ;IHS/OIT/FBD - 8/1/2018 - AVA*93.2*24
  I $P($G(^VA(200,+AVADA,"PS")),U,5)]"" D  ;IHS/ORDC/LJF 9/13/93 PATCH #1
  .S DA=$P(^DIC(3,+AVADA,0),U,16) ;IHS/ORDC/LJF 9/13/93 PATCH #1
  .I DA S DIE=6,DR="9999999.21" D ^DIE ;IHS/ORDC/LJF 9/13/93 PATCH #1

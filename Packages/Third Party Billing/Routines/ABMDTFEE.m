@@ -1,10 +1,12 @@
-ABMDTFEE ; IHS/ASDST/DMJ - Table Maintenance of 3P CODES ;
- ;;2.6;IHS Third Party Billing;**1,2,21**;NOV 12, 2009;Build 379
+ABMDTFEE ; IHS/SD/SDR - Table Maintenance of 3P CODES ;
+ ;;2.6;IHS Third Party Billing;**1,2,21,27**;NOV 12, 2009;Build 486
  ;
- ;IHS/SD/SDR - v2.6 CSV
- ;IHS/SD/SDR - abm*2.6*1 - NO HEAT - Populate owner of table
- ;IHS/SD/SDR - abm*2.6*2 - 3PMS10003A - populate new effective dates multiple
+ ;IHS/SD/SDR 2.6 CSV
+ ;IHS/SD/SDR 2.6*1 NO HEAT - Populate owner of table
+ ;IHS/SD/SDR 2.6*2 3PMS10003A - populate new effective dates multiple
  ;IHS/SD/SDR 2.6*21 HEAT135354 Fix so when CPT selected the effective fee, if there is one, will display; was just printing a dash, no description, and 0.00 for the fee no matter what was entered.
+ ;IHS/SD/SDR 2.6*27 CR8894 Fixed so short descriptions and fees will print if ?? typed at any prompt.  Fixed how entries were getting filed to use new
+ ;  DINUM methodology.  It requires codes to be hardset into global and then edited.
  ;
  S U="^" W !
 FEE K DIC
@@ -12,7 +14,8 @@ FEE K DIC
  S DIC("A")="Select FEE SCHEDULE: "
  S:$P($G(^ABMDPARM(DUZ(2),1,0)),U,9)]"" DIC("B")=$P(^(0),U,9)
  S DIC("S")="I DUZ(2)=$P($G(^ABMDFEE(X,0)),""^"",4)"
- S DIC("DR")=".02;.04////"_DUZ(2)  ;abm*2.6*1 NO HEAT
+ ;S DIC("DR")=".02;.04////"_DUZ(2)  ;abm*2.6*1 NO HEAT  ;abm*2.6*27 IHS/SD/SDR CR8894
+ S DIC("DR")=".02;.06////C;.04////"_DUZ(2)  ;abm*2.6*1 NO HEAT  ;abm*2.6*27 IHS/SD/SDR CR8894
  D ^DIC
  G XIT:$D(DUOUT)!$D(DTOUT)
  I +Y<1 G FEE
@@ -25,28 +28,74 @@ SEL W !!,"----- FEE SCHEDULE CATEGORIES -----",!
  S ABM=+Y
  ;
  S ABM("SUB")=$S(ABM=1:19,ABM=2:11,ABM=3:15,ABM=4:17,ABM=5:23,ABM=6:21,ABM=7:31,ABM=8:13,ABM=9:25,ABM=10:32)
-EDIT K DIC  ;abm*2.6*2 3PMS10003A moved EDIT tag to here
- S DA(1)=ABM("FEE")
- ;S (DIC,DIE)="^ABMDFEE("_DA(1)_","_ABM("SUB")_","  ;abm*2.6*2 3PMS10003A
- S DIC="^ABMDFEE("_DA(1)_","_ABM("SUB")_","  ;abm*2.6*2 3PMS10003A
+EDIT ;
+ ;start old abm*2.6*27 IHS/SD/SDR CR8894
+ ;K DIC  ;abm*2.6*2 3PMS10003A moved EDIT tag to here
+ ;S DA(1)=ABM("FEE")
+ ;;S (DIC,DIE)="^ABMDFEE("_DA(1)_","_ABM("SUB")_","  ;abm*2.6*2 3PMS10003A
+ ;S DIC="^ABMDFEE("_DA(1)_","_ABM("SUB")_","  ;abm*2.6*2 3PMS10003A
+ ;S:'$D(@(DIC_"0)")) @(DIC_"0)")="^9002274.01"_ABM("SUB")_"P"
+ ;S ABM("DICS")=9002274.01_ABM("SUB") X:$D(^DD(ABM("DICS"),.01,12.1)) ^DD(ABM("DICS"),.01,12.1)
+ ;;start old code abm*2.6*2 3PMS10003A
+ ;;I ABM=7 S DIC("W")="W "" - "",$P($G(^AUTTREVN(Y,0)),U,2),?65,$J($FN($P($G(^ABMDFEE(DA(1),31,Y,0)),U,2),"","",2),9)"
+ ;;I ABM=6 S DIC("W")="W "" - "",$P($G(^AUTTADA(Y,0)),U,2),?65,$J($FN($P($G(^ABMDFEE(DA(1),21,Y,0)),U,2),"","",2),9)"
+ ;;I "123458"[ABM S DIC("W")="W "" - "",$P($$CPT^ABMCVAPI(Y,DT),U,3),?65,$J($FN($P($G(^ABMDFEE(DA(1),ABM(""SUB""),Y,0)),U,2),"","",2),9)"  ;CSV-c
+ ;;S DR=".02"
+ ;;end old code start new code 3PMS10003A
+ ;I ABM=7 S DIC("W")="W "" - "",$P($G(^AUTTREVN(Y,0)),U,2),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),31,Y,DT),U),"","",2),9)"
+ ;;I ABM=6 S DIC("W")="W "" - "",$P($G(^AUTTADA(Y,0)),U,2),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),21,Y,DT),U),"","",2),9)"  ;abm*2.6*27 IHS/SD/SDR CR8894
+ ;I ABM=6 S DIC("W")="S ABMR(""CODE"")=$E(Y,2,5) W "" - "",$E($P($G(^AUTTADA($P(^ABMDFEE(DA(1),21,Y,0),U),0)),U,2),1,45),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),21,Y,DT),U),"","",2),9)"  ;abm*2.6*27 IHS/SD/SDR CR8894
+ ;;I "123458"[ABM S DIC("W")="W "" - "",$P($$CPT^ABMCVAPI(Y,DT),U,3),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),ABM(""SUB""),Y,DT),U),"","",2),9)"  ;CSV-c  ;abm*2.6*21 IHS/SD/SDR HEAT135354
+ ;;I "123458"[ABM S DIC("W")="W "" - "",$P($$CPT^ABMCVAPI(X,DT),U,3),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),ABM(""SUB""),$P($$CPT^ABMCVAPI(X,DT),U),DT),U),"","",2),9)"  ;CSV-c  ;abm*2.6*21 IHS/SD/SDR HEAT135354  ;abm*2.6*27 IHS/SD/SDR CR8894
+ ;;start new abm*2.6*27 IHS/SD/SDR CR8894
+ ;I "123458"[ABM D
+ ;.S DIC("W")=" W "" - "",$P($$CPT^ABMCVAPI(Y,DT),U,3),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),ABM(""SUB""),$P($$CPT^ABMCVAPI(Y,DT),U),DT),U),"","",2),9)"
+ ;I ABM=9 S DIC("W")="W ?50,$P($G(^PSDRUG(Y,2)),U,4),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),ABM(""SUB""),Y,DT),U),"","",2),9)"
+ ;I ABM=10 S DIC("W")="W ?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),ABM(""SUB""),Y,DT),U),"","",2),9)"
+ ;;end new abm*2.6*27 IHS/SD/SDR CR8894
+ ;;end new code 3PMS10003A
+ ;;
+ ;W !!  ;abm*2.6*2 3PMS10003A removed EDIT tag from here
+ ;S DIC(0)="QLEAM"
+ ;D ^DIC K DIC
+ ;
+ ;end old start new abm*2.6*27 IHS/SD/SDR CR8894
+ ;
+ K DIC  ;abm*2.6*2 3PMS10003A moved EDIT tag to here
+ S DIC="^ICPT("
+ I "^6^7^9^10^"[("^"_ABM_"^") D
+ .S DA(1)=ABM("FEE")
+ .S DIC="^ABMDFEE("_DA(1)_","_ABM("SUB")_","
+ .I ABM=7 S DIC("W")="W "" - "",$P($G(^AUTTREVN(Y,0)),U,2),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),31,Y,DT),U),"","",2),9)"
+ .I ABM=6 S DIC("W")="S ABMR(""CODE"")=$E(Y,2,5) W "" - "",$E($P($G(^AUTTADA($P(^ABMDFEE(DA(1),21,Y,0),U),0)),U,2),1,45),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),21,Y,DT),U),"","",2),9)"
+ .I ABM=9 S DIC("W")="W ?50,$P($G(^PSDRUG(Y,2)),U,4),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),ABM(""SUB""),Y,DT),U),"","",2),9)"
+ .I ABM=10 S DIC("W")="W ?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),ABM(""SUB""),Y,DT),U),"","",2),9)"
+ ;
  S:'$D(@(DIC_"0)")) @(DIC_"0)")="^9002274.01"_ABM("SUB")_"P"
  S ABM("DICS")=9002274.01_ABM("SUB") X:$D(^DD(ABM("DICS"),.01,12.1)) ^DD(ABM("DICS"),.01,12.1)
- ;start old code abm*2.6*2 3PMS10003A
- ;I ABM=7 S DIC("W")="W "" - "",$P($G(^AUTTREVN(Y,0)),U,2),?65,$J($FN($P($G(^ABMDFEE(DA(1),31,Y,0)),U,2),"","",2),9)"
- ;I ABM=6 S DIC("W")="W "" - "",$P($G(^AUTTADA(Y,0)),U,2),?65,$J($FN($P($G(^ABMDFEE(DA(1),21,Y,0)),U,2),"","",2),9)"
- ;I "123458"[ABM S DIC("W")="W "" - "",$P($$CPT^ABMCVAPI(Y,DT),U,3),?65,$J($FN($P($G(^ABMDFEE(DA(1),ABM(""SUB""),Y,0)),U,2),"","",2),9)"  ;CSV-c
- ;S DR=".02"
- ;end old code start new code 3PMS10003A
- I ABM=7 S DIC("W")="W "" - "",$P($G(^AUTTREVN(Y,0)),U,2),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),31,Y,DT),U),"","",2),9)"
- I ABM=6 S DIC("W")="W "" - "",$P($G(^AUTTADA(Y,0)),U,2),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),21,Y,DT),U),"","",2),9)"
- ;I "123458"[ABM S DIC("W")="W "" - "",$P($$CPT^ABMCVAPI(Y,DT),U,3),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),ABM(""SUB""),Y,DT),U),"","",2),9)"  ;CSV-c  ;abm*2.6*21 IHS/SD/SDR HEAT135354
- I "123458"[ABM S DIC("W")="W "" - "",$P($$CPT^ABMCVAPI(X,DT),U,3),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),ABM(""SUB""),$P($$CPT^ABMCVAPI(X,DT),U),DT),U),"","",2),9)"  ;CSV-c  ;abm*2.6*21 IHS/SD/SDR HEAT135354
- ;end new code 3PMS10003A
  ;
- W !!  ;abm*2.6*2 3PMS10003A removed EDIT tag from here
- S DIC(0)="QLEAM"
+ W !!
+ S DIC(0)="QEAMI"
+ I "^6^7^9^10^"[("^"_ABM_"^") S DIC(0)="QLEAM"
  D ^DIC K DIC
+ ;end new abm*2.6*27 IHS/SD/SDR CR8894
+ ;
  G SEL:X=""!$D(DUOUT)!$D(DTOUT)
+ ;
+ ;start new abm*2.6*27 IHS/SD/SDR CR8894
+ I "123458"[(ABM) D
+ .S X=$TR(X," ")
+ .S ABMCODE=$$DINUM^ABMFOFS($P(Y,U,2))
+ .I '$D(^ABMDFEE(ABM("FEE"),ABM("SUB"),ABMCODE)) D
+ ..S ^ABMDFEE(ABM("FEE"),ABM("SUB"),ABMCODE,0)=+Y
+ ..S ^ABMDFEE(ABM("FEE"),ABM("SUB"),"C",ABMCODE,+Y)=""
+ ..S ^ABMDFEE(ABM("FEE"),ABM("SUB"),"B",+Y,ABMCODE)=""
+ ;
+ I "123458"[ABM D
+ .;W !,ABMCODE," - ",$E($P($$CPT^ABMCVAPI(+Y,DT),U,3),1,55),?65,$J($FN($P($$ONE^ABMFEAPI(ABM("FEE"),ABM("SUB"),+Y,DT),U),",",2),9)
+ .W !,X," - ",$E($P($$CPT^ABMCVAPI(+Y,DT),U,3),1,55),?65,$J($FN($P($$ONE^ABMFEAPI(ABM("FEE"),ABM("SUB"),+Y,DT),U),",",2),9)
+ ;end new abm*2.6*27 IHS/SD/SDR CR8894
+ ;
  I +Y<1 G EDIT
  ;start old code 3PMS10003A
  ;S DA=+Y
@@ -55,7 +104,8 @@ EDIT K DIC  ;abm*2.6*2 3PMS10003A moved EDIT tag to here
  ;I ABM("LDATE") W !,"Last Updated: ",$$SDT^ABMDUTL(ABM("LDATE"))
  ;end old code start new code 3PMS10003A
 EFFDT ;
- S ABMCODE=+Y
+ ;S ABMCODE=+Y  ;abm*2.6*27 IHS/SD/SDR CR8894
+ I "^6^7^9^10^"[("^"_ABM_"^") S ABMCODE=+Y  ;abm*2.6*27 IHS/SD/SDR CR8894
  D ^XBFMK
  S DA(2)=ABM("FEE")
  S DA(1)=ABMCODE
@@ -72,8 +122,13 @@ EFFDT ;
  S DIE="^ABMDFEE("_DA(2)_","_ABM("SUB")_","_DA(1)_",1,"
  S DA=ABMENTRY
  S DR=".02//"_$P($$ONE^ABMFEAPI(DA(2),ABM("SUB"),ABMCODE,DT),U)
- S DR=DR_";.03//"_$P($$ONE^ABMFEAPI(DA(2),ABM("SUB"),ABMCODE,DT),U,2)
- S DR=DR_";.04//"_$P($$ONE^ABMFEAPI(DA(2),ABM("SUB"),ABMCODE,DT),U,3)
+ ;start old abm*2.6*27 IHS/SD/SDR CR8894
+ ;S DR=DR_";.03//"_$P($$ONE^ABMFEAPI(DA(2),ABM("SUB"),ABMCODE,DT),U,2)
+ ;S DR=DR_";.04//"_$P($$ONE^ABMFEAPI(DA(2),ABM("SUB"),ABMCODE,DT),U,3)
+ ;end old start new abm*2.6*27 IHS/SD/SDR CR8894
+ S DR=DR_";.03//"_+$P($$ONE^ABMFEAPI(DA(2),ABM("SUB"),ABMCODE,DT),U,2)
+ S DR=DR_";.04//"_+$P($$ONE^ABMFEAPI(DA(2),ABM("SUB"),ABMCODE,DT),U,3)
+ ;end new abm*2.6*27 IHS/SD/SDR CR8894
  S DR=DR_";.05////"_DT_";.06////"_DUZ
  ;end new code 3PMS10003A
  W !
@@ -96,6 +151,12 @@ EFFDT ;
  S DIC("DR")=".02////"_DUZ
  D ^DIC
  ;end new code 3PMS10003A
+ ;start new abm*2.6*27 IHS/SD/SDR CR8894
+ S DA(1)=ABM("FEE")
+ S DA=ABMCODE
+ S DIK="^ABMDFEE("_DA(1)_","_ABM("SUB")_","
+ D IX^DIK
+ ;end new abm*2.6*27 IHS/SD/SDR CR8894
  G EDIT
  ;
 XIT K ABM,DIR,DIC,DIE

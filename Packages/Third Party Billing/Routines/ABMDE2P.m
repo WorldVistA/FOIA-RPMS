@@ -1,5 +1,5 @@
 ABMDE2P ; IHS/ASDST/DMJ - Edit Page 2 - PICK PAYER ; 
- ;;2.6;IHS 3P BILLING SYSTEM;**6,24**;NOV 12, 2009;Build 429
+ ;;2.6;IHS 3P BILLING SYSTEM;**6,24,27**;NOV 12, 2009;Build 486
  ;
  ; IHS/SD/SDR - v2.5 p8 - task 8
  ;    Added code for replacement insurer
@@ -8,6 +8,7 @@ ABMDE2P ; IHS/ASDST/DMJ - Edit Page 2 - PICK PAYER ;
  ;
  ;IHS/SD/SDR 2.6*6 NOHEAT allow a 10th insurer to be selected; if 10th was selected it was putting 1st
  ;IHS/SD/SDR 2.6*24 CR9823 Added code to update fees if an insurer is Picked that has a different fee table setup than the one on the claim originally
+ ;IHS/SD/SDR 2.6*27 CR8894 Updated fee table change from p24 to use CPT, not CPT IEN for lookup
  ; *********************************************************************
  ;
 P1 ; Pick Insurer
@@ -133,7 +134,8 @@ NEWFETBL ;
  ...S DA(1)=ABMP("CDFN")
  ...S DA=ABMTT
  ...S DIE="^ABMDCLM("_DUZ(2)_","_DA(1)_","_ABMI_","
- ...S ABMT("CD")=$P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),ABMI,ABMTT,0)),U)
+ ...;S ABMT("CD")=$P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),ABMI,ABMTT,0)),U)  ;abm*2.6*27 IHS/SD/SDR CR8894
+ ...S ABMT("CD")=$P($$CPT^ABMCVAPI($P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),ABMI,ABMTT,0)),U),ABMP("VDT")),U,2)  ;abm*2.6*27 IHS/SD/SDR CR8894
  ...S ABMMLT=$S(ABMI=21:11,ABMI=23:25,ABMI=25:31,ABMI=27:19,ABMI=33:21,ABMI=35:15,ABMI=37:17,ABMI=39:23,ABMI=43:13,ABMI=45:32,ABMI=47:13,1:13)
  ...I ABMI=33 S ABMR("CODE")=$$GET1^DIQ(9999999.31,ABMT("CD"),".01","E"),ABMT("CD")="1"_ABMR("CODE")
  ...S ABMT("FEE")=+$$ONE^ABMFEAPI(ABMP("FEE"),ABMMLT,ABMT("CD"),ABMP("VDT"))

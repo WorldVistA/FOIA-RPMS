@@ -1,22 +1,21 @@
 ABMDEMLC ; IHS/ASDST/DMJ - Edit Utility - FOR MULTIPLES - PART 4 ;  
- ;;2.6;IHS Third Party Billing System;**2,3,6,9,10,18,21**;NOV 12, 2009;Build 379
+ ;;2.6;IHS Third Party Billing System;**2,3,6,9,10,18,21,27**;NOV 12, 2009;Build 486
  ;
- ;IHS/SD/SDR - V2.5 P2 - 5/9/02 - NOIS HQW-0302-100190
- ;     Modified to display 2nd and 3rd modifiers and units
- ;IHS/SD/SDR - V2.5 P3 - 1/22/03 - QBA-0103-130075
- ;    Modified to use IEN for HCPCS for Fee Schedule lookup
- ;IHS/SD/SDR v2.5 p5 - 5/18/04 - Modified to put POS and TOS by line item
- ;IHS/SD/SDR - v2.5 p6 - 7/9/04 - IM14079 - Notes regarding removal of TOS for now
- ;IHS/SD/SDR - v2.5 p8 - task 6 - Added code for POS ambulance default 41
- ;IHS/SD/SDR - v2.5 p9 - IM19297 - Added message about 4 corresponding Dxs when 837
- ;IHS/SD/SDR - v2.5 p11 - Corrections to 4 corr. Dxs.  If they answered NO it would put NO on the claim, not the selected Dxs.
+ ;IHS/SD/SDR 2.5 P2 5/9/02 NOIS HQW-0302-100190 Modified to display 2nd and 3rd modifiers and units
+ ;IHS/SD/SDR 2.5 P3 1/22/03 QBA-0103-130075 Modified to use IEN for HCPCS for Fee Schedule lookup
+ ;IHS/SD/SDR 2.5 p5 5/18/04 Modified to put POS and TOS by line item
+ ;IHS/SD/SDR 2.5 p6 7/9/04 IM14079 - Notes regarding removal of TOS for now
+ ;IHS/SD/SDR 2.5 p8 task 6 Added code for POS ambulance default 41
+ ;IHS/SD/SDR 2.5 p9 IM19297 Added message about 4 corresponding Dxs when 837
+ ;IHS/SD/SDR 2.5 p11 Corrections to 4 corr. Dxs.  If they answered NO it would put NO on the claim, not the selected Dxs.
  ;
- ;IHS/SD/SDR - v2.6 CSV
- ;IHS/SD/SDR - abm*2.6*2 - 3PMS10003A - Modified to call ABMFEAPI
- ;IHS/SD/SDR - abm*2.6*3 - NOHEAT - fixed modifiers so they work correctly; it would let user put garbage
- ;IHS/SD/SDR - abm*2.6*6 - 5010 - added export mode 32
- ;IHS/SD/SDR - 2.6*18 - HEAT242924 - Added screen when export mode is 33 so only 4 DXs can be selected for the coord. DX.
- ;IHS/SD/SDR - 2.6*21 - HEAT168435 - Added code to add/edit modifiers for 23 multiple (pharmacy)
+ ;IHS/SD/SDR v2.6 CSV
+ ;IHS/SD/SDR 2.6*2 3PMS10003A Modified to call ABMFEAPI
+ ;IHS/SD/SDR 2.6*3 NOHEAT fixed modifiers so they work correctly; it would let user put garbage
+ ;IHS/SD/SDR 2.6*6 5010 added export mode 32
+ ;IHS/SD/SDR 2.6*18 HEAT242924 Added screen when export mode is 33 so only 4 DXs can be selected for the coord. DX.
+ ;IHS/SD/SDR 2.6*21 HEAT168435 Added code to add/edit modifiers for 23 multiple (pharmacy)
+ ;IHS/SD/SDR 2.6*27 CR8894 Fixed API call so charge amount will default if available
  ;
 DX ;EP for selecting Corresponding Diagnosis
  I '+$O(^ABMDCLM(DUZ(2),ABMP("CDFN"),17,"C","")) W !!,"There are no Diagnosis entered to select from." Q
@@ -140,7 +139,8 @@ MOD ;EP for adding a Modifier
  K ABMX("MODS")
  S ABMZ("MODFEE")="" Q:'$P($G(^ABMDPARM(DUZ(2),1,2)),U,5)
  ;S ABMZ("CHARGE")=+$P($G(^ABMDFEE(ABMP("FEE"),ABMZ("CAT"),ABMX("Y"),0)),U,2)  ;abm*2.6*2 3PMS10003A
- S ABMZ("CHARGE")=+$P($$ONE^ABMFEAPI(ABMP("FEE"),ABMZ("CAT"),ABMX("Y"),ABMP("VDT")),U)  ;abm*2.6*2 3PMS10003A
+ ;S ABMZ("CHARGE")=+$P($$ONE^ABMFEAPI(ABMP("FEE"),ABMZ("CAT"),ABMX("Y"),ABMP("VDT")),U)  ;abm*2.6*2 3PMS10003A  ;abm*2.6*27 IHS/SD/SDR CR8894
+ S ABMZ("CHARGE")=+$P($$ONE^ABMFEAPI(ABMP("FEE"),ABMZ("CAT"),$$DINUM^ABMFOFS($P($G(^ICPT(ABMX("Y"),0)),U)),ABMP("VDT")),U)  ;abm*2.6*2 3PMS10003A  ;abm*2.6*27 IHS/SD/SDR CR8894
  S DIC=$S($$VERSION^XPDUTL("BCSV")>0:"^DIC(81.3,",1:"^AUTTCMOD(")  ;CSV-c
  S DIC(0)="QEAM"  ;CSV-c
  S ABMX("M")=$S($P(ABMZ("MOD"),U,4):3,1:1)

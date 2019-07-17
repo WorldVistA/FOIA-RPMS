@@ -1,5 +1,7 @@
 BEDDUTID ;VNGT/HS/BEE-BEDD Utility Routine 2 ; 08 Nov 2011  12:00 PM
- ;;2.0;BEDD DASHBOARD;**1,2**;Jun 04, 2014;Build 26
+ ;;2.0;BEDD DASHBOARD;**1,2,3**;Jun 04, 2014;Build 12
+ ;
+ ;GDIT/HS/BEE 05/10/2018;CR#10213 - BEDD*2.0*3 - Allow different hospital locations
  ;
  ;Adapted from BEDDUTL1/CNDH/RPF
  ;
@@ -256,8 +258,8 @@ DSAVE(DFN,AMERVSIT,VIEN,OBJID,DUZ,SITE,BEDDARY) ;EP - Dashboard Discharge Screen
  . S:$D(BEDDARY("AdmPrv")) AMUPD(9009081,DFN_",",18)=BEDDARY("AdmPrv")
  ;
  ;File VISIT entries
- I $G(VIEN)]"" D
- . S:$G(BEDDARY("txcln"))]"" AMUPD(9000010,VIEN_",",.08)=$O(^DIC(40.7,"C",BEDDARY("txcln"),""))
+ ;I $G(VIEN)]"" D
+ ;. S:$G(BEDDARY("txcln"))]"" AMUPD(9000010,VIEN_",",.08)=$O(^DIC(40.7,"C",BEDDARY("txcln"),""))
  ;
  I $D(AMUPD) D FILE^DIE("","AMUPD","ERROR")
  ;
@@ -272,18 +274,9 @@ DSAVE(DFN,AMERVSIT,VIEN,OBJID,DUZ,SITE,BEDDARY) ;EP - Dashboard Discharge Screen
  ;
 CLIN(CLIN) ;EP - Return List of Applicable Clinics
  ;
- ;Input:
- ; None
+ ;Moved to BEDDUTL2
+ D CLIN^BEDDUTL2(.CLIN)
  ;
- ;Output:
- ; CLIN Array - List of Clinics
- ;
- NEW CIEN,CTIEN,CNT
- K CLIN
- S CTIEN=$O(^AMER(2,"B","CLINIC TYPE","")) Q:CTIEN=""
- S CNT=0,CIEN="" F  S CIEN=$O(^AMER(3,"AC",CTIEN,CIEN)) Q:+CIEN=0  D
- . S CNT=CNT+1
- . S CLIN(CNT)=$$GET1^DIQ(9009083,CIEN_",",5,"I")_"^"_$$GET1^DIQ(9009083,CIEN_",",".01","I")
  Q
  ;
 DISP(DISP) ;EP - Return List of Dispositions
@@ -444,19 +437,13 @@ DXLKP(VALUE,OBJID,DUZ,FILTER) ;EP - Lookup to File 80 (DX)
  D DXLKP^BEDDPOV(VALUE,VDT,.SEX,FILTER)
  Q
  ;
-ESAVE(DFN,AMERVSIT,VIEN,BEDDARY,DUZ) ;EP - Dashboard Edit Screen Save
+ESAVE(DFN,AMERVSIT,VIEN,BEDDARY) ;EP - Dashboard Edit Screen Save
  ;
  ; Input:
  ; DFN - Patient IEN
  ; BEDDARY - Array of entries to save
- ; DUZ
  ;
- NEW X
- S X="S:$G(U)="""" U=""^""" X X
- S X="S:$G(DT)="""" DT=$$DT^XLFDT" X X
- ;
- ;Define DUZ variable
- D DUZ^XUP(DUZ)
+ NEW CLINIC
  ;
  ;Error Trapping
  NEW $ESTACK,$ETRAP S $ETRAP="D ERR^BEDDUTIL D UNWIND^%ZTER" ; SAC 2006 2.2.3.3.2
@@ -473,23 +460,20 @@ ESAVE(DFN,AMERVSIT,VIEN,BEDDARY,DUZ) ;EP - Dashboard Edit Screen Save
  . S:$D(BEDDARY("AdPvTm")) AMUPD(9009081,DFN_",",22)=BEDDARY("AdPvTm")
  ;
  ;File VISIT entries
+ S CLINIC=$G(BEDDARY("txcln"))
  I $G(VIEN)]"" D
- . S:$G(BEDDARY("txcln"))]"" AMUPD(9000010,VIEN_",",.08)=$O(^DIC(40.7,"C",BEDDARY("txcln"),""))
- . S:$G(BEDDARY("txcln"))="" AMUPD(9000010,VIEN_",",.08)="@"
+ . NEW ERR
+ . ;GDIT/HS/BEE 05/10/2018;CR#10213 - BEDD*2.0*3 - Allow different hospital locations
+ . S ERR=$$CKHLOC^AMERBSD(VIEN,CLINIC)
+ . ;
+ . ;Chief Complaint
  . S AMUPD(9000010,VIEN_",",1401)=$S($G(BEDDARY("COMP"))]"":BEDDARY("COMP"),1:"@")
+ . ;
  . ;BEDDv2.0;Save Decision to admit date
  . S AMUPD(9000010,VIEN_",",1116)=$S($G(BEDDARY("DecAdmit"))]"":BEDDARY("DecAdmit"),1:"@")
  ;
  ;File ER VISIT entries
- I $G(AMERVSIT)]"" D
- . ;
- . ;Save Clinic Type
- . I $D(BEDDARY("txcln")) D
- .. NEW CLIN,XCLIN
- .. S CLIN=$O(^DIC(40.7,"C",BEDDARY("txcln"),"")) Q:CLIN=""
- .. S XCLIN=$$GET1^DIQ(40.7,CLIN_",",.01,"E") Q:XCLIN=""
- .. S CLIN=$O(^AMER(3,"B",XCLIN,"")) Q:CLIN=""
- .. S AMUPD(9009080,AMERVSIT_",",.04)=CLIN
+ I $G(AMERVSIT)]"" S AMUPD(9009080,AMERVSIT_",",.04)=$S(CLINIC]"":CLINIC,1:"@")
  ;
  ;File visit entries
  I $D(AMUPD) D

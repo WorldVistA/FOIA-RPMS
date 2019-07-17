@@ -1,5 +1,5 @@
 APCM25ET ;IHS/CMI/LAB - IHS MU PATIENT LIST;
- ;;1.0;MU PERFORMANCE REPORTS;**7,9**;MAR 26, 2012;Build 25
+ ;;1.0;MU PERFORMANCE REPORTS;**7,9,10**;MAR 26, 2012;Build 31
  ;
  ;
  ;
@@ -74,7 +74,7 @@ MUYEAR ;
  I $E(Y,4,7)'="0000" W !!,"Please enter a year only!",! G MUYEAR
  I $E(Y,1,3)<315 W !!,"Year entered cannot be prior to 2015.",! G MUYEAR
  S APCMPER=APCMVDT
- I $E(APCMPER,1,3)=317 S APCMEDUD=3171231  ;IHS/CMI/LAB - PATCH 9 06/06/2017
+ I $E(APCMPER,1,3)>316 S APCMEDUD=$E(APCMPER,1,3)_"1231"  ;IHS/CMI/LAB - PATCH 10 06/20/2018
  S APCMLD=$E(APCMPER,1,3)_"0101",APCMHD=$E(APCMPER,1,3)_"1231"   ;LOW AND HIGH DATES ALLOWED BELOW
  ;
 YEAR ;
@@ -139,7 +139,7 @@ SUM ;display summary of this report
  W !,$$CTR("SUMMARY OF IHS MODIFIED STAGE 2 MEANINGFUL USE REPORT TO BE GENERATED")
  W !!,"The date ranges for this report are:"
  W !?5,"Report Period: ",?31,$$FMTE^XLFDT(APCMBD)," to ",?31,$$FMTE^XLFDT(APCMED)
- I $E(APCMPER,1,3)="317",($$HAS("S2.021.EP")!($$HAS("S2.020.EP"))!($$HAS("S2.023.EP"))) D    ;IHS/CMI/LAB - PATCH 9 06/06/2017
+ I $E(APCMPER,1,3)>316,($$HAS("S2.021.EP")!($$HAS("S2.020.EP"))!($$HAS("S2.023.EP"))) D    ;IHS/CMI/LAB - PATCH 9 06/06/2017
  .S C=0
  .W !!,"Please note: the date range is ",$$FMTE^XLFDT(APCMBD)," to ",$$FMTE^XLFDT(APCMEDUD)," for ",!
  .I $$HAS("S2.021.EP") W ?5,"Patient Education",!

@@ -1,5 +1,5 @@
 APCM25E9 ;IHS/CMI/LAB - IHS MU;  ; 29 Jul 2013  4:09 PM
- ;;1.0;MU PERFORMANCE REPORTS;**7,8,9**;MAR 26, 2012;Build 25
+ ;;1.0;MU PERFORMANCE REPORTS;**7,8,9,10**;MAR 26, 2012;Build 31
  ;;;;;;Build 3
 CPOE ;EP - CALCULATE EPRESCRIBING
  ;for each provider or for the facility count all prescriptions that meet criteria and if it is not written it meets numerator

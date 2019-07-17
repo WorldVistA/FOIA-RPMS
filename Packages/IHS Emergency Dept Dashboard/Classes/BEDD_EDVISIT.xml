@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2018-09-28 14:46:45">
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775U)" ts="2019-07-17 13:16:21">
 <Class name="BEDD.EDVISIT">
 <Description>
 BEDD.EDVISIT CLASS - MAIN STORAGE FOR DASHBOARD PATIENT DATA</Description>
 <Super>%Persistent</Super>
-<TimeChanged>64293,33180.398589</TimeChanged>
+<TimeChanged>64863,56490.112738</TimeChanged>
 <TimeCreated>61957,69798.389068</TimeCreated>
 
 <Property name="AMERVSIT">
@@ -521,6 +521,13 @@ combine TrgDt and TrgTm for display</Description>
 <SqlComputed>1</SqlComputed>
 </Property>
 
+<Property name="TrgECln">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {TrgECln}=##class(BEDD.EDVISIT).GetTrgERC({AMERVSIT},{VIEN}) </SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
 <Property name="RecLock">
 <Type>%Integer</Type>
 </Property>
@@ -882,6 +889,18 @@ Method Section</Description>
 	
 	S trgC="" I $G(amervsit)'="" S trgC=$$GETF^BEDDUTIL(9009080,amervsit,.04,"I") S:trgC]"" trgC=$$GETF^BEDDUTIL(9009083,trgC_",",5) Q:trgC]"" trgC
 	I $G(vien)'="" S trgC=$$GETF^BEDDUTIL(9000010,vien,.08,"I")
+	Q trgC
+]]></Implementation>
+</Method>
+
+<Method name="GetTrgERC">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>amervsit:%String,vien:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	S trgC="" I $G(amervsit)'="" S trgC=$$GETF^BEDDUTIL(9009080,amervsit,.04,"I") Q trgC
+	I $G(vien)'="" S trgC=$$VCLIN^BEDDUTL2(vien)
 	Q trgC
 ]]></Implementation>
 </Method>

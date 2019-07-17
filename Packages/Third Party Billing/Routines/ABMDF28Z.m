@@ -1,17 +1,18 @@
 ABMDF28Z ; IHS/SD/SDR - PRINT UB-04 ;  
- ;;2.6;IHS 3P BILLING SYSTEM;**3,8,9,10,11,14,16,21**;NOV 12, 2009;Build 379
+ ;;2.6;IHS 3P BILLING SYSTEM;**3,8,9,10,11,14,16,21,27**;NOV 12, 2009;Build 486
  ;IHS/SD/SDR-2.6*3-POA changes-removed insurer type "R" check
  ;IHS/SD/SDR-2.6*14-ICD10 002F-Updated ICD indicator on form to 9 or 0
  ;IHS/SD/SDR-2.6*16-HEAT236243-Moved dt for box 74 so there is space between PX code and date.
  ;IHS/SD/SDR 2.6*21 Split routine to ABMDF28T due to size.
- ;IHS/SD/SDR-2.6*21 HEAT97615 - Remove ID qualifier and ID from box 76 if Medicare is active and tribal
- ;IHS/SD/SDR-2.6*21 HEAT123457 - changed 61044 references from 'equals' to 'contains'
- ;IHS/SD/SDR-2.6*21 HEAT128931 - FL64 wasn't printing when insurer uses plan name
- ;IHS/SD/SDR-2.6*21 HEAT162190 - Print taxnomoy in 81 for Montana DPHHS.
- ;IHS/SD/SDR-2.6*21 HEAT189659 - Print taxonomy in 81 for SD Medicaid.
+ ;IHS/SD/SDR-2.6*21 HEAT97615 Remove ID qualifier and ID from box 76 if Medicare is active and tribal
+ ;IHS/SD/SDR-2.6*21 HEAT123457 changed 61044 references from 'equals' to 'contains'
+ ;IHS/SD/SDR-2.6*21 HEAT128931 FL64 wasn't printing when insurer uses plan name
+ ;IHS/SD/SDR-2.6*21 HEAT162190 Print taxnomoy in 81 for Montana DPHHS.
+ ;IHS/SD/SDR-2.6*21 HEAT189659 Print taxonomy in 81 for SD Medicaid.
  ;IHS/SD/SDR-2.6*21 HEAT217449-Moved box 76 one char left.  Was only printing 7 of 8 chars of prov id.
  ; self-insured has already been billed.
- ;IHS/SD/SDR-2.6*21 -VMBP - Updated p11 changes to include Serena ref#s. Moved VA Station Number to correct field on form.
+ ;IHS/SD/SDR-2.6*21 VMBP Updated p11 changes to include Serena ref#s. Moved VA Station Number to correct field on form.
+ ;IHS/SD/SDR 2.6*27 CR9867 Added code to check new parameter BILLING PRV TAXONOMY instead of hardcoding for specific insurers
  ;
 45 ; ABMPAID = Primary + Secondary + Tertiary + Prepaid
  ; ABMPBAL = Gross amount - ABM("PAID")
@@ -145,12 +146,26 @@ ABMDF28Z ; IHS/SD/SDR - PRINT UB-04 ;
  ;If NM Medicaid add Taxonomy and qualifier
  ;I ($P($G(^AUTNINS(ABMP("INS"),0)),U)="NEW MEXICO MEDICAID")!($P($G(^AUTNINS(ABMP("INS"),0)),U)="MEDICAID EXEMPT") D  ;abm*2.6*8 NOHEAT - ADD TAX FOR IA MCD ONLY
  ;I ($P($G(^AUTNINS(ABMP("INS"),0)),U)="NEW MEXICO MEDICAID")!($P($G(^AUTNINS(ABMP("INS"),0)),U)="MEDICAID EXEMPT")!($P($G(^AUTNINS(ABMP("INS"),0)),U)="IOWA MEDICAID") D  ;abm*2.6*8 NOHEAT - ADD TAX FOR IA MCD ONLY  ;abm*2.6*21 IHS/SD/SDR HEAT189659
- I "^NEW MEXICO MEDICAID^MEDICAID EXEMPT^IOWA MEDICAID^SOUTH DAKOTA MEDICAID^MONTANA DPHHS^"[("^"_$P($G(^AUTNINS(ABMP("INS"),0)),U)_"^") D  ;abm*2.6*8 NOHEAT - ADD TAX FOR IA MCD ONLY  ;abm*2.6*21 IHS/SD/SDR HEAT189659, HEAT162190
- .S ABMNLOC=$S($P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),1,ABMP("VTYP"),1)),U,8)'="":$P(^ABMNINS(ABMP("LDFN"),ABMP("INS"),1,ABMP("VTYP"),1),U,8),$P($G(^ABMDPARM(ABMP("LDFN"),1,2)),U,12)'="":$P(^(2),U,12),1:ABMP("LDFN"))  ;abm*2.6*10 HEAT82967
- .;S ABMDE="B3"_$$PTAX^ABMUTLF(ABMP("LDFN"))  ;taxonomy - form locator #81D  ;abm*2.6*10 IHS/SD/AML 9/18/12 -  HEAT82967
- .S ABMDE="B3"_$$PTAX^ABMUTLF(ABMNLOC) ;taxonomy - form locator #81D ;abm*2.6*10 IHS/SD/AML 9/18/12 - HEAT82967
- .S ABMDE=ABMDE_"^26^15"
- .D WRT^ABMDF28W
+ ;start old abm*2.6*27 IHS/SD/AML CR9867
+ ;I "^NEW MEXICO MEDICAID^MEDICAID EXEMPT^IOWA MEDICAID^SOUTH DAKOTA MEDICAID^MONTANA DPHHS^"[("^"_$P($G(^AUTNINS(ABMP("INS"),0)),U)_"^") D  ;abm*2.6*8 NOHEAT - ADD TAX FOR IA MCD ONLY  ;abm*2.6*21 IHS/SD/SDR HEAT189659, HEAT162190
+ ;.S ABMNLOC=$S($P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),1,ABMP("VTYP"),1)),U,8)'="":$P(^ABMNINS(ABMP("LDFN"),ABMP("INS"),1,ABMP("VTYP"),1),U,8),$P($G(^ABMDPARM(ABMP("LDFN"),1,2)),U,12)'="":$P(^(2),U,12),1:ABMP("LDFN"))  ;abm*2.6*10 HEAT82967
+ ;.;S ABMDE="B3"_$$PTAX^ABMUTLF(ABMP("LDFN"))  ;taxonomy - form locator #81D  ;abm*2.6*10 IHS/SD/AML 9/18/12 -  HEAT82967
+ ;.S ABMDE="B3"_$$PTAX^ABMUTLF(ABMNLOC) ;taxonomy - form locator #81D ;abm*2.6*10 IHS/SD/AML 9/18/12 - HEAT82967
+ ;.S ABMDE=ABMDE_"^26^15"
+ ;.D WRT^ABMDF28W
+ ;end old start new abm*2.6*27 IHS/SD/AML,SDR CR9867
+ S ABM81FLG=""
+ S ABM81FLG=$P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),1,ABMP("VTYP"),1)),U,23)
+ S ABMNLOC=$S($P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),1,ABMP("VTYP"),1)),U,8)'="":$P(^ABMNINS(ABMP("LDFN"),ABMP("INS"),1,ABMP("VTYP"),1),U,8),$P($G(^ABMDPARM(ABMP("LDFN"),1,2)),U,12)'="":$P(^(2),U,12),1:ABMP("LDFN"))
+ S ABMNLOC=$$PTAX^ABMUTLF(ABMNLOC)
+ I ABM81FLG["3T" D
+ .S ABMDE="B3"_ABMNLOC  ;taxonomy - form locator #81CC
+ I ABM81FLG["0T" D
+ .S ABMDE="  "_ABMNLOC  ;taxonomy - form locator #81CC
+ S ABMDE=ABMDE_"^26^15"
+ D WRT^ABMDF28W
+ ;end new abm*2.6*27 IHS/SD/AML,SDR CR9867
+ ;
  ;abm*2.6*10 IHS/SD/AML 9/12/2012 HEAT83791 Begin changes
  I ($P($G(^AUTNINS(ABMP("INS"),0)),U)="NEBRASKA MEDICAID") D
  .S ABMDE=" "_$$PTAX^ABMUTLF(ABMP("LDFN"))

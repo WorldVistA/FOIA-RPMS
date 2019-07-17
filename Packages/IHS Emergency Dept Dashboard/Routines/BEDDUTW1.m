@@ -2,7 +2,23 @@ BEDDUTW1 ;GDIT/HS/BEE-BEDD Utility Routine 2 - Cache Calls ; 08 Nov 2011  12:00 
   ;;2.0;IHS EMERGENCY DEPT DASHBOARD;**1**;Apr 02, 2014
  ;
  ;This routine is included in the BEDD XML 2.0 install and is not in the KIDS
+ ;GDIT/HS/BEE - This routine is included in the BEDD 2.0 Patch 3 XML
  ; 
+ Q
+ ;
+ ;GDIT/HS/BEE 05/10/2018;CR#10213 Get DUZ(2) from browser session var
+SDUZ(DUZ)	; EP - Set up DUZ array
+ ;
+ NEW X,EXEC
+ ;
+ ;Make sure initial variables are set
+ S X="S:$G(U)="""" U=""^""" X X
+ S X="S:$G(DT)="""" DT=$$DT^XLFDT" X X
+ ;
+ ;Set up DUZ
+ S EXEC="S DUZ(2)=$G(%session.Data(""SITE""))" X EXEC
+ D DUZ^XUP(DUZ)
+ ;
  Q
  ;
 CHKLK(BEDDID,DUZ,TIMEOUT) ; EP - Check and Possibly Unlock

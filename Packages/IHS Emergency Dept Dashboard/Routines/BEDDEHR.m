@@ -1,5 +1,5 @@
 BEDDEHR ;VNGT/HS/BEE-EHR Utility Routine ; 08 Nov 2011  12:00 PM
- ;;2.0;BEDD DASHBOARD;;Jun 04, 2014;Build 13
+ ;;2.0;BEDD DASHBOARD;**3**;Jun 04, 2014;Build 12
  ;
  Q
  ;
@@ -8,7 +8,8 @@ CHGPAT(DFN,DUZ) ;EP - Change the patient in EHR to the selected patient
  NEW Z,SUB,FND
  ;
  ;Data validation
- I $G(DFN)="" Q 0
+ ;GDIT/HS/BEE 07/10/2018;CR#10213 - BEDD*2.0*3 - Allow DFN=0 (clear patient)
+ ;I $G(DFN)="" Q 0
  I $G(DUZ)="" Q 0
  S:$G(U)="" U="^"
  ;

@@ -1,5 +1,5 @@
-BGOBMSR ; IHS/BAO/TMD - Manage BIRTH MEAS ;16-May-2007 11:08;DKM
- ;;1.1;BGO COMPONENTS;**1,3**;Mar 20, 2007
+BGOBMSR ; IHS/BAO/TMD - Manage BIRTH MEAS ;02-Jul-2018 10:19;DU
+ ;;1.1;BGO COMPONENTS;**1,3,24**;Mar 20, 2007
  ;---------------------------------------------
  ; Return birth measurement entries for patient
  ;  DFN = Patient IEN
@@ -22,7 +22,7 @@ GET(RET,DFN) ;EP
  Q
  ; Set birth measurements
  ;  INP = Patient IEN [1] ^ Weight [2] ^ Order [3] ^ Formula [4] ^ Breast [5] ^
- ;        Solids [6] ^ Mother [7]
+ ;        Solids [6] ^ Mother [7] ^ Gestational Age[8]
  ; .RET = -1 if error; null otherwise
 SET(RET,INP) ;EP
  N DFN,IENS,FDA,MOTHER
@@ -39,6 +39,7 @@ SET(RET,INP) ;EP
  S @FDA@(.12)=$P(INP,U,4)
  S @FDA@(.14)=$P(INP,U,5)
  S @FDA@(.16)=$P(INP,U,6)
+ S @FDA@(.06)=$P(INP,U,8)   ;Patch 24 added EGA
  S @FDA@(.21)=MOTHER
  S RET=$$UPDATE^BGOUTL(.FDA,"E@")
  D:'RET EVT(DFN,$E(IENS)'="+")

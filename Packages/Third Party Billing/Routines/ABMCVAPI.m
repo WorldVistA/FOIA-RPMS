@@ -1,14 +1,32 @@
 ABMCVAPI ; IHS/SD/SDR - 3PB CPT/ICD/MODIFIER API   
- ;;2.6;IHS 3P BILLING SYSTEM;**4,9,10,14**;NOV 12, 2009;Build 238
+ ;;2.6;IHS 3P BILLING SYSTEM;**4,9,10,14,27**;NOV 12, 2009;Build 486
  ;
  ; New routine - v2.6
- ;IHS/SD/SDR - 2.6*14 - 002F - replaced ICDDX^ICDCODE with ICDDX^ICDEX for ICD-10
- ;IHS/SD/SDR - 2.6*14 - 009 - made it so API can be called without a date for reports
- ;IHS/SD/SDR - 2.6*14 - HEAT165197 (CR3109) - Added NUM tag to return numeric, comparable value; also added COD tag to reverse NUM
+ ;IHS/SD/SDR 2.6*14 002F - replaced ICDDX^ICDCODE with ICDDX^ICDEX for ICD-10
+ ;IHS/SD/SDR 2.6*14 009 - made it so API can be called without a date for reports
+ ;IHS/SD/SDR 2.6*14 HEAT165197 (CR3109) - Added NUM tag to return numeric, comparable value; also added COD tag to reverse NUM
+ ;IHS/SD/SDR 2.6*27 CR8894 Updated to call CPT^ICPTCOD as many times as necessary to find the active CPT based on the CODE sent;
+ ;   currently the CPT can be in the CPT file multiple times with different IENs.  If the CPT is DINUMed, CPT^ICPTCOD will return
+ ;   the DINUMed entry which may not be the active entry.
  ;
 CPT(CODE,CDT,SRC,DFN) ;PEP - returns info about requested CPT entry
- I $$VERSION^XPDUTL("BCSV")>0 S A=$$CPT^ICPTCOD(CODE,CDT,"","") Q A
- E  S A=$$PRCSVCPT(CODE,CDT) Q A
+ I $$VERSION^XPDUTL("BCSV")>0 S A=$$CPT^ICPTCOD(CODE,CDT,"","") Q A  ;abm*2.6*27 IHS/SD/SDR CR8894
+ E  S A=$$PRCSVCPT(CODE,CDT) Q A  ;abm*2.6*27 IHS/SD/SDR CR8894
+ ;start new abm*2.6*27 IHS/SD/SDR CR8894
+ ;S A=0
+ ;I $$VERSION^XPDUTL("BCSV")>0 D
+ ;.S A=$$CPT^ICPTCOD(CODE,CDT,"","")
+ ;.I $P(A,U,7)'=0 Q  ;found entry is active, use it
+ ;.N B
+ ;.S B=0
+ ;.S A=0
+ ;.F  S B=$O(^ICPT("B",CODE,B)) Q:'B  D  Q:A
+ ;..S A=$$CPT^ICPTCOD(B,CDT,"","")
+ ;..I $P(A,U,7)=0 S A=0
+ ;I +A Q A  ;an active CPT entry was found in the above method; stop here
+ ;I $$VERSION^XPDUTL("BCSV")'>0 S A=$$PRCSVCPT(CODE,CDT) Q A
+ ;Q A
+ ;end new abm*2.6*27 IHS/SD/SDR CR8894
  ;****************************************************************
 PRCSVCPT(CODE,CDT) ;EP - build Pre-CSV IHS CPT string
  N ABMZCPT,ABMCPT

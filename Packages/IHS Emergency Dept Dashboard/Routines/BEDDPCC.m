@@ -1,5 +1,7 @@
 BEDDPCC ;GDIT/HS/BEE-BEDD Admit - Create a Visit ; 08 Nov 2011  12:00 PM
- ;;2.0;BEDD DASHBOARD;**2**;Jun 04, 2014;Build 26
+ ;;2.0;BEDD DASHBOARD;**2,3**;Jun 04, 2014;Build 12
+ ;
+ ;GDIT/HS/BEE 05/10/2018;CR#10213 - BEDD*2.0*3 - Allow different hospital locations
  ;
  ;Derived from AMERPCC
  ;
@@ -7,13 +9,18 @@ VISIT(AMERPAT,AMERTIME,BEDD) ; EP from NADM^BEDDADM when patient is admitted W/O
  ;
  NEW AMERVSIT
  ;
- S AMERVSIT=$$AMVISIT(AMERPAT,AMERTIME) I +AMERVSIT'>0 Q "-1^"_$P(AMERVSIT,U,2)
+ ;GDIT/HS/BEE 05/10/2018;CR#10213 - BEDD*2.0*3 - Allow different hospital locations
+ ;S AMERVSIT=$$AMVISIT(AMERPAT,AMERTIME) I +AMERVSIT'>0 Q "-1^"_$P(AMERVSIT,U,2)
+ S AMERVSIT=$$AMVISIT(AMERPAT,AMERTIME,.BEDD) I +AMERVSIT'>0 Q "-1^"_$P(AMERVSIT,U,2)
  ;
  Q AMERVSIT
  ;
-AMVISIT(AMERPAT,AMERDATE) ; 
+ ;GDIT/HS/BEE 05/10/2018;CR#10213 - BEDD*2.0*3 - Allow different hospital locations
+ ;AMVISIT(AMERPAT,AMERDATE) ; 
+AMVISIT(AMERPAT,AMERDATE,BEDD) ; 
  ;
- NEW IN,AMERVSIT,OUT,X,AMERVDR,AMEROPT,AMERTEMP,BEDDADM
+ ;NEW IN,AMERVSIT,OUT,X,AMERVDR,AMEROPT,AMERTEMP,BEDDADM
+ NEW IN,AMERVSIT,OUT,X,AMERVDR,AMEROPT,AMERTEMP,BEDDADM,CLIN,ICLIN,ICPREF
  ;
  S (AMERVSIT,AMERVDR)=""
  ;
@@ -25,7 +32,17 @@ AMVISIT(AMERPAT,AMERDATE) ;
  ; and get the "type of visit" that is set there
  S IN("VISIT TYPE")=$P($G(^APCCCTRL(DUZ(2),0)),U,4)
  S IN("USR")=DUZ
- S IN("HOS LOC")=$G(^AMER(2.5,DUZ(2),"SD"))
+ ;
+ ;GDIT/HS/BEE 05/10/2018;CR#10213 - BEDD*2.0*3 - Allow different hospital locations
+ ;S IN("HOS LOC")=$G(^AMER(2.5,DUZ(2),"SD"))
+ S CLIN=$G(BEDD("tClinic")) I CLIN]"" D
+ . NEW DA,IENS
+ . S ICLIN=$O(^AMER(3,"B",CLIN,"")) Q:ICLIN=""
+ . S ICPREF=$O(^AMER(2.5,DUZ(2),8,"B",ICLIN,"")) Q:ICPREF=""
+ . S DA(1)=DUZ(2),DA=ICPREF,IENS=$$IENS^DILF(.DA)
+ . S IN("HOS LOC")=$$GET1^DIQ(9009082.58,IENS,".02","I")
+ S:$G(IN("HOS LOC"))="" IN("HOS LOC")=$G(^AMER(2.5,DUZ(2),"SD"))
+ ;
  S:IN("HOS LOC")'="" IN("APPT DATE")=AMERDATE  ; Setting IN("APPT DATE") will create an appoinment for this time
  S IN("SRV CAT")="A"  ; ER VISITS are "ambulatory"
  S IN("TIME RANGE")=3  ; Only find a visit for a time that is close to time or ER VISIT

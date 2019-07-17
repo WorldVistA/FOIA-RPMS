@@ -1,5 +1,5 @@
-BGOVAMI2 ; MSC/DKA - AMI Utilities 2 ;01-May-2014 14:44;DKA
- ;;1.1;BGO COMPONENTS;**13,14**;Mar 20, 2007
+BGOVAMI2 ; IHS/MSC/DKA - AMI Utilities 2 ;11-Jun-2018 13:08;DU
+ ;;1.1;BGO COMPONENTS;**13,14,24**;Mar 20, 2007;Build 1
  ;01.23.14 - MSC/JS - move SET here to keep within 15k routine size limits
  ;01.28.14 - DEBUG EVENT CALL FOR NEW AMI RECORD ADDED
  ;O2.06.14 - Field .17 changed to store text
@@ -24,8 +24,9 @@ SET(RET,INP) ;EP
  ; P   - Protocol Standing Order
  ; PT  - Protocol Standing Order Text (Comment)
  ; S   - Symptom
+ ; PC  - PCI data
  N DESCT,FDA,FNUM,NARR,NARRPTR,NOW,NUMNEW,SUBIEN,VCODE,VFIEN,VFNEW,VFSTR,VI,VIEN,REFUSED,VISDAT,DELF,VFCOMM
- N ADT,EDT,FDT,ODT,PDT,ATCOMM,EFTCOMM,ETCOMM,FTCOMM,OTCOMM,PTCOMM,FIBTXT,REFDT,DFN,RET2,FI
+ N ADT,EDT,FDT,ODT,PDT,ATCOMM,EFTCOMM,ETCOMM,FTCOMM,OTCOMM,PTCOMM,FIBTXT,REFDT,DFN,RET2,FI,SNO
  S RET="",FNUM=$$FNUM
  S VFIEN=+INP(0)
  S VFNEW='VFIEN
@@ -58,6 +59,7 @@ SET(RET,INP) ;EP
  ...S @FDA@(1,@FDA@(1,0))=ATCOMM
  .E  I VCODE="E" D
  ..S FDA=$NA(FDA(FNUM,VFIEN_","))
+ ..S SNO=$$GET^XPAR("ALL","BGO EKG DONE SNOMED",1,"E")
  ..I $P(VFSTR,U,2)]"" D
  ...S EDT=$P(VFSTR,U,2)
  ...I EDT>0,EDT'["." S EDT=(EDT-1)+.24
@@ -69,6 +71,7 @@ SET(RET,INP) ;EP
  ...S @FDA@(1202)=$P(VFSTR,U,4) ;OrderingProvider
  ...S @FDA@(1210)=$P(VFSTR,U,5) ;OutsideProviderName
  ...S @FDA@(1215)=$P(VFSTR,U,6) ;OrderingLocation
+ ...I EDT>0 S @FDA@(1101)=SNO ;EKG done SNOMED term Patch 24
  ..I $P(VFSTR,U,2)="" D  ;                             1.22.14
  ...S @FDA@(.07)="@" ;EKGDone(Date/Time)
  ...S @FDA@(.08)="@" ;EKGDateTimeEntered
@@ -77,6 +80,7 @@ SET(RET,INP) ;EP
  ...S @FDA@(1202)="@" ;OrderingProvider
  ...S @FDA@(1210)="@" ;OutsideProviderName
  ...S @FDA@(1215)="@" ;OrderingLocation
+ ...S @FDA@(1101)="@" ;EKG done code patch 24
  ...S @FDA@(3)="@" ;EKG Comment [ET]
  .E  I VCODE="EF" D
  ..S SUBIEN=$P(VFSTR,U,2)
@@ -149,6 +153,16 @@ SET(RET,INP) ;EP
  ...S @FDA@(4)=$NA(FDA(FNUM,VFIEN_",",4))
  ...S @FDA@(4,0)=$G(@FDA@(4,0))+1
  ...S @FDA@(4,@FDA@(4,0))=FTCOMM
+ .;IHS/MSC/MGH Patch 24 for PCI
+ .E  I VCODE="PC" D
+ ..S FDA=$NA(FDA(FNUM,VFIEN_","))
+ ..I $P(VFSTR,U,2)="" D
+ ...S @FDA@(1102)="@"
+ ...S @FDA@(1103)="@"
+ ..E  D
+ ...S @FDA@(1102)=$P(VFSTR,U,2)
+ ...I $P(VFSTR,U,3)="" S @FDA@(1103)="@"
+ ...E  S @FDA@(1103)=$P(VFSTR,U,3)
  .E  I VCODE="O" D
  ..S FDA=$NA(FDA(FNUM,VFIEN_","))
  ..S ODT=$P(VFSTR,U,2)

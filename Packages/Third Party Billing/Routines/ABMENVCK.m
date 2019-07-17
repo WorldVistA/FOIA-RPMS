@@ -1,15 +1,17 @@
 ABMENVCK ;IHS/SD/SDR - ENVIRONMENT CHECKER ;   
- ;;2.6;IHS Third Party Billing;**1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26**;NOV 12, 2009;Build 440
- ;IHS/SD/SDR - 2.6*14 updated checker to look for patches after 8 (meaning 9 thru 13)
- ;IHS/SD/SDR - 2.6*16 Updated patches for patch 16
- ;IHS/SD/SDR - 2.6*17 Updated to check for patch 16
- ;IHS/SD/SDR - 2.6*18 Check for patch 17
- ;IHS/SD/SDR - 2.6*19 Check for patch 18
- ;IHS/SD/SDR - 2.6*20 Check for patch 19
- ;IHS/SD/SDR - 2.6*21 Check for patch 20
+ ;;2.6;IHS Third Party Billing;**1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27**;NOV 12, 2009;Build 486
+ ;IHS/SD/SDR 2.6*14 updated checker to look for patches after 8 (meaning 9 thru 13)
+ ;IHS/SD/SDR 2.6*16 Updated patches for patch 16
+ ;IHS/SD/SDR 2.6*17 Updated to check for patch 16
+ ;IHS/SD/SDR 2.6*18 Check for patch 17
+ ;IHS/SD/SDR 2.6*19 Check for patch 18
+ ;IHS/SD/SDR 2.6*20 Check for patch 19
+ ;IHS/SD/SDR 2.6*21 Check for patch 20
  ;IHS/SD/SDR 2.6*22 Check for patch 21
  ;IHS/SD/SDR 2.6*24 check for patches 22 and 23
  ;IHS/SD/SDR 2.6*26 check for p25, aupn*99.1*26
+ ;IHS/SD/SDR 2.6*27 check for p26; fixed so messages write for all checks; BSCV only wrote a message if it was missing.  Now more in line
+ ;  with notes file
  ;
  ;
  I '$G(DUZ) W !,"DUZ UNDEFINED OR 0." D SORRY(2) Q
@@ -23,10 +25,12 @@ ABMENVCK ;IHS/SD/SDR - ENVIRONMENT CHECKER ;
  S XPDQUIT=0
  ;
  I '$$VCHK("DI","22.0",2) S XPDQUIT=2  ;abm*2.6*2
- ;AUM*9.1*4 needed for new clinic code mapping
- S X=$$PATCH^XPDUTL("AUM*9.1*4")  ;abm*2.6*4
- I X'=1 W !,$$CJ^XLFSTR("AUM v9.1 Patch 4 NOT INSTALLED",IOM) S XPDQUIT=2  ;abm*2.6*4
- I X=1 W !,$$CJ^XLFSTR("AUM v9.1 Patch 4 installed.",IOM)  ;abm*2.6*4
+ ;start old abm*2.6*27 IHS/SD/SDR SAC findings
+ ;;AUM*9.1*4 needed for new clinic code mapping
+ ;S X=$$PATCH^XPDUTL("AUM*9.1*4")  ;abm*2.6*4
+ ;I X'=1 W !,$$CJ^XLFSTR("AUM v9.1 Patch 4 NOT INSTALLED",IOM) S XPDQUIT=2  ;abm*2.6*4
+ ;I X=1 W !,$$CJ^XLFSTR("AUM v9.1 Patch 4 installed.",IOM)  ;abm*2.6*4
+ ;end old abm*2.6*27 IHS/SD/SDR SAC findings
  I '$$VCHK("AUM","10.1",2) S XPDQUIT=2  ;abm*2.6*2
  ;
  ;start new abm*2.6*26 IHS/SD/SDR CR9264
@@ -58,7 +62,8 @@ ABMENVCK ;IHS/SD/SDR - ENVIRONMENT CHECKER ;
  ;F I=1:1:21 D  ;abm*2.6*21 IHS/SD/SDR  ;abm*2.6*22 IHS/SD/SDR  ;abm*2.6*24 IHS/SD/SDR
  ;F I=1:1:23 D  ;abm*2.6*24 IHS/SD/SDR  ;abm*2.6*25 IHS/SD/SDR
  ;F I=1:1:24 D  ;abm*2.6*25 IHS/SD/SDR  ;abm*2.6*26 IHS/SD/SDR
- F I=1:1:25 D  ;abm*2.6*26 IHS/SD/SDR
+ ;F I=1:1:25 D  ;abm*2.6*26 IHS/SD/SDR  ;abm*2.6*27 IHS/SD/SDR
+ F I=1:1:26 D  ;abm*2.6*27 IHS/SD/SDR
  .S X=$$PATCH^XPDUTL("ABM*2.6*"_I)
  .I X'=1 S ABM=0 W !,$$CJ^XLFSTR("Need Third Party Billing v2.6 Patch "_I_"..... "_$S(ABM=0:"NOT ",1:"")_"Present",IOM)
  I ABM=0 S XPDQUIT=2
@@ -73,18 +78,20 @@ ABMENVCK ;IHS/SD/SDR - ENVIRONMENT CHECKER ;
  K X
  S X=$$PATCH^XPDUTL("XU*8.0*1013")
  I X'=1 W !,$$CJ^XLFSTR("KERNEL v8.0 Patch 1013 NOT INSTALLED",IOM) S XPDQUIT=2
- I X=1 W !,$$CJ^XLFSTR("XU Patch 1013 installed.",IOM)
+ ;I X=1 W !,$$CJ^XLFSTR("XU Patch 1013 installed.",IOM)  ;abm*2.6*27 IHS/SD/SDR SAC findings
  K X
  S X=$$PATCH^XPDUTL("XU*8.0*1014")
  I X'=1 W !,$$CJ^XLFSTR("KERNEL v8.0 Patch 1014 NOT INSTALLED",IOM) S XPDQUIT=2
- I X=1 W !,$$CJ^XLFSTR("XU Patch 1014 installed.",IOM)
+ ;I X=1 W !,$$CJ^XLFSTR("XU Patch 1014 installed.",IOM)  ;abm*2.6*27 IHS/SD/SDR SAC findings
  ;
  ;start new code abm*2.6*10
  N X,ABM,I
  S ABM=1
  F I=1:1:3 D
  .S X=$$PATCH^XPDUTL("BCSV*1.0*"_I)
- .I X'=1 S ABM=0 W !,$$CJ^XLFSTR("Need BCSV IHS Code Set Versioning v1.0 Patch "_I_"..... "_$S(ABM=0:"NOT ",1:"")_"Present",IOM)
+ .;I X'=1 S ABM=0 W !,$$CJ^XLFSTR("Need BCSV IHS Code Set Versioning v1.0 Patch "_I_"..... "_$S(ABM=0:"NOT ",1:"")_"Present",IOM)  ;abm*2.6*27 IHS/SD/SDR SAC findings
+ .I X'=1 S ABM=0  ;abm*2.6*27 IHS/SD/SDR SAC findings
+ .W !,$$CJ^XLFSTR("Need BCSV IHS Code Set Versioning v1.0 Patch "_I_"..... "_$S(ABM=0:"NOT ",1:"")_"Present",IOM)  ;abm*2.6*27 IHS/SD/SDR SAC findings
  I ABM=0 S XPDQUIT=2
  ;end new code abm*2.6*10
  ;

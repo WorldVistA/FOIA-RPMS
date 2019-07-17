@@ -1,5 +1,5 @@
 APCM25E7 ;IHS/CMI/LAB - IHS MU;  ; 28 Jul 2016  2:42 PM
- ;;1.0;MU PERFORMANCE REPORTS;**7,8**;MAR 26, 2012;Build 22
+ ;;1.0;MU PERFORMANCE REPORTS;**7,8,10**;MAR 26, 2012;Build 31
  ;
 LAB ;EP - CALCULATE LAB
  ;for each provider or for the facility count all labs that meet criteria and if it is not written it meets numerator
@@ -212,7 +212,9 @@ SEM ;EP
 ST1 ;set denominator value into field
  S F=31.02  ;denom field for this measure 2016
  D S^APCM25E1(APCMRPT,APCMIC,1,APCMP,APCMRPTT,APCMTIME,F)
- S F=31.04  ;denom field for this measure 2016
+ S F=31.04  ;denom field for this measure 2017
+ D S^APCM25E1(APCMRPT,APCMIC,1,APCMP,APCMRPTT,APCMTIME,F)
+ S F=31.06  ;denom field for this measure 2018 AND BEYOND
  D S^APCM25E1(APCMRPT,APCMIC,1,APCMP,APCMRPTT,APCMTIME,F)
  S APCMVALU="VISIT: "_$$DATE^APCM1UTL(APCMHVTP(APCMP))
  ;numerator?
@@ -229,6 +231,8 @@ ST1 ;set denominator value into field
  .S F=31.01  ;2016 NUMERATOR
  .D S^APCM25E1(APCMRPT,APCMIC,$P(V,U,5),APCMP,APCMRPTT,APCMTIME,F)
  .S F=31.03  ;2017 NUMERATOR
+ .D S^APCM25E1(APCMRPT,APCMIC,$P(V,U,5),APCMP,APCMRPTT,APCMTIME,F)
+ .S F=31.05  ;2018 AND ABOVE NUMERATOR
  .D S^APCM25E1(APCMRPT,APCMIC,$P(V,U,5),APCMP,APCMRPTT,APCMTIME,F)
  D SETLIST^APCM25E1
  Q

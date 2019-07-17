@@ -1,5 +1,7 @@
 AMEREDTA ; IHS/OIT/SCR - SUB-ROUTINE FOR ER VISIT EDIT of ADMIT information
- ;;3.0;ER VISIT SYSTEM;**2**;FEB 23, 2009
+ ;;3.0;ER VISIT SYSTEM;**2,10**;MAR 3, 2009;Build 23
+ ;
+ ;GDIT/HS/BEE 05/10/2018;CR#10213 - AMER*3.0*10 - Save updated clinic and hospital location
  ;
  ; VARIABLES: The following variables are passed to multiple editing routines
  ; AMERDA  : the IEN of the ER VISIT that is selected for editing
@@ -99,25 +101,63 @@ EDADMIT(AMERDA,AMERAIEN)   ;EP - CALLED BY AMEREDIT when "ADMIT" is selected for
  ..Q
  .Q
  Q:AMERQUIT 0
+ ;
+ ;GDIT/HS/BEE 05/10/2018;CR#10213 - AMER*3.0*10 - Save updated clinic and hospital location
+ ;Reworked entire section to save custom clinics and differing hospital locations
+ ;
  ;allow user to update "clinic type"
  D EN^DDIOL("","","!")
- S AMEROLD=$P($G(^AMERVSIT(AMERDA,0)),U,4)
- S:AMEROLD'="" DIC("B")=$P($G(^AMER(3,AMEROLD,0)),U,1)
- S DIC("A")="Clinic type (EMERGENCY or URGENT): "
- S DIC="^AMER(3,",DIC("S")="I $P(^(0),U,2)="_$$CAT^AMER0("CLINIC TYPE"),DIC(0)="AEQ"
- D ^DIC K DIC
- I $D(DUOUT)!$D(DTOUT) K DIC,DUOUT,DTOUT Q 0
- S AMERNEW=$P(Y,U,1)
- I AMEROLD'=AMERNEW D
- .S AMEROLD=$$EDDISPL^AMEREDAU(AMEROLD,"L")
- .S AMERNEW=$$EDDISPL^AMEREDAU(AMERNEW,"L")
- .S AMERSTRG=$$EDAUDIT^AMEREDAU(".05",AMEROLD,AMERNEW,"CLINIC TYPE")
- .I AMERSTRG="^" S AMERQUIT=1 Q
- .S AMERDR=$S(AMERDR'="":AMERDR_";",1:""),AMERDR=AMERDR_".04///"_AMERNEW
- .D DIEREC^AMEREDAU(AMERAIEN,AMERSTRG)
+ ;S AMEROLD=$P($G(^AMERVSIT(AMERDA,0)),U,4)
+ ;S:AMEROLD'="" DIC("B")=$P($G(^AMER(3,AMEROLD,0)),U,1)
+ ;S DIC("A")="Clinic type (EMERGENCY or URGENT): "
+ ;S DIC="^AMER(3,",DIC("S")="I $P(^(0),U,2)="_$$CAT^AMER0("CLINIC TYPE"),DIC(0)="AEQ"
+ ;D ^DIC K DIC
+ ;I $D(DUOUT)!$D(DTOUT) K DIC,DUOUT,DTOUT Q 0
+ ;S AMERNEW=$P(Y,U,1)
+ ;I AMEROLD'=AMERNEW D
+ ;.S AMEROLD=$$EDDISPL^AMEREDAU(AMEROLD,"L")
+ ;.S AMERNEW=$$EDDISPL^AMEREDAU(AMERNEW,"L")
+ ;.S AMERSTRG=$$EDAUDIT^AMEREDAU(".05",AMEROLD,AMERNEW,"CLINIC TYPE")
+ ;.I AMERSTRG="^" S AMERQUIT=1 Q
+ ;.S AMERDR=$S(AMERDR'="":AMERDR_";",1:""),AMERDR=AMERDR_".04///"_AMERNEW
+ ;.D DIEREC^AMEREDAU(AMERAIEN,AMERSTRG)
+ ;.D DIE^AMEREDIT(AMERDA,AMERDR)
+ ;.S (AMERDR,Y,AMERNEW,AMEROLD)=""
+ ;.Q
+ N VIEN,NCLN,OCLN
+ ;
+ ;Get visit
+ S VIEN=$$GET1^DIQ(9009080,AMERDA_",",.03,"I") I VIEN="" Q 0
+ ;
+ ;Update clinic
+ S (NCLN,OCLN,AMERQUIT)=""
+ I VIEN>0 D
+ .NEW DIC,X,Y,AMERCLN,AMERTYP,AMERDR
+ .S DIC("B")=""
+ .S AMERCLN=$$GETCLN^AMER2A(VIEN) ;Pull Hospital Location
+ .I AMERCLN]"" S OCLN=AMERCLN,DIC("B")=$$GET1^DIQ(9009083,AMERCLN,.01,"E")  ;Get AMER clinic text
+ .S DIC="^AMER(3,"
+ .S DIC("S")="I '$P(^(0),U,5),$P(^(0),U,2)="_$$CAT^AMER0("CLINIC TYPE")
+ .S DIC(0)="AEQ"
+ .S DIC("A")="*Clinic type: "
+ .D ^DIC I '+Y S AMERQUIT=1 Q
+ .S NCLN=+Y
+ .S AMERDR=".04///"_NCLN
  .D DIE^AMEREDIT(AMERDA,AMERDR)
- .S (AMERDR,Y,AMERNEW,AMEROLD)=""
- .Q
+ ;
+ ;Need to update clinic and hospital location if overrides on file
+ I OCLN'=NCLN,VIEN>0,'AMERQUIT D
+ . NEW ERR,AMEROLD,AMERNEW
+ . ;
+ . ;GDIT/HS/BEE 05/10/2018;CR#10213/10423 - AMER*3.0*10 - Save updated clinic and hospital location
+ . ;Need to update clinic and hospital location if overrides on file
+ . S ERR=$$CKHLOC^AMERBSD(VIEN,NCLN)
+ . ;
+ . S AMEROLD=$$EDDISPL^AMEREDAU(OCLN,"L")
+ . S AMERNEW=$$EDDISPL^AMEREDAU(NCLN,"L")
+ . S AMERSTRG=$$EDAUDIT^AMEREDAU(".05",AMEROLD,AMERNEW,"CLINIC TYPE")
+ . D DIEREC^AMEREDAU(AMERAIEN,AMERSTRG)
+ ;
  Q:AMERQUIT 0
 PQ  ;NOW allow user to update "presenting complaint'
  S Y=$G(^AMERVSIT(AMERDA,1))

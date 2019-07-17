@@ -1,5 +1,5 @@
 AUMSCBM  ;IHS/OIT/NKD - SCB UPDATE - MAP 12/12/2012 ;
- ;;18.0;TABLE MAINTENANCE;**3**;AUG 14,2017;Build 1
+ ;;19.0;TABLE MAINTENANCE;**1**;SEP 04,2018;Build 1
  ; 03/12/14 - Modified Inactivate processing for Education tables
  ; 05/28/14 - Added Tribe Inactivate and Pre processing
  ; 12/16/14 - Removed old/unused code
@@ -9,6 +9,7 @@ AUMSCBM  ;IHS/OIT/NKD - SCB UPDATE - MAP 12/12/2012 ;
  ; 03/07/16 - Added Service Category table
  ; 03/15/18 - Added Revenue Codes table
  ; 05/08/18 - Added Admission Source table
+ ; 09/07/18 - Added PCC Data Entry Educ Topics table
  ;
  Q
  ;
@@ -215,4 +216,11 @@ ASRC ;; ADMISSION SOURCE FILE
  ;;WP;;9999999.53^1|P3
  ;;HDR;;AUMT;ADMISSION SOURCE FILE ENTRIES^CODE|7;NAME|12
  ;;DSP;;AUMM|6;P1|4;P2|40
+ ;;END
+PCCED ;; PCC DATA ENTRY EDUC TOPICS FILE
+ ;;SEA;;9001002.5^P2|C;P1|B
+ ;;NEW;;9001002.5^.01|P1;.02|P2^I
+ ;;UPD;;9001002.5^.01|P1;.02|P2^I
+ ;;HDR;;AUMT;PCC DATA ENTRY EDUC TOPICS FILE ENTRIES^MNEMONIC|7;NAME|16
+ ;;DSP;;AUMM|6;P2|8;P1|30
  ;;END

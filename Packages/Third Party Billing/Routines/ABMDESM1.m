@@ -1,5 +1,5 @@
 ABMDESM1 ; IHS/SD/SDR - Display Summarized Claim Info ; 
- ;;2.6;IHS Third Party Billing;**1,6,8,11,13,14,23**;NOV 12, 2009;Build 427
+ ;;2.6;IHS Third Party Billing;**1,6,8,11,13,14,23,27**;NOV 12, 2009;Build 486
  ;
  ; IHS/SD/SDR V2.5 P2 5/9/02 - NOIS HQW-0302-100190 Modified to display 2nd and 3rd modifiers and units
  ; IHS/SD/SDR v2.5 p5 5/18/04 Modified to put POS and TOS by line item
@@ -20,6 +20,7 @@ ABMDESM1 ; IHS/SD/SDR - Display Summarized Claim Info ;
  ;IHS/SD/SDR 2.6*13 Added check for new export mode 35
  ;IHS/SD/SDR 2.6*14 HEAT161263 Changed to use $$GET^DIQ so output transform will execute for SNOMED/Provider Narrative
  ;IHS/SD/AML 2.6*23 HEAT247169 Gather line items from 8D and 8H if visit type is 997
+ ;IHS/SD/AML 2.6*27 CR8897 Added check if not Medi-Cal and not bill type 731 to be treated like flat rate
  ;
  K ABMS
  ;
@@ -33,7 +34,8 @@ ABMDESM1 ; IHS/SD/SDR - Display Summarized Claim Info ;
  .S ABMX=$P($G(@(ABMP("GL")_"6)")),U,6)  ;abm*2.6*1 HEAT7884
  .S ABMX=ABMX+$S((ABMP("VTYP")=999&(ABMP("BTYP")=731)&($P($G(^AUTNINS(ABMP("INS"),0)),U)["MONTANA MEDICAID")):$P($G(@(ABMP("GL")_"5)")),U,7),1:$P($G(@(ABMP("GL")_"7)")),U,3))  ;abm*2.6*1 HEAT7884
  .;S:($E(ABMP("BTYP"),2)'<3&'(ABMP("VTYP")=999&(ABMP("BTYP")=731)&($P($G(^AUTNINS(ABMP("INS"),0)),U)["MONTANA MEDICAID"))) ABMX=1  ;abm*2.6*1 HEAT7884  ;abm*2.6*6 Swing bed
- .S:($E(ABMP("BTYP"),2)'<3&'(ABMP("VTYP")=999&(ABMP("BTYP")=731)&($P($G(^AUTNINS(ABMP("INS"),0)),U)["MONTANA MEDICAID"))&(ABMP("BTYP")'=181)) ABMX=1  ;abm*2.6*1 HEAT7884  ;abm*2.6*6 Swing bed
+ .;S:($E(ABMP("BTYP"),2)'<3&'(ABMP("VTYP")=999&(ABMP("BTYP")=731)&($P($G(^AUTNINS(ABMP("INS"),0)),U)["MONTANA MEDICAID"))&(ABMP("BTYP")'=181)) ABMX=1  ;abm*2.6*1 HEAT7884  ;abm*2.6*6 Swing bed  ;abm*2.6*27 IHS/SD/AML CR8897
+ .S:(($$RCID^ABMUTLP(ABMP("INS"))'["61044"&(ABMP("BTYP")'=731))&$E(ABMP("BTYP"),2)'<3&'(ABMP("VTYP")=999&(ABMP("BTYP")=731)&($P($G(^AUTNINS(ABMP("INS"),0)),U)["MONTANA MEDICAID"))&(ABMP("BTYP")'=181)) ABMX=1  ;abm*2.6*27 IHS/SD/AML CR8897
  .S:ABMX=0 ABMX=1 S ABMS($P(ABMP("FLAT"),U,2))=$P(ABMP("FLAT"),U)*ABMX_U_ABMX_U_$P(ABMP("FLAT"),U)_U_U_($P($G(@(ABMP("GL")_"6)")),U,6)*$P(ABMP("FLAT"),U))
  .S ABMS("TOT")=+ABMS($P(ABMP("FLAT"),U,2)) G ^ABMDESMC:(ABMP("BTYP")=831)
  .I $D(ABMP("FLAT",170)) S ABMX=ABMP("FLAT",170),ABMS(170)=$P(ABMP("FLAT"),U)*ABMX_U_ABMX_U_$P(ABMP("FLAT"),U)_U_U_($P($G(@(ABMP("GL")_"6)")),U,6)*$P(ABMP("FLAT"),U)),ABMS("TOT")=ABMS("TOT")+ABMS(170)

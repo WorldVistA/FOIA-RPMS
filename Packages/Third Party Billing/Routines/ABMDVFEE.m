@@ -1,6 +1,7 @@
 ABMDVFEE ; IHS/SD/SDR - VIEW CPT FEES ;
- ;;2.6;IHS Third Party Billing System;**9,21**;NOV 12, 2009;Build 379
+ ;;2.6;IHS Third Party Billing System;**9,21,27**;NOV 12, 2009;Build 486
  ;IHS/SD/SDR 2.6*21 HEAT135354 fixed display of code when one is selected; was printing a dash, no description, and 0.00 all the time, no matter the charge.
+ ;IHS/SD/SDR 2.6*27 CR8894 Fixed display to show short description for CPT if ?? entered by user
  ;
  S U="^" W !
 FEE K DIC
@@ -25,11 +26,19 @@ EDIT K DIC
  S DA(1)=ABM("FEE")
  S DIC="^ABMDFEE("_DA(1)_","_ABM("SUB")_","
  S:'$D(@(DIC_"0)")) @(DIC_"0)")="^9002274.01"_ABM("SUB")_"P"
- S ABM("DICS")=9002274.01_ABM("SUB") X:$D(^DD(ABM("DICS"),.01,12.1)) ^DD(ABM("DICS"),.01,12.1)
+ ;S ABM("DICS")=9002274.01_ABM("SUB") X:$D(^DD(ABM("DICS"),.01,12.1)) ^DD(ABM("DICS"),.01,12.1)  ;abm*2.6*27 IHS/SD/SDR CR8894
  I ABM=7 S DIC("W")="W "" - "",$P($G(^AUTTREVN(Y,0)),U,2),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),31,Y,DT),U),"","",2),9)"
- I ABM=6 S DIC("W")="W "" - "",$P($G(^AUTTADA(Y,0)),U,2),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),21,Y,DT),U),"","",2),9)"
+ ;I ABM=6 S DIC("W")="W "" - "",$P($G(^AUTTADA(Y,0)),U,2),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),21,Y,DT),U),"","",2),9)"  ;abm*2.6*27 IHS/SD/SDR CR8894
+ I ABM=6 S DIC("W")="S ABMR(""CODE"")=$E(Y,2,5) W "" - "",$E($P($G(^AUTTADA($P(^ABMDFEE(DA(1),21,Y,0),U),0)),U,2),1,45),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),21,Y,DT),U),"","",2),9)"  ;abm*2.6*27 IHS/SD/SDR CR8894
  ;I "123458"[ABM S DIC("W")="W "" - "",$P($$CPT^ABMCVAPI(Y,DT),U,3),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),ABM(""SUB""),Y,DT),U),"","",2),9)"  ;CSV-c  ;abm*2.6*21 IHS/SD/SDR HEAT135354
- I "123458"[ABM S DIC("W")="W "" - "",$P($$CPT^ABMCVAPI(X,DT),U,3),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),ABM(""SUB""),$P($$CPT^ABMCVAPI(X,DT),U),DT),U),"","",2),9)"  ;CSV-c  ;abm*2.6*21 IHS/SD/SDR HEAT135354
+ ;I "123458"[ABM S DIC("W")="W "" - "",$P($$CPT^ABMCVAPI(X,DT),U,3),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),ABM(""SUB""),$P($$CPT^ABMCVAPI(X,DT),U),DT),U),"","",2),9)"  ;CSV-c  ;abm*2.6*21 IHS/SD/SDR HEAT135354  ;abm*2.6*27 IHS/SD/SDR CR8894
+ ;start new abm*2.6*27 IHS/SD/SDR CR8894
+ I "123458"[ABM D
+ .S DIC("W")=" W "" - "",$P($$CPT^ABMCVAPI(+Y,DT),U,3),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),ABM(""SUB""),$P($$CPT^ABMCVAPI(+Y,DT),U),DT),U),"","",2),9)"
+ ;
+ I ABM=9 S DIC("W")="W ?50,$P($G(^PSDRUG(Y,2)),U,4),?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),ABM(""SUB""),Y,DT),U),"","",2),9)"
+ I ABM=10 S DIC("W")="W ?65,$J($FN($P($$ONE^ABMFEAPI(DA(1),ABM(""SUB""),Y,DT),U),"","",2),9)"
+ ;end new abm*2.6*27 IHS/SD/SDR CR8894
  ;
  W !!
  S DIC(0)="QEAM"

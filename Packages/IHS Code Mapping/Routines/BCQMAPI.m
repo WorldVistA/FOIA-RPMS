@@ -1,15 +1,17 @@
-BCQMAPI ; IHS/OIT/FBD - MAGIC MAPPER API ;
- ;;1.0;IHS CODE MAPPING;;MAR 19, 2014;Build 13
+BCQMAPI ; IHS/OIT/FBD - MAGIC MAPPER API ;05/07/18 07:49;FS
+ ;;1.0;IHS CODE MAPPING;;MAY 07, 2018;Build 21
  ;
 MM(BCQMF,LOOKUP,LKFORM,VALUE1,VALUE2,VALUE3,VALUE4,VALUE5,VALUE6,BCQMDATE,RETVAL) ;PEP; table oriented magic mapper
  ;this API will be called to obtained code values based
  ;on an entry in a that file that is passed
  ;  input:
  ;  1  -  File number in which the code lives
+ ;        NEW FILE INTRODUCTION: ICD OPERATION/PROCEDURE (80.1) for ICD10 Procedure codes.
  ;  2  -  lookup value into the table in file 
  ;        the caller must pass a value that will not fail a DIC lookup into the table
  ;        must be a unique lookup value
  ;        EXAM - pass standard IHS code, e.g. 34
+ ;        ICD10 Procedures - pass standard IHS ICD10 code, e.g. 5A02210, F0636KZ, F003GZZ..
  ;        NOTE:  there is no unique lookup value in EDUCATION topics so caller must pass the IEN of the topic
  ;               there are tons of dupes
  ;  3  -  lookup value format, is this an I (internal value IEN) or E - External value  DEFAULT IS "E"
@@ -84,8 +86,18 @@ MMEDUC ;test
  W !,X,!
  ;ZW OUT
  Q
+MMICD10 ;test
+ KILL OUT
+ S X=$$MM(80.1,"F02Z5ZZ",,,,,,,,DT,"OUT")
+ W !,X,!
+ ;ZW OUT
+ Q
+ ;
 PRIMPOV() ;PEP - return SNOMED to use for primary pov
  Q $$GET1^DIQ(9002022,1,.02)
+ ;
+EMERPOV() ;PEP - return SNOMED to use for V EMERGENCY VISIT (In Future, for now eCQM module will map it locally)
+ Q ;$$GET1^DIQ(9002022,2,.02)
  ;
 HANDED(V,D,RETVAL) ;PEP = get snomed handedness
  K @RETVAL

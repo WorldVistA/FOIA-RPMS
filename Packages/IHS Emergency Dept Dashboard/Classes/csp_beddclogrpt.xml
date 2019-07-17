@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2018-09-28 14:46:46">
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775U)" ts="2019-07-17 13:16:22">
 <Class name="csp.beddclogrpt">
 <ClassType/>
 <Hidden>1</Hidden>
@@ -7,9 +7,9 @@
 <Language>cache</Language>
 <ProcedureBlock>0</ProcedureBlock>
 <Super>%CSP.Page</Super>
-<TimeChanged>64672,29652.884186</TimeChanged>
-<TimeCreated>64672,29652.876445</TimeCreated>
-<GeneratedBy>/csp/foia_goldb/BEDDCLOGRPT.csp</GeneratedBy>
+<TimeChanged>65058,29543.898559</TimeChanged>
+<TimeCreated>65058,29543.890309</TimeCreated>
+<GeneratedBy>/csp/foia_external/BEDDCLOGRPT.csp</GeneratedBy>
 
 <Method name="OnPage">
 <ClassMethod>1</ClassMethod>
@@ -59,7 +59,7 @@
 	Write "	<tr>",!
 	Write "		<b>",!
 	Write "		<td>Check-In</td><td>Arrival</td><td>Patient </td><td>Presenting Complaint</td><td>Chart</td>",!
-	Write "		<td>Age</td><td>Sex</td> <td>DOB</td> <td>Initial Triage Acuity</td><td>Diagnosis</td>",!
+	Write "		<td>Age</td><td>Sex</td> <td>DOB</td><td>Clinic</td> <td>Initial Triage Acuity</td><td>Diagnosis</td>",!
 	Write "		<td>ED Provider</td><td>Medical Screening Exam Time</td><td>CI-MSE Wtg</td><td>Primary Nurse</td><td>Decision to Admit Dt/Tm</td>",!
 	Write "		<td>Triage Dt/Tm</td><td>CI-Trg Wtg </td>",!
 	Write "		<td>Room</td><td>Original Room Tm</td><td>Trg-Rm Wtg </td>",!
@@ -138,6 +138,14 @@
 	//DOB
 	If $P(n0,"^",8)]"" {
 	&html<<td>#($P(n0,"^",8))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//GDIT/HS/BEE 05/10/2018;CR#10213 - BEDD*2.0*3 - Include clinic
+	If $P(n0,"^",9)]"" {
+	&html<<td>#($P(n0,"^",9))#</td>>
 	}
 	Else {
 	&html<<td>&nbsp;</td>>
@@ -413,15 +421,15 @@
 </Method>
 
 <Parameter name="CSPFILE">
-<Default>D:\intersystems\E3IHS\CSP\foia_goldb\BEDDCLOGRPT.csp</Default>
+<Default>D:\intersystems\E3IHS\CSP\foia_external\BEDDCLOGRPT.csp</Default>
 </Parameter>
 
 <Parameter name="CSPURL">
-<Default>/csp/foia_goldb/BEDDCLOGRPT.csp</Default>
+<Default>/csp/foia_external/BEDDCLOGRPT.csp</Default>
 </Parameter>
 
 <Parameter name="FileTimestamp">
-<Default>64671,78190</Default>
+<Default>65058,54686</Default>
 </Parameter>
 </Class>
 </Export>

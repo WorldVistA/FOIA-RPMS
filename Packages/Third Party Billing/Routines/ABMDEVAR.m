@@ -1,5 +1,5 @@
 ABMDEVAR ; IHS/SD/SDR - SET UP CLAIM VARIABLES ;      
- ;;2.6;IHS Third Party Billing;**1,4,6,7,10,11,13,14,18,21**;NOV 12, 2009;Build 379
+ ;;2.6;IHS Third Party Billing;**1,4,6,7,10,11,13,14,18,21,27**;NOV 12, 2009;Build 486
  ;
  ;IHS/ASDS/DMJ - v2.4 p7 - 9/7/01 NOIS HQW-0701-100066
  ;     Modifications done related to Medicare Part B.
@@ -9,15 +9,17 @@ ABMDEVAR ; IHS/SD/SDR - SET UP CLAIM VARIABLES ;
  ;IHS/SD/SDR - v2.5 p10 - IM20337
  ;   Add page 9F to selection
  ;IHS/SD/SDR - v2.5 p11 - NPI
- ;IHS/SD/SDR - abm*2.6*1 - HEAT6439 - Allow page9 for any 837 (not just 837P)
- ;IHS/SD/SDR - abm*2.6*1 - HEAT7884 - display page7 if visit type 731
- ;IHS/SD/SDR - abm*2.6*4 - HEAT15368 - <SUBSCR>PAGE+11^ABMDEVAR
- ;IHS/SD/SDR - abm*2.6*6 - 5010 - added page 3B
- ;IHS/SD/SDR  2.6*13 - exp mode 35 - make page 9A show up
- ;IHS/SD/SDR - 2.6*14 - ICD10 Updated go-live date to 10/1/2015; also added code to check ICD Indicator that acts as override for go-live date
- ;IHS/SD/SDR - 2.6*14 - HEAT165301 - took out page 9A
- ;IHS/SD/SDR - 2.6*18 - HEAT244054 - DOS same as ICD10 Effective Date was causing errors, page 5A to not work correctly.
- ;IHS/SD/SDR - 2.6*21 - HEAT139641 - Changed 3P Insurer references from DUZ(2) to ABMP("LDFN")
+ ;
+ ;IHS/SD/SDR 2.6*1 - HEAT6439 - Allow page9 for any 837 (not just 837P)
+ ;IHS/SD/SDR 2.6*1 - HEAT7884 - display page7 if visit type 731
+ ;IHS/SD/SDR 2.6*4 - HEAT15368 - <SUBSCR>PAGE+11^ABMDEVAR
+ ;IHS/SD/SDR 2.6*6 - 5010 - added page 3B
+ ;IHS/SD/SDR 2.6*13 - exp mode 35 - make page 9A show up
+ ;IHS/SD/SDR 2.6*14 - ICD10 Updated go-live date to 10/1/2015; also added code to check ICD Indicator that acts as override for go-live date
+ ;IHS/SD/SDR 2.6*14 - HEAT165301 - took out page 9A
+ ;IHS/SD/SDR 2.6*18 - HEAT244054 - DOS same as ICD10 Effective Date was causing errors, page 5A to not work correctly.
+ ;IHS/SD/SDR 2.6*21 - HEAT139641 - Changed 3P Insurer references from DUZ(2) to ABMP("LDFN")
+ ;IHS/SD/AML 2.6*27 CR8897 Made page 7 display for Medi-cal bill type 731
  ;
  S ABMP("C0")=^ABMDCLM(DUZ(2),ABMP("CDFN"),0)
  S ABMP("PDFN")=$P(ABMP("C0"),U)
@@ -128,6 +130,11 @@ PAGE ;EP - SET  SELECTABLE PAGES
  ;abm*2.6*4 HEAT15368 - added + to ABMP("INS") to stop <SUBSCR>PAGE+11^ABMDEVAR
  I (ABMP("VTYP")=111!($G(ABMP("BTYP"))=111)!($G(ABMP("BTYP"))=121)!(ABMP("VTYP")=831)!($G(ABMP("BTYP"))=181)!(ABMP("VTYP")=999&(ABMP("BTYP")=731)&($P($G(^AUTNINS(+ABMP("INS"),0)),U)["MONTANA MEDICAID"))) S ABMP("PAGE")=ABMP("PAGE")_",7"
  ;end new code HEAT7884
+ ;start new abm*2.6*27 IHS/SD/SDR CR8897
+ S ABMPOS=0  ;abm*2.6*27 IHS/SD/SDR CR8897
+ I "^51^52^53^54^55^"[("^"_$$GET1^DIQ(9002274.03,$P($G(^ABMDPARM(ABMP("LDFN"),1,3)),U,6),".01","E")_"^") S ABMPOS=1  ;Place of Service setup for facility  ;abm*2.6*27 IHS/SD/SDR CR8897
+ I (($$RCID^ABMUTLP(ABMP("INS")))["61044")&(ABMP("BTYP")=731)&(ABMPOS=1) S ABMP("PAGE")=ABMP("PAGE")_",7"
+ ;end new abm*2.6*27 IHS/SD/SDR CR8897
  S:$G(ABMP("PX"))'="I"!(ABMP("VTYP")=831) ABMP("PAGE")=ABMP("PAGE")_",8"
  ;I $P($G(^ABMDEXP(+$G(ABMP("EXP")),0)),U)["UB"!($P($G(^ABMDEXP(+$G(ABMP("EXP")),0)),U)["ADA")!($P($G(^ABMDEXP(+$G(ABMP("EXP")),0)),U)["837 P") S ABMP("PAGE")=ABMP("PAGE")_",9"  ;abm*2.6*1 HEAT6439
  ;abm*2.6*14 IHS/SD/SDR HEAT165301 put below line back in

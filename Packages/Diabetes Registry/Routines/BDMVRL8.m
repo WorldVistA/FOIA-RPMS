@@ -1,5 +1,5 @@
 BDMVRL8 ; cmi/anch/maw - VIEW PT RECORD & DIAGNOSIS DATA ;
- ;;2.0;DIABETES MANAGEMENT SYSTEM;;AUG 11, 2006
+ ;;2.0;DIABETES MANAGEMENT SYSTEM;**12**;JUN 14, 2007;Build 51
  ;
  ;
 CDISP ;EP;DISPLAY AND EDIT DIAGNOSIS
@@ -85,7 +85,30 @@ CINIT ;EP;INITIALIZE LIST OF PATIENTS DIAGNOSIS
  N A,B,C,X,Y,Z
  S X=""
  S VALMCNT=0
- S X="    Diagnosis"
+ ;DISPLAY PROBLEM LIST FROM PCC
+ S X="DIABETES RELATED PROBLEMS ON THE PROBLEM LIST"
+ D Z(X)
+ S X="PROB #",$E(X,9)="DX",$E(X,20)="PROVIDER NARRATIVE",$E(X,57)="DATE OF ONSET",$E(X,72)="STATUS"
+ D Z(X)
+ S X="",$P(X,"-",80)=""
+ D Z(X)
+ N J,X,Y,Z,F,N
+ K BDMPLDX
+ D GETPLDX
+ I '$D(BDMPLDX) S X="None on file" D Z(X)
+ I $O(BDMPLDX(0)) D
+ .S J=0 F  S J=$O(BDMPLDX(J)) Q:J'=+J  D
+ ..S F=$$VALI^XBDIQ1(9000011,J,.06)
+ ..S N=$$VAL^XBDIQ1(9000011,J,.07)
+ ..S X=$S($P(^AUTTLOC(F,0),U,7)]"":$J($P(^(0),U,7),4),1:"??")_N
+ ..S $E(X,9)=$$VAL^XBDIQ1(9000011,J,.01)
+ ..S $E(X,20)=$E($$VAL^XBDIQ1(9000011,J,.05),1,35)
+ ..S $E(X,57)=$$VAL^XBDIQ1(9000011,J,.13)
+ ..S $E(X,72)=$$VAL^XBDIQ1(9000011,J,.12)
+ ..D Z(X)
+ S X=" "
+ D Z(X)
+ S X="    Register Diagnosis"
  D Z(X)
  S X="    NO.  Diagnosis                       ONSET DATE"
  D Z(X)
@@ -183,12 +206,22 @@ CLIST ;LIST ALL DIAGNOSIS
  F  S X=$O(BDM("DIAG",X)) Q:'X  D
  .W !?5,X,?10,$P(BDM("DIAG",X),U,2)
  Q
+GETPLDX ;
+ NEW T S T=$O(^ATXAX("B","SURVEILLANCE DIABETES",0))
+ I 'T Q
+ NEW D,X,I S D="",X=0 F  S X=$O(^AUPNPROB("AC",DFN,X)) Q:X'=+X  D
+ .Q:$P(^AUPNPROB(X,0),U,12)="D"  ;deleted problem
+ .S I=$P(^AUPNPROB(X,0),U)
+ .I $$ICD^BDMUTL(I,$P(^ATXAX(T,0),U),9) S BDMPLDX(X)="" Q
+ .I $P($G(^AUPNPROB(X,800)),U,1)]"",$$SNOMED^BDMUTL(2019,"PXRM DIABETES",$P(^AUPNPROB(X,800),U,1)) S BDMPLDX(X)=""
+ .Q
+ Q
+ ;
 CLINIT ;EP;TO INITIALIZE DIAGNOSIS LIST
  D REG^BDMFUTIL
  Q:$D(BDMQUIT)
  K ^TMP("BDMVR",$J)
  K BDM("DIAGLIST")
- N J,X,Y,Z
  D DIAGLIST
  S VALMCNT=0
  S X="    Diagnosis"
@@ -260,4 +293,12 @@ Z(X) ;SET TMP NODE
 PAUSE ;
  K DIR
  S DIR(0)="E",DIR("A")="Press enter to continue" D ^DIR K DIR
+ Q
+HDR ;
+ S VALMSG=$$VALMSG^BDMVU
+ K VALMHDR
+ ;
+ S VALMHDR(1)="Make sure that the date of onset is also documented on the"
+ S VALMHDR(2)="patient's problem list so other clinician's can see it."
+ S VALMHDR(3)="Problem list entries can be modified using EHR."
  Q

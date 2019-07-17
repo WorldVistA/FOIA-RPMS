@@ -1,5 +1,5 @@
 BDMLPM ; IHS/CMI/LAB - CALCULATE LAST PAP MAM ; 20 Oct 2017  1:17 PM
- ;;2.0;DIABETES MANAGEMENT SYSTEM;**1,2,8,9,10,11**;JUN 14, 2007;Build 30
+ ;;2.0;DIABETES MANAGEMENT SYSTEM;**1,2,8,9,10,11,12**;JUN 14, 2007;Build 51
  ;
  ;
 LASTPAP(P) ;EP - return last pap date
@@ -277,12 +277,12 @@ OTHEDUC(P,BDATE,EDATE) ;EP
  ...I $P(J,"-",1)="250" S G=D Q
  ...I $P(J,"-",1)="DM" S G=D Q
  ...I $P(J,"-",1)="DMC" S G=D Q
- ...I $P(J,"-",1)]"",$$SNOMED^BDMUTL(2018,"PXRM DIABETES",$P(J,"-",1)) S G=D Q
+ ...I $P(J,"-",1)]"",$$SNOMED^BDMUTL(2019,"PXRM DIABETES",$P(J,"-",1)) S G=D Q
  ...N CODE
  ...S CODE=$P($$CODEN^BDMUTL($P(T,"-",1),80),"~")
  ...I CODE>0 D  Q
  ....N TAX
  ....S TAX=$O(^ATXAX("B","SURVEILLANCE DIABETES",0))
  ....I $$ICD^BDMUTL(CODE,$P(^ATXAX(TAX,0),U),9) S G=D
- ...I $P(J,"-",1)]"",$$SNOMED^BDMUTL(2018,"PXRM DIABETES",$P(J,"-",1)) S G=$$VD^APCLV($P(^AUPNVPED(I,0),U,3))
+ ...I $P(J,"-",1)]"",$$SNOMED^BDMUTL(2019,"PXRM DIABETES",$P(J,"-",1)) S G=$$VD^APCLV($P(^AUPNVPED(I,0),U,3))
  Q G

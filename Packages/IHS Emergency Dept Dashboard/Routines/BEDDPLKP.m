@@ -1,29 +1,21 @@
 BEDDPLKP ;GDIT/HCSD/BEE-Patient Lookup ; 29 Oct 2005  6:51 PM
- ;;2.0;BEDD DASHBOARD;**2**;Jun 04, 2014;Build 26
+ ;;2.0;BEDD DASHBOARD;**2,3**;Jun 04, 2014;Build 12
  ;
  ;Adapted from BQIPTLKP
  ;
  Q
  ;
-FND(BEDD,TEXT,DUZ,MAX) ; EP -- LOOKUP PATIENTS
+FND(BEDD,TEXT,MAX) ; EP -- LOOKUP PATIENTS
  ;
  ;Description - Find a list of patients based on search criteria
  ;Input
  ;  TEXT - Search text which can include name, SSN, HRN, etc.
- ;   DUZ - Users DUZ
  ;   MAX - Maximum results to return
  ;Output
  ;  BEDD - Array of patients
  ;
  NEW UID,I,H,FILE,FIELD,XREF,FLAGS,NUMB,SCREEN,BN,DFN,NAME,HRN
  NEW DOB,DOD,AL,ALFLG,X,ALIAS,NODE,RCNT,TYPE,X,SEX,DISP,TMP
- ;
- ;Make sure initial variables are set
- S X="S:$G(U)="""" U=""^""" X X
- S X="S:$G(DT)="""" DT=$$DT^XLFDT" X X
- ;
- ;Set up DUZ
- D DUZ^XUP(DUZ)
  ;
  ; NOTE: Since "DILIST" is used by the DIC calls it must use $J and not UID.
  K BEDD,^TMP("DILIST",$J)

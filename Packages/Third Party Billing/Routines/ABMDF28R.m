@@ -1,5 +1,5 @@
 ABMDF28R ; IHS/SD/SDR - PRINT UB-04 ;    
- ;;2.6;IHS Third Party Billing;**1,2,4,6,9,10,11,13,19,20,21,22,23**;NOV 12, 2009;Build 427
+ ;;2.6;IHS Third Party Billing;**1,2,4,6,9,10,11,13,19,20,21,22,23,27**;NOV 12, 2009;Build 486
  ;IHS/SD/SDR-2.6*13-HEAT117086-T1015 should be top line for all Mcd
  ;IHS/SD/SDR-2.6*19-HEAT116949-If DUZ(2)=4610 (Chapa-De/Auburn), make FL56=1124150891
  ;IHS/SD/SDR-2.6*20-HEAT262141-Added code for AHCCCS RX.  Will print detail lines for all meds, but won't print price, only NDC, desc, date, and units.
@@ -9,6 +9,7 @@ ABMDF28R ; IHS/SD/SDR - PRINT UB-04 ;
  ;IHS/SD/SDR 2.6*22 HEAT335246 check new parm for printing itemized with first line printing flat rate and NDC.
  ;IHS/SD/AML 2.6*23 CR8897 HEAT314802 Made changes for Medi-Cal from-thru billing
  ;IHS/SD/SDR 2.6*23 HEAT347035 Changed how it was getting rev code
+ ;IHS/SD/SDR 2.6*27 CR10170 Changed the Medi-Cal check for box 50 to check if insurer name contains O/P Medi-Cal as well as 61044 check
  ;
 18A ;EP
  F ABMCTR=ABMCTR:1:22 W !  ;get to line 23
@@ -49,7 +50,8 @@ ABMDF28R ; IHS/SD/SDR - PRINT UB-04 ;
  .;Ins name_" "_Payor Sub ID
  .S ABMDE=$S($E(ABMREC(30,I),54,78)["RAILROAD":"RAILROAD MEDICARE",1:$E(ABMREC(30,I),54,78))_" "_$E(ABMREC(30,I),31,34)_"^^22"
  .;I $$RCID^ABMERUTL(+$G(ABMP("INS",I)))=61044 S ABMDE="O/P MEDI-CAL^^22"  ;abm*2.6*19 HEAT116949
- .I $$RCID^ABMERUTL(+$G(ABMP("INS",I)))["61044" S ABMDE="O/P MEDI-CAL^^22"  ;abm*2.6*19 HEAT116949
+ .;I $$RCID^ABMERUTL(+$G(ABMP("INS",I)))["61044" S ABMDE="O/P MEDI-CAL^^22"  ;abm*2.6*19 HEAT116949  ;abm*2.6*27 IHS/SD/SDR CR10170
+ .I (($$RCID^ABMERUTL(+$G(ABMP("INS",I)))["61044")&($E(ABMREC(30,I),54,78)["O/P MEDI-CAL")) S ABMDE="O/P MEDI-CAL^^22"  ;abm*2.6*27 IHS/SD/SDR CR10170
  .D WRT^ABMDF28W  ;#50
  .S ABMDE=$E(ABMREC(30,I),160,172)_"^23^15"  ;Provider ID (blank)
  .I $P($G(^AUTNINS(ABMP("INS"),0)),U)="IOWA MEDICAID" S ABMDE="^23^15"

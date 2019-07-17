@@ -1,17 +1,18 @@
-BHSHS3 ;IHS/CIA/MGH - Health Summary for other components ;31-Jul-2013 18:44;DU
- ;;1.0;HEALTH SUMMARY COMPONENTS;**2,8**;March 17, 2006;Build 22
+BHSHS3 ;IHS/CIA/MGH - Health Summary for other components ;06-Aug-2018 15:44;MGH
+ ;;1.0;HEALTH SUMMARY COMPONENTS;**2,8,15**;March 17, 2006;Build 8
  ;===================================================================
  ;VA health summary components for insurance, elder care, and refusals
  ;Patch 8 added SNOMED reasons for refusal
  ; IHS/TUCSON/LAB - PART 5 OF APCHS -- SUMMARY PRODUCTION COMPONENTS ;
  ;;2.0;IHS RPMS/PCC Health Summary;**5,6,8,11**;JUN 24, 1997
  ;Patch 2 for changes in patch 16
+ ;Patch 15 -changes for insurance
 INS ; ******************* INSURANCE * 9000003, 9000004, 9000006 *********
  N BHSPAT
  S BHSPAT=DFN
  I $O(^AUPNMCD("B",BHSPAT,0))="",'$D(^AUPNMCR(BHSPAT)),'$D(^AUPNPRVT(BHSPAT)),'$D(^AUPNRRE(BHSPAT)) Q
  D CKP^GMTSUP Q:$D(GMTSQIT)
- W "INSURANCE",?25,"NUMBER",?35,"SUFF",?40,"COV",?50,"EL DATE",?60,"SIG DATE",?70,"END DATE",!
+ W "INSURANCE",?25,"NUMBER",?40,"COV",?48,"EL DATE",?59,"SIG DATE",?70,"END DATE",!
  D MAID^BHSINSUR,MCARE^BHSINSUR,THIRD^BHSINSUR,RR^BHSINSUR
 INSX K BHSSPDN,BHSSINS,BHSSEDN,BHSSN,BHSSIDN,BHSSDTL,BHSSDTN,BHSSUFF,BHSSCOV,BHSSDTS,BHSSI,BHSSJ,BHSSITB
  Q

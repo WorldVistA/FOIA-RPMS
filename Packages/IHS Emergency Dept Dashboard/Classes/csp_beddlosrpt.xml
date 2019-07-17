@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775U)" ts="2019-07-17 13:16:22">
+<Class name="csp.beddlosrpt">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeChanged>65058,29544.374089</TimeChanged>
+<TimeCreated>65058,29544.367632</TimeCreated>
+<GeneratedBy>/csp/foia_external/BEDDLOSRPT.csp</GeneratedBy>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<BODY bgcolor=#DCDCDC>"
+	Write !
+	Set Begdt1=%request.Get("Begdt")
+	Set Enddt1=%request.Get("Enddt")
+	D ALST^BEDDRPT(Begdt1,Enddt1,"CL","TRGA")
+	Write !,!,"<h1><b>"
+	Write "<div align=""center"">"
+	Write "Length of Stay By Triage Acuity"
+	Write "</div>"
+	Write "</b></h1>",!
+	Write "<h2><b>"
+	Write "<div align=""center"">"
+	Write "Between the dates of"
+	Write "</div>"
+	Write "</b></h2>",!
+	Write "<h3><b>"
+	Write "<div align=""center"">"
+	Write (Begdt1)_" And "_(Enddt1)
+	Write "</div>"
+	Write "</b></h3>",!
+	Write !,"<table align=""center"" bgcolor=#DDDDFF border=1>",!
+	Write "	<tr>",!
+	Write "		<td>Triage</td><td>Presenting Complaint</td><td>Disposition</td><td>LOS</td>",!
+	Write "		<td>Check-In</td><td>Patient</td><td>Chart</td>",!
+	Write "		<td>Age</td><td>Sex</td> <td>DOB</td><td>Clinic</td><td>Diagnosis</td>",!
+	Write "		<td>ED Provider</td><td>Medical Screening Exam Time</td><td>Primary Nurse</td><td>Decision to Admit Dt/Tm</td>",!
+	Write "		<td>Triage Dt/Tm</td><td>CI-Trg Wtg </td>",!
+	Write "		<td>Room</td><td>Original Room Dt/Tm</td><td>Trg-Rm Wtg </td>",!
+	Write "		<td>Departure Dt/Tm</td><td>Rm-DC Wtg </td>",!
+	Write "		<td>Primary Provider</td><td>Discharge Nurse</td><td>Final Acuity</td>",!
+	Write "		<td>Injury</td><td>Consult</td>",!
+	Write "		<td>PCP</td><td>AMERVSIT</td><td>OBJID</td><td>VIEN</td><td>DFN</td>",!
+	Write "	</tr>",!
+	Write !
+	Set dsrt=$O(^TMP("BEDDADT",$J,"CLOG",""))
+	While (dsrt]"") {
+	Set dien=$O(^TMP("BEDDADT",$J,"CLOG",dsrt,""))
+	While (dien]"") {
+	&html<<tr>>
+	Set n0=$Get(^TMP("BEDDADT",$J,"CLOG",dsrt,dien,0))
+	Set n1=$Get(^TMP("BEDDADT",$J,"CLOG",dsrt,dien,1))
+	Set n2=$Get(^TMP("BEDDADT",$J,"CLOG",dsrt,dien,2))
+	//
+	//Initial Triage Acuity
+	If $P(n1,"^")]"" {
+	&html<<td>#($P(n1,"^"))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//Presenting Complaint
+	If $P(n0,"^",4)]"" {
+	&html<<td>#($P(n0,"^",4))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//Disposition
+	If $P(n1,"^",4)]"" {
+	&html<<td>#($P(n1,"^",4))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//LOS
+	If $P(n2,"^",2)]"" {
+	&html<<td>#($P(n2,"^",2))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//Check-In
+	If $P(n0,"^")]"" {
+	&html<<td>#($P(n0,"^"))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//Patient
+	If $P(n0,"^",3)]"" {
+	&html<<td>#($P(n0,"^",3))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//Chart
+	If $P(n0,"^",5)]"" {
+	&html<<td>#($P(n0,"^",5))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//Age
+	If $P(n0,"^",6)]"" {
+	&html<<td>#($P(n0,"^",6))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//Sex
+	If $P(n0,"^",7)]"" {
+	&html<<td>#($P(n0,"^",7))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//DOB
+	If $P(n0,"^",8)]"" {
+	&html<<td>#($P(n0,"^",8))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//Clinic
+	If $P(n0,"^",9)]"" {
+	&html<<td>#($P(n0,"^",9))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//Diagnosis
+	If $P(n1,"^",2)]"" {
+	&html<<td>#($P(n1,"^",2))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//Admitting Physician
+	If $P(n1,"^",3)]"" {
+	&html<<td>#($P(n1,"^",3))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//Medical Screening Exam time
+	If $P(n1,"^",11)]"" {
+	&html<<td>#($P(n1,"^",11))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//Primary Nurse
+	If $P(n2,"^",13)]"" {
+	&html<<td>#($P(n2,"^",13))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//Decision to Admit Dt/Tm
+	If $P(n2,"^",14)]"" {
+	&html<<td>#($P(n2,"^",14))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//Triage Date/Time
+	If $P(n1,"^",5)]"" {
+	&html<<td>#($P(n1,"^",5))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//Check-In/Triage WT
+	If $P(n1,"^",6)]"" {
+	&html<<td>#($P(n1,"^",6))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//Room
+	If $P(n1,"^",7)]"" {
+	&html<<td>#($P(n1,"^",7))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//Room Dt/Tm
+	If $P(n1,"^",8)]"" {
+	&html<<td>#($P(n1,"^",8))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//Triage/Rm WT
+	If $P(n1,"^",9)]"" {
+	&html<<td>#($P(n1,"^",9))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//Departure Dt/Tm
+	If $P(n1,"^",10)]"" {
+	&html<<td>#($P(n1,"^",10))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//Rm/Dep WT
+	If $P(n2,"^")]"" {
+	&html<<td>#($P(n2,"^"))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//Primary Provider
+	If $P(n2,"^",10)]"" {
+	&html<<td>#($P(n2,"^",10))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//Discharge Nurse
+	If $P(n2,"^",11)]"" {
+	&html<<td>#($P(n2,"^",11))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//Final Acuity
+	If $P(n2,"^",12)]"" {
+	&html<<td>#($P(n2,"^",12))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}		
+	//
+	//Injury
+	If $P(n2,"^",3)]"" {
+	&html<<td>#($P(n2,"^",3))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//Consult
+	If $P(n2,"^",4)]"" {
+	&html<<td>#($P(n2,"^",4))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//PCP
+	If $P(n2,"^",5)]"" {
+	&html<<td>#($P(n2,"^",5))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//AMERVSIT
+	If $P(n2,"^",6)]"" {
+	&html<<td>#($P(n2,"^",6))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//OBJID
+	If $P(n2,"^",7)]"" {
+	&html<<td>#($P(n2,"^",7))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//VIEN
+	If $P(n2,"^",8)]"" {
+	&html<<td>#($P(n2,"^",8))#</td>>
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	//
+	//DFN
+	If $P(n2,"^",9)]"" {
+	&html<<td>#($P(n2,"^",9))#</td>>
+	//Audit the activity
+	Do LOG^BEDDUTIU($G(%session.Data("DUZ")),"P","Q","BEDDLOSRPT.csp","BEDD: User displayed Length of Stay by Triage Acuity",$P(n2,"^",9))
+	}
+	Else {
+	&html<<td>&nbsp;</td>>
+	}
+	&html<</tr>>
+	Set dien=$O(^TMP("BEDDADT",$J,"CLOG",dsrt,dien))		
+	}
+	Set dsrt=$O(^TMP("BEDDADT",$J,"CLOG",dsrt))
+	}
+	Kill ^TMP("BEDDADT",$J)
+	Write !,!,"</table>",!
+	Write "</BODY>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<!-- BEDDLOSRPT.csp - Main BEDD LOS By Acuity -->"
+	Write !,"<!-- ;;2.0;IHS EMERGENCY DEPT DASHBOARD;;Apr 02, 2014 -->"
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<HEAD>"
+	Write !,!
+	Set U="^",site=$G(%session.Data("SITE"))
+	Do LOADSYS^BEDDUTW(.beddsys,site)
+	Set timeout=$G(beddsys("TimeOut"))
+	Write !,!,"<META HTTP-EQUIV=""Refresh"" CONTENT="""_( timeout )_"; URL=BEDD.csp"">"
+	Write !,!,"<TITLE>	BEDD LOS By Acuity </TITLE>",!
+	Write "</HEAD>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<HTML>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !,!,"<b>"
+	Write "<div align=""right"">"
+	Write "<a href="""_($zconvert(..Link("BEDDRPTMNU.csp"),"O","HTML"))_""">"
+	Write "ERS/BEDD Reports Menu"
+	Write "</a>"
+	Write "</div>"
+	Write "</b> ",!
+	Write "<hr>",!
+	Do ..OnPageBODY()
+	Write !,"</HTML>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>D:\intersystems\E3IHS\CSP\foia_external\BEDDLOSRPT.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/foia_external/BEDDLOSRPT.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>65058,54686</Default>
+</Parameter>
+</Class>
+</Export>

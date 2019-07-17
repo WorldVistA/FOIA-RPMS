@@ -1,5 +1,5 @@
-BGOVAMI ; MSC/DKA - Manage V AMI ;06-Feb-2015 16:13;DU
- ;;1.1;BGO COMPONENTS;**13,14**;Mar 20, 2007
+BGOVAMI ; IHS/MSC/DKA - Manage V AMI ;16-May-2018 12:43;DU
+ ;;1.1;BGO COMPONENTS;**13,14,24**;Mar 20, 2007;Build 1
  ;12.26.13 - MSC/JS add translation for Midnight and blank 'E' input string check.
  ;01.08.14 - MSC/DKA Send "@" to filer to delete comments when they are blank in the SET call.
  ;01.08.14 - MSC/JS delete fibrinolytic fields for fibrin therapy initiated or fibrin therapy refused.
@@ -10,6 +10,7 @@ BGOVAMI ; MSC/DKA - Manage V AMI ;06-Feb-2015 16:13;DU
  ;01.22.14 - MSC/JS EHR will send a blank 'E' for 'EKG DONE' box unchecked
  ;01.23.14 - MSC/JS - move SET to BGOVAMI2 to keep within 15k routine size limits
  ;03.19.14 - MCS/DKA - Added FIBRINOLYTIC THER D/T ENTERED to "F" string in GET().
+ ;05.14.18 - MSC/MGH - Added PCI data for eCQM
  ;
  ; Get Chest Pain (AMI) by individual entry, visit, or patient
  ;   INP = Patient IEN [1] ^ V File IEN [2] ^ Visit IEN [3]
@@ -53,6 +54,8 @@ GET(RET,INP) ;EP
  ..S $P(VFSTR,U,4)=VFDATA(FNUM,FX,1202,"I") ;OrderingProvider
  ..S $P(VFSTR,U,5)=VFDATA(FNUM,FX,1210,"I") ;OutsideProviderName
  ..S $P(VFSTR,U,6)=VFDATA(FNUM,FX,1215,"I") ;OrderingLocation
+ ..S $P(VFSTR,U,7)=VFDATA(FNUM,FX,1101,"I") ;EKG done SNOMED P24
+ ..S $P(VFSTR,U,8)=VFDATA(FNUM,FX,1101.019,"E") ;EKG done SNOMED text P24
  ..S VFARR=VFARR+1,VFARR(VFARR)=VFSTR
  ..; Add the comment lines from field 3 on separate "ET" records
  ..S FNS=0 F  S FNS=$O(VFDATA(FNUM,FX,3,FNS)) Q:'FNS  D
@@ -72,6 +75,11 @@ GET(RET,INP) ;EP
  ...S VFSTR="FT"
  ...S $P(VFSTR,U,2)=$G(VFDATA(FNUM,FX,4,FNS))
  ...S VFARR=VFARR+1,VFARR(VFARR)=VFSTR
+ ..S VFSTR="PC"
+ ..;IHS/MSC/MGH PCD done data included patch 24
+ ..S $P(VFSTR,U,2)=VFDATA(FNUM,FX,1102,"I") ;PCI done
+ ..S $P(VFSTR,U,3)=VFDATA(FNUM,FX,1103,"I") ;Date/time PCI done
+ ..S VFARR=VFARR+1,VFARR(VFARR)=VFSTR
  ..S VFSTR="O"
  ..S $P(VFSTR,U,2)=VFDATA(FNUM,FX,.04,"I") ;OnsetSymptoms
  ..S VFARR=VFARR+1,VFARR(VFARR)=VFSTR

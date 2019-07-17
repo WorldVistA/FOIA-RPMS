@@ -1,5 +1,5 @@
 AMHGSVF ; IHS/CMI/MAW - AMHG Save Visit Form Data (frmVisitDataEntry) 2/12/2009 3:01:26 PM ;
- ;;4.0;IHS BEHAVIORAL HEALTH;**1,3,4,5,6**;JUN 02, 2010;Build 10
+ ;;4.0;IHS BEHAVIORAL HEALTH;**1,3,4,5,6,10**;JUN 02, 2010;Build 15
  ;
  ;
  ;
@@ -36,6 +36,7 @@ VISIT(RETVAL,AMHSTR) ;-- save visit form, called from method SaveVisit in clsVis
  S AMHESIG=$P(AMHSTR,P,15)
  S AMHATG=$P(AMHSTR,P,16)
  D MODV^AMHGEVF(.AMHIEN,AMHDM,AMHREC,AMHPP,AMHPRO,AMHCLN,AMHTOC,AMHARR,AMHEDT,AMHLOC,AMHAW,AMHCOM,AMHP,AMHGN,AMHTIG,AMHATG)
+ ;cmi/maw v4.0p10 update the call below to not change the record if an edit and already signed
  I $G(AMHESIG) D UPDREC^AMHGESIG(AMHIEN,DUZ)
  S @RETVAL@(AMHI)="T00010BMXIEN"_$C(30)
  S AMHI=AMHI+1

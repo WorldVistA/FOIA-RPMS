@@ -1,5 +1,5 @@
 APCM25EA ; IHS/CMI/LAB - IHS MU ;
- ;;1.0;MU PERFORMANCE REPORTS;**7,8**;MAR 26, 2012;Build 22
+ ;;1.0;MU PERFORMANCE REPORTS;**7,8,10**;MAR 26, 2012;Build 31
  ;
 ET ;
  W ! S APCMZ=0 F  S APCMZ=$O(^APCM25OB(APCMY,N,APCMZ)) Q:APCMZ'=+APCMZ  W !,^APCM25OB(APCMY,N,APCMZ,0)
@@ -83,15 +83,18 @@ SEM ;EP - PRINT OUT SEM
  ;W !!,"measure being worked on...will let you know when it is done." Q
  ;write label
  I APCMPTYP="P" D
- .F X=1,2,3 D
+ .;F X=1,2,3,4 D
+ .S Y=$E(APCMPER,1,3)
+ .S X=$S(Y=315:1,Y=316:2,Y=317:3,Y=318:4,1:9)
+ .D
  ..S M=APCMIC
  ..I X=1 D W^APCM2AEH(" 9. Secure Messaging 2015+",0,2,APCMPTYP)
- ..I X=2 D W^APCM2AEH("    Secure Messaging 2016",0,1,APCMPTYP)
- ..I X=3 D W^APCM2AEH("    Secure Messaging 2017",0,1,APCMPTYP)
+ ..I X>1 D W^APCM2AEH(" 9. Secure Messaging",0,2,APCMPTYP)
  ..;TARGET
  ..I X=2 S T=">=1"
  ..I X=1 S T="Yes"
  ..I X=3 S T=">5%"
+ ..I X>3 S T=">5%"
  ..D W^APCM2AEH(T,0,0,APCMPTYP,,35)
  ..;RATE
  ..I X=1 D SETND^APCM2AER
@@ -104,9 +107,13 @@ SEM ;EP - PRINT OUT SEM
  ...S (APCMCYN,APCMCYD,APCMCYP)=0
  ...S APCMDF=31.04,APCMNF=31.03 D SETND
  ...D WRATE
+ ..I X>3 D
+ ...S (APCMCYN,APCMCYD,APCMCYP)=0
+ ...S APCMDF=31.06,APCMNF=31.05 D SETND
+ ...D WRATE
  ..;NUM/DEN
  ..I X=1 W ?55,"    N/A",?65,"    N/A"
- ..I X=2!(X=3) D WNUMDEN
+ ..I X=2!(X=3)!(X>3) D WNUMDEN
  ..;EXCL
  ..D WEXCL
  .Q:'APCMSEME
@@ -115,15 +122,17 @@ SEM ;EP - PRINT OUT SEM
  .D W^APCM25EH("resolve the error and then regenerate the report again to obtain accurate",0,1,APCMPTYP,,0)
  .D W^APCM25EH("results.",0,1,APCMPTYP,,0)
  I APCMPTYP="D" D
- .F X=1,2,3 D
+ .;F X=1,2,3,4 D
+ .S Y=$E(APCMPER,1,3)
+ .S X=$S(Y=315:1,Y=316:2,Y=317:3,Y=318:4,1:9)
+ .D
  ..S M=APCMIC
  ..I X=1 S APCMX="Secure Messaging 2015+"
- ..I X=2 S APCMX="Secure Messaging 2016"
- ..I X=3 S APCMX="Secure Messaging 2017"
+ ..I X>1 S APCMX="Secure Messaging "
  ..;TARGET
  ..I X=2 S T=">=1"
  ..I X=1 S T="Yes"
- ..I X=3 S T=">5%"
+ ..I X>2 S T=">5%"
  ..S $P(APCMX,U,2)=T
  ..;RATE
  ..I X=1 D SETND^APCM2AER S $P(APCMX,U,3)=APCMCYD
@@ -135,11 +144,15 @@ SEM ;EP - PRINT OUT SEM
  ...S (APCMCYN,APCMCYD,APCMCYP)=0
  ...S APCMDF=31.04,APCMNF=31.03 D SETND
  ...S $P(APCMX,U,3)=$$SB^APCM25ER($J(APCMCYP,8,2))_"%"
+ ..I X>3 D
+ ...S (APCMCYN,APCMCYD,APCMCYP)=0
+ ...S APCMDF=31.06,APCMNF=31.05 D SETND
+ ...S $P(APCMX,U,3)=$$SB^APCM25ER($J(APCMCYP,8,2))_"%"
  ..;NUM/DEN
  ..I X=1 S $P(APCMX,U,4)="N/A",$P(APCMX,U,5)="N/A"
- ..I X=2!(X=3) D WNUMDEN
+ ..I X=2!(X=3)!(X>3) D WNUMDEN
  ..D WEXCL
- ..I X=2!(X=3) D W^APCM25EH(APCMX,0,1,APCMPTYP,1)
+ ..I X=2!(X=3)!(X>3) D W^APCM25EH(APCMX,0,2,APCMPTYP,1)
  ..I X=1 D W^APCM25EH(APCMX,0,2,APCMPTYP,1)
  .Q:'APCMSEME
  .D W^APCM25EH("Note: PHR Server access failed during report generation "_$P(APCMSEME,U,2)_" which may",0,1,APCMPTYP,1)

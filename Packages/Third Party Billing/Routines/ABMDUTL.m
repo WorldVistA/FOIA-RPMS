@@ -1,15 +1,17 @@
 ABMDUTL ; IHS/SD/SDR - UTILITY FOR 3P BILLING PACKAGE ;     
- ;;2.6;IHS 3P BILLING SYSTEM;**6,15,21**;NOV 12, 2009;Build 379
- ; IHS/SD/SDR - v2.5 p9 - IM12408 - Added code for inactive CPTs to check visit date
- ; IHS/SD/SDR - v2.5 p9 - IM16660 - Coded for 4-digit revenue codes
- ; IHS/SD/SDR - v2.5 p10 - IM20454 - Fix xref on .03 field
- ; IHS/SD/SDR - v2.5 p11 - IM23431 - Fix lookup of HCPCS codes
+ ;;2.6;IHS 3P BILLING SYSTEM;**6,15,21,27**;NOV 12, 2009;Build 486
+ ;IHS/SD/SDR v2.5 p9 IM12408 - Added code for inactive CPTs to check visit date
+ ;IHS/SD/SDR v2.5 p9 IM16660 - Coded for 4-digit revenue codes
+ ;IHS/SD/SDR v2.5 p10 IM20454 - Fix xref on .03 field
+ ;IHS/SD/SDR v2.5 p11 IM23431 - Fix lookup of HCPCS codes
  ;
- ; IHS/SD/SDR - v2.6 CSV
- ; IHS/SD/SDR - abm*2.6*6 - 5010 - added new call BDT for complete date, includ. seconds
- ;IHS/SD/SDR - 2.6*15 - HEAT188548 - added code to make length of time 6 characters
- ;IHS/SD/SDR - 2.6*21 - HEAT122118 - added code to look in bill file for new claim number as well.
- ;IHS/SD/SDR - 2.6*21 - HEAT139641 - Changed 3P Insurer references from DUZ(2) to ABMP("LDFN")
+ ;IHS/SD/SDR 2.6 CSV
+ ;IHS/SD/SDR 2.6*6 5010 added new call BDT for complete date, includ. seconds
+ ;IHS/SD/SDR 2.6*15 HEAT188548 added code to make length of time 6 characters
+ ;IHS/SD/SDR 2.6*21 HEAT122118 added code to look in bill file for new claim number as well.
+ ;IHS/SD/SDR 2.6*21 HEAT139641 Changed 3P Insurer references from DUZ(2) to ABMP("LDFN")
+ ;IHS/SD/SDR 2.6*27 CR8894 NEW ABMZCPT array so it won't hang around and create <STORE> error if user types ?? at CPT prompt
+ ;  and then just scrolls the list of codes
  ;
 SDT(X) ;EP - Y is set to the printable date ##/##/#### from X (fileman date)
  N Y
@@ -199,10 +201,17 @@ CHKCPT(Y) ; check CPT for valid date, inactive flag
  NEW A,I,D
  NEW ABMY
  NEW X  ;CSV-c
+ NEW ABMZCPT  ;this variable was hanging around  ;abm*2.6*27 IHS/SD/SDR CR8894
  S ABMY=$S(+$G(Y)=0:$O(^ICPT("B",Y,0)),1:Y)
  Q:+$G(ABMY)=0 0
  S:'$G(ABMP("VDT")) ABMP("VDT")=DT  ;default for dt
- I $P($$CPT^ABMCVAPI(ABMY,ABMP("VDT")),U,7)=0 Q 0  ;CSV-c
+ ;I $P($$CPT^ABMCVAPI(ABMY,ABMP("VDT")),U,7)=0 Q 0  ;CSV-c  ;abm*2.6*27 IHS/SD/SDR CR8894
+ ;start new abm*2.6*27 IHS/SD/SDR CR8894
+ S X=$$CPT^ABMCVAPI(ABMY,ABMP("VDT"))
+ I (+$G(X)'=0) D  Q A
+ .I $P(X,U,7)'=0 S A=1 Q
+ .E  S A=0
+ ;end new abm*2.6*27 IHS/SD/SDR CR8894
  S X=$$IHSCPT^ABMCVAPI(ABMY,ABMP("VDT"))  ;CSV-c
  S A=$P(X,U,7),I=$P(X,U,8)  ;CSV-c
  ;A is date added, I is date inactivated/deleted

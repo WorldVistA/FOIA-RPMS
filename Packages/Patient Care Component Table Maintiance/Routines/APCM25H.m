@@ -1,5 +1,5 @@
 APCM25H ; IHS/CMI/LAB - IHS MU ;
- ;;1.0;MU PERFORMANCE REPORTS;**7,8,9**;MAR 26, 2012;Build 25
+ ;;1.0;MU PERFORMANCE REPORTS;**7,8,9,10**;MAR 26, 2012;Build 31
  ;
  ;
  W:$D(IOF) @IOF
@@ -23,17 +23,16 @@ MUYEAR ;
  K APCMVDT,APCMPER,APCMEDUD
  K DIR S DIR(0)="D^::EP"
  W !!,"Enter the Calendar Year for which the EH is demonstrating Meaningful"
- S DIR("A")="Use.  Use a 4 digit year, e.g. 2015"
+ S DIR("A")="Use.  Use a 4 digit year, e.g. 2018"
  S DIR("?")="Enter a valid year."
  D ^DIR KILL DIR
  I $D(DIRUT) G EP
  I $D(DUOUT) G EP
  S APCMVDT=Y
- I Y'="3150000",Y'="3160000",Y'="3170000" W !!,"You can only enter 2015, 2016 or 2017" G MUYEAR  ;LORI REMOVE
- ;I Y'="3150000",Y'="3160000",Y'="3170000" W !!,"You can only enter 2015, 2016 or 2017" G MUYEAR
+ ;I Y'="3150000",Y'="3160000",Y'="3170000",Y'="3180000" W !!,"You can only enter 2015, 2016, 2017 or 2018" G MUYEAR
  I $E(Y,4,7)'="0000" W !!,"Please enter a year only!",! G MUYEAR
  S APCMPER=APCMVDT
- I $E(APCMPER,1,3)=317 S APCMEDUD=3171231  ;IHS/CMI/LAB - PATCH 9 06/06/2017
+ I $E(APCMPER,1,3)>316 S APCMEDUD=$E(APCMPER,1,3)_"1231"  ;IHS/CMI/LAB - PATCH 10
  S APCMLD=$E(APCMPER,1,3)_"0101",APCMHD=$E(APCMPER,1,3)_"1231"   ;LOW AND HIGH DATES ALLOWED BELOW
  ;
 YEAR ;
@@ -78,7 +77,7 @@ SUM ;display summary of this report
  W !,$$CTR("SUMMARY OF MODIFIED STAGE 2 MEANINGFUL USE REPORT TO BE GENERATED")
  W !!,"The date ranges for this report are:"
  W !?5,"Report Period: ",?31,$$FMTE^XLFDT(APCMBD)," to ",?31,$$FMTE^XLFDT(APCMED)
- I $E(APCMPER,1,3)="317" D    ;IHS/CMI/LAB - PATCH 9 06/06/2017
+ I $E(APCMPER,1,3)>316 D    ;IHS/CMI/LAB - PATCH 9 06/06/2017  PATCH 10 06/20/18
  .W !!,"Please note: the date range for Patient Education, Patient Electronic Access",!,"and Summary of Care (HIE) is ",$$FMTE^XLFDT(APCMBD)," to ",$$FMTE^XLFDT(APCMEDUD),".",!
  W !!,"Hospital: ",$P(^DIC(4,APCMFAC,0),U,1)
  D PT^APCM25SL
@@ -115,7 +114,7 @@ TSKMN ;EP ENTRY POINT FROM TASKMAN
  I $G(IO("DOC"))]"" S ZTIO=ZTIO_";"_$G(IO("DOC"))
  I $D(IOM)#2,IOM S ZTIO=ZTIO_";"_IOM I $D(IOSL)#2,IOSL S ZTIO=ZTIO_";"_IOSL
  K ZTSAVE S ZTSAVE("APCM*")=""
- S ZTCPU=$G(IOCPU),ZTRTN="DRIVER^APCM25H",ZTDTH="",ZTDESC="2014 MU STAGE 2 REPORT" D ^%ZTLOAD D XIT Q
+ S ZTCPU=$G(IOCPU),ZTRTN="DRIVER^APCM25H",ZTDTH="",ZTDESC="2015 MU STAGE 2 REPORT" D ^%ZTLOAD D XIT Q
  Q
  ;
 XIT ;

@@ -1,7 +1,8 @@
-BTIULO2 ; IHS/ITSC/LJF - MORE TIU OBJECTS ;03-Aug-2009 15:46;MGH
- ;;1.0;TEXT INTEGRATION UTILITIES;**1001,1002,1006**;NOV 04, 2004
+BTIULO2 ; IHS/ITSC/LJF - MORE TIU OBJECTS ;06-Aug-2018 16:28;DU
+ ;;1.0;TEXT INTEGRATION UTILITIES;**1001,1002,1006,1020**;NOV 04, 2004;Build 7
  ;IHS/IHTSC/LJF 4/28/2005 PATCH 1002 added EP; to MCR and MCD entry points
  ;1006 check for invalid visit
+ ;1020 added new lookup for medicare and railroad numbers
  ;
 CURDIET(DFN,VST) ;EP; returns patient's current diet for visit
  NEW ADM,Y
@@ -146,30 +147,89 @@ LASTMAM(DFN) ;EP; -- returns last mammogram date and result
  ;
  ;
 VSTINS(DFN,VISIT) ;EP; returns insurance coverage at visit time
- NEW VDT,LINE
+ NEW VDT,LINE,PVT
  I ('$G(DFN))!('$G(VISIT)) Q "Invalid visit"
  S LINE="",VDT=+$G(^AUPNVSIT(VISIT,0)) I 'VDT Q LINE
- I $$MCR^AUPNPAT(DFN,VDT)=1 S LINE="MEDICARE #"_$$MCR(DFN)_"/"
+ I $$MCR^AUPNPAT(DFN,VDT)=1 S LINE="MEDICARE #"_$$MCR2(DFN)_"/"
  I $$MCD^AUPNPAT(DFN,VDT)=1 S LINE=LINE_"MEDICAID #"_$$MCD(DFN)_"/"
- I $$PI^AUPNPAT(DFN,VDT)=1 S LINE=LINE_"PVT INS ("_$$PIN^AUPNPAT(DFN,VDT,"E")_")/"
+ ;I $$PI^AUPNPAT(DFN,VDT)=1 S LINE=LINE_"PVT INS ("_$$PIN^AUPNPAT(DFN,VDT,"E")_")/"
+ I $$PI^AUPNPAT(DFN,VDT)=1 S PVT=$$THIRD(DFN) S LINE=LINE_"PVT INS ("_PVT_")/"
+ I $$RR^AUPNPAT(DFN,VDT)=1 S LINE=LINE_"RR INS #"_$$GETRRE^AGUTL(DFN,VDT)_")/"
  Q $S(LINE="":"",1:$E(LINE,1,$L(LINE)-1))
  ;
 POLICY(DFN,VISIT) ; EP; returns prvt insurance policy number at visit time
- NEW INSUR,IEN
+ NEW INSUR,IEN,PVT
+ S PVT=""
  S INSUR=$$PIN^AUPNPAT(DFN,VISIT,"I"),IEN=0
- I INSUR S IEN=$O(^AUPNPRVT(DFN,11,"B",INSUR,0))
- I IEN Q "#"_$P($G(^AUPNPRVT(DFN,11,IEN,0)),U,2)
+ I INSUR S PVT=$$THIRD(DFN)
+ Q PVT
+ ;S IEN=$O(^AUPNPRVT(DFN,11,"B",INSUR,0))
+ ;I IEN Q "#"_$P($G(^AUPNPRVT(DFN,11,IEN,0)),U,2)
  Q ""
- ;
 MCR(DFN) ;EP; returns medicare number for patient
  NEW IEN
+ S IEN=$$GETMCR^AGUTL(DFN)
+ I IEN'="" Q IEN
  S IEN=$O(^AUPNMCR("B",DFN,0)) I 'IEN Q "??"
  Q $P($G(^AUPNMCR(IEN,0)),U,3)
  ;
+MCR2(DFN) ;EP; returns medicare number for patient
+ NEW IEN,NUMBER,TYPE,IEN2,MCARE,COV,DNAME,INS
+ S MCARE=""
+ S NUMBER=$$GETMCR^AGUTL(DFN)
+ ;I '+NUMBER D
+ ;.S IEN=$O(^AUPNMCR("B",DFN,0))
+ ;.S NUMBER=$P($G(^AUPNMCR(IEN,0)),U,3)
+ S IEN2=0 F  S IEN2=$O(^AUPNMCR(DFN,11,IEN2)) Q:'+IEN2  D
+ .S DATA=$G(^AUPNMCR(DFN,11,IEN2,0))
+ .S EXP=$P(DATA,U,2)
+ .Q:(+EXP)&(EXP<DT)
+ .S COV=$P(DATA,U,3)
+ .I COV="A"!(COV="B") S DNAME="Part "_COV_"-"_NUMBER
+ .I COV="D" D
+ ..S INS=$$GET1^DIQ(9999999.18,$P(DATA,U,4),.01)
+ ..S DNAME="Part "_COV_" "_INS_"-"_$P(DATA,U,6)
+ .I MCARE="" S MCARE=DNAME
+ .E  S MCARE=MCARE_";"_DNAME
+ Q MCARE
+RRE(DFN) ;EP; returns railroad number for patient
+ NEW IEN,NUMBER,TYPE,IEN2,RRE,COV,DNAME,INS
+ S RRE=""
+ S NUMBER=$$GETRRE^AGUTL(DFN)
+ S IEN2=0 F  S IEN2=$O(^AUPNRRE(DFN,11,IEN2)) Q:'+IEN2  D
+ .S DATA=$G(^AUPNRRE(DFN,11,IEN2,0))
+ .S EXP=$P(DATA,U,2)
+ .Q:(+EXP)&(EXP<DT)
+ .S COV=$P(DATA,U,3)
+ .I COV="A"!(COV="B") S DNAME="Part "_COV_"-"_NUMBER
+ .I COV="D" D
+ ..S INS=$$GET1^DIQ(9999999.18,$P(DATA,U,4),.01)
+ ..S DNAME="Part "_COV_" "_INS_"-"_$P(DATA,U,6)
+ .I RRE="" S RRE=DNAME
+ .E  S RRE=RRE_";"_DNAME
+ Q RRE
 MCD(DFN) ;EP; returns medicaid number for patient
  NEW IEN
  S IEN=$O(^AUPNMCD("B",DFN,0)) I 'IEN Q "??"
  Q $P($G(^AUPNMCD(IEN,0)),U,3)
+THIRD(DFN) ;EP returns third party insurance
+ NEW IEN,TYPE,DATA,NAME,NUMBER,PVT,EXP
+ S PVT=""
+ S TYPE="" F  S TYPE=$O(^AUPNPRVT(DFN,11,"B",TYPE)) Q:'+TYPE  D
+ .S IEN="" F  S IEN=$O(^AUPNPRVT(DFN,11,"B",TYPE,IEN)) Q:'+IEN  D
+ ..S DATA=$G(^AUPNPRVT(DFN,11,IEN,0))
+ ..S EXP=$P(DATA,U,7)
+ ..Q:(+EXP)&(EXP<DT)
+ ..Q:DATA=""
+ ..S NAME=$$GET1^DIQ(9999999.18,$P(DATA,U,1),.01)
+ ..S NUMBER=$P($G(^AUPNPRVT(DFN,11,IEN,2)),U,1)
+ ..;following code looks at the Member Number field of Insurer multiple.
+ ..;from Policy Holder File
+ ..I NUMBER="" D
+ ...I +$P(DATA,U,8) S NUMBER=$P($G(^AUPN3PPH($P(DATA,U,8),0)),U,4)
+ ..I PVT="" S PVT=NAME_"-"_NUMBER
+ ..E  S PVT=PVT_";"_NAME_"-"_NUMBER
+ Q PVT
  ;
 LASTEXAM(DFN,CODE) ;EP; returns last V Exam date and result
  ; CODE=unique code from exam file or exam name

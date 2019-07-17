@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775)" ts="2018-09-28 14:46:46">
+<Export generator="Cache" version="25" zv="Cache for UNIX (Red Hat Enterprise Linux for x86-64) 2014.1.3 (Build 775U)" ts="2019-07-17 13:16:22">
 <Class name="csp.bedddc">
 <ClassType/>
 <Hidden>1</Hidden>
@@ -7,9 +7,9 @@
 <Language>cache</Language>
 <ProcedureBlock>0</ProcedureBlock>
 <Super>%CSP.Page</Super>
-<TimeChanged>64672,29653.164465</TimeChanged>
-<TimeCreated>64672,29653.121082</TimeCreated>
-<GeneratedBy>/csp/foia_goldb/BEDDDC.csp</GeneratedBy>
+<TimeChanged>65058,29544.028736</TimeChanged>
+<TimeCreated>65058,29543.986161</TimeCreated>
+<GeneratedBy>/csp/foia_external/BEDDDC.csp</GeneratedBy>
 
 <Method name="ClearPatSession">
 <ClassMethod>1</ClassMethod>
@@ -125,8 +125,8 @@
 	Set admprv=objForm.AdmPrv
 	Set prmnrs=objForm.PrmNurse
 	Set dcadmdt=objForm.NewDecAdmit
-	Set clinic=objForm.GetCln(objForm.AMERVSIT,objForm.PtDFN,objForm.VIEN)
-	Set clinic=$$CCLN^BEDDUTID(objForm.TrgCln)
+	//Set clinic=$$CCLN^BEDDUTID(objForm.TrgCln)
+	Set clinic=objForm.TrgECln
 	//
 	//Injury Information
 	Set vdate=$$GETF^BEDDUTIL(9000010,objForm.VIEN,".01","I")
@@ -1486,15 +1486,15 @@ Called during rendering of this page to write out JavaScript code to do field va
 </Method>
 
 <Parameter name="CSPFILE">
-<Default>D:\intersystems\E3IHS\CSP\foia_goldb\BEDDDC.csp</Default>
+<Default>D:\intersystems\E3IHS\CSP\foia_external\BEDDDC.csp</Default>
 </Parameter>
 
 <Parameter name="CSPURL">
-<Default>/csp/foia_goldb/BEDDDC.csp</Default>
+<Default>/csp/foia_external/BEDDDC.csp</Default>
 </Parameter>
 
 <Parameter name="FileTimestamp">
-<Default>64671,78193</Default>
+<Default>65058,54686</Default>
 </Parameter>
 </Class>
 </Export>

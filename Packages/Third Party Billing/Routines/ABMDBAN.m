@@ -1,14 +1,12 @@
-ABMDBAN ; IHS/ASDST/DMJ - 3P Billing Banner ; 
- ;;2.6;IHS Third Party Billing;**1,9**;NOV 12, 2009
+ABMDBAN ; IHS/SD/SDR - 3P Billing Banner ; 
+ ;;2.6;IHS Third Party Billing;**1,9,27**;NOV 12, 2009;Build 486
  ;ORIGINAL - TMD, BILLINGS AREA OFFICE
  ;
- ; IHS/SD/SDR - v2.5 p12 - UFMS
- ;   If user is logged into cashiering session and they are exiting
- ;   TPB they should get a message letting them know they are still
- ;   logged in.  Also added warning msg for "outstanding" open and
- ;   closed sessions.
+ ;IHS/SD/SDR 2.5*12 UFMS If user is logged into cashiering session and they are exiting TPB they should get a message letting
+ ;   them know they are still logged in.  Also added warning msg for "outstanding" open and closed sessions.
  ;
- ; IHS/SD/SDR - abm*2.6*1 - NO HEAT - Added patch# to menu header
+ ;IHS/SD/SDR 2.6*1 NO HEAT Added patch# to menu header
+ ;IHS/SD/SDR 2.6*27 CR8894 Added check for 3P Fee Table cleanup/correction message
  ;
  S ABMM(0)=$S($D(Y(0)):$P(Y(0),U,2),$D(XQY0):$P(XQY0,U,2),1:$P($G(^XUTL("XQ",$J,"S")),U,3))
  ;
@@ -72,6 +70,10 @@ END ;
  .I $P($G(^ABMDPARM(DUZ(2),1,4)),U,15)="" D
  ..W !!,$$EN^ABMVDF("RVN"),*7,"WARNING:",$$EN^ABMVDF("RVF")," UFMS PARAMETERS have not been completed."
  .;end new code
+ .;start new abm*2.6*27 IHS/SD/SDR CR8894
+ .I $$FEETBCHK()=1 D
+ ..W !!,$$EN^ABMVDF("RVN"),*7,"WARNING:",$$EN^ABMVDF("RVF")," FEE SCHEDULES NEED TO BE REVIEWED/COMPLETED BEFORE ALL FEES WILL",!,"   BE ACCURATE"
+ .;end new abm*2.6*27 IHS/SD/SDR CR8894
  K ABM("F1")
  ;
 XIT ;
@@ -94,3 +96,11 @@ SESSCK ;EP - Check if user has open session for UFMS
  .W !?6,"Sign Out (CIO).",!
  .S DIR(0)="E",DIR("A")="Enter RETURN to Continue" D ^DIR K DIR
  Q
+ ;start new abm*2.6*27 IHS/SD/SDR CR8894
+FEETBCHK() ;EP
+ S ABMT=0
+ S ABMT("TB")=0
+ F  S ABMT("TB")=$O(^ABMDFEE(ABMT("TB"))) Q:'ABMT("TB")  D
+ .I $P($G(^ABMDFEE(ABMT("TB"),0)),U,6)="" S ABMT=1
+ Q ABMT
+ ;end new abm*2.6*27 IHS/SD/SDR CR8894

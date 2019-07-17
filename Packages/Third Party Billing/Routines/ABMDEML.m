@@ -1,18 +1,18 @@
 ABMDEML ; IHS/SD/SDR - Edit Utility - FOR MULTIPLES ;   
- ;;2.6;IHS Third Party Billing;**1,2,3,6,8,9,10,11,13,14,18,21,23**;NOV 12, 2009;Build 427
+ ;;2.6;IHS Third Party Billing;**1,2,3,6,8,9,10,11,13,14,18,21,23,27**;NOV 12, 2009;Build 486
  ;
- ; IHS/ASDS/DMJ V2.4 Patch 7 - NOIS HQW-0701-100066 Modifications made related to Medicare Part B.
- ; IHS/ASDS/LSL V2.4 Patch 9 - NOIS HQW-0701-100066 The above change doesn't work as ABMP("HCFA") is undefined. Changed code back to listing HCFA modes of export.
+ ;IHS/ASDS/DMJ 2.4*7 NOIS HQW-0701-100066 Modifications made related to Medicare Part B
+ ;IHS/ASDS/LSL 2.4*9 NOIS HQW-0701-100066 Above change doesn't work as ABMP("HCFA") is undefined. Changed code back to listing HCFA modes of export
  ;
- ;IHS/SD/SDR 2.5 p4 IM11671 Added 837 format to list so it would inquire for corresponding diagnosis
- ;IHS/SD/SDR 2.5 p5 Modified to put POS and TOS by line item
- ;IHS/SD/SDR 2.5 p8 IM14079 Edited code to not do TOS prompt if 837 format
- ;IHS/SD/SDR 2.5 p8 IM12246 Added In-House and Reference LAB CLIA prompts
- ;IHS/SD/SDR 2.5 p8 task 6 Added code to populate mileage on page 3A when A0425/A0888 are used
- ;IHS/SD/SDR 2.5 p9 task 1 Coded for new line item provider multiple
- ;IHS/SD/SDR 2.5 p10 IM20346 Variables getting carried over for Stuff tag
- ;IHS/SD/SDR 2.5 p10 IM21539 Made OBSTETRICAL? question be asked in correct place
- ;IHS/SD/SDR 2.5 p13 POA changes
+ ;IHS/SD/SDR 2.5*4 IM11671 Added 837 format to list so it would inquire for corr. diagnosis
+ ;IHS/SD/SDR 2.5*5 Modified to put POS, TOS by line item
+ ;IHS/SD/SDR 2.5*8 IM14079 Edited code to not do TOS prompt if 837 format
+ ;IHS/SD/SDR 2.5*8 IM12246 Added In-House and Reference LAB CLIA prompts
+ ;IHS/SD/SDR 2.5*8 task 6 Added code to populate mileage on page 3A when A0425/A0888 are used
+ ;IHS/SD/SDR 2.5*9 task 1 Coded for new line item provider multiple
+ ;IHS/SD/SDR 2.5*10 IM20346 Variables getting carried over for Stuff tag
+ ;IHS/SD/SDR 2.5*10 IM21539 Made OBSTETRICAL? question be asked in correct place
+ ;IHS/SD/SDR 2.5*13 POA changes
  ;
  ;IHS/SD/SDR 2.6 CSV
  ;IHS/SD/SDR 2.6*1 HEAT6566 populate anes based on MCR/non-MCR
@@ -27,16 +27,16 @@ ABMDEML ; IHS/SD/SDR - Edit Utility - FOR MULTIPLES ;
  ;IHS/SD/SDR 2.6*21 HEAT136508 Made change to ask for CLIA if lab code starts with 'G'
  ;IHS/SD/SDR 2.6*21 HEAT235867 Added code to put default provider narrative for ICD10 codes.  DD change was causing there to be no default
  ;IHS/SD/AML 2.6*23 HEAT247169 Added code to prompt for NDC when subfile is 43.
+ ;IHS/SD/SDR 2.6*27 CR8894 Fixed so default fee would show up from fee table if there is one.  Also fixed anesthesia page to use pointer, not actual CPT.
+ ;  was causing NO SUCH ENTRY to display for CPT name if CPT wasn't DINUMed.  Also made change for category 13 and the CPT code is something specific,
+ ;  like lab or rad
  ; *********************************
- ;
 A1 ;
  ;Documentation by Linda Lehman 3/19/97
- ;Entry Point for pages in claim editor that allow multiple 
- ;additions.  Pages 8A, 8B, 8E, 8F, 8G, 8H, 8I
+ ;Entry Point for pages in claim editor that allow multiple additions.  Pages 8A, 8B, 8E, 8F, 8G, 8H, 8I
  ;(If select A as desired ACTION)
  ;
  ;VARIABLES:
- ;
  ;ABMZ("DR") String of fields to be filed by ^DIE
  ;ABMZ("TITL") Title corresponding to Claim Editor page number
  ;ABMZ("DICS") Specific code for lookup screen
@@ -46,12 +46,12 @@ A1 ;
  ;ABMZ("ANTH") Set to null if page 8G, otherwise undefined
  ;ABMZ("REVN") Revenue code field for DR string (only set on pages 8A, 8E, 8F)
  ;ABMZ("MOD") Modifier field # in 3P Claim appropriate multiple ^ modifier category ^ 2nd modifier field # (only if HCFA) ^ 3rd modifier field # (only if HCFA)
- ;   Modifier category:
- ;   1 = Medical      (27)
- ;   2 = Anesthesia   (39)
- ;   3 = Surgical     (21)
- ;   4 = Radiology    (35)
- ;   5 = Laboratory   (37)
+ ;  Modifier category:
+ ;  1 = Medical    (27)
+ ;  2 = Anesthesia (39)
+ ;  3 = Surgical   (21)
+ ;  4 = Radiology  (35)
+ ;  5 = Laboratory (37)
  ; 
  ;ABMZ("NARR") Providers narrative, 1st piece is field # for DR
  ;ABMZ("CHRG")  
@@ -80,7 +80,8 @@ DIC ;
  G XIT:$D(DTOUT)!$D(DUOUT)!$D(DIROUT)!(X=""),DIC:+Y<1
  K DIC
  ;if anesthesia page or revenue code multiple
- I $D(ABMZ("ANTH"))!(ABMZ("SUB")=25) S Y=$P(Y,U,2)
+ ;I $D(ABMZ("ANTH"))!(ABMZ("SUB")=25) S Y=$P(Y,U,2)  ;abm*2.6*27 IHS/SD/SDR CR8894
+ I (ABMZ("SUB")=25) S Y=$P(Y,U,2)  ;abm*2.6*27 IHS/SD/SDR CR8894
  ;
 DUPCHK ;USED TO BE THE DUPLICATE CHECK LINE TAG
  S ABMX("Y")=+Y
@@ -90,7 +91,7 @@ DUPCHK ;USED TO BE THE DUPLICATE CHECK LINE TAG
  I $G(ABMZ("SUB"))=33 D
  .I $P(^AUTTADA(ABMX("Y"),0),U,9)]"" S ABMZ("DR")=$P(ABMZ("DR"),";.05")
  .S ABMX("NEWY")=1_$P(Y,"^",2)
- ;Go get modifiers if no revenue code
+ ;Go get modifiers if no rev code
  G MOD:'$D(ABMZ("REVN"))
  ;If default rev code for CPT code, add to DR string and get mods
  I $P($$IHSCPT^ABMCVAPI(ABMX("Y"),ABMP("VDT")),U,3)>0 S ABMZ("DR")=ABMZ("DR")_$P(ABMZ("REVN"),"//")_"//"_$P($$IHSCPT^ABMCVAPI(ABMX("Y"),ABMP("VDT")),U,3) G MOD  ;CSV-c
@@ -114,6 +115,15 @@ MOD ;
  S ABMX("DIC")=$S($E(ABMZ("DIC"),3,5)="CPT":ABMZ("CAT"),$E(ABMZ("DIC"),6,8)="ADA":21,1:31)
  I ABMX("DIC")=31 S Y=$E(Y,1,2)_"0"
  I $G(ABMZ("CAT"))=13 D
+ .;start new abm*2.6*27 IHS/SD/SDR CR8894
+ .S ABMX("TST")=$P($G(^ICPT(ABMX("Y"),0)),U)
+ .S ABMTF=0
+ .F ABMT=1:1:($L(ABMX("TST"))) D  ;if there's an alpha char involved leave category as 13 for HCPCS
+ ..I $A($E(ABMX("TST"),ABMT))>64 S ABMTF=1
+ .I ABMTF=1 Q
+ .S ABMX("Y")=ABMX("TST")
+ .I ABMX("Y")<2000 S ABMX("DIC")=23 Q
+ .;end new abm*2.6*27 IHS/SD/SDR CR8894
  .I ABMX("Y")<70000 S ABMX("DIC")=11 Q
  .I ABMX("Y")<80000 S ABMX("DIC")=15 Q
  .I ABMX("Y")<90000 S ABMX("DIC")=17 Q
@@ -123,11 +133,13 @@ MOD ;
  I $D(ABMZ("OUTLAB")) D LAB^ABMDEMLB I Y=1 G DIAG
  S:'$G(ABMX("NEWY")) ABMX("NEWY")=ABMX("Y")
  S ABMZ("DR")=ABMZ("DR")_ABMZ("CHRG")
- I $D(^ABMDFEE(ABMP("FEE"),ABMX("DIC"),ABMX("NEWY"),0)) D
+ ;I $D(^ABMDFEE(ABMP("FEE"),ABMX("DIC"),ABMX("NEWY"),0)) D  ;abm*2.6*27 IHS/SD/SDR CR8894
+ I $D(^ABMDFEE(ABMP("FEE"),ABMX("DIC"),+$$DINUM^ABMFOFS($P($G(^ICPT(+ABMX("NEWY"),0)),U)),0)) D  ;abm*2.6*27 IHS/SD/SDR CR8894
  .S ABMZ("DR")=ABMZ("DR")_$S($D(ABMP("638")):"//",ABMZ("SUB")=43:"//",ABMZ("CAT")=23:"//",1:"///")
  .I +$G(ABMZ("MODFEE"))=$G(ABMZ("MODFEE")) D  Q
  ..S ABMZ("DR")=ABMZ("DR")_ABMZ("MODFEE")
- .S ABMZ("DR")=ABMZ("DR")_$P($$ONE^ABMFEAPI(ABMP("FEE"),ABMX("DIC"),ABMX("NEWY"),ABMP("VDT")),U)  ;abm*2.6*2 3PMS10003A
+ .;S ABMZ("DR")=ABMZ("DR")_$P($$ONE^ABMFEAPI(ABMP("FEE"),ABMX("DIC"),ABMX("NEWY"),ABMP("VDT")),U)  ;abm*2.6*2 3PMS10003A  ;abm*2.6*27 IHS/SD/SDR CR8894
+ .S ABMZ("DR")=ABMZ("DR")_$P($$ONE^ABMFEAPI(ABMP("FEE"),ABMX("DIC"),$P($G(^ICPT(+ABMX("NEWY"),0)),U),ABMP("VDT")),U)  ;abm*2.6*2 3PMS10003A  ;abm*2.6*27 IHS/SD/SDR CR8894
  ;start new abm*2.6*9 NARR
  I $D(^ABMNINS(ABMP("LDFN"),ABMP("INS"),5,"B",ABMX("Y"))) D
  .Q:$P($G(^ABMDEXP(ABMP("EXP"),0)),U)'["5010"  ;only 5010 formats
@@ -135,11 +147,9 @@ MOD ;
  .I ABMCNCK,$P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),5,ABMCNCK,0)),U,2)="Y" S ABMZ("DR")=ABMZ("DR")_";22Narrative"
  ;end new NARR
  D POSA^ABMDEMLC
- ;I ABMP("EXP")'=21,(ABMP("EXP")'=22),(ABMP("EXP")'=23) D TOSA^ABMDEMLC  ;don't do for 837 formats  ;abm*2.6*6 5010
  ;I ABMP("EXP")'=21,(ABMP("EXP")'=22),(ABMP("EXP")'=23),(ABMP("EXP")'=32) D TOSA^ABMDEMLC  ;don't do for 837 formats  ;abm*2.6*6 5010  ;abm*2.6*8 5010
  I ABMP("EXP")'=21,(ABMP("EXP")'=22),(ABMP("EXP")'=23),(ABMP("EXP")'=31),(ABMP("EXP")'=32),(ABMP("EXP")'=33) D TOSA^ABMDEMLC  ;don't do for 837 formats  ;abm*2.6*6 5010  ;abm*2.6*8 5010
  I ABMZ("SUB")=43 S ABMZ("DR")=ABMZ("DR")_";.19"  ;abm*2.6*23 IHS/SD/AML HEAT247169
- ;I $G(ABMX("Y"))>79999,$G(ABMX("Y"))<90000 D  ;lab charges only  ;abm*2.6*3 HEAT11696
  ;I ($G(ABMX("Y"))>79999&($G(ABMX("Y"))<90000))!($G(ABMZ("SUB"))=37&(ABMX("Y")=36415)) D  ;lab charges only  ;abm*2.6*3 HEAT11696  ;abm*2.6*21 HEAT136508
  I ($G(ABMX("Y"))>79999&($G(ABMX("Y"))<90000))!($G(ABMZ("SUB"))=37&(ABMX("Y")=36415))!($E($P($$CPT^ABMCVAPI($G(ABMX("Y"),ABMP("VDT")),U,2),U,2))="G") D  ;lab charges only  ;abm*2.6*3 HEAT11696  ;abm*2.6*21 HEAT136508
  .I $D(ABMX("MODS",90)) S ABMZ("DR")=ABMZ("DR")_";.14//"_$S($P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),9)),U,23)'="":$P($G(^ABMRLABS($P($G(^ABMDCLM(DUZ(2),ABMP("CDFN"),9)),U,23),0)),U,2),1:"")
@@ -150,15 +160,12 @@ MOD ;
  .Q:$P($G(^ABMNINS(ABMP("LDFN"),ABMP("INS"),4,ABMIIEN,0)),U,2)'="Y"
  .S:(ABMP("EXP")=22) ABMZ("DR")=ABMZ("DR")_";W !,!,""Enter LABORATORY Results:"";.19;.21"
  .S:(ABMP("EXP")=32) ABMZ("DR")=ABMZ("DR")_";W !,!,""Enter LABORATORY Results:"";.19;.21;.22"  ;abm*2.6*6 5010
- .;S:(ABMP("EXP")=21) ABMZ("DR")=ABMZ("DR")_";W !,!,""Value Code 48 or 49 should be present on Page 9C"",!"  ;abm*2.6*8 5010
  .S:((ABMP("EXP")=21)!(ABMP("EXP")=31)) ABMZ("DR")=ABMZ("DR")_";W !,!,""Value Code 48 or 49 should be present on Page 9C"",!"  ;abm*2.6*8 5010
  I $P($G(^ICPT(ABMX("Y"),0)),U,3),($P($G(^DIC(81.1,$P($G(^ICPT(ABMX("Y"),0)),U,3),0)),U)["IMMUNIZATION") S ABMZ("DR")=ABMZ("DR")_";15"  ;abm*2.6*6 5010
  ;
 DIAG ;CORRESPONDING DIAGNOSES
  D
  .Q:'$D(ABMZ("DIAG"))
- .;I '$D(ABMP("EXP",2)),'$D(ABMP("EXP",3)),'$D(ABMP("EXP",14)),'$D(ABMP("EXP",15)),'$D(ABMP("EXP",19)),'$D(ABMP("EXP",20)),'$D(ABMP("EXP",22)),'$D(ABMP("EXP",27)) Q  ;abm*2.6*6 5010
- .;I '$D(ABMP("EXP",2)),'$D(ABMP("EXP",3)),'$D(ABMP("EXP",14)),'$D(ABMP("EXP",15)),'$D(ABMP("EXP",19)),'$D(ABMP("EXP",20)),'$D(ABMP("EXP",22)),'$D(ABMP("EXP",27)),'$D(ABMP("EXP",32)) Q  ;abm*2.6*6 5010  ;abm*2.6*13 export mode 35
  .I '$D(ABMP("EXP",2)),'$D(ABMP("EXP",3)),'$D(ABMP("EXP",14)),'$D(ABMP("EXP",15)),'$D(ABMP("EXP",19)),'$D(ABMP("EXP",20)),'$D(ABMP("EXP",22)),'$D(ABMP("EXP",27)),'$D(ABMP("EXP",32)),'$D(ABMP("EXP",35)) Q  ;abm*2.6*13 export mode 35
  .D DX^ABMDEMLC Q:$G(Y(0))=""
  .S ABMZ("DR")=ABMZ("DR")_ABMZ("DIAG")_"////"_$G(Y(0))
@@ -194,9 +201,7 @@ STUFF ;FILE MULTIPLE
  .K DD,DO
  .D FILE^DICN
  .S ABMOIEN=ABMX("Y")  ;abm*2.6*13
- .;I ABMZ("SUB")=51,"^01^11^"[("^"_$P($G(^ABMDCODE(ABMOIEN,0)),U)_"^") D OCCURCD  ;for new export mode 35  abm*2.6*13  ;abm*2.6*14 HEAT165301
 PROV ;
- ;I ABMZ("SUB")=21!(ABMZ("SUB")=23)!(ABMZ("SUB")=27)!(ABMZ("SUB")=35)!(ABMZ("SUB")=37)!(ABMZ("SUB")=39)!(ABMZ("SUB")=43) D  ;abm*2.6*10
  I ABMZ("SUB")=21!(ABMZ("SUB")=23)!(ABMZ("SUB")=27)!(ABMZ("SUB")=35)!(ABMZ("SUB")=37)!(ABMZ("SUB")=39)!(ABMZ("SUB")=43)!(ABMZ("SUB")=47) D  ;abm*2.6*10
  .K DIC,DR,DIE,DA
  .S DA(2)=ABMP("CDFN")
@@ -222,7 +227,6 @@ XIT ;
 39 ;EP - dr string for anesthesia page
  ;S ABMZ("DR")=ABMZ("DR")_";.15//11;.07:.08"  ;abm*2.6*1 HEAT6566  ;abm*2.6*10 HEAT76189
  S ABMZ("DR")=ABMZ("DR")_";.07:.08"  ;abm*2.6*1 HEAT6566  ;IHS/SD/AML 7/20/2012 HEAT76189 - REMOVE DUPLICATE POS FIELD
- ;I ABMP("ITYP")'="R" S ABMZ("DR")=ABMZ("DR")_";.15//11;.07:.08"  ;abm*2.6*1 HEAT6566
  ;I ABMP("ITYP")="R" S ABMZ("DR")=ABMZ("DR")_";.12//1;.06;.07:.09;.03"  ;abm*2.6*1 HEAT6566
  Q
 MILEAGE ;

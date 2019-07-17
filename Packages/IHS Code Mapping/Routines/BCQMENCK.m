@@ -1,5 +1,5 @@
-BCQMENCK ;IHS/OIT/FBD - MAGIC MAPPER - ENVIRONMENT CHECKER ;   
- ;;1.0;IHS CODE MAPPING;;APR 11, 2016;Build 13
+BCQMENCK ;GDIT/IHS/FS - MAGIC MAPPER - ENVIRONMENT CHECKER ;05/07/18 07:49;FS  
+ ;;1.0;IHS CODE MAPPING;;MAY 07, 2018;Build 21
  ;
  ;
  I '$G(DUZ) W !,"DUZ UNDEFINED OR 0." D SORRY(2) Q
@@ -8,7 +8,7 @@ BCQMENCK ;IHS/OIT/FBD - MAGIC MAPPER - ENVIRONMENT CHECKER ;
  ;
  S X=$P(^VA(200,DUZ,0),U)
  W !!,$$CJ^XLFSTR("Hello, "_$P(X,",",2)_" "_$P(X,","),IOM)
- W !!,$$CJ^XLFSTR("Checking Environment for "_$P($T(+2),";",4)_" V "_$P($T(+2),";",3)_" Patch 3"_".",IOM),!
+ W !!,$$CJ^XLFSTR("Checking Environment for "_$P($T(+2),";",4)_" V "_$P($T(+2),";",3)_" Patch 4"_".",IOM),!
  ;
  S XPDQUIT=0
  I '$$VCHK("XU","8.0",2) S XPDQUIT=2

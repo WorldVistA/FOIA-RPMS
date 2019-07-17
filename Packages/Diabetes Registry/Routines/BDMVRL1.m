@@ -1,5 +1,5 @@
 BDMVRL1 ; cmi/anch/maw - VIEW RECORD ACTION ;
- ;;2.0;DIABETES MANAGEMENT SYSTEM;;AUG 11, 2006
+ ;;2.0;DIABETES MANAGEMENT SYSTEM;**12**;JUN 14, 2007;Build 51
  ;
 MP ;EP; -- view medication profile
  K BDMONLY

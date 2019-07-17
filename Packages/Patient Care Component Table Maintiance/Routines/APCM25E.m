@@ -1,5 +1,5 @@
 APCM25E ; IHS/CMI/LAB - IHS MU ; 07 Oct 2015  1:21 PM
- ;;1.0;MU PERFORMANCE REPORTS;**7,8,9**;MAR 26, 2012;Build 25
+ ;;1.0;MU PERFORMANCE REPORTS;**7,8,9,10**;MAR 26, 2012;Build 31
  ;
  ;
  W:$D(IOF) @IOF
@@ -35,7 +35,7 @@ MUYEAR ;
  I $E(Y,4,7)'="0000" W !!,"Please enter a year only!",! G MUYEAR
  I $E(Y,1,3)<315 W !!,"Year entered cannot be prior to 2015.",! G MUYEAR
  S APCMPER=APCMVDT
- I $E(APCMPER,1,3)=317 S APCMEDUD=3171231  ;IHS/CMI/LAB - PATCH 9 06/06/2017
+ I $E(APCMPER,1,3)>316 S APCMEDUD=$E(APCMPER,1,3)_"1231"  ;IHS/CMI/LAB - PATCH 10 06/06/2017
  S APCMLD=$E(APCMPER,1,3)_"0101",APCMHD=$E(APCMPER,1,3)_"1231"   ;LOW AND HIGH DATES ALLOWED BELOW
  ;
 YEAR ;
@@ -105,7 +105,7 @@ SUM ;display summary of this report
  W !,$$CTR("SUMMARY OF MODIFIED STAGE 2 REPORT TO BE GENERATED")
  W !!,"The date ranges for this report are:"
  W !?5,"Report Period: ",?31,$$FMTE^XLFDT(APCMBD)," to ",?31,$$FMTE^XLFDT(APCMED)
- I $E(APCMPER,1,3)="317" D    ;IHS/CMI/LAB - PATCH 9 06/06/2017
+ I $E(APCMPER,1,3)>316 D    ;IHS/CMI/LAB - PATCH 9 06/06/2017 PATCH 10 06/20/2018
  .W !!,"Please note: the date range for Patient Education, Patient Electronic Access",!,"and Summary of Care (HIE) is ",$$FMTE^XLFDT(APCMBD)," to ",$$FMTE^XLFDT(APCMEDUD),".",!
  W !!,"Providers: "
  S X=0 F  S X=$O(APCMPRV(X)) Q:X'=+X  W !?5,$P(^VA(200,X,0),U,1)

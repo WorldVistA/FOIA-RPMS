@@ -1,5 +1,5 @@
 BDMGTB ; cmi/anch/maw - BDM DMS GUI Table Lookup ;
- ;;2.0;BDM DIABETES MANAGEMENT SYSTEM;**1,8**;JUN 14, 2007;Build 53
+ ;;2.0;BDM DIABETES MANAGEMENT SYSTEM;**1,8,12**;JUN 14, 2007;Build 51
  ;
  ;
 DEBUG(BDMRET,BDMSTR) ;-- debug entry point for Serenji
@@ -254,7 +254,7 @@ AU(BDMRET,BDMSTR) ;-- returns a list of Authorized Users
  S BDMDA=0 F  S BDMDA=$O(^ACM(41.1,BDMREG,"AU",BDMDA)) Q:'BDMDA  D
  . S BDMMGR=0
  . S BDMI=BDMI+1
- . I $D(^VA(200,BDMDA,51,BDMMKEY)) S BDMMGR=1
+ . I $D(^VA(200,BDMDA,51,"B",BDMMKEY)) S BDMMGR=1
  . S ^BDMTMP($J,BDMI)=BDMDA_U_$P($G(^VA(200,BDMDA,0)),U)_U_$S(BDMMGR:"Y",1:"N")_$C(30)
  S ^BDMTMP($J,BDMI+1)=$C(31)_$G(BDMERR)
  Q

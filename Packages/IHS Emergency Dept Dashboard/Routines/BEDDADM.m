@@ -1,22 +1,30 @@
 BEDDADM ;GDIT/HS/BEE-BEDD Admit Utility Routine ; 08 Nov 2011  12:00 PM
- ;;2.0;BEDD DASHBOARD;**2**;Jun 04, 2014;Build 26
+ ;;2.0;BEDD DASHBOARD;**2,3**;Jun 04, 2014;Build 12
+ ;
+ ;GDIT/HS/BEE 05/10/2018;CR#10213 - BEDD*2.0*3 - Allow different hospital locations
  ;
  Q
  ;
 GCLINIC(DFN) ;Return the visit clinic
  ;
- NEW CL,VIEN,DEF
+ ;GDIT/HS/BEE 05/10/2018;CR#10213 - BEDD*2.0*3 - Now returning ER OPTION CIEN
+ ;NEW CL,VIEN,DEF
  ;
- S DEF=$$GET1^DIQ(40.7,"30,",1,"I")
+ ;S DEF=$$GET1^DIQ(40.7,"30,",1,"I")
  ;
- I +$G(DFN)=0 Q DEF
+ ;I +$G(DFN)=0 Q DEF
  ;
  ;Get the visit
- S VIEN=$$GET1^DIQ(9009081,DFN_",",1.1,"I") I '+VIEN Q DEF
+ ;S VIEN=$$GET1^DIQ(9009081,DFN_",",1.1,"I") I '+VIEN Q DEF
  ;
  ;Get the clinic
- S CL=$$GET1^DIQ(9000010,VIEN_",",.08,"I") I '+CL Q DEF
- Q $$GET1^DIQ(40.7,CL_",",1,"I")
+ ;S CL=$$GET1^DIQ(9000010,VIEN_",",.08,"I") I '+CL Q DEF
+ ;Q $$GET1^DIQ(40.7,CL_",",1,"I")
+ ;
+ NEW VIEN
+ ;
+ S VIEN=$$GET1^DIQ(9009081,+$G(DFN)_",",1.1,"I") I '+VIEN Q ""
+ Q $$VCLIN^BEDDUTL2(VIEN)
  ;
 CLIN(CIEN) ;Return the clinic mnemonic
  Q
@@ -144,23 +152,32 @@ BLDACMP(MYACMP) ;EP - Build MYACMP array
  . S MYACMP(CNT)=MIEN_"^"_MCMP
  Q
  ;
-DEFMTRN() ;EP - Locate Default "PRIVATE VEHICLE TRANSFER" trasnsport type
+DEFCLIN() ;EP - Return the default clinic
+ ;
+ NEW CLIN
+ ;
+ ;GDIT/HS/BEE 07/10/2018;CR#10213 - BEDD*2.0*3 - Now use CIEN rather then code
+ ;S CLIN=$$GET1^DIQ(9009082.5,DUZ(2)_",",.06,"I") I CLIN]"" D
+ ;. S CLIN=$$GET1^DIQ(9009083,CLIN_",",5,"I")
+ S CLIN=$$GET1^DIQ(9009082.5,+$G(DUZ(2))_",",.06,"I")
+ ;
+ ;GDIT/HS/BEE 07/10/2018;CR#10213 - BEDD*2.0*3 - if none, pick first with 30
+ ;If default not set, use first one pointing to 30
+ ;S:CLIN="" CLIN=30
+ S:CLIN="" CLIN=$O(^AMER(3,"B",30,""))
+ ;
+ Q CLIN
+ ;
+DEFMTRN() ;EP - Locate Default "PRIVATE VEHICLE TRANSFER" transport type
  Q $O(^AMER(3,"B","PRIVATE VEHICLE TRANSFER",""))
  ;
 DEFTMOD() ;EP - Locate Default "PRIVATE VEHICLE TRANSFER" trasnsport type
  Q $O(^AMER(3,"B","PRIVATE VEHICLE/WALK IN",""))
  ;
-SAVEADM(BEDD,DUZ) ;Admit/update patient visit
+SAVEADM(BEDD) ;Admit/update patient visit
  ;
  NEW X,AMERUP,DFN,AMERTIME,AGCHART,AMERPCC,TRANSYN,TRNFRM,TRNMOD,TRNATT,PCMP
- NEW VTYPE,AMEANS,ACOMP,ABILL,ANUMB,ACTION,BIEN,EXEC,CLINIC
- ;
- ;Make sure initial variables are set
- S X="S:$G(U)="""" U=""^""" X X
- S X="S:$G(DT)="""" DT=$$DT^XLFDT" X X
- ;
- ;Set up DUZ
- D DUZ^XUP(DUZ)
+ NEW VTYPE,AMEANS,ACOMP,ABILL,ANUMB,ACTION,BIEN,EXEC,CLINIC,ERR
  ;
  ;Update visit entries
  S DFN=$G(BEDD("tPatientDFN")) I DFN="" Q "-1^Could not locate patient DFN"
@@ -183,8 +200,8 @@ SAVEADM(BEDD,DUZ) ;Admit/update patient visit
  ;
  ;Clinic
  S CLINIC=$G(BEDD("tClinic"))
- S:CLINIC]"" AMERUP(9000010,AMERPCC_",",.08)=$O(^DIC(40.7,"C",CLINIC,""))
- S:CLINIC="" AMERUP(9000010,AMERPCC_",",.08)="@"
+ ;GDIT/HS/BEE 05/10/2018;CR#10213 - BEDD*2.0*3 - Allow different hospital locations
+ S ERR=$$CKHLOC^AMERBSD(AMERPCC,CLINIC)
  ;
  ;Date of Birth
  S AMERUP(9009081,DFN_",",.02)=$$GET1^DIQ(2,DFN_",",.03,"I")

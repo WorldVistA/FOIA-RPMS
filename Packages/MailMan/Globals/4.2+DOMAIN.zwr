@@ -1,6 +1,6 @@
 OSEHRA ZGO Export: DOMAIN
-28-SEP-2018 11:40:51 ZWR
-^DIC(4.2,0)="DOMAIN^4.2I^372^4"
+17-JUL-2019 12:49:37 ZWR
+^DIC(4.2,0)="DOMAIN^4.2I^377^9"
 ^DIC(4.2,0,"DD")="@"
 ^DIC(4.2,0,"DEL")="@"
 ^DIC(4.2,0,"GL")="^DIC(4.2,"
@@ -10,6 +10,11 @@ OSEHRA ZGO Export: DOMAIN
 ^DIC(4.2,370,0)="WWW.IHS.GOV"
 ^DIC(4.2,371,0)="F3420-IHSDBD01^C^370^^^^^^^^^^^^^y"
 ^DIC(4.2,372,0)="220^C^370^^^^^^^^^^^^^y"
+^DIC(4.2,373,0)="112^C^370^^^^^^^^^^^^^y"
+^DIC(4.2,374,0)="203^C^370^^^^^^^^^^^^^y"
+^DIC(4.2,375,0)="113^C^370^^^^^^^^^^^^^y"
+^DIC(4.2,376,0)="111^C^370^^^^^^^^^^^^^y"
+^DIC(4.2,377,0)="114^C^370^^^^^^^^^^^^^y"
 ^DIC(4.2,"%",0)="^1.005^1^1"
 ^DIC(4.2,"%",1,0)="XM"
 ^DIC(4.2,"%","B","XM",1)=""
@@ -33,6 +38,11 @@ OSEHRA ZGO Export: DOMAIN
 ^DIC(4.2,"%D",17,0)=" "
 ^DIC(4.2,"%D",18,0)="Otherwise, the message is put in the queue for the Parent domain, as defined"
 ^DIC(4.2,"%D",19,0)="at MailMan initialization time."
+^DIC(4.2,"B",111,376)=""
+^DIC(4.2,"B",112,373)=""
+^DIC(4.2,"B",113,375)=""
+^DIC(4.2,"B",114,377)=""
+^DIC(4.2,"B",203,374)=""
 ^DIC(4.2,"B",220,372)=""
 ^DIC(4.2,"B","DEMO.IHS.GOV",369)=""
 ^DIC(4.2,"B","F3420-IHSDBD01",371)=""

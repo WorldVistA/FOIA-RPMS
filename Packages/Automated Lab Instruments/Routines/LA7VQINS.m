@@ -1,5 +1,5 @@
 LA7VQINS ;VA/DALOI/DLR - LAB ORM (Order) message builder ; 17-Oct-2014 09:22 ; MKK
- ;;5.2;AUTOMATED LAB INSTRUMENTS;**1027,1033,1034**;NOV 01, 1997;Build 88
+ ;;5.2;AUTOMATED LAB INSTRUMENTS;**1027,1033,1034,1042**;NOV 01, 1997;Build 9
  ;
  ;
 INS(STORE,OR) ;Handle insurance
@@ -20,9 +20,12 @@ INS(STORE,OR) ;Handle insurance
  . I $P(STR,"~",10)="M" D  Q
  .. S IEIEN=$P($P(STR,"~",11),",",3)
  .. D MCR(IIEN,IEIEN,STORE)
- . I $P(STR,"~",10)="R" D  Q
+ . I $P(STR,"~",10)="R",$E($P(STR,"~",7),1,1)="M" D  Q
  .. S IEIEN=$P($P(STR,"~",11),",",3)
  .. D MCR(IIEN,IEIEN,STORE)
+ . I $E($P(STR,"~",7),1,1)="R" D  Q    ;cmi/maw 05/05/2018 p1042
+ .. S IEIEN=$P($P(STR,"~",11),",",3)
+ .. D RR(IIEN,IEIEN,STORE)
  . I $P(STR,"~",10)="P" D
  .. S IPIEN=$E($P(STR,"~",7),2,99)
  .. S IEIEN=$P($P(STR,"~",11),",",3)
@@ -43,7 +46,8 @@ MCR(IEN,PE,ST) ;medicare.
  S IN1(18)=1
  S IN1(17)=$$HLNAME^HLFNC($G(IN(9000003,IENS,2101,"E")),LA7ECH)
  I IN1(17)="" S IN1(17)=$$HLNAME^HLFNC($G(IN(9000003,IENS,.01,"E")),LA7ECH)
- S IN1(37)=$G(IN(9000003,IENS,.03,"I"))_$G(IN(9000003,IENS,.04,"E"))
+ ;S IN1(37)=$G(IN(9000003,IENS,.03,"I"))_$G(IN(9000003,IENS,.04,"E"))  ;cmi/maw p1042
+ S IN1(37)=$$GETMCR^AGUTL(IEN,DT)  ;cmi/maw 05/08/2018 p1042 NMCI
  S IN1(4)=$G(IN(9999999.18,INS,.66,"E"))
  S IN1(9)=$G(IN(9000003.11,IENS,.11,"I"))
  S IN1(9)=$S($G(IN1(9)):$P($G(^AUTNEGRP(IN1(9),0)),U,2),1:"")
@@ -142,7 +146,31 @@ WC(INS,IEN,ST) ;-- workmans comp
  D IN1(.IN1)
  Q
  ;
-RR ;-- get railroad insurance
+RR(IEN,PE,ST) ;-- get railroad insurance
+ S CNT=$G(CNT)+1
+ N IENS S IENS=IEN_","
+ D GETS^DIQ(9000005,IENS,"*","EI","IN")
+ S EINS=PE_","_IENS D GETS^DIQ(9000005.11,EINS,"*","EI","IN")
+ S INS=$G(IN(9000005,IENS,.02,"I"))_","
+ D GETS^DIQ(9999999.18,INS,"*","EI","IN")
+ S IN1(4)=$G(IN(9999999.18,INS,.66,"E"))
+ S IN1(5)=$G(IN(9999999.18,INS,.01,"E"))
+ S IN1(7)=$G(IN(9999999.18,INS,.06,"E"))
+ S IN1(16)="RR"
+ S IN1(18)=1
+ S IN1(17)=$$HLNAME^HLFNC($G(IN(9000005,IENS,2101,"E")),LA7ECH)
+ I IN1(17)="" S IN1(17)=$$HLNAME^HLFNC($G(IN(9000005,IENS,.01,"E")),LA7ECH)
+ ;S IN1(37)=$G(IN(9000003,IENS,.03,"I"))_$G(IN(9000003,IENS,.04,"E"))  ;cmi/maw p1042
+ S IN1(37)=$$GETRRE^AGUTL(IEN,DT)  ;cmi/maw 05/08/2018 p1042 NMCI
+ S IN1(4)=$G(IN(9999999.18,INS,.66,"E"))
+ S IN1(9)=$G(IN(9000005.11,IENS,.11,"I"))
+ S IN1(9)=$S($G(IN1(9)):$P($G(^AUTNEGRP(IN1(9),0)),U,2),1:"")
+ S IN1(10)=$G(IN(9000005,IENS,.06,"E"))
+ S IN1(6)=$$ADD()
+ S IN1(20)=$$ADD(2)
+ S IN1(48)=$S($G(ORD):$P($$ACCT^LA7VQINS(ORD),U,4),1:"")
+ Q:'ST
+ D IN1(.IN1)
  Q
  ;
 ADD(FILE) ;
@@ -272,9 +300,12 @@ PRT(UID) ;EP -- print out insurance information on manifest
  . I $P(STR,"~",10)="M" D
  .. S IEIEN=$P($P(STR,"~",11),",",3)
  .. D MCR(IIEN,IEIEN,0)
- . I $P(STR,"~",10)="R" D
+ . I $P(STR,"~",10)="R",$E($P(STR,"~",7),1,1)="M" D
  .. S IEIEN=$P($P(STR,"~",11),",",3)
  .. D MCR(IIEN,IEIEN,0)
+ . I $E($P(STR,"~",7),1,1)="R" D  ;cmi/maw 05/08/2018 p1042
+ .. S IEIEN=$P($P(STR,"~",11),",",3)
+ .. D RR(IIEN,IEIEN,0)
  . I $P(STR,"~",10)="P" D
  .. S IPIEN=$E($P(STR,"~",7),2,99)
  .. S IEIEN=$P($P(STR,"~",11),",",3)
@@ -309,7 +340,7 @@ DGP(ORI) ;
  . S CNT=CNT+1
  . S DX=$P($G(^BLRRLO(ORI,1,BDA,0)),U)
  . S DXE=$P($G(^ICD9(DX,0)),U)
- . ; S DXEE=$E($P($G(^ICD9(DX,0)),U,3),1,39)
+ . ;S DXEE=$E($P($G(^ICD9(DX,0)),U,3),1,39)
  . S DXEE=$E($$DIAGICD^BLRICDU0(DX),1,39)   ; IHS/MSC/MKK - LR*5.2*1034
  . D WR("Diagnosis: ",DXE,11,1)
  . D WR("Description: ",DXEE,30)

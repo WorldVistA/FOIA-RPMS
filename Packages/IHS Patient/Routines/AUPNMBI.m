@@ -1,11 +1,11 @@
 AUPNMBI ; IHS/OIT/FBD&NKD - MBI APIS ; 10/25/2017 ;
- ;;99.1;IHS DICTIONARIES (PATIENT);**26**;MAR 9, 1999;Build 11
+ ;;99.1;IHS DICTIONARIES (PATIENT);**26,27**;MAR 9, 1999;Build 2
  ;
  Q  ;NO TOP-LEVEL CALL ALLOWED
  ;
 ADDMBI(PATIEN,EFFDATE,MBI,SOURCE) ;PEP - ADD MBI VALUE FOR A PATIENT
  ; Function: Add an MBI for a patient on the specified effective date
- ; Call: $$ADDMBI^AUPNMBI(PATIEN,MBI,EFFDATE,SOURCE)
+ ; Call: $$ADDMBI^AUPNMBI(PATIEN,EFFDATE,MBI,SOURCE)
  ; Returned value:
  ;  Successful: EFF_DATE(? - as IEN in MBI multiple)
  ;  Unsuccessful: 0 (zero)
@@ -29,14 +29,15 @@ GETMBI(PATIEN,SVCDATE,FORMAT) ;PEP - GET MBI VALUE FOR A PATIENT
  ; Call: $$GETMBI^AUPNMBI(PAT_IEN,DATE,FMT)
  ; FORMAT:
  ;  0/default: MBI value only return requested
- ;  1: All fields, internal value return requested
- ;  2(?):  All fields, external value return requested
+ ;  1:         All fields, internal value return requested
+ ;  2:         All fields, external value return requested
  ; Returned value:
  ;  Successful (Dependent upon FORMAT specification):
  ;   0/default: MBI
- ;   1: MBI^EFF_DATE^SOURCE
- ;   2(?):  MBI^EFF_DATE_ext^SOURCE_ext
+ ;   1:         MBI^EFF_DATE^SOURCE
+ ;   2:         MBI^EFF_DATE_ext^SOURCE_ext
  ;  Unsuccessful: 0 (zero)
+ ;
  N IEN,RES
  S (IEN,RES)=0,PATIEN=+$G(PATIEN),SVCDATE=+$G(SVCDATE),FORMAT=$G(FORMAT,0) Q:'PATIEN!'SVCDATE RES
  S IEN=$O(^AUPNPAT(PATIEN,44,SVCDATE+.000001),-1) Q:'IEN RES
@@ -44,28 +45,62 @@ GETMBI(PATIEN,SVCDATE,FORMAT) ;PEP - GET MBI VALUE FOR A PATIENT
  I FORMAT S RES=RES_U_$$GET1^DIQ(9000001.44,IEN_","_PATIEN,.01,$S(FORMAT>1:"",1:"I"))_U_$$GET1^DIQ(9000001.44,IEN_","_PATIEN,2,$S(FORMAT>1:"",1:"I"))
  Q RES
  ;
-HISTMBI(PATIEN,TARGET) ;PEP - GET MBI VALUE HISTORY FOR A PATIENT
- ;Function: Retrieve the entire MBI history for a patient, sorted by effective date
- ; Call: $$HISTMBI^AUPNMBI(PAT_IEN,.TARGET_ARRAY)
+DELMBI(PATIEN,EFFDATE,MBI) ;DELETE MBI VALUE FOR A PATIENT
+ ; Function: Delete an MBI entry for a patient on the specified effective date
+ ; Call: $$DELMBI^AUPNMBI(PATIEN,EFFDATE,MBI)
  ; Returned value:
  ;  Successful: 1
- ;  -  MBI history returned as individual nodes in specified target array
- ;  -  Node format: MBI^Effective_Date^Source
  ;  Unsuccessful: 0 (zero)
  ;  -  Error message (if any) concatenated to status response
  ;  -  Format: 0^error_message
- N ERR,MBI,PAT K TARGET  ;INITIALIZATION
- S PAT=+$G(PATIEN)
+ ;
+ N PAT,DATE,DIK,DA,ERR  ;INITIALIZATION
+ S PAT=$G(PATIEN),DATE=$G(EFFDATE),MBI=$G(MBI)
  I +PAT D  ;
- . I $D(^AUPNPAT(PAT,0)) D  ;
- . . S MBI=0
- . . I +$O(^AUPNPAT(PAT,44,MBI)) D  ;
- . . . F  S MBI=$O(^AUPNPAT(PATIEN,44,MBI)) Q:'+MBI  S TARGET(MBI)=$$GETMBI(PAT,MBI,1)
- . . E  S ERR="0^No MBI history on file for patient" I 1
+ . I $D(^AUPNPAT(PAT)) D  ;
+ . . I +DATE D  ;
+ . . . I $D(^AUPNPAT(PAT,44,DATE)) D  ;
+ . . . . I $P(^AUPNPAT(PAT,44,DATE,0),U,2)=MBI D  ;
+ . . . . . S DA(1)=PAT,DA=DATE,DIK="^AUPNPAT("_DA(1)_",44,"
+ . . . . . D ^DIK
+ . . . . E  S ERR="0^MBI not found for specified date" I 1
+ . . . E  S ERR="0^Effective date not found" I 1
+ . . E  S ERR="0^Invalid effective date" I 1
  . E  S ERR="0^Invalid patient reference" I 1
  E  S ERR="0^Invalid pointer value" I 1
  Q:$D(ERR) ERR
  Q 1
+ ;
+HISTMBI(PATIEN,TARGET,FORMAT) ;PEP - GET MBI VALUE HISTORY FOR A PATIENT
+ ;Function: Retrieve the entire MBI history for a patient, sorted by effective date
+ ; Call: $$HISTMBI^AUPNMBI(PAT_IEN,.TARGET_ARRAY,FORMAT)
+ ; FORMAT:
+ ;  1/default: Effective_Date and Source returned in FileMan-internal format
+ ;  2:         Effective_Date and Source returned in external format
+ ; Returned value:
+ ;  Successful: 1
+ ;  -  MBI history returned as individual nodes in specified target array
+ ;  -  Node format (dependent upon FORMAT specification):
+ ;  -    1/default: MBI^Effective_Date^Source
+ ;  -    2:         MBI^Effective_Date_ext^Source_ext
+ ;  Unsuccessful: 0 (zero)
+ ;  -  Error message (if any) concatenated to status response
+ ;  -  Format: 0^error_message
+ ;
+ N ERR,MBI,PAT,TARCNT K TARGET  ;INITIALIZATION
+ ;S PAT=+$G(PATIEN) ;AUPN*99.1*27 - ORIGINAL LINE - COMMENTED OUT
+ S PAT=+$G(PATIEN),FORMAT=$G(FORMAT,1),TARCNT=0  ;IHS/OIT/NKD - AUPN*99.1*27 - INCLUDED OUTPUT FORMAT PARAMETER
+ I +PAT D  ;
+ . I $D(^AUPNPAT(PAT,0)) D  ;
+ . . S MBI=0
+ . . I +$O(^AUPNPAT(PAT,44,MBI)) D  ;
+ . . . ;F  S MBI=$O(^AUPNPAT(PATIEN,44,MBI)) Q:'+MBI  S TARGET(MBI)=$$GETMBI(PAT,MBI,1) ;AUPN*99.1*27 - ORIGINAL LINE - COMMENTED OUT
+ . . . F  S MBI=$O(^AUPNPAT(PATIEN,44,MBI)) Q:'+MBI  S TARGET(MBI)=$$GETMBI(PAT,MBI,FORMAT),TARCNT=TARCNT+1  ;IHS/OIT/NKD - AUPN*99.1*27 - INCLUDED OUTPUT FORMAT PARAMETER
+ . . E  S ERR="0^No MBI history on file for patient" I 1
+ . E  S ERR="0^Invalid patient reference" I 1
+ E  S ERR="0^Invalid pointer value" I 1
+ Q:$D(ERR) ERR
+ Q TARCNT
  ;
 FORMOK(MBI) ;PEP - VALIDATE MBI VALUE FORMAT
  ;Function: Validate MBI format compliance

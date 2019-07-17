@@ -1,5 +1,5 @@
 ABMDE2A ; IHS/SD/SDR - PAGE 2 - INSURER VIEW OPTION ;  
- ;;2.6;IHS 3P BILLING SYSTEM;**21,26**;NOV 12, 2009;Build 440
+ ;;2.6;IHS 3P BILLING SYSTEM;**21,26,27**;NOV 12, 2009;Build 486
  ;
  ;IHS/SD/SDR V2.5 P2 4/17/02 - NOIS NEA-0401-180046 - Modified to include coverage
  ;    type in claim editor for the insurer view portion
@@ -10,6 +10,7 @@ ABMDE2A ; IHS/SD/SDR - PAGE 2 - INSURER VIEW OPTION ;
  ;
  ;IHS/SD/SDR 2.6*21 VMBP RQMT_109 - Updated View option for VAMB Eligible data
  ;IHS/SD/SDR 2.6*26 CR9264 Updated Page 2 View to for MBI with default to HICN for Medicare
+ ;IHS/SD/SDR 2.6*27 CR10170 Fixed so insurer info and errors display correctly when replacement insurer is being used
  ;
  ; *********************************************************************
  ;
@@ -30,12 +31,15 @@ V2 ;
  S Y=$P(ABMZ(+Y),U,3)
  S ABM("XIEN")=+Y
  S ABMP("GL")="^ABMDCLM(DUZ(2),"_ABMP("CDFN")_","
- S Y=$S($P(^ABMDCLM(DUZ(2),ABMP("CDFN"),13,+Y,0),U,11)'="":$P(^ABMDCLM(DUZ(2),ABMP("CDFN"),13,+Y,0),U,11),1:$P(^ABMDCLM(DUZ(2),ABMP("CDFN"),13,+Y,0),U))
+ ;S Y=$S($P(^ABMDCLM(DUZ(2),ABMP("CDFN"),13,+Y,0),U,11)'="":$P(^ABMDCLM(DUZ(2),ABMP("CDFN"),13,+Y,0),U,11),1:$P(^ABMDCLM(DUZ(2),ABMP("CDFN"),13,+Y,0),U))  ;abm*2.6*27 IHS/SD/SDR CR10170
+ S Y=$P(^ABMDCLM(DUZ(2),ABMP("CDFN"),13,+Y,0),U)  ;abm*2.6*27 IHS/SD/SDR CR10170
  D SEL^ABMDE2X
  S ABMZ("TITL")="INSURER - VIEW OPTION"
  D SUM^ABMDE1
  S ABMV="",$P(ABMV,"-",80)=""
- W !,"Insurer..: ",$E($P($P(ABMV("X1"),U),";",2),1,30)
+ ;W !,"Insurer..: ",$E($P($P(ABMV("X1"),U),";",2),1,30)  ;abm*2.6*27 IHS/SD/SDR CR10170
+ S ABMT("INS")=$S($P(^ABMDCLM(DUZ(2),ABMP("CDFN"),13,+ABM("XIEN"),0),U,11)'="":$P(^ABMDCLM(DUZ(2),ABMP("CDFN"),13,ABM("XIEN"),0),U,11),1:$P(^ABMDCLM(DUZ(2),ABMP("CDFN"),13,ABM("XIEN"),0),U))  ;abm*2.6*27 IHS/SD/SDR CR10170
+ W !,"Insurer..: ",$E($P($G(^AUTNINS(ABMT("INS"),0)),U),1,30)  ;abm*2.6*27 IHS/SD/SDR CR10170
  W ?45,"Phone....: ",$P(ABMV("X1"),U,2)
  W !,"Prov. No.: ",$P(ABMV("X1"),U,7)
  W ?45,"Contact..: ",$E($P(ABMV("X1"),U,3),1,24)

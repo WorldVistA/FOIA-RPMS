@@ -1,9 +1,12 @@
 ABMDTFED ; IHS/ASDST/DMJ - REPORT OF 3P FEE SCHEDULES ; 
- ;;2.6;IHS Third Party Billing System;**3,8**;NOV 12, 2009
+ ;;2.6;IHS Third Party Billing System;**3,8,27**;NOV 12, 2009;Build 486
  ;
- ; IHS/SD/SDR - v2.5 p9 - IM11865 - Made change so it will print to printer
- ; IHS/SD/SDR - abm*2.6*3 - FIXPMS10008 and FIXPMS10012 - Modified to not use templates and to print by
+ ;IHS/SD/SDR 2.5*9 IM11865 - Made change so it will print to printer
+ ;
+ ;IHS/SD/SDR 2.6*3 FIXPMS10008 and FIXPMS10012 - Modified to not use templates and to print by
  ;   effective dates that were introduced in patch 2.
+ ;IHS/SD/SDR 2.6*27 CR8897 Fixed header when Charge Master selected; made NDC print for drugs; made sure
+ ;   display works with changes to IENs in 3P Fee Table
  ;
  S U="^"
 FEE W ! K DIC
@@ -99,20 +102,35 @@ S2 ;start old code abm*2.6*3 FIXPMS10008
  F  S ABMCD=$O(^TMP("ABM-FS",$J,ABMCD)) Q:($G(ABMCD)="")  D  Q:$D(DTOUT)!$D(DUOUT)!$D(DIROUT)
  .S ABMCODE="",ABMDESC=""
  .I $Y>(IOSL-5) D HD Q:$D(DTOUT)!$D(DUOUT)!$D(DIROUT)  W " (cont)"
- .I ABM("CAT")=25 S ABMCODE=$P($G(^PSDRUG($P($G(^TMP("ABM-FS",$J,ABMCD)),U),0)),U)  ;drug
+ .;I ABM("CAT")=25 S ABMCODE=$P($G(^PSDRUG($P($G(^TMP("ABM-FS",$J,ABMCD)),U),0)),U)  ;drug  ;abm*2.6*27 IHS/SD/SDR CR8894
+ .;start new abm*2.6*27 IHS/SD/SDR CR8894
+ .I ABM("CAT")=25 D
+ ..S ABMCODE=$P($G(^PSDRUG($P($G(^TMP("ABM-FS",$J,ABMCD)),U),2)),U,4)  ;NDC
+ ..S ABMDESC=$P($G(^PSDRUG($P($G(^TMP("ABM-FS",$J,ABMCD)),U),0)),U)  ;drug
+ .;end new abm*2.6*27 IHS/SD/SDR CR8894
  .I ABM("CAT")=32 S ABMCODE=$P($G(^ABMCM(ABMCD,0)),U)  ;charge master
  .I (ABM("CAT")'=25&(ABM("CAT")'=32)) S ABMCODE=ABMCD
- .I "^19^11^15^17^23^13^"[("^"_ABM("CAT")_"^") S ABMDESC=$P($$CPT^ABMCVAPI($P(^TMP("ABM-FS",$J,ABMCD),U),ABM("EFFDT")),U,3)
+ .;I "^19^11^15^17^23^13^"[("^"_ABM("CAT")_"^") S ABMDESC=$P($$CPT^ABMCVAPI($P(^TMP("ABM-FS",$J,ABMCD),U),ABM("EFFDT")),U,3)  ;abm*2.6*27 IHS/SD/SDR CR8894
+ .;start new abm*2.6*27 IHS/SD/SDR CR8894
+ .I "^19^11^15^17^23^13^"[("^"_ABM("CAT")_"^") D
+ ..S ABMDESC=$P($$CPT^ABMCVAPI(ABMCD,ABM("EFFDT")),U,3)
+ ..I ABMDESC="" S ABMDESC=$P($$CPT^ABMCVAPI(ABMCD,DT),U,3)
+ .;end new abm*2.6*27 IHS/SD/SDR CR8894
  .I ABM("CAT")=21 S ABMDESC=$P($G(^AUTTADA($P($G(^TMP("ABM-FS",$J,ABMCODE)),U),0)),U,2)
  .I ABM("CAT")=31 S ABMDESC=$P($G(^AUTTREVN(ABMCD,0)),U,2)
  .W !,ABMCODE
- .W ?10,$E(ABMDESC,1,32)
+ .;W ?10,$E(ABMDESC,1,32)  ;abm*2.6*27 IHS/SD/SDR CR8894
+ .I ABM("CAT")'=25 W ?10  ;abm*2.6*27 IHS/SD/SDR CR8894
+ .I ABM("CAT")=25 W ?15  ;abm*2.6*27 IHS/SD/SDR CR8894
+ .W $E(ABMDESC,1,32)  ;abm*2.6*27 IHS/SD/SDR CR8894
  .I "^19^11^15^17^23^13^21^31^"[("^"_ABM("CAT")_"^") D
  ..W ?44,+$P($G(^TMP("ABM-FS",$J,ABMCD)),U,2)
  ..W ?56,+$P($G(^TMP("ABM-FS",$J,ABMCD)),U,3)
  ..W ?68,+$P($G(^TMP("ABM-FS",$J,ABMCD)),U,4)
  .I "^19^11^15^17^23^13^21^31^"'[("^"_ABM("CAT")_"^") D
+ ..I ABM("CAT")=25 Q  ;abm*2.6*27 IHS/SD/SDR CR8894
  ..W ?44,+$P($G(^TMP("ABM-FS",$J,ABMCD)),U,2)
+ .I ABM("CAT")=25 W ?60,+$P($G(^TMP("ABM-FS",$J,ABMCD)),U,2)  ;abm*2.6*27 IHS/SD/SDR CR8894
  ;end new code FIXPMS10008
 XIT D ^%ZISC
  K ABM
@@ -140,10 +158,12 @@ QUE ;EP
 HD D PAZ^ABMDRUTL Q:$D(DTOUT)!$D(DUOUT)!$D(DIROUT)
 HDB S ABM("PG")=ABM("PG")+1
  D WHD^ABMDRHD
- I "^19^11^15^17^23^13^21^31^"[("^"_ABM("CAT")_"^") W !?44,"GLOBAL",?56,"TECH",?68,"PROF"
+ ;I "^19^11^15^17^23^13^21^31^"[("^"_ABM("CAT")_"^") W !?44,"GLOBAL",?56,"TECH",?68,"PROF"  ;abm*2.6*27 IHS/SD/SDR CR8894
+ I "^19^11^15^17^23^13^21^31^32^"[("^"_ABM("CAT")_"^") W !?44,"GLOBAL",?56,"TECH",?68,"PROF"  ;abm*2.6*27 IHS/SD/SDR CR8894
  I "^19^11^15^17^23^13^"[("^"_ABM("CAT")_"^") W !,"CPT CODE",?10,"SHORT NAME",?44,"CHARGE",?56,"CHARGE",?68,"CHARGE"
  I ABM("CAT")=21 W !,"ADA CODE",?15,"SHORT NAME",?44,"CHARGE",?56,"CHARGE",?68,"CHARGE"
- I ABM("CAT")=25 W !,"DRUG",?44,"PRICE PER DISPENSING UNIT"
+ ;I ABM("CAT")=25 W !,"DRUG",?44,"PRICE PER DISPENSING UNIT"  ;abm*2.6*27 IHS/SD/SDR CR8894
+ I ABM("CAT")=25 W !,"NDC",?18,"DRUG",?55,"PRICE PER DISPENSING UNIT"  ;abm*2.6*27 IHS/SD/SDR CR8894
  I ABM("CAT")=31 W !,"REV CODE",?10,"STANDARD ABBREV.",?44,"CHARGE",?56,"CHARGE",?68,"CHARGE"
  I ABM("CAT")=32 W !,"CHARGE MASTER",?44,"CHARGE",?56,"CHARGE",?68,"CHARGE"
  S $P(ABM("LINE"),"-",80)="" W !,ABM("LINE") K ABM("LINE")

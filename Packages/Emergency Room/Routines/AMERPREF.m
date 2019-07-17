@@ -1,0 +1,27 @@
+AMERPREF ;GDIT/HS/BEE - AMER SITE PREFERENCES ; 07 Oct 2013  11:33 AM
+ ;;3.0;ER VISIT SYSTEM;**10**;MAR 03, 2009;Build 23
+ ;
+ Q
+ ;
+EN ;
+ ;
+ NEW DA,DIC,DIE,DLAYGO,DR,FAC,X,Y
+ ;
+ ;First Select the facility
+FAC W !!
+ S DIC="^AMER(2.5,",DIC(0)="AEMQL"
+ S DLAYGO=9002318.2 D ^DIC S FAC=+Y
+ I FAC=-1 Q
+ ;
+ ;Edit the fields
+ S DIE="^AMER(2.5,",DA=FAC,DR="[AMER ER FACILITY]"
+ D ^DIE
+ ;
+ G FAC
+ ;
+ Q
+ ;
+ ;SCREEN for 9009082.58/.01 field
+SCREEN(Y) I '$G(Y) Q 0
+ I $$GET1^DIQ(9009083,Y_",",1,"E")="CLINIC TYPE" Q 1
+ Q 0

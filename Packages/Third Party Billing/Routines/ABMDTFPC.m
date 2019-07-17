@@ -1,8 +1,8 @@
 ABMDTFPC ; IHS/SD/SDR - Apply per cent change to fee sched ;
- ;;2.6;IHS Third Party Billing System;**2,14,21**;NOV 12, 2009;Build 379
- ; IHS/SD/SDR - abm*2.6*2 - 3PMS10003A - modified to track changes
- ;   in effective date multiples and who updated
- ;IHS/SD/SDR - 2.6*21 - HEAT112857 - Fixed increase fee even when old data structure is incomplete.
+ ;;2.6;IHS Third Party Billing System;**2,14,21,27**;NOV 12, 2009;Build 486
+ ;IHS/SD/SDR 2.6*2 3PMS10003A modified to track changes in effective date multiples and who updated
+ ;IHS/SD/SDR 2.6*21 HEAT112857 Fixed increase fee even when old data structure is incomplete.
+ ;IHS/SD/SDR 2.6*27 CR8894 Fixed how it calculates fees; it was rounding everything off to a whole number which doesn't work for the Drugs section
  ;
 START ;START
  W !!,"This routine will apply a percentage increase or decrease to"
@@ -44,6 +44,12 @@ ID ;INCREASE OR DECREASE
  S DIC("DR")=".02////"_DUZ_";.04////"_$E(ABMIDNM,1)_";.05////"_ABMPCT
  D ^DIC
  ;end new code 3PMS10003A
+ ;start new abm*2.6*27 IHS/SD/SDR CR8894
+ ;reindex all entries for look up
+ S DIK="^ABMDFEE("
+ S DA=ABMFEE
+ D IX^DIK
+ ;end new abm*2.6*27 IHS/SD/SDR CR8894
  W !!,"Finished.",!!
  K ABMCAT,ABMFEE,ABMID,ABMMULT,ABMPCT,ABMCTR,ABMCNAME,ABMIDNM
  S DIR(0)="E" D ^DIR K DIR
@@ -61,14 +67,31 @@ CAT1 ;CHANGE FEES ONE CATEGORY
  .;end old start new abm*2.6*21 IHS/SD/SDR HEAT112857
  .S ABMOFE=+$P($G(^ABMDFEE(ABMFEE,ABMCAT,ABMI,0)),U,2)
  .I ABMOFE'=0 D
- ..S ABMNFE=ABMOFE*ABMMULT
- ..S ABMNFE=ABMNFE+.5
- ..S ABMNFE=ABMNFE\1
+ ..;start old abm*2.6*27 IHS/SD/SDR CR8894
+ ..;S ABMNFE=ABMOFE*ABMMULT
+ ..;S ABMNFE=ABMNFE+.5
+ ..;S ABMNFE=ABMNFE\1
+ ..;end old start abm*2.6*27 IHS/SD/SDR CR8894
+ ..D ROUND  ;abm*2.6*27 IHS/SD/SDR CR8894
  ..S $P(^ABMDFEE(ABMFEE,ABMCAT,ABMI,0),U,2)=ABMNFE
  .;end new abm*2.6*21 IHS/SD/SDR HEAT112857
  .D EFFDT
  Q
  ;start new code abm*2.6*2 3PMS10003A
+ ;
+ ;start new abm*2.6*27 IHS/SD/SDR CR8894
+ROUND ;EP
+ I ABMCAT'=25 D
+ .S ABMNFE=ABMOFE*ABMMULT
+ .S ABMNFE=ABMNFE+.5
+ .S ABMNFE=ABMNFE\1
+ I ABMCAT=25 D
+ .S ABMNFE=ABMOFE*ABMMULT
+ .S ABMDEC=$L($P(ABMOFE,".",2))
+ .S ABMNFE=$J(ABMNFE,0,ABMDEC)
+ Q
+ ;end new abm*2.6*27 IHS/SD/SDR CR8894
+ ;
 EFFDT ;
  D GETFEES
  ;
@@ -108,10 +131,15 @@ GETFEES ;
  ..;start new abm*2.6*21 IHS/SD/SDR HEAT112857
  ..I ABMOFE=0 D
  ...S ABMOFE=+$P($G(^ABMDFEE(ABMFEE,ABMCAT,ABMI,1,ABMDIEN,0)),U,2)
- ...S ABMNFE=ABMOFE*ABMMULT
- ...S ABMNFE=ABMNFE+.5
- ...S ABMNFE=ABMNFE\1
- ...S ^ABMDFEE(ABMFEE,ABMCAT,ABMI,0)=ABMI_U_ABMNFE_U_ABMEDT
+ ...;start old abm*2.6*27 IHS/SD/SDR CR8894
+ ...;S ABMNFE=ABMOFE*ABMMULT
+ ...;S ABMNFE=ABMNFE+.5
+ ...;S ABMNFE=ABMNFE\1
+ ...;end old abm*2.6*27 IHS/SD/SDR CR8894
+ ...D ROUND  ;abm*2.6*27 IHS/SD/SDR CR8894
+ ...;S ^ABMDFEE(ABMFEE,ABMCAT,ABMI,0)=ABMI_U_ABMNFE_U_ABMEDT  ;abm*2.6*27 IHS/SD/SDR CR8894
+ ...S $P(^ABMDFEE(ABMFEE,ABMCAT,ABMI,0),U,2)=ABMNFE  ;abm*2.6*27 IHS/SD/SDR CR8894
+ ...S $P(^ABMDFEE(ABMFEE,ABMCAT,ABMI,0),U,3)=ABMEDT  ;abm*2.6*27 IHS/SD/SDR CR8894
  ..;end new abm*2.6*21 IHS/SD/SDR HEAT112857
  ..S ABMTFE=+$P($G(^ABMDFEE(ABMFEE,ABMCAT,ABMI,1,ABMDIEN,0)),U,3)  ;technical charge
  ..S ABMPFE=+$P($G(^ABMDFEE(ABMFEE,ABMCAT,ABMI,1,ABMDIEN,0)),U,4)  ;professional charge

@@ -1,5 +1,5 @@
 AMERPCC  ; IHS/OIT/SCR - PRIMARY ROUTINE FOR PCC VISIT CREATION AND EDITING 
- ;;3.0;ER VISIT SYSTEM;**1,2,5,6,8**;MAR 03, 2009;Build 23
+ ;;3.0;ER VISIT SYSTEM;**1,2,5,6,8,10**;MAR 03, 2009;Build 23
  ;
  ; PCC vists are created with a call that includes an interface to the scheduling package
  ; IF a 
@@ -14,15 +14,6 @@ AMERPCC  ; IHS/OIT/SCR - PRIMARY ROUTINE FOR PCC VISIT CREATION AND EDITING
  ;
  ; CURRENTLY: Only V POV and V PROVIDER support is provided by the ERS interface
  ; 
- ; These routines are designed to:
- ; 1. Create or locate an exisiting PCC VISIT
- ; 2. Create V PROVIDER entries when information is entered through ERS TRI option before discharge
- ; 3. Keep PCC information current with an edited ER VISIT by:
- ;    a. Updating the VISIT file entry for this Visit when info is changed
- ;    b. Creating, updating or deleting V PROVIDER enrtries when info is changed
- ;    c. Creating, updating or deleting V POV entries when info is changed
- ;
- ;
 VISIT(AMERPAT,AMERDATE) ; EP from AMER1 when patient is admitted W/O PIMS interface CHEKIN^AMERBSDU 
  ; If site has indicated a CLINIC in paramaters, a scheduled walk-in visit is created
  ;   and a PCC VISIT record is created by PIMS SCHEDULING (BSDU) pacage
@@ -30,19 +21,41 @@ VISIT(AMERPAT,AMERDATE) ; EP from AMER1 when patient is admitted W/O PIMS interf
  ; 1. Look for VISIT created at checkin
  ; 2. Create a VISIT if none exists for this patient on this date from this location
  ; 3. Return VISIT IEN if successful, 0 otherwise
- N IN,AMERVSIT,OUT,X,AMERVDR,AMEROPT
+ N IN,AMERVSIT,OUT,X,AMERVDR,AMEROPT,CLIN,HLOC
+ ;
+ ;GDIT/HS/BEE 05/10/2018;CR#10213 - AMER*3.0*10 - Pull default ER clinic and use
+ S CLIN=$$GET1^DIQ(9009082.5,DUZ(2)_",",.06,"I")
+ ;
+ ;If no clinic, get first one with a 30 mnemonic
+ I CLIN="" S CLIN=$O(^AMER(3,"B",30,""))
+ ;
+ S CLIN=$$GCLIN^AMERBSD(CLIN)
+ S HLOC=$P(CLIN,U,2),CLIN=$P(CLIN,U)
+ ;
+ I HLOC="" D  Q ""
+ . W !,"SITE PARAMETERS have not been set up in the ERS PARAMETER option"
+ . W !,"No entry for EMERGENCY MEDICINE could be located"
+ ;
+ ;Set up for BSD
+ S IN("HOS LOC")=HLOC
+ S IN("CLINIC CODE")=CLIN
+ ;
+ ;End of CR#10213 Changes
+ ;
  S (AMERVSIT,AMERVDR)=""
  S IN("PAT")=AMERPAT
  S IN("VISIT DATE")=AMERDATE
  S IN("SITE")=$G(DUZ(2))
- ; To determine "visit type" for this visit, look in the "PCC MASTER CONTROL" file
- ; and get the "type of visit" that is set there
+ ;To determine "visit type" for this visit, look in "PCC MASTER CONTROL" file
+ ;get the "type of visit" that is set there
  S IN("VISIT TYPE")=$P($G(^APCCCTRL(DUZ(2),0)),U,4)
  S IN("USR")=DUZ
- S IN("HOS LOC")=$G(^AMER(2.5,DUZ(2),"SD"))
+ ;GDIT/HS/BEE 05/10/2018;CR#10213 - AMER*3.0*10 - Now being set above
+ ;S IN("HOS LOC")=$G(^AMER(2.5,DUZ(2),"SD"))
  S:IN("HOS LOC")'="" IN("APPT DATE")=AMERDATE  ; Setting IN("APPT DATE") will create an appoinment for this time
  S IN("SRV CAT")="A"  ; ER VISITS are "ambulatory"
  S IN("TIME RANGE")=3  ; Only find a visit for a time that is close to time or ER VISIT
+ ;
  D GETVISIT^APCDAPI4(.IN,.OUT)
  I $P(OUT(0),U,1)=0 D
  .D EN^DDIOL("NO VISIT FOUND OR CREATED!!!","","!!")
@@ -57,7 +70,7 @@ VISIT(AMERPAT,AMERDATE) ; EP from AMER1 when patient is admitted W/O PIMS interf
  ..Q
  .Q
  I $P(OUT(0),U,1)=1 S AMERVSIT=$O(OUT(AMERTEMP))
- ; IF "Option use to create" is blank (no PIMS interface) update it with a DIE call...
+ ; IF "Option use to create" is blank (no PIMS interface) update it with DIE call
  I AMERVSIT>0 D
  .Q:$$GETVOPTN^AMERVSIT(AMERVSIT)'=""
  .S AMEROPT=$$GETOPIEN^AMERVSIT("AMER IHS PCC LINK")
@@ -67,7 +80,7 @@ VISIT(AMERPAT,AMERDATE) ; EP from AMER1 when patient is admitted W/O PIMS interf
  Q AMERVSIT
  ;
 EXISTING(AMERDFN) ; EP FROM TRGSET^AMERD
- ; RETURNS THE VISIT IEN for a patient that has not yet been discharged from ER
+ ; RETURNS VISIT IEN for patient that has not yet been discharged
  N IN,OUT,DIC,Y,AMERTEMP,AMERVSIT
  S DIC="^AMERADM(",X=AMERDFN,DIC(0)="NXZ"
  D ^DIC
@@ -76,10 +89,10 @@ EXISTING(AMERDFN) ; EP FROM TRGSET^AMERD
  S AMERVSIT=$P($G(^AMERADM(AMERDFN,0)),U,3)
  Q AMERVSIT
 SCHEDULD(AMERPAT,AMERDATE,AMERSCHD) ; EP from ERCHCKIN^AMERBDSU
- ; Called when a user has selected to check-in an ER patient for a scheduled visit
- ; INPUT: AMERPAT - ien of PATIENT who has a scheduled appointment
- ;        AMERDATE - the date and time of the ER ADMISSION
- ;        AMERSCHD - the date and time of a scheduled ER APPOINTMENT
+ ; Called when user has selected to check-in ER patient for scheduled visit
+ ; INPUT: AMERPAT - ien of PATIENT
+ ;        AMERDATE - the date and time of ER ADMISSION
+ ;        AMERSCHD - the date and time of scheduled ER APPOINTMENT
  ;
  ; Return VISIT IEN if check-in is successful, 0 otherwise
  ;
@@ -90,7 +103,7 @@ SCHEDULD(AMERPAT,AMERDATE,AMERSCHD) ; EP from ERCHCKIN^AMERBDSU
  S IN("PAT")=AMERPAT
  S IN("VISIT DATE")=AMERDATE
  S IN("SITE")=$G(DUZ(2))
- ; We know the appointment date and want to check-in for this visit
+ ;know the appointment date and want to check-in for this visit
  S IN("APPT DATE")=AMERSCHD
  ; To determine "visit type" for this visit, look in the "PCC MASTER CONTROL" file
  ; and get the "type of visit" that is set there
@@ -116,9 +129,9 @@ SCHEDULD(AMERPAT,AMERDATE,AMERSCHD) ; EP from ERCHCKIN^AMERBDSU
  Q AMERVSIT
  ;
 FINDVSIT(AMERDA)  ; EP FROM AMEREDTA,AMERVSIT,AMERSAV
- ; AMERDA  - THE VISIT IEN FOR THIS ER VISIT
+ ; AMERDA-VISIT IEN FOR THIS ER VISIT
  ;
- ; RETURNS THE VISIT IEN for a patient that has been discharged from ER IF SUCCESSFUL
+ ; RETURNS VISIT IEN for patient that has been discharged from ER IF SUCCESSFUL
  ;   -1 IF NOT
  N IN,OUT,DIC,Y,AMERTEMP,AMERVSIT
  N AMERDFN,AMERDR
@@ -127,7 +140,7 @@ FINDVSIT(AMERDA)  ; EP FROM AMEREDTA,AMERVSIT,AMERSAV
  Q AMERVSIT
  ;
 VPROVTRG(AMERDFN,AMERPCC)  ; EP From TRGSET^AMERD
- ; Updates VISIT information when it is entered through TRI option before discharge
+ ; Updates VISIT information when entered through TRI option before discharge
  ; Update CLINIC code if needed in VISIT entry
  ; and add ADMITTING providers to V PROVIDER before discharge
  ; AMERDFN:patient ien
@@ -142,12 +155,13 @@ VPROVTRG(AMERDFN,AMERPCC)  ; EP From TRGSET^AMERD
  S AMERVVAL=$G(^AUPNVSIT(AMERPCC,14))
  S AMERCOMP=$P($G(Y(0)),U,10) ; PRESENTING COMPLAINT
  I AMERVVAL'=AMERCOMP S AMERVDR="1401///"_AMERCOMP
- ; UPDATE CLINIC IF IT IS NOT THE SAME AS WHAT IS ALREADY THERE
- S AMERVVAL=$P($G(^AUPNVSIT(AMERPCC,0)),U,8)
- S:AMERVVAL>0 AMERVVAL=$P($G(^DIC(40.7,AMERVVAL,0)),U,1)
- S AMERCLNC=$P($G(^TMP("AMER",$J,2,20)),U,2)
- I (AMERCLNC'="URGENT CARE") S AMERCLNC="EMERGENCY MEDICINE"
- I AMERVVAL'=AMERCLNC S AMERVDR=$S(AMERVDR'="":AMERVDR_";",1:""),AMERVDR=AMERVDR_".08///"_AMERCLNC
+ ;GDIT/HS/BEE 05/10/2018;CR#10213 - AMER*3.0*10 - Clinic (and Location) now set in AMER2A
+ ;UPDATE CLINIC IF IT IS NOT THE SAME AS WHAT IS ALREADY THERE
+ ;S AMERVVAL=$P($G(^AUPNVSIT(AMERPCC,0)),U,8)
+ ;S:AMERVVAL>0 AMERVVAL=$P($G(^DIC(40.7,AMERVVAL,0)),U,1)
+ ;S AMERCLNC=$P($G(^TMP("AMER",$J,2,20)),U,2)
+ ;I (AMERCLNC'="URGENT CARE") S AMERCLNC="EMERGENCY MEDICINE"
+ ;I AMERVVAL'=AMERCLNC S AMERVDR=$S(AMERVDR'="":AMERVDR_";",1:""),AMERVDR=AMERVDR_".08///"_AMERCLNC
  ; NOW ADD V PROVIDER INFO
  S AMERPIEN=$P($G(Y(0)),U,19)  ; TRIAGE NURSE
  S AMERTIME=$P($G(Y(0)),U,21)  ; TRIAGE TIME
@@ -214,16 +228,10 @@ SYNCHPCC(AMERDA) ; EP from UPDATE^AMERSAV, AMEREDPC, AND AMEREDTA
  I $G(^AMERVSIT(AMERDA,6))'="" S AMERDEPT=$P(^AMERVSIT(AMERDA,6),U,2)
  S AMERPCC=$$FINDVSIT^AMERPCC(AMERDA)
  I AMERPCC<0 Q 0     ;IHS/OIT/SCR 05/07/09 patch 1
- ; GET THE EXTERNAL VALUE FOR "CLINIC TYPE" IN VISIT FILE AND SET IT TO EMERGENCY IF IT ISN'T ALREADY URGENT CARE
- S AMERCLN=$P($G(^AMERVSIT(AMERDA,0)),U,4)  ; AMERCLN IS A POINTER TO ER OPTIONS FILE 
- I AMERCLN'="" D
- .S AMERCLN=$P($G(^AMER(3,AMERCLN,0)),U,1)  ; AMERCLN IS A WORD - 30: EMERGENCY MEDICINE "80: URGENT CARE"
- .S AMERVVAL=$$CLINIC^APCLV(AMERPCC,"E")
- .I (AMERVVAL'=AMERCLN) D
- ..S AMERPNTR=$O(^DIC(40.7,"B",AMERCLN,0))
- ..S:AMERPNTR'="" AMERVDR=$S(AMERVDR'="":AMERVDR_";",1:""),AMERVDR=AMERVDR_".08////"_AMERPNTR
- ..Q
- .Q
+ ;
+ ;GDIT/HS/BEE 05/10/2018;CR#10213 - AMER*3.0*10 - Sync clinic and hospital location 
+ D SYNCCL^AMER2A(AMERDA,AMERPCC)
+ ;
  ; Compare ER "Presenting Complaint" to VISIT "Chief Complaint"
  S AMEREVAL=$G(^AMERVSIT(AMERDA,1))
  S AMERVVAL=$G(^AUPNVSIT(AMERPCC,14))
@@ -244,13 +252,12 @@ SYNCHPCC(AMERDA) ; EP from UPDATE^AMERSAV, AMEREDPC, AND AMEREDTA
  ..D DIE^AMEREDIT(AMERDA,AMERDR)
  ..Q
  .I AMERANS=1 D
- ..;UPDATE THE PCC VISIT WITH WHAT USER JUST ENTERED
+ ..;UPDATE THE PCC VISIT
  ..S AMERVDR=$S(AMERVDR'="":AMERVDR_";",1:""),AMERVDR=AMERVDR_"1401///"_AMEREVAL
  ..Q
  .Q
  ; GET THE DEPARTURE OUT TIME FROM VISIT AND COMPARE TO CHECK OUT TIME IN ER VISIT
  S AMEREVAL=$P($G(^AMERVSIT(AMERDA,6)),U,2)  ; AMERDEPT IS DEPARTURE TIME
- ;S AMERVVAL=$$CODT^APCLV(AMERPCC,"I")  - THIS IS ONLY RETURNING THE DAY NOT THE TIME...
  S AMERVVAL=$P(^AUPNVSIT(AMERPCC,0),"^",18)  ;CHECKOUT TIME
  I (AMEREVAL'=AMERVVAL) D
   .I AMERVVAL'="" D
@@ -271,14 +278,13 @@ SYNCHPCC(AMERDA) ; EP from UPDATE^AMERSAV, AMEREDPC, AND AMEREDTA
   ...Q
   ..I AMERANS=1 D
   ...;UPDATE THE PCC VISIT WITH WHAT USER JUST ENTERED
-  ...;S AMERVDR=$S(AMERVDR'="":AMERVDR_";",1:""),AMERVDR=AMERVDR_"1401///"_AMEREVAL
   ...S AMERVDR=$S(AMERVDR'="":AMERVDR_";",1:""),AMERVDR=AMERVDR_".18///"_AMEREVAL  ; patch 2
   ...Q
   ..Q
   .E  S AMERVDR=$S(AMERVDR'="":AMERVDR_";",1:""),AMERVDR=AMERVDR_".18////"_AMEREVAL
   .Q
- ; GET THE OPTION USED TO CREATE THIS VISIT - IF IT ISN'T THERE, IDENTIFY "AMER IHS PCC LINK" OPTION
- S AMERVVAL=$P($G(^AUPNVSIT(AMERPCC,0)),U,24) ; THE IEN OF THE OPTION THAT CREATED THIS VISIT
+ ; GET OPTION USED TO CREATE VISIT - IF NOT THERE, IDENTIFY "AMER IHS PCC LINK" OPTION
+ S AMERVVAL=$P($G(^AUPNVSIT(AMERPCC,0)),U,24) ; IEN OF OPTION THAT CREATED VISIT
  I AMERVVAL="" S AMERVDR=$S(AMERVDR'="":AMERVDR_";",1:""),AMERVDR=AMERVDR_".24///"_$$GETOPIEN^AMERVSIT("AMER IHS PCC LINK")
  D:AMERVDR'="" VSITDIE^AMERVSIT(AMERPCC,AMERVDR) ; update VISIT file with identified changes
  K AMERVVAL,AMEREVAL,AMERVDR
@@ -291,8 +297,8 @@ SYNCHPCC(AMERDA) ; EP from UPDATE^AMERSAV, AMEREDPC, AND AMEREDTA
  ;
 SAVPCCA(AMERPCC,AMERDFN) ; EP FROM AMER WHEN AN ADMISSION AND PCC VISIT HAS JUST BEEN CREATED
  ; UPDATES THE ER ADMISSION FILE WITH THE PCC VISIT IEN ASSOCIATED WITH IT
- ; INPUT AMERPCC - THE IEN OF THE PCC VISIT FILE ENTRY THAT WAS CREATED FOR THIS ER VISIT
- ;       AMERDFN - THE IEN OF THE PATIENT THAT HAS JUST BEEN ADMITTED THROUGH  ERS 
+ ; INPUT AMERPCC - THE IEN OF THE PCC VISIT
+ ;       AMERDFN - THE IEN OF THE PATIENT 
  N DIE,DA,DR
  S DR="1.1////"_AMERPCC
  S DIE="^AMERADM(",DA=AMERDFN
@@ -306,8 +312,8 @@ SAVPCCA(AMERPCC,AMERDFN) ; EP FROM AMER WHEN AN ADMISSION AND PCC VISIT HAS JUST
 SAVPCCO(AMERPCC,AMERDA) ; EP FROM AMER CHANGPAT^AMERVSIT
  ; WHEN AN ADMISSION AND PCC VISIT HAS JUST BEEN CREATED OR WHEN PATIENT IS BEING CHANGED AND A NEW PCC VISIT IS CREATED
  ; UPDATES THE ER ADMISSION FILE WITH THE PCC VISIT IEN ASSOCIATED TO IT
- ; INPUT AMERPCC - THE IEN OF THE PCC VISIT FILE ENTRY THAT WAS CREATED FOR THIS ER VISIT
- ;       AMERDATE - THE DATE/TIME OF ADMISSION TO ERS 
+ ; INPUT AMERPCC - THE IEN OF THE PCC VISIT FILE ENTRY
+ ;       AMERDATE - THE DATE/TIME OF ADMISSION
  N DIE,DA,DR
  S DR=".03////"_AMERPCC
  S DIE="^AMERVSIT(",DA=AMERDA

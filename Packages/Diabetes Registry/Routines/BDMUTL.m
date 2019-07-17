@@ -1,8 +1,8 @@
 BDMUTL ; IHS/CMI/LAB - Area Database Utility Routine ; 14 Sep 2015  12:41 PM
- ;;2.0;DIABETES MANAGEMENT SYSTEM;**5,8,9,10,11**;JUN 14, 2007;Build 30
+ ;;2.0;DIABETES MANAGEMENT SYSTEM;**5,8,9,10,11,12**;JUN 14, 2007;Build 51
  ;
 SNOMED(YR,LIST,SMC) ;EP - is snomed code smc on the list for the year
- I 'YR S YR=2018
+ I 'YR S YR=2019
  I LIST="" Q ""
  I SMC="" Q ""
  NEW YRI,LISTI

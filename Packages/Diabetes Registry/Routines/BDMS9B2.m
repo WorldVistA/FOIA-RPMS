@@ -1,52 +1,59 @@
 BDMS9B2 ; IHS/CMI/LAB - DIABETIC CARE SUMMARY SUPPLEMENT ; 09 Nov 2017  3:25 PM
- ;;2.0;DIABETES MANAGEMENT SYSTEM;**3,4,5,6,7,8,9,10,11**;JUN 14, 2007;Build 30
+ ;;2.0;DIABETES MANAGEMENT SYSTEM;**3,4,5,6,7,8,9,10,11,12**;JUN 14, 2007;Build 51
  ;
  ;
 MORE ;EP
  S X="Immunizations:" D S(X,1)
  S X="   Influenza vaccine (since August 1st): ",$E(X,41)=$$FLU^BDMS9B3(BDMSDFN) D S(X)
  S X="   Pneumococcal vaccine (ever):",$E(X,41)=$$PNEU^BDMS9B4(BDMSDFN) D S(X)
- S X="   Td/Tdap (in past 10 yrs):",$E(X,41)=$$TD^BDMS9B3(BDMSDFN,(DT-100000),DT) D S(X)
- S X="   Tdap (ever):",$E(X,41)=$P($$TDAP^BDMDF1B(BDMSDFN,DT,"H"),"  ",2,99) D S(X)
- S X="   Hepatitis B series complete (ever): ",$E(X,41)=$P($$HEP^BDMDF13(BDMSDFN,DT),"  ",2,99) D S(X)
+ S X="   Td/Tdap/DTAP/DT (in past 10 yrs):",$E(X,41)=$$TD^BDMS9B3(BDMSDFN,(DT-100000),DT) D S(X)
+ S X="   Tdap (ever):",$E(X,41)=$P($$TDAP^BDMDG1B(BDMSDFN,DT,"H"),"  ",2,99) D S(X)
+ S X="   Hepatitis B complete series (ever): ",$E(X,41)=$P($$HEP^BDMDG13(BDMSDFN,DT),"  ",2,99) D S(X)
  S Y=$$PPDS^BDMS9B4(BDMSDFN) S J=1 I Y]"" S X="TB - Status:",$E(X,30)=Y D S(X,1) S J=0
  S Y=$$PPD^BDMS9B4(BDMSDFN) S X="TB - Last Documented Test:",$E(X,30)=$P(Y,"  ",4)_"  "_$P(Y,"  ",1) D S(X,J)
  S X="",$E(X,6)="TB Test Result:",$E(X,30)=$P(Y,"  ",2)_"  "_$P(Y,"  ",3) D S(X)
  S X="     TB Treatment Completed: ",$E(X,30)=$$TB(BDMSDFN) D S(X)
 HEPC ;2018 AUDIT
- D S("Hepatitis C",1)
- S X=$$HEPCDX^BDMDF1D(BDMSDFN,DT) D S("Diagnosed with HCV ever: "_$P(X,"  ",2))
- ;SCREEN 1945-1965
+ D S("Hepatitis C (HCV)",1)
+ S X=$$HEPCDX^BDMDG1D(BDMSDFN,DT) D S("   Diagnosed with HCV ever: "_$P(X,"  ",2))
+ ;SCREEN ALL  P12
  S B=$$DOB^AUPNPAT(BDMSDFN)
- I B<2450101!(B>2651231) G R  ;patch 12 - add if screened ever
- I $E(X)'=1 D S("DOB 1945-1965 screened ever: "_$P($$HEPSCR^BDMDF1D(BDMSDFN,DT),"  ",2))
+ ;I B<2450101!(B>2651231) G R  ;patch 12 - add if screened ever
+ I $E(X)'=1 D S("   Screened for HCV ever: "_$P($$HEPSCR^BDMDG1D(BDMSDFN,DT),"  ",2))
 R ;retinopathy
- S X=$$DMRETDX^BDMDF1D(BDMSDFN,DT) D S("Retinopathy Diagnosed: "_$S($E(X)=1:"Yes",1:"No"),1)
+ S X=$$DMRETDX^BDMDG1D(BDMSDFN,DT) D S("Retinopathy Diagnosed: "_$S($E(X)=1:"Yes",1:"No"),1)
+ ;ADDED LE AMPUTATIONS
+LEAMP ;
+ S R=$$LEAMP^BDMDG1D(BDMSDFN,DT,2)
+ ;
+ D S("Amputation",1)
+ S Y="   Lower extremity (ever), any type (e.g., toe, partial foot, above or" D S(Y)
+ S Y="   below knee):  "_R D S(Y)
 L ;
  S X="Laboratory Results (most recent):",$E(X,55)="RPMS LAB TEST NAME" D S(X,1)
- S X=" A1C:" S Y=$$HBA1C(BDMSDFN),$E(X,25)=$P(Y,"|||"),$E(X,44)=$$DATE^BDMS9B1($P(Y,"|||",2)),$E(X,55)=$P(Y,"|||",3) D S(X)
+ S X="   A1C:" S Y=$$HBA1C(BDMSDFN),$E(X,25)=$P(Y,"|||"),$E(X,44)=$$DATE^BDMS9B1($P(Y,"|||",2)),$E(X,55)=$P(Y,"|||",3) D S(X)
  I $P(Y,"|||",4)]"" S X="   Note: "_$P(Y,"|||",4) D S(X)
- S X=" Next most recent A1C:" S Y=$$NLHGB(BDMSDFN),$E(X,25)=$P(Y,"|||"),$E(X,44)=$$DATE^BDMS9B1($P(Y,"|||",2)),$E(X,55)=$P(Y,"|||",3) D S(X)
- S X=" Creatinine:" S Y=$$CREAT(BDMSDFN),$E(X,25)=$P(Y,"|||"),$E(X,44)=$$DATE^BDMS9B1($P(Y,"|||",2)),$E(X,55)=$P(Y,"|||",3) D S(X,1)
+ S X="   Next most recent A1C:" S Y=$$NLHGB(BDMSDFN),$E(X,25)=$P(Y,"|||"),$E(X,44)=$$DATE^BDMS9B1($P(Y,"|||",2)),$E(X,55)=$P(Y,"|||",3) D S(X)
+ S X="   Serum Creatinine:" S Y=$$CREAT(BDMSDFN),$E(X,25)=$P(Y,"|||"),$E(X,44)=$$DATE^BDMS9B1($P(Y,"|||",2)),$E(X,55)=$P(Y,"|||",3) D S(X,1)
  I $P(Y,"|||",4)]"" S X="   Note: "_$P(Y,"|||",4) D S(X)
- S X=" Estimated GFR:" S Y=$$GFR(BDMSDFN),$E(X,25)=$P(Y,"|||"),$E(X,44)=$$DATE^BDMS9B1($P(Y,"|||",2)),$E(X,55)=$P(Y,"|||",3) D S(X)
+ S X="   eGFR:" S Y=$$GFR(BDMSDFN),$E(X,25)=$P(Y,"|||"),$E(X,44)=$$DATE^BDMS9B1($P(Y,"|||",2)),$E(X,55)=$P(Y,"|||",3) D S(X)
  S Y=$$ACRATIO(BDMSDFN)
- S X=" UACR (Quant A/C Ratio):",$E(X,25)=$P(Y,"|||"),$E(X,44)=$$DATE^BDMS9B1($P(Y,"|||",2)),$E(X,55)=$P(Y,"|||",3) D S(X)
- S X=" Total Cholesterol:" S Y=$$TCHOL(BDMSDFN),$E(X,25)=$P(Y,"|||"),$E(X,44)=$$DATE^BDMS9B1($P(Y,"|||",2)),$E(X,55)=$P(Y,"|||",3) D S(X,1)
+ S X="   UACR (Quant A/C Ratio):",$E(X,25)=$P(Y,"|||"),$E(X,44)=$$DATE^BDMS9B1($P(Y,"|||",2)),$E(X,55)=$P(Y,"|||",3) D S(X)
+ S X="   Total Cholesterol:" S Y=$$TCHOL(BDMSDFN),$E(X,25)=$P(Y,"|||"),$E(X,44)=$$DATE^BDMS9B1($P(Y,"|||",2)),$E(X,55)=$P(Y,"|||",3) D S(X,1)
  ;S X="  Non-HDL Cholesterol:" S Y=$$NONHDL(BDMSDFN),$E(X,25)=$P(Y,"|||"),$E(X,44)=$$DATE^BDMS9B1($P(Y,"|||",2)),$E(X,55)=$P(Y,"|||",3) D S(X)
- S X="  LDL Cholesterol:" S Y=$$CHOL(BDMSDFN),$E(X,25)=$P(Y,"|||"),$E(X,44)=$$DATE^BDMS9B1($P(Y,"|||",2)),$E(X,55)=$P(Y,"|||",3) D S(X)
- S X="  HDL Cholesterol:" S Y=$$HDL(BDMSDFN),$E(X,25)=$P(Y,"|||"),$E(X,44)=$$DATE^BDMS9B1($P(Y,"|||",2)),$E(X,55)=$P(Y,"|||",3) D S(X)
- S X="  Triglycerides:" S Y=$$TRIG(BDMSDFN),$E(X,25)=$P(Y,"|||"),$E(X,44)=$$DATE^BDMS9B1($P(Y,"|||",2)),$E(X,55)=$P(Y,"|||",3) D S(X)
+ S X="   LDL Cholesterol:" S Y=$$CHOL(BDMSDFN),$E(X,25)=$P(Y,"|||"),$E(X,44)=$$DATE^BDMS9B1($P(Y,"|||",2)),$E(X,55)=$P(Y,"|||",3) D S(X)
+ S X="   HDL Cholesterol:" S Y=$$HDL(BDMSDFN),$E(X,25)=$P(Y,"|||"),$E(X,44)=$$DATE^BDMS9B1($P(Y,"|||",2)),$E(X,55)=$P(Y,"|||",3) D S(X)
+ S X="   Triglycerides:" S Y=$$TRIG(BDMSDFN),$E(X,25)=$P(Y,"|||"),$E(X,44)=$$DATE^BDMS9B1($P(Y,"|||",2)),$E(X,55)=$P(Y,"|||",3) D S(X)
  S Z=0
 EDUCD D S(" ")
  S BDMSBEG=$$FMADD^XLFDT(DT,-365)
- S X="DM Education Provided (in past yr): " D S(X)
+ S X="Education Provided (in past yr): " D S(X)
  S X="  Last Dietitian Visit (ever):  "_$$DIETV^BDMS9B3(BDMSDFN) D S(X)
  S X=""
  K BDMX
  D EDUC
  I $D(BDMX) D
- .S %="" F  S %=$O(BDMX(%)) Q:%=""  D S(BDMX(%))
+ .S %="" F  S %=$O(BDMX(%)) Q:%=""  D S("   "_BDMX(%))
  ;I X]"" D S(X)
  K BDMX,BDMY,%
  D EDUCREF I $D(BDMX) S X="In the past year, the patient has refused the following Diabetes education:" D S(X) D
@@ -114,6 +121,7 @@ EDT(E) ;
  I $P(T,"-",2)="EX" Q 1
  I $P(T,"-",2)="N" Q 1
  I $P(T,"-",2)="DT" Q 1
+ I $P(T,"-",2)="MNT" Q 1
  ;SNOMED
  I $P(T,"-",1)]"",$$SNOMED^BDMUTL($$LE(),"PXRM DIABETES",$P(T,"-",1)) Q 1
  NEW CODE

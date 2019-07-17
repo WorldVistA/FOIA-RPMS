@@ -1,5 +1,5 @@
 APCM25E5 ;IHS/CMI/LAB - IHS MU; 
- ;;1.0;MU PERFORMANCE REPORTS;**7,8,9**;MAR 26, 2012;Build 25
+ ;;1.0;MU PERFORMANCE REPORTS;**7,8,9,10**;MAR 26, 2012;Build 31
  ;;;;;;Build 3
 PATEDUC ;EP - CALCULATE PAT ED
  ;for each provider or for the facility find out if this
@@ -47,18 +47,21 @@ PATEDUC1 ;
  ;
 HASED(P,BD,ED) ;does patient have Patient Ed -L
  ;
- NEW A,B,C,D,E,PED,Y,EDUC,X,T
+ NEW A,B,C,D,E,PED,Y,EDUC,X,T,I
  S C=0
  S PED=""
  S Y="EDUC("
  S X=P_"^ALL EDUC;DURING "_$$FMTE^XLFDT(BD)_"-"_$$FMTE^XLFDT(ED) S E=$$START1^APCLDF(X,Y)
  I '$D(EDUC(1)) Q ""
  S (X,D)=0,%="",T="" F  S X=$O(EDUC(X)) Q:X'=+X!(PED]"")  D
+ .S I=+$P(EDUC(X),U,4)
+ .S A=$P($$VALI^XBDIQ1(9000010.16,I,1216),".")
+ .Q:A>ED
  .S T=$P(^AUPNVPED(+$P(EDUC(X),U,4),0),U)
  .Q:'T
  .Q:'$D(^AUTTEDT(T,0))
  .S T=$P(^AUTTEDT(T,0),U,2)
- .I $P(T,"-",2)="L" S PED=1_U_T_" on "_$$DATE^APCM1UTL($P(EDUC(X),U)) Q
+ .I $P(T,"-",2)="L" S PED=1_U_T_" on "_$$DATE^APCM1UTL($S(A]"":A,1:$P(EDUC(X),U))) Q
  Q PED
 HASMMR(V) ;does patient have a m-mr ON this visit in v updated/reviewed
  ;

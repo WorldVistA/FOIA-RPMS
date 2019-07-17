@@ -1,21 +1,21 @@
 ABMEHGRV ; IHS/ASDST/DMJ - GET ANCILLARY SVCS REVENUE CODE INFO ;   
- ;;2.6;IHS 3P BILLING SYSTEM;**6,7,11,13,21,22,23**;NOV 12, 2009;Build 427
+ ;;2.6;IHS 3P BILLING SYSTEM;**6,7,11,13,21,22,23,27**;NOV 12, 2009;Build 486
  ;Original;DMJ;01/26/96 4:02 PM
  ; IHS/ASDS/DMJ - 09/06/00 - V2.4 Patch 3 (no NOIS)
  ;
- ; IHS/SD/SDR - v2.5 p8 - task 6 - Added code for new ambulance multiple 47
- ; IHS/SD/SDR - v2.5 p10 - IM20395 - Split out lines bundled by rev codes
- ; IHS/SD/SDR - v2.5 p11 - ambulance and pt stmt
- ;   Made change to getting ambulance line items.  Found it wasn't
+ ;IHS/SD/SDR 2.5 p8 task 6 Added code for new ambulance multiple 47
+ ;IHS/SD/SDR 2.5 p10 IM20395 Split out lines bundled by rev codes
+ ;IHS/SD/SDR 2.5 p11 ambulance and pt stmt.  Made change to getting ambulance line items.  Found it wasn't
  ;   working right when they were doing new pt stmt in patch 11.
  ;
  ;IHS/SD/SDR 2.6 CSV
  ;IHS/SD/SDR 2.6*6 line item control number
- ;IHS/SD/SDR 2.6*13 HEAT117086 - removed code to put T1015 as top line; doesn't work here.
- ;IHS/SD/SDR 2.6*21 HEAT205579 - code to put T1015 as top line in 837P file.
+ ;IHS/SD/SDR 2.6*13 HEAT117086 removed code to put T1015 as top line; doesn't work here.
+ ;IHS/SD/SDR 2.6*21 HEAT205579 code to put T1015 as top line in 837P file.
  ;IHS/SD/SDR 2.6*22 HEAT335246 Made it so if the insurer is setup to print the NDC it will do flat rate and itemized on a claim, with either the default CPT
  ;  printing with the flat rate or the flat rate printing on the first line item.
  ;IHS/SD/SDR 2.6*23 HEAT247169 Added code to check subfile 43 if visit type is 997.
+ ;IHS/SD/SDR 2.6*27 CR10326 Correction so coordinating dx will print when billing flat rate; moved line down and made it a single dot
  ;
 START ;START HERE
  K ABM,ABMRV
@@ -106,10 +106,11 @@ P1 ;EP - SET UP ABMRV ARRAY
  .S ABMCPT=$P($G(^ABMNINS(DUZ(2),ABMP("INS"),1,ABMP("VTYP"),0)),"^",16) I ABMCPT D
  ..S ABMCPT=$P($$CPT^ABMCVAPI(ABMCPT,ABMP("VDT")),U,2)  ;CSV-c
  ..S $P(ABMRV(1,1,1),U,2)=ABMCPT
- ..S $P(ABMRV(1,1,1),U,11)=1
+ ..;S $P(ABMRV(1,1,1),U,11)=1  ;abm*2.6*27 IHS/SD/SDR CR10326
  ..K ABMCDX
  ..Q:$G(ABMP("EXP"))'=11
  ..S $P(ABMRV(+ABM(2),"TOT"),U,2)=ABMCPT
+ .S $P(ABMRV(1,1,1),U,11)=1  ;coor dx - default to 1  ;abm*2.6*27 IHS/SD/SDR CR10326 - moved down from above to make a single dot
  .S ABM(4)=$P($G(^ABMDBILL(DUZ(2),ABMP("BDFN"),6)),U,6)
  .I ABM(4),ABMP("VTYP")=111 S $P(ABMRV(1,1,1),U,7)=(ABM(4)*ABM(1))
  .;start old code abm*2.6*11 HEAT105003
