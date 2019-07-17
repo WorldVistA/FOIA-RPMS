@@ -7,6 +7,10 @@ Download releases from the OSEHRA Tech Journal from here: https://code.osehra.or
 
 Configure InterSystems Caché
 ----------------------------
+Since RPMS runs on Ensemble, which is has Unicode support turned on by default,
+you need to install Cache with Unicode turned on; otherwise you will get
+<WIDE CHAR> errors when exporting. We used to deal with these on a case by case
+basis, but they are becoming too many to deal with.
 
 Configure a RPMS namespace in InterSystems Caché and point it at the
 above "CACHE.DAT".  Map globals TEMP, TMP, UTILITY, and XTMP into the
@@ -19,15 +23,18 @@ into the RPMS namespace.
 
 Instance Set-up
 ---------------
-For Telnet Device, change to be appropriate.
-Change default HFS directory to be appropriate.
+For Telnet Device, change $I to be appropriate to your OS.
+Change default HFS directory $I to be appropriate to your OS.
 Double check printing the latest installs from Fileman to check that the RPMS instance is really the date it says it was last updated.
+
+Make Directories
+----------------
+We are exporting here to /tmp/RPMS/, /tmp/RPMS/globals/, and /tmp/RPMS/classes/. Make these directories or here or elsewhere as you choose.
 
 Recompile all Objects and Reindex Routines
 ------------------------------------------
   D ^%RCOMPIL
-  N $NAMESPACE S $NAMESPACE="%SYS" W $System.OBJ.UpgradeAll()
-  Q
+  N $NAMESPACE S $NAMESPACE="%SYS" W $System.OBJ.UpgradeAll() Q
   D RebuildIndex^%R("","",1)
   Do $System.OBJ.Compile("*","ckr")
 
@@ -44,8 +51,6 @@ Start the Caché Terminal.  Dump all RPMS routines using %RO:
  Output routines to
  Device: /tmp/RPMS/Routines.ro
 
-Currently there is a routine/class called AGMPI which crashes the %RO. I let Floyd know. For now, you need to exclude it by putting 'AGMPI.* after *.
-
 Pack the "ZGO" routine into routine transfer format:
 
  $ python Scripts/PackRO.py Scripts/ZGO.m > /tmp/ZGO.ro
@@ -61,7 +66,7 @@ Start the Caché Terminal.  Load the ZGO routine:
 Dump all RPMS globals using the ZGO routine. We do this using single threading as there are bad globals that cause crashes. It would be wise therefore to run this and see if it crashes in front of you.
 
  RPMS>S ZGODEBUG=1 D SAVEALL^ZGO("/tmp/RPMS/Globals/")
- 
+
 My records show that the following non-Fileman globals crash:
 ^XCR
 ^XCSV
@@ -71,10 +76,6 @@ To extract Classes, run this:
  
   RPMS>Do $system.OBJ.ExportAllClassesIndividual("/tmp/RPMS/classes","diffexport")
 
-This fails right now due to AGMPI (again!). To fix, do this:
-
-  RPMS>S ^oddDEF("AGMPI.Adapters.HLOGlobalInbound","m","OnTask",30,146)=" "
-
 RPMS has now been extracted to the host disk as
 
  $ ls /tmp/RPMS/Routines.ro /tmp/RPMS/Globals/*.zwr /tmp/RPMS/Classes/*.xml
@@ -83,6 +84,8 @@ RPMS has now been extracted to the host disk as
 Unpack Routines and Globals
 ---------------------------
 Clean globals:
+
+$ cd /tmp/RPMS/Globals/
 $ rm -v [A-Za-Z]*.*.zwr
 removed ‘DICT.COMO.zwr’
 removed ‘DICT.PH.zwr’
@@ -92,14 +95,16 @@ removed ‘MV.SYS.zwr’
 removed ‘MV.VOC.zwr’
 
 
+
 Remove old FOIA-RPMS files but not Packages/.gitattributes:
 
+ $ cd {FOIA-RPMS repo root}
  $ rm -rf -- Packages/*
 
 Unpack routines from the routine transfer format to .m files:
 
  $ cd Packages
- $ python ../Scripts/UnpackRO.py < /tmp/VistA/Routines.ro
+ $ python ../Scripts/UnpackRO.py < /tmp/RPMS/Routines.ro
  $ cd ..
 
 Remove Caché-specific routines. These are classes which are handled later.
@@ -121,7 +126,7 @@ Split large global .zwr files into pieces no larger than 64 MiB:
 
 Copy the classes into the packages directory
 
- $ cp /tmp/RPMS/Classes/*.zwr Packages/
+ $ cp /tmp/RPMS/Classes/*.xml Packages/
 
 Populate Package Directories
 ----------------------------
@@ -131,6 +136,10 @@ populate the Packages directory structure:
 
  $ cd Packages
  $ python ../Scripts/PopulatePackages.py < ../Packages.csv
+
+Move the CSP classes for BEDD if there are any as the scripts don't handle these.
+
+ $ mv Uncategorized/Classes/csp_bedd* IHS\ Emergency\ Dept\ Dashboard/Classes/
 
 Check for new Uncategorized routines and globals:
 
@@ -145,6 +154,7 @@ files and test it by re-processing the Uncategorized files:
  $ mv Uncategorized/Globals/*.zwr .
  $ python ../Scripts/PopulatePackages.py < ../Packages.csv
  $ git status -- Uncategorized
+
 
 Once the content of Uncategorized is satisfactory, the package
 directories have been populated.
